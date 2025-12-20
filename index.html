@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Time Map is a neurodivergent-friendly time orientation tool with time blindness support, body doubling, and overwhelm support."
+        />
+        <title>Time Map | ADHD-Friendly Time Orientation</title>
+        <!-- Dyslexia-friendly font option -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+        <body>
+            <!-- Background -->
+            <div class="bg-canvas" aria-hidden="true">
+                <div class="bg-gradient"></div>
+                <div class="grid-pattern"></div>
+            </div>
+
+        <!-- Confetti Container -->
+        <div
+            class="confetti-container"
+            id="confettiContainer"
+            aria-hidden="true"
+        ></div>
+
+        <!-- Focus Mode Reveal Zones (hover to show UI) -->
+        <div
+            class="focus-reveal-zone focus-reveal-top"
+            id="focusRevealTop"
+            aria-hidden="true"
+        ></div>
+        <div
+            class="focus-reveal-zone focus-reveal-left"
+            id="focusRevealLeft"
+            aria-hidden="true"
+        ></div>
+        <button
+            class="focus-handle"
+            id="focusHandle"
+            type="button"
+            aria-label="Toggle focus controls"
+            hidden
+        ></button>
+        <button
+            class="layout-handle"
+            id="layoutHandle"
+            type="button"
+            aria-label="Show top bar"
+            hidden
+        ></button>
+        <button
+            class="sidebar-handle"
+            id="sidebarHandle"
+            type="button"
+            aria-label="Show sidebar"
+            hidden
+        ></button>
+
+        <!-- Main App -->
+        <div class="app">
+            <!-- Header -->
+            <header class="header" role="banner">
+                <div class="logo">
+                    <div class="logo-icon" aria-hidden="true">◆</div>
+                    <span class="logo-text">Time Map</span>
+                </div>
+
+                <!-- Year Progress -->
+                <div
+                    class="year-progress"
+                    id="timeProgress"
+                    role="progressbar"
+                    aria-valuenow="0"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-label="Time progress"
+                >
+                    <div class="year-progress-header">
+                        <span class="year-progress-label" id="yearProgressLabel"
+                            >Time in view</span
+                        >
+                        <span class="year-progress-value" id="yearProgressValue"
+                            >0%</span
+                        >
+                    </div>
+                    <div class="year-progress-bar">
+                        <div
+                            class="year-progress-fill"
+                            id="yearProgressFill"
+                        ></div>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <div class="toggle-group header-focus-toggle">
+                        <span
+                            class="toggle-label"
+                            id="focus-toggle-label"
+                            title="Reduce visual noise (no productivity tracking)"
+                            >Focus</span
+                        >
+                        <button
+                            class="toggle-switch"
+                            id="focusToggle"
+                            role="switch"
+                            aria-checked="false"
+                            aria-labelledby="focus-toggle-label"
+                            aria-describedby="focus-toggle-desc"
+                        ></button>
+                        <span class="sr-only" id="focus-toggle-desc"
+                            >Focus reduces visual noise. It doesn't track productivity.</span
+                        >
+                    </div>
+                    <button
+                        class="btn btn-ghost btn-icon"
+                        id="hideHeaderBtn"
+                        type="button"
+                        aria-label="Hide top bar"
+                        title="Hide top bar"
+                    >
+                        <span aria-hidden="true">▴</span>
+                    </button>
+                    <div class="header-more">
+                        <button
+                            class="btn btn-ghost btn-icon header-more-toggle"
+                            id="headerMoreToggle"
+                            aria-label="More"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            title="More"
+                        >
+                            <span aria-hidden="true">⋯</span>
+                        </button>
+                        <div
+                            class="header-more-dropdown"
+                            id="headerMoreDropdown"
+                            role="menu"
+                            hidden
+                        >
+                            <div class="header-more-section" aria-label="App actions">
+                                <button
+                                    class="header-more-item"
+                                    id="focusModeBtn"
+                                    aria-pressed="false"
+                                    data-close-header-more
+                                    title="Reduce visual noise (no productivity tracking)"
+                                >
+                                    Focus (reduce visual noise)
+                                </button>
+                                <button
+                                    class="header-more-item"
+                                    id="appSettingsBtn"
+                                    data-close-header-more
+                                >
+                                    Settings
+                                </button>
+                            </div>
+
+                            <div class="header-more-divider" role="separator"></div>
+
+                            <div class="header-more-section" aria-label="Support tools">
+                                <button
+                                    class="nd-dropdown-item"
+                                    id="brainDumpBtn"
+                                    role="menuitem"
+                                    data-close-header-more
+                                >
+                                    <span class="nd-icon nd-icon-brain" aria-hidden="true"
+                                        >🧠</span
+                                    >
+                                    <span class="nd-label">
+                                        <span class="nd-label-title">Brain Dump</span>
+                                        <span class="nd-label-desc"
+                                            >Park intrusive thoughts</span
+                                        >
+                                    </span>
+                                </button>
+                                <button
+                                    class="nd-dropdown-item"
+                                    id="bodyDoubleBtn"
+                                    role="menuitem"
+                                    data-close-header-more
+                                >
+                                    <span class="nd-icon nd-icon-body" aria-hidden="true"
+                                        >⏱</span
+                                    >
+                                    <span class="nd-label">
+                                        <span class="nd-label-title">Body Double</span>
+                                        <span class="nd-label-desc"
+                                            >Focused work sessions</span
+                                        >
+                                    </span>
+                                </button>
+                                <button
+                                    class="nd-dropdown-item"
+                                    id="dopamineMenuBtn"
+                                    role="menuitem"
+                                    data-close-header-more
+                                >
+                                    <span class="nd-icon nd-icon-quick" aria-hidden="true"
+                                        >⚡</span
+                                    >
+                                    <span class="nd-label">
+                                        <span class="nd-label-title">Quick Wins</span>
+                                        <span class="nd-label-desc"
+                                            >Low motivation tasks</span
+                                        >
+                                    </span>
+                                </button>
+                                <button
+                                    class="nd-dropdown-item"
+                                    id="ndSettingsBtn"
+                                    role="menuitem"
+                                    data-close-header-more
+                                >
+                                    <span
+                                        class="nd-icon nd-icon-settings"
+                                        aria-hidden="true"
+                                        >⚙</span
+                                    >
+                                    <span class="nd-label">
+                                        <span class="nd-label-title">Accessibility &amp; Overwhelm</span>
+                                        <span class="nd-label-desc">Make this calmer</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Sidebar -->
+            <aside
+                class="sidebar"
+                id="sidebar"
+                role="complementary"
+                aria-label="Planning sidebar"
+            >
+                <button
+                    class="sidebar-hide-btn"
+                    id="hideSidebarBtn"
+                    type="button"
+                    aria-label="Hide sidebar"
+                    title="Hide sidebar"
+                >
+                    <span aria-hidden="true">⟨</span>
+                </button>
+                <!-- You Are Here - Time Blindness Support -->
+                <div
+                    class="now-panel"
+                    role="region"
+                    aria-label="Current time context"
+                >
+                    <div class="now-label">You Are Here</div>
+                    <div class="now-date" id="nowDate" aria-live="polite">
+                        Loading...
+                    </div>
+                    <div class="now-context" id="nowContext"></div>
+                    <div
+                        class="time-stats"
+                        role="group"
+                        aria-label="Time remaining this year"
+                    >
+                        <div class="time-stat">
+                            <div
+                                class="time-stat-value"
+                                id="daysLeft"
+                                aria-label="Days left in year"
+                            >
+                                --
+                            </div>
+                            <div class="time-stat-label">Days Left</div>
+                        </div>
+                        <div class="time-stat">
+                            <div
+                                class="time-stat-value"
+                                id="weeksLeft"
+                                aria-label="Weeks left in year"
+                            >
+                                --
+                            </div>
+                            <div class="time-stat-label">Weeks Left</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Affirmation - Emotional Regulation Support -->
+                <div
+                    class="sidebar-section collapsible"
+                    data-section="affirmation"
+                >
+                    <button
+                        class="section-toggle"
+                        aria-expanded="false"
+                        aria-controls="affirmationContent"
+                    >
+                        <span class="section-toggle-icon">▼</span>
+                        <span class="section-toggle-label">Affirmation</span>
+                    </button>
+                    <div class="section-content" id="affirmationContent">
+                        <div
+                            class="affirmation-panel"
+                            id="affirmationPanel"
+                            role="button"
+                            tabindex="0"
+                            aria-label="Click for a new affirmation"
+                        >
+                            <div
+                                class="affirmation-text"
+                                id="affirmationText"
+                                aria-live="polite"
+                            >
+                                "You're doing better than you think."
+                            </div>
+                            <div class="affirmation-hint" aria-hidden="true">
+                                Click for a new affirmation
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- What's Next - Decision Paralysis Support -->
+                <div class="sidebar-section collapsible" data-section="upcoming">
+                    <button
+                        class="section-toggle"
+                        aria-expanded="true"
+                        aria-controls="upcomingContent"
+                    >
+                        <span class="section-toggle-icon">▼</span>
+                        <span class="section-toggle-label">Coming Up</span>
+                    </button>
+                    <div class="section-content" id="upcomingContent">
+                        <div
+                            class="whats-next"
+                            role="region"
+                            aria-label="Upcoming anchors"
+                        >
+                            <div class="section-header">
+                                <button
+                                    class="pick-btn"
+                                    id="pickOneBtn"
+                                    aria-describedby="pick-hint"
+                                >
+                                    Surprise me
+                                </button>
+                                <span id="pick-hint" class="visually-hidden"
+                                    >Randomly select an anchor to return to if you can't
+                                    decide</span
+                                >
+                            </div>
+                            <div
+                                id="upcomingGoals"
+                                role="list"
+                                aria-label="Upcoming anchors list"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Achievements - Dopamine/Reward Support -->
+                <div
+                    class="sidebar-section collapsible"
+                    data-section="achievements"
+                >
+                    <button
+                        class="section-toggle"
+                        aria-expanded="false"
+                        aria-controls="achievementsContent"
+                    >
+                        <span class="section-toggle-icon">▼</span>
+                        <span class="section-toggle-label">Achievements</span>
+                    </button>
+                    <div class="section-content" id="achievementsContent">
+                        <div
+                            class="achievements-panel"
+                            role="region"
+                            aria-label="Your achievements"
+                        >
+                            <div
+                                class="achievements-grid"
+                                id="achievementsGrid"
+                                role="list"
+                                aria-label="Achievements list"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content" id="main-content" role="main">
+                <!-- Control Bar -->
+                <div
+                    class="control-bar"
+                    role="toolbar"
+                    aria-label="Calendar controls"
+                >
+                    <div class="control-left">
+                        <!-- View Switcher -->
+                        <div
+                            class="view-switcher"
+                            role="tablist"
+                            aria-label="Zoom level"
+                        >
+                            <button
+                                class="view-btn active"
+                                data-view="year"
+                                role="tab"
+                                aria-selected="true"
+                                aria-label="Year view"
+                            >
+                                Year
+                            </button>
+                            <button
+                                class="view-btn"
+                                data-view="month"
+                                role="tab"
+                                aria-selected="false"
+                                aria-label="Month view"
+                            >
+                                Month
+                            </button>
+                            <button
+                                class="view-btn"
+                                data-view="week"
+                                role="tab"
+                                aria-selected="false"
+                                aria-label="Week view"
+                            >
+                                Week
+                            </button>
+                            <button
+                                class="view-btn"
+                                data-view="day"
+                                role="tab"
+                                aria-selected="false"
+                                aria-label="Day view"
+                            >
+                                Day
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-center">
+                        <!-- Date Navigation -->
+                        <div
+                            class="date-nav"
+                            role="group"
+                            aria-label="Date navigation"
+                        >
+                            <button
+                                class="nav-btn"
+                                id="navPrev"
+                                aria-label="Previous"
+                            >
+                                ←
+                            </button>
+                            <button
+                                class="nav-btn today-btn"
+                                id="navToday"
+                                aria-label="Go to today"
+                            >
+                                Today
+                            </button>
+                            <span
+                                class="date-display"
+                                id="dateDisplay"
+                                aria-live="polite"
+                                >2025</span
+                            >
+                            <button class="nav-btn" id="navNext" aria-label="Next">
+                                →
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-right">
+                        <div
+                            class="filter-group"
+                            role="group"
+                            aria-label="Scope filter"
+                        >
+                            <span class="filter-label" id="filter-label">Scope</span>
+                            <div
+                                class="category-filters"
+                                id="categoryFilters"
+                                role="group"
+                                aria-labelledby="filter-label"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zoomable Canvas -->
+                <div class="canvas-container" id="canvasContainer">
+                    <div class="canvas" id="canvas">
+                        <div
+                            class="calendar-grid"
+                            id="calendarGrid"
+                            role="grid"
+                            aria-label="Year calendar with anchors"
+                        ></div>
+                    </div>
+                    <div
+                        class="zoom-controls canvas-zoom-controls"
+                        role="group"
+                        aria-label="Zoom controls"
+                    >
+                        <button class="zoom-btn" id="zoomOut" aria-label="Zoom out">
+                            −
+                        </button>
+                        <span class="zoom-level" id="zoomLevel" aria-live="polite"
+                            >100%</span
+                        >
+                        <button class="zoom-btn" id="zoomIn" aria-label="Zoom in">
+                            +
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Add Anchor Modal -->
+        <div
+            class="modal-overlay"
+            id="goalModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="goal-modal-title"
+        >
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="goal-modal-title">
+                        Add New Anchor
+                    </h2>
+                    <button
+                        class="modal-close"
+                        id="closeModal"
+                        aria-label="Close modal"
+                    >
+                        ×
+                    </button>
+                </div>
+                <form id="goalForm">
+                    <div class="form-group">
+                        <label for="goalTitle"
+                            >What would you like to place here?</label
+                        >
+                        <input
+                            type="text"
+                            id="goalTitle"
+                            placeholder="e.g., Make space for my side project"
+                            required
+                            aria-required="true"
+                        />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="goalMonth">When?</label>
+                            <select
+                                id="goalMonth"
+                                required
+                                aria-required="true"
+                            ></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="goalCategory">Category (optional)</label>
+                            <select id="goalCategory">
+                                <option value="" selected>No category</option>
+                                <option value="career">Career</option>
+                                <option value="health">Health</option>
+                                <option value="finance">Finance</option>
+                                <option value="personal">Personal</option>
+                                <option value="creative">Creative</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalPriority">Priority</label>
+                        <select id="goalPriority">
+                            <option value="low">Low - No rush</option>
+                            <option value="medium" selected>
+                                Medium - When you can
+                            </option>
+                            <option value="high">High - Important</option>
+                            <option value="urgent">Urgent - Do soon</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button
+                            type="button"
+                            class="btn btn-ghost"
+                            id="cancelModal"
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Save Anchor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Celebration Modal - Dopamine Reward -->
+        <div
+            class="celebration-overlay"
+            id="celebrationModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="celebration-title-label"
+        >
+            <div class="celebration-content">
+                <div
+                    class="celebration-icon"
+                    id="celebrationIcon"
+                    aria-hidden="true"
+                ></div>
+                <div
+                    class="celebration-title"
+                    id="celebrationTitle"
+                    id="celebration-title-label"
+                >
+                    Amazing!
+                </div>
+                <div class="celebration-text" id="celebrationText">
+                    Anchor updated.
+                </div>
+                <button class="btn btn-primary" id="closeCelebration">
+                    Keep Going
+                </button>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast" id="toast" role="status" aria-live="polite">
+            <span class="toast-icon" id="toastIcon" aria-hidden="true"></span>
+            <span class="toast-message" id="toastMessage">Anchor placed.</span>
+        </div>
+
+        <!-- Body Double Timer Display (shows when active) -->
+        <div
+            class="body-double-display"
+            id="bodyDoubleDisplay"
+            role="timer"
+            aria-live="polite"
+            hidden
+        >
+            <span class="bd-icon" aria-hidden="true"></span>
+            <span class="bd-timer" id="bdTimer">25:00</span>
+            <button
+                class="bd-stop"
+                id="bdStop"
+                aria-label="Stop body double timer"
+            >
+                Stop
+            </button>
+        </div>
+
+        <button
+            class="fab-add-anchor"
+            id="addGoalBtn"
+            type="button"
+            aria-label="Add new anchor"
+            title="Add new anchor"
+        >
+            <span class="fab-icon" aria-hidden="true"></span>
+        </button>
+
+        <script src="app.js"></script>
+    </body>
+</html>
