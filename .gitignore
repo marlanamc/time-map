@@ -6,6 +6,7 @@ package-lock.json
 dist/
 *.min.js
 *.min.css
+*.js.map
 
 # OS files
 .DS_Store
