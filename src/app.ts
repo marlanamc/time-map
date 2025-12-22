@@ -30,6 +30,7 @@ import type {
 } from './types';
 import { SupabaseService } from './services/SupabaseService';
 import { AuthComponent } from './components/Auth';
+import { ModalManager } from './utils/modalManager';
 
 // UI Elements interface for proper typing
 interface UIElements {
@@ -243,12 +244,12 @@ const TimeBreakdown = {
 const ND_CONFIG = {
   // Accent color themes
   ACCENT_THEMES: {
-    teal: { label: "Sky Blue", emoji: "☁️", color: "#8CB7D9" },
-    coral: { label: "Terracotta", emoji: "🏺", color: "#C86B4A" },
-    sage: { label: "Sage Green", emoji: "🌿", color: "#6F9B86" },
-    amber: { label: "Golden Hour", emoji: "🌅", color: "#E09A60" },
-    clay: { label: "Earth Clay", emoji: "🧱", color: "#B46A4A" },
-    violet: { label: "Petal Pink", emoji: "🌸", color: "#E59AA0" },
+    teal: { label: "Daylight Blue", emoji: "☀️", color: "#4A90E2" },
+    coral: { label: "Clay Red", emoji: "🏺", color: "#C06C52" },
+    sage: { label: "Garden Green", emoji: "🌿", color: "#5A9B8D" },
+    amber: { label: "Sunlight", emoji: "☀️", color: "#F0B429" },
+    clay: { label: "Warm Earth", emoji: "🧱", color: "#C06C52" },
+    violet: { label: "Bright Petal", emoji: "🌸", color: "#E59AA0" },
   },
 
   // Body doubling / coworking timer options
@@ -375,27 +376,27 @@ const CONFIG = {
     "December",
   ],
   CATEGORIES: {
-    career: { emoji: "💼", symbol: "◆", label: "Career", color: "#6366f1" },
-    health: { emoji: "💪", symbol: "●", label: "Health", color: "#10b981" },
-    finance: { emoji: "💰", symbol: "◇", label: "Finance", color: "#f59e0b" },
+    career: { emoji: "💼", symbol: "◆", label: "Career", color: "#4A90E2" },
+    health: { emoji: "💪", symbol: "●", label: "Health", color: "#5A9B8D" },
+    finance: { emoji: "💰", symbol: "◇", label: "Finance", color: "#F0B429" },
     personal: {
       emoji: "💖",
       symbol: "♥",
       label: "Personal",
-      color: "#ec4899",
+      color: "#E59AA0",
     },
     creative: {
       emoji: "🎨",
       symbol: "✦",
       label: "Creative",
-      color: "#8b5cf6",
+      color: "#9F7AEA",
     },
   },
   PRIORITIES: {
-    urgent: { emoji: "🔴", symbol: "!!!", label: "Urgent", color: "#ef4444" },
-    high: { emoji: "🟠", symbol: "!!", label: "High", color: "#f97316" },
-    medium: { emoji: "🟡", symbol: "!", label: "Medium", color: "#eab308" },
-    low: { emoji: "🟢", symbol: "—", label: "Low", color: "#22c55e" },
+    urgent: { emoji: "🔴", symbol: "!!!", label: "Urgent", color: "#C06C52" },
+    high: { emoji: "🟠", symbol: "!!", label: "High", color: "#F4A261" },
+    medium: { emoji: "🟡", symbol: "!", label: "Medium", color: "#4A9099" },
+    low: { emoji: "🟢", symbol: "—", label: "Low", color: "#728B91" },
   },
   STATUSES: {
     "not-started": {
@@ -1387,22 +1388,21 @@ const NDSupport = {
       root.style.setProperty("--word-spacing", spacing.wordSpacing);
     }
 
-    // Apply color blind mode
+    // Apply color blind mode - remove all first, then add if needed
+    document.body.classList.remove(
+      "colorblind-deuteranopia",
+      "colorblind-protanopia",
+      "colorblind-tritanopia",
+    );
     if (prefs.colorBlindMode && prefs.colorBlindMode !== "none") {
       document.body.classList.add(`colorblind-${prefs.colorBlindMode}`);
     }
 
-    // Apply simplified view
-    if (prefs.simplifiedView) {
-      document.body.classList.add("simplified-view");
-    }
+    // Apply simplified view - toggle properly
+    document.body.classList.toggle("simplified-view", !!prefs.simplifiedView);
 
-    // Apply reduced emojis mode
-    if (prefs.reduceEmojis) {
-      document.body.classList.add("reduce-emojis");
-    } else {
-      document.body.classList.remove("reduce-emojis");
-    }
+    // Apply reduced emojis mode - toggle properly
+    document.body.classList.toggle("reduce-emojis", !!prefs.reduceEmojis);
   },
 
   // Brain dump - parking lot for intrusive thoughts
@@ -2074,13 +2074,12 @@ const NDSupport = {
     const prefs = State.data.preferences;
     const nd = prefs.nd;
 
-    const modal = document.createElement("div");
-    modal.className = "modal-overlay active appearance-modal";
-    modal.innerHTML = `
+    const modalManager = new ModalManager();
+    const modal = modalManager.create("modal-overlay active appearance-modal", `
         <div class="modal modal-lg">
           <div class="modal-header">
             <h2 class="modal-title">🎨 Appearance</h2>
-            <button class="modal-close" aria-label="Close" onclick="this.closest('.modal-overlay').remove()">×</button>
+            <button class="modal-close" aria-label="Close">×</button>
           </div>
           <div class="modal-body nd-settings-body">
             <div class="settings-section">
@@ -2099,8 +2098,8 @@ const NDSupport = {
                 <label>Accent Color</label>
                 <div class="theme-picker" role="radiogroup" aria-label="Choose accent color">
                   ${Object.entries(ND_CONFIG.ACCENT_THEMES)
-      .map(
-        ([key, theme]) => `
+        .map(
+          ([key, theme]) => `
                       <button
                         class="theme-swatch ${nd.accentTheme === key ? "active" : ""}"
                         data-theme="${key}"
@@ -2113,8 +2112,8 @@ const NDSupport = {
                         <span class="swatch-emoji">${theme.emoji}</span>
                       </button>
                     `,
-      )
-      .join("")}
+        )
+        .join("")}
                 </div>
               </div>
             </div>
@@ -2124,24 +2123,19 @@ const NDSupport = {
             </div>
           </div>
         </div>
-      `;
+      `);
 
-    document.body.appendChild(modal);
-
-    modal.querySelectorAll(".theme-swatch").forEach((swatch) => {
-      swatch.addEventListener("click", (e) => {
-        modal
-          .querySelectorAll(".theme-swatch")
-          .forEach((s) => s.classList.remove("active"));
-        const target = e.currentTarget as HTMLElement;
-        target.classList.add("active");
-      });
+    // Theme swatch selection
+    modalManager.addModalListeners(".theme-swatch", "click", (e: Event) => {
+      modal.querySelectorAll(".theme-swatch").forEach((s: Element) => s.classList.remove("active"));
+      const target = e.currentTarget as HTMLElement;
+      target.classList.add("active");
     });
 
-    modal.querySelector("#saveAppearance")?.addEventListener("click", () => {
+    // Save button
+    modalManager.addModalListener("#saveAppearance", "click", () => {
       if (!State.data) return;
-      const nightGarden = !!(modal.querySelector("#appearanceNightGarden") as HTMLInputElement)
-        ?.checked;
+      const nightGarden = !!(modal.querySelector("#appearanceNightGarden") as HTMLInputElement)?.checked;
       const activeTheme = modal.querySelector(".theme-swatch.active") as HTMLElement | null;
       const selectedTheme = activeTheme
         ? activeTheme.dataset.theme
@@ -2155,14 +2149,19 @@ const NDSupport = {
       State.save();
 
       this.applyAccessibilityPreferences();
-      UI.applyThemePreference();
       UI.render();
-      modal.remove();
+      modalManager.remove();
       UI.showToast("✨", "Appearance saved");
     });
 
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.remove();
+    // Close button
+    modalManager.addModalListener(".modal-close", "click", () => {
+      modalManager.remove();
+    });
+
+    // Click outside to close
+    modalManager.addEventListener(modal, "click", (e: Event) => {
+      if (e.target === modal) modalManager.remove();
     });
   },
 
@@ -2383,7 +2382,6 @@ const AppSettings = {
 
     const prefs = State.data.preferences;
     const sidebarPrefs = prefs.sidebar || {};
-    const ndPrefs = prefs.nd || {};
 
     modal.innerHTML = `
         <div class="modal modal-lg">
@@ -2738,8 +2736,51 @@ const UI = {
   _filterDocListeners: null as FilterDocListeners | null, // For managing document event listeners
   _focusRevealSetup: false, // Whether focus reveal has been initialized
   _focusRevealHideTimer: null as ReturnType<typeof setTimeout> | null, // Timer for hiding focus reveal
+  _mobileMql: null as MediaQueryList | null,
+  _mobileModeSetup: false,
+  _initialMobileDefaultsApplied: false,
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
+  isMobileViewport(): boolean {
+    if (this._mobileMql) return this._mobileMql.matches;
+    return window.matchMedia("(max-width: 600px)").matches;
+  },
+
+  setupViewportMode() {
+    if (this._mobileModeSetup) return;
+    this._mobileModeSetup = true;
+
+    this._mobileMql = window.matchMedia("(max-width: 600px)");
+
+    const apply = () => {
+      const isMobile = this.isMobileViewport();
+      document.body.classList.toggle("is-mobile", isMobile);
+
+      // First-load defaults: mobile starts on Home and avoids Year as the default view.
+      // (We don't persist this so desktop preferences don't get overwritten.)
+      if (isMobile && !this._initialMobileDefaultsApplied) {
+        this._initialMobileDefaultsApplied = true;
+        document.body.classList.add("mobile-home-view");
+        if (State.currentView === VIEWS.YEAR) {
+          State.currentView = VIEWS.DAY;
+        }
+      }
+    };
+
+    apply();
+
+    // Keep body class in sync on resize/orientation change.
+    const mql = this._mobileMql;
+    if (mql) {
+      const onChange = () => apply();
+      try {
+        mql.addEventListener("change", onChange);
+      } catch {
+        // Safari < 14
+        mql.addListener(onChange);
+      }
+    }
+  },
   getCurrentLevel(): GoalLevel {
     switch (State.currentView) {
       case "year": return "vision";
@@ -2812,7 +2853,7 @@ const UI = {
     const cat = goal.category ? CONFIG.CATEGORIES[goal.category] : null;
     const levelInfo = CONFIG.LEVELS[goal.level] || CONFIG.LEVELS.intention;
 
-	    overlay.innerHTML = `
+    overlay.innerHTML = `
 	      <div class="zen-focus-container">
 	        <button class="zen-close-btn">×</button>
 
@@ -2914,6 +2955,7 @@ const UI = {
     this.cacheElements();
     this.els = this.elements; // Alias for convenience
     this.bindEvents();
+    this.setupViewportMode();
     this.applySavedUIState();
     this.render();
     this.updateTimeDisplay();
@@ -2998,10 +3040,27 @@ const UI = {
   },
 
   bindEvents() {
-    // View switcher
+    // View switcher (desktop)
     document.querySelectorAll(".view-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
+        document.body.classList.remove("mobile-home-view");
         State.setView((btn as HTMLElement).dataset.view as ViewType);
+        this.syncViewButtons();
+      });
+    });
+
+    // Mobile tab bar
+    document.querySelectorAll(".mobile-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const view = (tab as HTMLElement).dataset.view;
+        if (view === "home") {
+          // Show sidebar as main content
+          document.body.classList.add("mobile-home-view");
+        } else {
+          // Switch to the selected view
+          document.body.classList.remove("mobile-home-view");
+          State.setView(view as ViewType);
+        }
         this.syncViewButtons();
       });
     });
@@ -3490,14 +3549,21 @@ const UI = {
     container.innerHTML = html;
     container.className = "week-view-container";
 
-    // Click handlers
+    // Navigation handlers: desktop uses dblclick to reduce accidental drills,
+    // mobile uses single tap (dblclick doesn't exist on touch).
     container.querySelectorAll(".week-day-column").forEach((col) => {
-      col.addEventListener("dblclick", () => {
+      const openDay = () => {
         const dateIso = (col as HTMLElement).dataset.date;
         if (!dateIso) return;
         State.goToDate(new Date(dateIso));
         State.setView(VIEWS.DAY);
-      });
+      };
+
+      if (this.isMobileViewport()) {
+        col.addEventListener("click", openDay);
+      } else {
+        col.addEventListener("dblclick", openDay);
+      }
     });
 
     container.querySelectorAll(".week-goal-item").forEach((item) => {
@@ -4061,31 +4127,36 @@ const UI = {
       .map((goal) => {
         const cat = goal.category ? (CONFIG.CATEGORIES[goal.category] ?? null) : null;
         const statusClass = goal.status === "done" ? "completed" : "";
-        const priorityClass =
+        const priorityTag =
           goal.priority === "urgent" || goal.priority === "high"
-            ? `priority - ${goal.priority} `
+            ? `<span class="goal-tag priority-${goal.priority}">${goal.priority}</span>`
             : "";
 
         const level = CONFIG.LEVELS[goal.level] || CONFIG.LEVELS.milestone;
+        const subtasksSummary =
+          goal.subtasks.length > 0
+            ? `${goal.subtasks.filter((s: Subtask) => s.done).length}/${goal.subtasks.length}`
+            : "";
+
         return `
-  < div class="goal-item ${statusClass} ${priorityClass}" data - goal - id="${goal.id}" >
-    <div class="goal-checkbox ${goal.status === "done" ? "checked" : ""}"
-data - goal - id="${goal.id}" > </div>
-  < div class="goal-content" >
-    <div class="goal-title" >
-      <span class="goal-level-emoji" > ${level.emoji} </span>
-                                ${this.escapeHtml(goal.title)}
-</div>
-  < div class="goal-meta" >
-    ${cat ? `<span class="goal-category" style="color: ${cat.color}">${cat.emoji}</span>` : ""}
-                                ${goal.subtasks.length > 0 ? `<span class="goal-subtasks">${goal.subtasks.filter((s: Subtask) => s.done).length}/${goal.subtasks.length}</span>` : ""}
-                                ${goal.progress > 0 && goal.progress < 100 ? `<span class="goal-progress-text">${goal.progress}%</span>` : ""}
-</div>
-                            ${goal.progress > 0 ? `<div class="goal-progress-bar"><div class="goal-progress-fill" style="width: ${goal.progress}%"></div></div>` : ""}
-</div>
-  < button class="btn btn-icon btn-ghost goal-edit-btn" data - goal - id="${goal.id}" >⋮</button>
-    </div>
-      `;
+          <div class="goal-item ${statusClass}" data-goal-id="${goal.id}">
+            <div class="goal-checkbox ${goal.status === "done" ? "checked" : ""}" data-goal-id="${goal.id}"></div>
+            <div class="goal-content">
+              <div class="goal-title">
+                <span class="goal-level-emoji">${level.emoji}</span>
+                ${this.escapeHtml(goal.title)}
+              </div>
+              <div class="goal-meta">
+                ${cat ? `<span class="goal-category" style="color: ${cat.color}">${cat.emoji}</span>` : ""}
+                ${subtasksSummary ? `<span class="goal-subtasks">${subtasksSummary}</span>` : ""}
+                ${priorityTag}
+                ${goal.progress > 0 && goal.progress < 100 ? `<span class="goal-progress-text">${goal.progress}%</span>` : ""}
+              </div>
+              ${goal.progress > 0 ? `<div class="goal-progress"><div class="goal-progress-fill" style="width: ${goal.progress}%"></div></div>` : ""}
+            </div>
+            <button class="btn btn-icon btn-ghost goal-edit-btn" data-goal-id="${goal.id}" type="button" aria-label="Goal options">⋮</button>
+          </div>
+        `;
       })
       .join("");
   },
@@ -4245,14 +4316,14 @@ data - goal - id="${goal.id}" > </div>
         );
 
         return `
-  < div class="upcoming-goal" data - goal - id="${goal.id}" >
-    <div class="upcoming-dot" style = "background: ${cat ? cat.color : "rgba(255, 255, 255, 0.18)"}" > </div>
-      < div class="upcoming-content" >
-        <div class="upcoming-title" > ${this.escapeHtml(goal.title)} </div>
-          < div class="upcoming-meta" > ${monthName} • ${timeLeft} </div>
+          <div class="upcoming-goal" data-goal-id="${goal.id}">
+            <div class="upcoming-dot" style="background: ${cat ? cat.color : "rgba(255, 255, 255, 0.18)"}"></div>
+            <div class="upcoming-content">
+              <div class="upcoming-title">${this.escapeHtml(goal.title)}</div>
+              <div class="upcoming-meta">${monthName} • ${timeLeft}</div>
             </div>
-            </div>
-              `;
+          </div>
+        `;
       })
       .join("");
 
@@ -4274,11 +4345,10 @@ data - goal - id="${goal.id}" > </div>
     container.innerHTML = Object.entries(CONFIG.ACHIEVEMENTS)
       .map(
         ([id, ach]) => `
-            < div class="achievement ${unlocked.includes(id) ? "unlocked" : ""}"
-data - tooltip="${ach.desc}" >
-  ${ach.emoji}
-</div>
-  `,
+          <div class="achievement ${unlocked.includes(id) ? "unlocked" : ""}" data-tooltip="${this.escapeHtml(ach.desc)}">
+            ${ach.emoji}
+          </div>
+        `,
       )
       .join("");
   },
@@ -5204,10 +5274,17 @@ data - tooltip="${ach.desc}" >
     }
 
     document.body.classList.toggle("focus-mode", State.focusMode);
+    const isMobile = this.isMobileViewport();
     if (State.focusMode) {
       this.updateFocusLayoutVars();
-      this.setupFocusHoverReveal();
-      document.getElementById("focusHandle")?.removeAttribute("hidden");
+      if (isMobile) {
+        // Mobile has no hover; keep controls accessible without the reveal system.
+        document.body.classList.add("focus-ui-revealed");
+        document.getElementById("focusHandle")?.setAttribute("hidden", "");
+      } else {
+        this.setupFocusHoverReveal();
+        document.getElementById("focusHandle")?.removeAttribute("hidden");
+      }
     } else {
       document.body.classList.remove("focus-ui-revealed");
       document.getElementById("focusHandle")?.setAttribute("hidden", "");
@@ -5250,7 +5327,7 @@ data - tooltip="${ach.desc}" >
 
     this.applyLayoutVisibility();
     this.applySidebarVisibility();
-    this.applyThemePreference();
+    NDSupport.applyAccessibilityPreferences();
     this.syncViewButtons();
   },
 
@@ -5263,6 +5340,20 @@ data - tooltip="${ach.desc}" >
   },
 
   applyLayoutVisibility() {
+    // Mobile uses a different layout system (bottom tabs + Home-as-sidebar).
+    // Desktop "hide/show" chrome controls don't translate well to small screens,
+    // so force the primary chrome on and hide the floating handles.
+    if (this.isMobileViewport()) {
+      document.body.classList.remove(
+        "hide-header",
+        "hide-control-bar",
+        "hide-sidebar",
+      );
+      document.getElementById("layoutHandle")?.setAttribute("hidden", "");
+      document.getElementById("sidebarHandle")?.setAttribute("hidden", "");
+      return;
+    }
+
     const defaults = State.getDefaultData().preferences;
     const layout = State.data?.preferences?.layout ?? defaults.layout;
 
@@ -5288,7 +5379,9 @@ data - tooltip="${ach.desc}" >
 
     const sidebarHandle = document.getElementById("sidebarHandle");
     if (sidebarHandle) {
-      if (layout.showSidebar === false && !State.focusMode) {
+      // Hide sidebar handle on mobile devices (unnecessary on mobile)
+      const isMobile = window.matchMedia("(max-width: 600px)").matches;
+      if (layout.showSidebar === false && !State.focusMode && !isMobile) {
         sidebarHandle.removeAttribute("hidden");
       } else {
         sidebarHandle.setAttribute("hidden", "");
@@ -5399,10 +5492,25 @@ data - tooltip="${ach.desc}" >
   },
 
   syncViewButtons() {
+    // Sync desktop view buttons
     document.querySelectorAll(".view-btn").forEach((btn) => {
       const isActive = (btn as HTMLElement).dataset.view === State.currentView;
       btn.classList.toggle("active", isActive);
       btn.setAttribute("aria-selected", String(isActive));
+    });
+
+    // Sync mobile tab bar
+    const isMobileHomeView = document.body.classList.contains("mobile-home-view");
+    document.querySelectorAll(".mobile-tab").forEach((tab) => {
+      const tabView = (tab as HTMLElement).dataset.view;
+      let isActive = false;
+      if (tabView === "home") {
+        isActive = isMobileHomeView;
+      } else {
+        isActive = !isMobileHomeView && tabView === State.currentView;
+      }
+      tab.classList.toggle("active", isActive);
+      tab.setAttribute("aria-selected", String(isActive));
     });
   },
 
@@ -5663,7 +5771,7 @@ data - tooltip="${ach.desc}" >
 // ============================================
 // Initialize App
 // ============================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   window.addEventListener("error", (event) => {
     try {
       console.error("Unhandled error:", event.error || event.message);
@@ -5682,7 +5790,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  State.init();
+  await State.init();
   UI.init();
 
   if ("serviceWorker" in navigator) {
