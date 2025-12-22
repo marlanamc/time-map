@@ -3335,7 +3335,22 @@ const UI = {
     if (!container) return;
 
     container.addEventListener("mousedown", (e) => {
-      if ((e.target as Element)?.closest(".month-card") || (e.target as Element)?.closest(".goal-item"))
+      const target = e.target as Element | null;
+      if (!target) return;
+      // Don't start canvas panning when interacting with UI elements.
+      // (This also enables native HTML5 drag-and-drop in Day view seed tray.)
+      if (
+        target.closest(".month-card") ||
+        target.closest(".goal-item") ||
+        target.closest(".day-goal-card") ||
+        target.closest("button") ||
+        target.closest("input") ||
+        target.closest("select") ||
+        target.closest("textarea") ||
+        target.closest(".modal") ||
+        target.closest(".header-more-dropdown") ||
+        target.closest(".support-panel")
+      )
         return;
       isDragging = true;
       container.classList.add("grabbing");
@@ -4001,8 +4016,14 @@ const UI = {
         this.render();
       };
 
+      const seedCards = Array.from(
+        container.querySelectorAll(
+          ".day-goal-card.day-goal-variant-seed[draggable='true']",
+        ),
+      ) as HTMLElement[];
+
       // Desktop HTML5 drag and drop.
-      container.querySelectorAll(".day-goal-card.day-goal-variant-seed[draggable='true']").forEach((card) => {
+      seedCards.forEach((card) => {
         card.addEventListener("dragstart", (e) => {
           if (!(e instanceof DragEvent)) return;
           const goalId = (card as HTMLElement).dataset.goalId;
@@ -4041,6 +4062,213 @@ const UI = {
         placeGoalAtY(goalId, e.clientY);
         dayBed.classList.remove("is-drop-over");
       });
+
+      // Touch / iOS fallback: long-press + drag with a visual ghost.
+      // HTML5 drag-and-drop is poorly supported on iOS Safari, so we emulate it.
+      const supportsPointerEvents =
+        typeof window !== "undefined" && "PointerEvent" in window;
+      const longPressMs = 180;
+      const moveCancelPx = 8;
+
+      let touchDragging = false;
+      let touchGoalId: string | null = null;
+      let touchPointerId: number | null = null;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchPressTimer: ReturnType<typeof setTimeout> | null = null;
+      let ghostEl: HTMLElement | null = null;
+      let suppressClickUntil = 0;
+
+      const clearPressTimer = () => {
+        if (!touchPressTimer) return;
+        clearTimeout(touchPressTimer);
+        touchPressTimer = null;
+      };
+
+      const cleanupTouchDrag = () => {
+        touchDragging = false;
+        touchGoalId = null;
+        touchPointerId = null;
+        clearPressTimer();
+        if (ghostEl) {
+          ghostEl.remove();
+          ghostEl = null;
+        }
+        document.body.classList.remove("is-touch-dragging-seed");
+        dayBed.classList.remove("is-drop-target", "is-drop-over");
+      };
+
+      const setGhostPosition = (clientX: number, clientY: number) => {
+        if (!ghostEl) return;
+        ghostEl.style.left = `${clientX}px`;
+        ghostEl.style.top = `${clientY}px`;
+      };
+
+      const isPointOverDayBed = (clientX: number, clientY: number) => {
+        const rect = dayBed.getBoundingClientRect();
+        return (
+          clientX >= rect.left &&
+          clientX <= rect.right &&
+          clientY >= rect.top &&
+          clientY <= rect.bottom
+        );
+      };
+
+      const startTouchDrag = (card: HTMLElement, goalId: string, clientX: number, clientY: number) => {
+        touchDragging = true;
+        touchGoalId = goalId;
+        suppressClickUntil = Date.now() + 800;
+        document.body.classList.add("is-touch-dragging-seed");
+        dayBed.classList.add("is-drop-target");
+
+        ghostEl = card.cloneNode(true) as HTMLElement;
+        ghostEl.classList.add("drag-ghost");
+        ghostEl.style.width = `${card.getBoundingClientRect().width}px`;
+        document.body.appendChild(ghostEl);
+        setGhostPosition(clientX, clientY);
+      };
+
+      // Suppress accidental click after a drag.
+      seedCards.forEach((card) => {
+        card.addEventListener(
+          "click",
+          (e) => {
+            if (Date.now() < suppressClickUntil) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          },
+          true,
+        );
+      });
+
+      if (supportsPointerEvents) {
+        seedCards.forEach((card) => {
+          card.addEventListener("pointerdown", (e: PointerEvent) => {
+            if (e.pointerType !== "touch") return;
+            const goalId = card.dataset.goalId;
+            if (!goalId) return;
+
+            touchStartX = e.clientX;
+            touchStartY = e.clientY;
+            touchPointerId = e.pointerId;
+
+            clearPressTimer();
+            touchPressTimer = setTimeout(() => {
+              startTouchDrag(card, goalId, e.clientX, e.clientY);
+              try {
+                card.setPointerCapture(e.pointerId);
+              } catch {
+                // no-op
+              }
+            }, longPressMs);
+          });
+
+          card.addEventListener("pointermove", (e: PointerEvent) => {
+            if (e.pointerType !== "touch") return;
+            if (touchPointerId !== null && e.pointerId !== touchPointerId) return;
+
+            const dx = Math.abs(e.clientX - touchStartX);
+            const dy = Math.abs(e.clientY - touchStartY);
+            if (!touchDragging && (dx > moveCancelPx || dy > moveCancelPx)) {
+              // Treat as scroll if they move before long-press triggers.
+              clearPressTimer();
+              return;
+            }
+
+            if (!touchDragging) return;
+            e.preventDefault();
+            setGhostPosition(e.clientX, e.clientY);
+            dayBed.classList.toggle("is-drop-over", isPointOverDayBed(e.clientX, e.clientY));
+          });
+
+          const end = (e: PointerEvent) => {
+            if (e.pointerType !== "touch") return;
+            if (touchPointerId !== null && e.pointerId !== touchPointerId) return;
+
+            if (!touchDragging) {
+              clearPressTimer();
+              touchPointerId = null;
+              return;
+            }
+
+            e.preventDefault();
+            const goalId = touchGoalId;
+            const shouldDrop = isPointOverDayBed(e.clientX, e.clientY);
+            cleanupTouchDrag();
+            if (goalId && shouldDrop) {
+              placeGoalAtY(goalId, e.clientY);
+            }
+          };
+
+          card.addEventListener("pointerup", end);
+          card.addEventListener("pointercancel", end);
+        });
+      } else {
+        // Legacy iOS Safari fallback (no PointerEvent)
+        seedCards.forEach((card) => {
+          card.addEventListener(
+            "touchstart",
+            (e: TouchEvent) => {
+              const t = e.touches[0];
+              if (!t) return;
+              const goalId = card.dataset.goalId;
+              if (!goalId) return;
+
+              touchStartX = t.clientX;
+              touchStartY = t.clientY;
+              clearPressTimer();
+              touchPressTimer = setTimeout(() => {
+                startTouchDrag(card, goalId, t.clientX, t.clientY);
+              }, longPressMs);
+            },
+            { passive: true },
+          );
+
+          card.addEventListener(
+            "touchmove",
+            (e: TouchEvent) => {
+              const t = e.touches[0];
+              if (!t) return;
+
+              const dx = Math.abs(t.clientX - touchStartX);
+              const dy = Math.abs(t.clientY - touchStartY);
+              if (!touchDragging && (dx > moveCancelPx || dy > moveCancelPx)) {
+                clearPressTimer();
+                return;
+              }
+              if (!touchDragging) return;
+              e.preventDefault();
+              setGhostPosition(t.clientX, t.clientY);
+              dayBed.classList.toggle("is-drop-over", isPointOverDayBed(t.clientX, t.clientY));
+            },
+            { passive: false },
+          );
+
+          card.addEventListener("touchend", (e: TouchEvent) => {
+            const t = e.changedTouches[0];
+            if (!t) {
+              cleanupTouchDrag();
+              return;
+            }
+            if (!touchDragging) {
+              clearPressTimer();
+              return;
+            }
+            e.preventDefault();
+            const goalId = touchGoalId;
+            const shouldDrop = isPointOverDayBed(t.clientX, t.clientY);
+            cleanupTouchDrag();
+            if (goalId && shouldDrop) {
+              placeGoalAtY(goalId, t.clientY);
+            }
+          });
+
+          card.addEventListener("touchcancel", () => {
+            cleanupTouchDrag();
+          });
+        });
+      }
     }
   },
 

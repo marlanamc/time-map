@@ -2821,6 +2821,21 @@ body.is-dragging-seed .day-goal-card.day-goal-variant-seed[draggable="true"] {
     cursor: grabbing;
 }
 
+body.is-touch-dragging-seed {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.drag-ghost {
+    position: fixed;
+    z-index: 3000;
+    pointer-events: none;
+    opacity: 0.92;
+    transform: translate(-50%, -50%) rotate(-1deg);
+    box-shadow: var(--shadow-xl);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
 .day-bed-canvas.is-drop-target {
     outline: 2px dashed rgba(107, 168, 169, 0.45);
     outline-offset: 6px;
