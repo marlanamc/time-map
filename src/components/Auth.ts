@@ -28,6 +28,41 @@ export class AuthComponent {
   }
 
   render() {
+    const env = window.__GARDEN_FENCE_ENV;
+    const isConfigured = Boolean(env?.SUPABASE_URL && env?.SUPABASE_ANON_KEY);
+
+    if (!isConfigured) {
+      this.container.innerHTML = `
+        <div style="background: var(--bg-surface, var(--glass-bg, rgba(255, 255, 255, 0.9))); padding: var(--space-6, 24px); border-radius: var(--radius-xl, 16px); max-width: 520px; width: 100%; text-align: left; border: 1px solid var(--glass-border, rgba(107, 168, 169, 0.22)); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); margin: auto;">
+          <h2 style="color: var(--text-primary, #1A2B2F); margin-bottom: var(--space-3, 12px); font-size: var(--text-2xl, 1.5rem); font-weight: 700;">Setup needed</h2>
+          <p style="color: var(--text-secondary, #455C61); margin-bottom: var(--space-4, 16px); font-size: var(--text-base, 1rem); line-height: 1.5;">
+            This deployment is missing Supabase credentials, so the login screen can’t load.
+          </p>
+          <div style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius-lg, 12px); padding: var(--space-4, 16px); margin-bottom: var(--space-4, 16px);">
+            <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary, #1A2B2F);">Fix on Vercel</div>
+            <ol style="margin: 0; padding-left: 18px; color: var(--text-secondary, #455C61); line-height: 1.6;">
+              <li>Go to <b>Project Settings → Environment Variables</b></li>
+              <li>Add <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code></li>
+              <li>Redeploy</li>
+            </ol>
+          </div>
+          <button id="auth-close" type="button"
+            style="padding: var(--space-3, 12px) var(--space-4, 16px); border-radius: var(--radius-md, 8px); background: var(--accent, var(--teal, #4A9099)); color: white; border: none; font-size: var(--text-base, 1rem); cursor: pointer; font-weight: 600; min-height: 48px; transition: all 0.2s ease;">
+            Continue in offline mode
+          </button>
+          <div style="margin-top: 10px; color: var(--text-tertiary, #6B7D82); font-size: var(--text-sm, 0.875rem);">
+            (You can still use local-only features, but cloud sync/auth will be disabled.)
+          </div>
+        </div>
+      `;
+
+      this.container
+        .querySelector("#auth-close")
+        ?.addEventListener("click", () => this.hide());
+
+      return;
+    }
+
     let isSignUp = false;
 
     const updateUI = () => {
