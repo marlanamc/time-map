@@ -144,6 +144,8 @@ export const SupabaseService = {
                 completed_at: goal.completedAt,
                 last_worked_on: goal.lastWorkedOn,
                 due_date: goal.dueDate,
+                start_time: goal.startTime,
+                end_time: goal.endTime,
                 tags: goal.tags
             });
 

@@ -3195,6 +3195,13 @@ body.night-garden .day-goal-variant-planter {
 /* Planter drag and resize */
 .day-goal-variant-planter[draggable="true"] {
     cursor: grab;
+    transition: transform var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.day-goal-variant-planter[draggable="true"]:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .day-goal-variant-planter[draggable="true"]:active {
@@ -3203,7 +3210,22 @@ body.night-garden .day-goal-variant-planter {
 
 body.is-dragging-planter .day-goal-variant-planter[draggable="true"] {
     cursor: grabbing;
-    opacity: 0.8;
+    opacity: 0.75;
+    transform: scale(0.98);
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+}
+
+body.is-dragging-planter .day-goal-variant-planter[draggable="true"]:not([aria-grabbed="true"]) {
+    opacity: 1;
+    transform: none;
+}
+
+.day-goal-variant-planter[aria-grabbed="true"] {
+    opacity: 0.6;
+    transform: scale(0.96) rotate(0.5deg);
+    box-shadow: var(--shadow-xl);
+    z-index: 10;
 }
 
 body.is-resizing-planter {

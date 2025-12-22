@@ -3978,6 +3978,10 @@ const UI = {
     // Drag + drop: move seed tray intentions into the day bed to assign a start time.
     const dayBed = container.querySelector(".day-bed-canvas") as HTMLElement | null;
     if (dayBed) {
+      // Track dragging state (dataTransfer.getData doesn't work in dragover)
+      let draggingPlanterId: string | null = null;
+      let draggingSeedId: string | null = null;
+      
       const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
       const toTimeString = (mins: number) => {
         const hh = Math.floor(mins / 60);
@@ -4029,6 +4033,10 @@ const UI = {
           if (!(e instanceof DragEvent)) return;
           const goalId = (card as HTMLElement).dataset.goalId;
           if (!goalId) return;
+          
+          // Track dragging state
+          draggingSeedId = goalId;
+          
           e.dataTransfer?.setData("text/plain", goalId);
           e.dataTransfer?.setData("application/x-garden-goal-id", goalId);
           if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
@@ -4041,13 +4049,20 @@ const UI = {
           (card as HTMLElement).setAttribute("aria-grabbed", "false");
           document.body.classList.remove("is-dragging-seed");
           dayBed.classList.remove("is-drop-target", "is-drop-over");
+          draggingSeedId = null;
         });
       });
 
       dayBed.addEventListener("dragover", (e) => {
         e.preventDefault();
-        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-        dayBed.classList.add("is-drop-over");
+        const dataTransfer = e.dataTransfer;
+        if (!dataTransfer) return;
+        
+        // Use closure variable instead of dataTransfer.getData (doesn't work in dragover)
+        if (draggingPlanterId || draggingSeedId) {
+          dataTransfer.dropEffect = "move";
+          dayBed.classList.add("is-drop-over");
+        }
       });
 
       dayBed.addEventListener("dragleave", () => {
@@ -4056,11 +4071,15 @@ const UI = {
 
       dayBed.addEventListener("drop", (e) => {
         e.preventDefault();
+        
+        // Use closure variable first, fallback to dataTransfer
         const goalId =
+          draggingSeedId ||
           e.dataTransfer?.getData("application/x-garden-goal-id") ||
           e.dataTransfer?.getData("text/plain");
         if (!goalId) return;
         placeGoalAtY(goalId, e.clientY);
+        draggingSeedId = null;
         dayBed.classList.remove("is-drop-over");
       });
 
@@ -4370,8 +4389,18 @@ const UI = {
             e.preventDefault();
             return;
           }
+          // Don't drag if clicking on resize handles
+          const target = e.target as HTMLElement;
+          if (target.closest(".planter-resize-handle")) {
+            e.preventDefault();
+            return;
+          }
           const goalId = (card as HTMLElement).dataset.goalId;
           if (!goalId) return;
+          
+          // Track dragging state
+          draggingPlanterId = goalId;
+          
           e.dataTransfer?.setData("text/plain", goalId);
           e.dataTransfer?.setData("application/x-garden-planter-id", goalId);
           if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
@@ -4384,6 +4413,7 @@ const UI = {
           (card as HTMLElement).setAttribute("aria-grabbed", "false");
           document.body.classList.remove("is-dragging-planter");
           dayBed.classList.remove("is-drop-target", "is-drop-over");
+          draggingPlanterId = null;
         });
 
         // Prevent card click when clicking on resize handles
@@ -4401,35 +4431,34 @@ const UI = {
         const dataTransfer = e.dataTransfer;
         if (!dataTransfer) return;
         
-        // Check if dragging a planter
-        const planterId = dataTransfer.getData("application/x-garden-planter-id");
-        if (planterId) {
+        // Use closure variable instead of dataTransfer.getData (doesn't work in dragover)
+        if (draggingPlanterId) {
           dataTransfer.dropEffect = "move";
           dayBed.classList.add("is-drop-over");
-        } else {
-          // Check if dragging a seed
-          const seedId = dataTransfer.getData("application/x-garden-goal-id");
-          if (seedId) {
-            dataTransfer.dropEffect = "move";
-            dayBed.classList.add("is-drop-over");
-          }
+        } else if (draggingSeedId) {
+          dataTransfer.dropEffect = "move";
+          dayBed.classList.add("is-drop-over");
         }
       });
 
       dayBed.addEventListener("drop", (e) => {
         e.preventDefault();
-        const planterId = e.dataTransfer?.getData("application/x-garden-planter-id");
-        if (planterId) {
-          movePlanter(planterId, e.clientY);
+        
+        // Use closure variable first, fallback to dataTransfer for seeds
+        if (draggingPlanterId) {
+          movePlanter(draggingPlanterId, e.clientY);
+          draggingPlanterId = null;
           dayBed.classList.remove("is-drop-over");
           return;
         }
         
         const goalId =
+          draggingSeedId ||
           e.dataTransfer?.getData("application/x-garden-goal-id") ||
           e.dataTransfer?.getData("text/plain");
         if (!goalId) return;
         placeGoalAtY(goalId, e.clientY);
+        draggingSeedId = null;
         dayBed.classList.remove("is-drop-over");
       });
 
@@ -4516,7 +4545,12 @@ const UI = {
       };
 
       resizeHandles.forEach((handle) => {
-        handle.addEventListener("mousedown", (e) => startResize(e, handle));
+        // Prevent drag events on resize handles
+        handle.addEventListener("mousedown", (e) => {
+          e.stopPropagation();
+          startResize(e, handle);
+        });
+        handle.setAttribute("draggable", "false");
       });
 
       // Global mouse move/up for resize
