@@ -4,6 +4,7 @@ package-lock.json
 
 # Build outputs
 dist/
+public/
 *.min.js
 *.min.css
 *.js.map
@@ -26,4 +27,3 @@ npm-debug.log*
 # Environment variables
 .env
 .env.local
-
