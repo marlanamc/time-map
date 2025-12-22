@@ -14,11 +14,15 @@ export class AuthComponent {
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.85);
-      z-index: 9999;
+      z-index: 10000;
       display: flex;
       justify-content: center;
       align-items: center;
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: var(--space-4, 16px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     `;
     document.body.appendChild(this.container);
   }
@@ -38,28 +42,28 @@ export class AuthComponent {
     };
 
     this.container.innerHTML = `
-      <div style="background: var(--bg-card, #1e1e1e); padding: 2rem; border-radius: 1rem; max-width: 400px; width: 90%; text-align: center; border: 1px solid var(--border-color, #333);">
-        <h2 style="color: var(--text-primary, #fff); margin-bottom: 1rem;">Welcome Back</h2>
-        <p style="color: var(--text-secondary, #aaa); margin-bottom: 2rem;">Sign in to save your progress across devices.</p>
+      <div style="background: var(--bg-surface, var(--glass-bg, rgba(255, 255, 255, 0.9))); padding: var(--space-6, 24px); border-radius: var(--radius-xl, 16px); max-width: 400px; width: 100%; text-align: center; border: 1px solid var(--glass-border, rgba(107, 168, 169, 0.22)); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); margin: auto;">
+        <h2 style="color: var(--text-primary, #1A2B2F); margin-bottom: var(--space-3, 12px); font-size: var(--text-2xl, 1.5rem); font-weight: 700;">Welcome Back</h2>
+        <p style="color: var(--text-secondary, #455C61); margin-bottom: var(--space-5, 20px); font-size: var(--text-base, 1rem);">Sign in to save your progress across devices.</p>
         
-        <form id="auth-form" style="display: flex; flex-direction: column; gap: 1rem;">
-          <input type="email" id="auth-email" placeholder="Enter your email" required 
-            style="padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color, #444); background: var(--bg-input, #2a2a2a); color: white; font-size: 1rem;">
+        <form id="auth-form" style="display: flex; flex-direction: column; gap: var(--space-4, 16px);">
+          <input type="email" id="auth-email" placeholder="Enter your email" required autocomplete="email"
+            style="padding: var(--space-3, 12px) var(--space-4, 16px); border-radius: var(--radius-md, 8px); border: 1px solid var(--glass-border, rgba(107, 168, 169, 0.22)); background: var(--bg-surface, rgba(255, 255, 255, 0.9)); color: var(--text-primary, #1A2B2F); font-size: 16px; min-height: 44px; width: 100%; box-sizing: border-box;">
           
-          <input type="password" id="auth-password" placeholder="Enter your password" required 
-            style="padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color, #444); background: var(--bg-input, #2a2a2a); color: white; font-size: 1rem;">
+          <input type="password" id="auth-password" placeholder="Enter your password" required autocomplete="current-password"
+            style="padding: var(--space-3, 12px) var(--space-4, 16px); border-radius: var(--radius-md, 8px); border: 1px solid var(--glass-border, rgba(107, 168, 169, 0.22)); background: var(--bg-surface, rgba(255, 255, 255, 0.9)); color: var(--text-primary, #1A2B2F); font-size: 16px; min-height: 44px; width: 100%; box-sizing: border-box;">
 
           <button type="submit" 
-            style="padding: 0.75rem; border-radius: 0.5rem; background: var(--accent-color, #2a9d8f); color: white; border: none; font-size: 1rem; cursor: pointer; font-weight: 600;">
+            style="padding: var(--space-3, 12px) var(--space-4, 16px); border-radius: var(--radius-md, 8px); background: var(--accent, var(--teal, #4A9099)); color: white; border: none; font-size: var(--text-base, 1rem); cursor: pointer; font-weight: 600; min-height: 48px; transition: all 0.2s ease;">
             Log In
           </button>
         </form>
 
-        <button id="toggle-auth-mode" style="background: none; border: none; color: var(--text-secondary, #aaa); text-decoration: underline; margin-top: 1rem; cursor: pointer; font-size: 0.9rem;">
+        <button id="toggle-auth-mode" style="background: none; border: none; color: var(--text-secondary, #455C61); text-decoration: underline; margin-top: var(--space-4, 16px); cursor: pointer; font-size: var(--text-sm, 0.875rem); padding: var(--space-2, 8px); min-height: 44px;">
           Need an account? Sign Up
         </button>
         
-        <div id="auth-status" style="margin-top: 1rem; color: var(--accent-color, #2a9d8f);"></div>
+        <div id="auth-status" style="margin-top: var(--space-4, 16px); color: var(--accent, var(--teal, #4A9099)); font-size: var(--text-sm, 0.875rem); min-height: 20px;"></div>
       </div>
     `;
 

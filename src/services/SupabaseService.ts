@@ -12,8 +12,20 @@ import {
 export const SupabaseService = {
     // --- Auth ---
     async getUser() {
-        const { data: { user } } = await supabase.auth.getUser();
-        return user;
+        try {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            // If there's an error or no user, also check session to ensure it's valid
+            if (error || !user) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    return null;
+                }
+            }
+            return user;
+        } catch (err) {
+            console.error('Error getting user:', err);
+            return null;
+        }
     },
 
     async signIn(email: string, password?: string) {

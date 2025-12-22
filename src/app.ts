@@ -543,8 +543,11 @@ const State: AppState & {
 
     if (!user) {
       // Show Auth Modal if not logged in
+      console.log('No user found, showing auth modal...');
       const auth = new AuthComponent();
       auth.render();
+      // Ensure modal is visible
+      auth.show();
     } else {
       // Load cloud data
       console.log('User logged in, loading cloud data...');
