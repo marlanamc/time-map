@@ -4006,11 +4006,27 @@ const UI = {
         const goal = Goals.getById(goalId);
         if (!goal) return;
 
+        const prevStartMin = parseTimeToMinutes(goal.startTime);
+        const prevEndMin = parseTimeToMinutes(goal.endTime);
+        const durationMin =
+          prevStartMin !== null &&
+            prevEndMin !== null &&
+            prevEndMin > prevStartMin
+            ? prevEndMin - prevStartMin
+            : null;
+
         const due = new Date(State.viewingDate);
         due.setHours(12, 0, 0, 0);
 
+        const nextStart = toTimeString(minutes);
+        const nextEnd =
+          durationMin !== null
+            ? toTimeString(clamp(minutes + durationMin, plotStartMin + 15, plotEndMin))
+            : null;
+
         Goals.update(goalId, {
-          startTime: toTimeString(minutes),
+          startTime: nextStart,
+          ...(nextEnd ? { endTime: nextEnd } : {}),
           // When you place something into a specific day, anchor it to that day.
           dueDate: due.toISOString(),
           month: due.getMonth(),
@@ -4051,36 +4067,6 @@ const UI = {
           dayBed.classList.remove("is-drop-target", "is-drop-over");
           draggingSeedId = null;
         });
-      });
-
-      dayBed.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        const dataTransfer = e.dataTransfer;
-        if (!dataTransfer) return;
-        
-        // Use closure variable instead of dataTransfer.getData (doesn't work in dragover)
-        if (draggingPlanterId || draggingSeedId) {
-          dataTransfer.dropEffect = "move";
-          dayBed.classList.add("is-drop-over");
-        }
-      });
-
-      dayBed.addEventListener("dragleave", () => {
-        dayBed.classList.remove("is-drop-over");
-      });
-
-      dayBed.addEventListener("drop", (e) => {
-        e.preventDefault();
-        
-        // Use closure variable first, fallback to dataTransfer
-        const goalId =
-          draggingSeedId ||
-          e.dataTransfer?.getData("application/x-garden-goal-id") ||
-          e.dataTransfer?.getData("text/plain");
-        if (!goalId) return;
-        placeGoalAtY(goalId, e.clientY);
-        draggingSeedId = null;
-        dayBed.classList.remove("is-drop-over");
       });
 
       // Touch / iOS fallback: long-press + drag with a visual ghost.
@@ -4173,56 +4159,54 @@ const UI = {
             touchStartY = e.clientY;
             touchPointerId = e.pointerId;
 
+            const onMove = (ev: PointerEvent) => {
+              if (ev.pointerType !== "touch") return;
+              if (touchPointerId !== null && ev.pointerId !== touchPointerId) return;
+
+              const dx = Math.abs(ev.clientX - touchStartX);
+              const dy = Math.abs(ev.clientY - touchStartY);
+
+              if (!touchDragging) {
+                // Cancel long press if they start scrolling/moving first.
+                if (dx > moveCancelPx || dy > moveCancelPx) clearPressTimer();
+                return;
+              }
+
+              ev.preventDefault();
+              setGhostPosition(ev.clientX, ev.clientY);
+              dayBed.classList.toggle("is-drop-over", isPointOverDayBed(ev.clientX, ev.clientY));
+            };
+
+            const onEnd = (ev: PointerEvent) => {
+              if (ev.pointerType !== "touch") return;
+              if (touchPointerId !== null && ev.pointerId !== touchPointerId) return;
+
+              window.removeEventListener("pointermove", onMove);
+              window.removeEventListener("pointerup", onEnd);
+              window.removeEventListener("pointercancel", onEnd);
+
+              if (!touchDragging) {
+                clearPressTimer();
+                touchPointerId = null;
+                return;
+              }
+
+              ev.preventDefault();
+              const goalId = touchGoalId;
+              const shouldDrop = isPointOverDayBed(ev.clientX, ev.clientY);
+              cleanupTouchDrag();
+              if (goalId && shouldDrop) placeGoalAtY(goalId, ev.clientY);
+            };
+
+            window.addEventListener("pointermove", onMove, { passive: false } as any);
+            window.addEventListener("pointerup", onEnd, { passive: false } as any);
+            window.addEventListener("pointercancel", onEnd, { passive: false } as any);
+
             clearPressTimer();
             touchPressTimer = setTimeout(() => {
               startTouchDrag(card, goalId, e.clientX, e.clientY);
-              try {
-                card.setPointerCapture(e.pointerId);
-              } catch {
-                // no-op
-              }
             }, longPressMs);
           });
-
-          card.addEventListener("pointermove", (e: PointerEvent) => {
-            if (e.pointerType !== "touch") return;
-            if (touchPointerId !== null && e.pointerId !== touchPointerId) return;
-
-            const dx = Math.abs(e.clientX - touchStartX);
-            const dy = Math.abs(e.clientY - touchStartY);
-            if (!touchDragging && (dx > moveCancelPx || dy > moveCancelPx)) {
-              // Treat as scroll if they move before long-press triggers.
-              clearPressTimer();
-              return;
-            }
-
-            if (!touchDragging) return;
-            e.preventDefault();
-            setGhostPosition(e.clientX, e.clientY);
-            dayBed.classList.toggle("is-drop-over", isPointOverDayBed(e.clientX, e.clientY));
-          });
-
-          const end = (e: PointerEvent) => {
-            if (e.pointerType !== "touch") return;
-            if (touchPointerId !== null && e.pointerId !== touchPointerId) return;
-
-            if (!touchDragging) {
-              clearPressTimer();
-              touchPointerId = null;
-              return;
-            }
-
-            e.preventDefault();
-            const goalId = touchGoalId;
-            const shouldDrop = isPointOverDayBed(e.clientX, e.clientY);
-            cleanupTouchDrag();
-            if (goalId && shouldDrop) {
-              placeGoalAtY(goalId, e.clientY);
-            }
-          };
-
-          card.addEventListener("pointerup", end);
-          card.addEventListener("pointercancel", end);
         });
       } else {
         // Legacy iOS Safari fallback (no PointerEvent)
@@ -4340,6 +4324,45 @@ const UI = {
         this.showToast("🌱", `Moved to ${format12h(newStartMin)}`);
       };
 
+      // Unified desktop drag/drop handler (capture) so drops on child elements still work.
+      const onDayBedDragOver = (e: DragEvent) => {
+        if (!(e instanceof DragEvent)) return;
+        if (!draggingPlanterId && !draggingSeedId) return;
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        dayBed.classList.add("is-drop-over");
+      };
+
+      const onDayBedDragLeave = () => {
+        dayBed.classList.remove("is-drop-over");
+      };
+
+      const onDayBedDrop = (e: DragEvent) => {
+        if (!(e instanceof DragEvent)) return;
+        e.preventDefault();
+
+        if (draggingPlanterId) {
+          const id = draggingPlanterId;
+          draggingPlanterId = null;
+          movePlanter(id, e.clientY);
+          dayBed.classList.remove("is-drop-over");
+          return;
+        }
+
+        const goalId =
+          draggingSeedId ||
+          e.dataTransfer?.getData("application/x-garden-goal-id") ||
+          e.dataTransfer?.getData("text/plain");
+        draggingSeedId = null;
+        if (!goalId) return;
+        placeGoalAtY(goalId, e.clientY);
+        dayBed.classList.remove("is-drop-over");
+      };
+
+      dayBed.addEventListener("dragover", onDayBedDragOver, true);
+      dayBed.addEventListener("drop", onDayBedDrop, true);
+      dayBed.addEventListener("dragleave", onDayBedDragLeave, true);
+
       const resizePlanterTop = (goalId: string, clientY: number, skipRender = false) => {
         const goal = Goals.getById(goalId);
         if (!goal) return;
@@ -4426,41 +4449,7 @@ const UI = {
         });
       });
 
-      dayBed.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        const dataTransfer = e.dataTransfer;
-        if (!dataTransfer) return;
-        
-        // Use closure variable instead of dataTransfer.getData (doesn't work in dragover)
-        if (draggingPlanterId) {
-          dataTransfer.dropEffect = "move";
-          dayBed.classList.add("is-drop-over");
-        } else if (draggingSeedId) {
-          dataTransfer.dropEffect = "move";
-          dayBed.classList.add("is-drop-over");
-        }
-      });
-
-      dayBed.addEventListener("drop", (e) => {
-        e.preventDefault();
-        
-        // Use closure variable first, fallback to dataTransfer for seeds
-        if (draggingPlanterId) {
-          movePlanter(draggingPlanterId, e.clientY);
-          draggingPlanterId = null;
-          dayBed.classList.remove("is-drop-over");
-          return;
-        }
-        
-        const goalId =
-          draggingSeedId ||
-          e.dataTransfer?.getData("application/x-garden-goal-id") ||
-          e.dataTransfer?.getData("text/plain");
-        if (!goalId) return;
-        placeGoalAtY(goalId, e.clientY);
-        draggingSeedId = null;
-        dayBed.classList.remove("is-drop-over");
-      });
+      // Drop handler is installed above (capture) to support drops on planters/children.
 
       // Resize handles for planters
       const resizeHandles = Array.from(

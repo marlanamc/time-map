@@ -2826,6 +2826,10 @@ body.is-touch-dragging-seed {
     -webkit-user-select: none;
 }
 
+body.is-touch-dragging-seed .day-view-container {
+    touch-action: none;
+}
+
 .drag-ghost {
     position: fixed;
     z-index: 3000;
