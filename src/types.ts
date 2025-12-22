@@ -1,6 +1,7 @@
 // Type definitions for Time Map application
 
 export type ViewType = "year" | "month" | "week" | "day";
+export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
 export type GoalStatus = "not-started" | "in-progress" | "done" | "blocked";
 export type Priority = "low" | "medium" | "high" | "urgent";
 export type Category = "career" | "health" | "finance" | "personal" | "creative" | null;
@@ -47,6 +48,7 @@ export interface TimeLogEntry {
 export interface Goal {
   id: string;
   title: string;
+  level: GoalLevel;
   description: string;
   month: number;
   year: number;
@@ -62,17 +64,22 @@ export interface Goal {
   completedAt: string | null;
   lastWorkedOn: string | null;
   dueDate: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
   tags: string[];
 }
 
 export interface GoalData {
   title: string;
+  level: GoalLevel;
   description?: string;
   month: number;
   year?: number;
   category?: Category;
   priority?: Priority;
   dueDate?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
   tags?: string[];
 }
 

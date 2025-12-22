@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="The Garden Fence (maskable)">
+  <rect width="512" height="512" fill="#6F9B86"/>
+  <circle cx="256" cy="256" r="196" fill="#FDFBF7" opacity="0.16"/>
+  <path d="M256 384c0-82 12-140 48-189" fill="none" stroke="#FDFBF7" stroke-width="24" stroke-linecap="round"/>
+  <path d="M256 384c0-82-12-140-48-189" fill="none" stroke="#FDFBF7" stroke-width="24" stroke-linecap="round"/>
+  <path d="M300 190c66 0 104 32 104 86-64 0-104-30-104-86Z" fill="#FDFBF7"/>
+  <path d="M212 190c-66 0-104 32-104 86 64 0 104-30 104-86Z" fill="#FDFBF7"/>
+  <circle cx="256" cy="384" r="24" fill="#E09A60"/>
+</svg>
