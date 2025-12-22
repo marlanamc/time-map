@@ -42,13 +42,19 @@ async function main() {
   await ensureDir(publicDir);
 
   // HTML
-  await copyFileIfExists(path.join(root, "dist", "index.html"), path.join(publicDir, "index.html"));
-  await copyFileIfExists(path.join(root, "index.html"), path.join(publicDir, "index.html"));
+  const distIndex = path.join(root, "dist", "index.html");
+  const rootIndex = path.join(root, "index.html");
+  if (await exists(distIndex)) {
+    await copyFileIfExists(distIndex, path.join(publicDir, "index.html"));
+  } else {
+    await copyFileIfExists(rootIndex, path.join(publicDir, "index.html"));
+  }
 
   // Core assets
   await copyFileIfExists(path.join(root, "styles.css"), path.join(publicDir, "styles.css"));
   await copyFileIfExists(path.join(root, "styles.min.css"), path.join(publicDir, "styles.min.css"));
   await copyFileIfExists(path.join(root, "sw.js"), path.join(publicDir, "sw.js"));
+  await copyFileIfExists(path.join(root, "env.js"), path.join(publicDir, "env.js"));
   await copyFileIfExists(path.join(root, "manifest.webmanifest"), path.join(publicDir, "manifest.webmanifest"));
 
   // Bundles
@@ -63,4 +69,3 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
-

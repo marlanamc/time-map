@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `garden-fence-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -52,6 +52,7 @@ self.addEventListener("fetch", (event) => {
 
   const accept = request.headers.get("accept") || "";
   const isNavigation = request.mode === "navigate" || accept.includes("text/html");
+  const isEnv = url.pathname.endsWith("/env.js") || url.pathname === "/env.js";
 
   if (isNavigation) {
     event.respondWith(
@@ -62,6 +63,19 @@ self.addEventListener("fetch", (event) => {
           return response;
         })
         .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  if (isEnv) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+          return response;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }
