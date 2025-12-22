@@ -2816,6 +2816,20 @@ body.night-garden .seed-tray-empty {
     padding: var(--space-3);
 }
 
+/* Drag-and-drop scheduling (Day View) */
+body.is-dragging-seed .day-goal-card.day-goal-variant-seed[draggable="true"] {
+    cursor: grabbing;
+}
+
+.day-bed-canvas.is-drop-target {
+    outline: 2px dashed rgba(107, 168, 169, 0.45);
+    outline-offset: 6px;
+}
+
+.day-bed-canvas.is-drop-over {
+    outline-color: var(--accent);
+}
+
 body.night-garden .day-bed-canvas {
     border: 1px solid rgba(164, 185, 217, 0.08);
     background:

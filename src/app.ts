@@ -3958,6 +3958,90 @@ const UI = {
     plantBtn?.addEventListener("click", () => {
       this.showQuickAdd(State.viewingDate);
     });
+
+    // Drag + drop: move seed tray intentions into the day bed to assign a start time.
+    const dayBed = container.querySelector(".day-bed-canvas") as HTMLElement | null;
+    if (dayBed) {
+      const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+      const toTimeString = (mins: number) => {
+        const hh = Math.floor(mins / 60);
+        const mm = mins % 60;
+        return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+      };
+      const format12h = (mins: number) => {
+        const h24 = Math.floor(mins / 60) % 24;
+        const mm = mins % 60;
+        const suffix = h24 < 12 ? "AM" : "PM";
+        const h12 = h24 % 12 || 12;
+        return `${h12}:${String(mm).padStart(2, "0")} ${suffix}`;
+      };
+
+      const placeGoalAtY = (goalId: string, clientY: number) => {
+        const rect = dayBed.getBoundingClientRect();
+        const y = clamp(clientY - rect.top, 0, rect.height);
+        const pct = rect.height > 0 ? y / rect.height : 0;
+        let minutes = Math.round((plotStartMin + pct * plotRangeMin) / 15) * 15;
+        minutes = clamp(minutes, plotStartMin, plotEndMin - 15);
+
+        const goal = Goals.getById(goalId);
+        if (!goal) return;
+
+        const due = new Date(State.viewingDate);
+        due.setHours(12, 0, 0, 0);
+
+        Goals.update(goalId, {
+          startTime: toTimeString(minutes),
+          // When you place something into a specific day, anchor it to that day.
+          dueDate: due.toISOString(),
+          month: due.getMonth(),
+          year: due.getFullYear(),
+        });
+
+        this.showToast("🌱", `Planted at ${format12h(minutes)}`);
+        this.render();
+      };
+
+      // Desktop HTML5 drag and drop.
+      container.querySelectorAll(".day-goal-card.day-goal-variant-seed[draggable='true']").forEach((card) => {
+        card.addEventListener("dragstart", (e) => {
+          if (!(e instanceof DragEvent)) return;
+          const goalId = (card as HTMLElement).dataset.goalId;
+          if (!goalId) return;
+          e.dataTransfer?.setData("text/plain", goalId);
+          e.dataTransfer?.setData("application/x-garden-goal-id", goalId);
+          if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
+          (card as HTMLElement).setAttribute("aria-grabbed", "true");
+          document.body.classList.add("is-dragging-seed");
+          dayBed.classList.add("is-drop-target");
+        });
+
+        card.addEventListener("dragend", () => {
+          (card as HTMLElement).setAttribute("aria-grabbed", "false");
+          document.body.classList.remove("is-dragging-seed");
+          dayBed.classList.remove("is-drop-target", "is-drop-over");
+        });
+      });
+
+      dayBed.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        dayBed.classList.add("is-drop-over");
+      });
+
+      dayBed.addEventListener("dragleave", () => {
+        dayBed.classList.remove("is-drop-over");
+      });
+
+      dayBed.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const goalId =
+          e.dataTransfer?.getData("application/x-garden-goal-id") ||
+          e.dataTransfer?.getData("text/plain");
+        if (!goalId) return;
+        placeGoalAtY(goalId, e.clientY);
+        dayBed.classList.remove("is-drop-over");
+      });
+    }
   },
 
   // Render a single goal card for day view
@@ -3973,9 +4057,13 @@ const UI = {
           ? "day-goal-variant-compost"
           : "day-goal-variant-seed";
     const styleAttr = opts?.style ? ` style="${opts.style}"` : "";
+    const dragAttrs =
+      variant === "seed" && !isCompleted
+        ? ` draggable="true" aria-grabbed="false"`
+        : "";
 
     return `
-      <div class="day-goal-card ${variantClass} ${isCompleted ? "completed" : ""}" data-goal-id="${goal.id}" role="button" tabindex="0"${styleAttr}>
+      <div class="day-goal-card ${variantClass} ${isCompleted ? "completed" : ""}" data-goal-id="${goal.id}" role="button" tabindex="0"${styleAttr}${dragAttrs}>
         <div class="day-goal-checkbox ${isCompleted ? "checked" : ""}"></div>
         <div class="day-goal-content">
           <div class="day-goal-level">
