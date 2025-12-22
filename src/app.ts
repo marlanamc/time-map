@@ -3783,7 +3783,8 @@ const UI = {
           endMinRaw !== null && endMinRaw > startMinRaw
             ? endMinRaw
             : startMinRaw + 60;
-        endMin = Math.min(Math.max(endMin, startMin + 15), plotEndMin);
+        // Ensure minimum duration of 30 minutes
+        endMin = Math.min(Math.max(endMin, startMin + 30), plotEndMin);
 
         return { goal, startMin, endMin };
       })
@@ -4269,6 +4270,277 @@ const UI = {
           });
         });
       }
+
+      // Drag + resize: move and resize planters in the day bed
+      const planterCards = Array.from(
+        container.querySelectorAll(
+          ".day-goal-card.day-goal-variant-planter:not(.completed)",
+        ),
+      ) as HTMLElement[];
+
+      const updatePlanterTime = (goalId: string, startMin: number, endMin: number, skipRender = false) => {
+        const goal = Goals.getById(goalId);
+        if (!goal) return;
+
+        const due = new Date(State.viewingDate);
+        due.setHours(12, 0, 0, 0);
+
+        Goals.update(goalId, {
+          startTime: toTimeString(startMin),
+          endTime: toTimeString(endMin),
+          dueDate: due.toISOString(),
+          month: due.getMonth(),
+          year: due.getFullYear(),
+        });
+
+        if (!skipRender) {
+          this.render();
+        }
+      };
+
+      const movePlanter = (goalId: string, clientY: number) => {
+        const goal = Goals.getById(goalId);
+        if (!goal) return;
+
+        const startMinRaw = parseTimeToMinutes(goal.startTime);
+        const endMinRaw = parseTimeToMinutes(goal.endTime);
+        if (startMinRaw === null) return;
+
+        const duration = (endMinRaw !== null && endMinRaw > startMinRaw)
+          ? endMinRaw - startMinRaw
+          : 60;
+
+        const rect = dayBed.getBoundingClientRect();
+        const y = clamp(clientY - rect.top, 0, rect.height);
+        const pct = rect.height > 0 ? y / rect.height : 0;
+        let newStartMin = Math.round((plotStartMin + pct * plotRangeMin) / 15) * 15;
+        newStartMin = clamp(newStartMin, plotStartMin, plotEndMin - Math.max(duration, 30));
+        const newEndMin = Math.min(newStartMin + duration, plotEndMin);
+
+        updatePlanterTime(goalId, newStartMin, newEndMin);
+        this.showToast("🌱", `Moved to ${format12h(newStartMin)}`);
+      };
+
+      const resizePlanterTop = (goalId: string, clientY: number, skipRender = false) => {
+        const goal = Goals.getById(goalId);
+        if (!goal) return;
+
+        const startMinRaw = parseTimeToMinutes(goal.startTime);
+        const endMinRaw = parseTimeToMinutes(goal.endTime);
+        if (startMinRaw === null || endMinRaw === null || endMinRaw <= startMinRaw) return;
+
+        const rect = dayBed.getBoundingClientRect();
+        const y = clamp(clientY - rect.top, 0, rect.height);
+        const pct = rect.height > 0 ? y / rect.height : 0;
+        let newStartMin = Math.round((plotStartMin + pct * plotRangeMin) / 15) * 15;
+        newStartMin = clamp(newStartMin, plotStartMin, endMinRaw - 30);
+        const newEndMin = endMinRaw;
+
+        updatePlanterTime(goalId, newStartMin, newEndMin, skipRender);
+      };
+
+      const resizePlanterBottom = (goalId: string, clientY: number, skipRender = false) => {
+        const goal = Goals.getById(goalId);
+        if (!goal) return;
+
+        const startMinRaw = parseTimeToMinutes(goal.startTime);
+        const endMinRaw = parseTimeToMinutes(goal.endTime);
+        if (startMinRaw === null) return;
+
+        const currentEndMin = (endMinRaw !== null && endMinRaw > startMinRaw)
+          ? endMinRaw
+          : startMinRaw + 60;
+
+        const rect = dayBed.getBoundingClientRect();
+        const y = clamp(clientY - rect.top, 0, rect.height);
+        const pct = rect.height > 0 ? y / rect.height : 0;
+        let newEndMin = Math.round((plotStartMin + pct * plotRangeMin) / 15) * 15;
+        newEndMin = clamp(newEndMin, startMinRaw + 30, plotEndMin);
+        const newStartMin = startMinRaw;
+
+        updatePlanterTime(goalId, newStartMin, newEndMin, skipRender);
+      };
+
+      // Desktop HTML5 drag and drop for planters
+      planterCards.forEach((card) => {
+        card.addEventListener("dragstart", (e) => {
+          if (!(e instanceof DragEvent)) return;
+          // Don't drag if we're resizing
+          if (isResizing) {
+            e.preventDefault();
+            return;
+          }
+          const goalId = (card as HTMLElement).dataset.goalId;
+          if (!goalId) return;
+          e.dataTransfer?.setData("text/plain", goalId);
+          e.dataTransfer?.setData("application/x-garden-planter-id", goalId);
+          if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
+          (card as HTMLElement).setAttribute("aria-grabbed", "true");
+          document.body.classList.add("is-dragging-planter");
+          dayBed.classList.add("is-drop-target");
+        });
+
+        card.addEventListener("dragend", () => {
+          (card as HTMLElement).setAttribute("aria-grabbed", "false");
+          document.body.classList.remove("is-dragging-planter");
+          dayBed.classList.remove("is-drop-target", "is-drop-over");
+        });
+
+        // Prevent card click when clicking on resize handles
+        card.addEventListener("click", (e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest(".planter-resize-handle")) {
+            e.stopPropagation();
+            e.preventDefault();
+          }
+        });
+      });
+
+      dayBed.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const dataTransfer = e.dataTransfer;
+        if (!dataTransfer) return;
+        
+        // Check if dragging a planter
+        const planterId = dataTransfer.getData("application/x-garden-planter-id");
+        if (planterId) {
+          dataTransfer.dropEffect = "move";
+          dayBed.classList.add("is-drop-over");
+        } else {
+          // Check if dragging a seed
+          const seedId = dataTransfer.getData("application/x-garden-goal-id");
+          if (seedId) {
+            dataTransfer.dropEffect = "move";
+            dayBed.classList.add("is-drop-over");
+          }
+        }
+      });
+
+      dayBed.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const planterId = e.dataTransfer?.getData("application/x-garden-planter-id");
+        if (planterId) {
+          movePlanter(planterId, e.clientY);
+          dayBed.classList.remove("is-drop-over");
+          return;
+        }
+        
+        const goalId =
+          e.dataTransfer?.getData("application/x-garden-goal-id") ||
+          e.dataTransfer?.getData("text/plain");
+        if (!goalId) return;
+        placeGoalAtY(goalId, e.clientY);
+        dayBed.classList.remove("is-drop-over");
+      });
+
+      // Resize handles for planters
+      const resizeHandles = Array.from(
+        container.querySelectorAll(".planter-resize-handle"),
+      ) as HTMLElement[];
+
+      let isResizing = false;
+      let currentResizeHandle: HTMLElement | null = null;
+      let currentResizeGoalId: string | null = null;
+      let currentResizeType: string | null = null;
+
+      const startResize = (e: MouseEvent | PointerEvent, handle: HTMLElement) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const planterCard = handle.closest(".day-goal-variant-planter") as HTMLElement | null;
+        const goalId = planterCard?.dataset.goalId;
+        const resizeType = handle.dataset.resize;
+
+        if (!goalId || !resizeType) return;
+
+        isResizing = true;
+        currentResizeHandle = handle;
+        currentResizeGoalId = goalId;
+        currentResizeType = resizeType;
+        document.body.classList.add("is-resizing-planter");
+        planterCard?.classList.add("is-resizing");
+        // Prevent dragging while resizing
+        planterCard?.setAttribute("draggable", "false");
+
+        if (resizeType === "top") {
+          resizePlanterTop(goalId, e.clientY);
+        } else if (resizeType === "bottom") {
+          resizePlanterBottom(goalId, e.clientY);
+        }
+      };
+
+      const doResize = (e: MouseEvent | PointerEvent) => {
+        if (!isResizing || !currentResizeGoalId || !currentResizeType) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Update during resize without full render for performance
+        if (currentResizeType === "top") {
+          resizePlanterTop(currentResizeGoalId, e.clientY, true);
+        } else if (currentResizeType === "bottom") {
+          resizePlanterBottom(currentResizeGoalId, e.clientY, true);
+        }
+
+        // Update the planter's visual position via CSS variables
+        const planterCard = currentResizeHandle?.closest(".day-goal-variant-planter") as HTMLElement | null;
+        if (planterCard) {
+          const goal = Goals.getById(currentResizeGoalId);
+          if (goal) {
+            const startMinRaw = parseTimeToMinutes(goal.startTime);
+            const endMinRaw = parseTimeToMinutes(goal.endTime);
+            if (startMinRaw !== null) {
+              const endMin = (endMinRaw !== null && endMinRaw > startMinRaw) ? endMinRaw : startMinRaw + 60;
+              const startPct = ((startMinRaw - plotStartMin) / plotRangeMin) * 100;
+              const durPct = ((endMin - startMinRaw) / plotRangeMin) * 100;
+              planterCard.style.setProperty("--start", startPct.toFixed(4));
+              planterCard.style.setProperty("--dur", durPct.toFixed(4));
+            }
+          }
+        }
+      };
+
+      const endResize = () => {
+        if (!isResizing) return;
+        isResizing = false;
+        if (currentResizeHandle) {
+          const planterCard = currentResizeHandle.closest(".day-goal-variant-planter") as HTMLElement | null;
+          planterCard?.classList.remove("is-resizing");
+          // Re-enable dragging after resize
+          planterCard?.setAttribute("draggable", "true");
+        }
+        document.body.classList.remove("is-resizing-planter");
+        // Final render to update everything properly
+        this.render();
+        currentResizeHandle = null;
+        currentResizeGoalId = null;
+        currentResizeType = null;
+      };
+
+      resizeHandles.forEach((handle) => {
+        handle.addEventListener("mousedown", (e) => startResize(e, handle));
+      });
+
+      // Global mouse move/up for resize
+      document.addEventListener("mousemove", doResize);
+      document.addEventListener("mouseup", endResize);
+
+      // Touch support for resize
+      if (typeof window !== "undefined" && "PointerEvent" in window) {
+        resizeHandles.forEach((handle) => {
+          handle.addEventListener("pointerdown", (e: PointerEvent) => {
+            if (e.pointerType === "touch") {
+              startResize(e, handle);
+            }
+          });
+        });
+
+        document.addEventListener("pointermove", (e: PointerEvent) => {
+          if (e.pointerType === "touch" && isResizing) {
+            doResize(e);
+          }
+        });
+        document.addEventListener("pointerup", endResize);
+        document.addEventListener("pointercancel", endResize);
+      }
     }
   },
 
@@ -4288,10 +4560,21 @@ const UI = {
     const dragAttrs =
       variant === "seed" && !isCompleted
         ? ` draggable="true" aria-grabbed="false"`
+        : variant === "planter" && !isCompleted
+          ? ` draggable="true" aria-grabbed="false"`
+          : "";
+
+    const resizeHandles =
+      variant === "planter" && !isCompleted
+        ? `
+          <div class="planter-resize-handle planter-resize-handle-top" data-resize="top"></div>
+          <div class="planter-resize-handle planter-resize-handle-bottom" data-resize="bottom"></div>
+        `
         : "";
 
     return `
       <div class="day-goal-card ${variantClass} ${isCompleted ? "completed" : ""}" data-goal-id="${goal.id}" role="button" tabindex="0"${styleAttr}${dragAttrs}>
+        ${resizeHandles}
         <div class="day-goal-checkbox ${isCompleted ? "checked" : ""}"></div>
         <div class="day-goal-content">
           <div class="day-goal-level">
