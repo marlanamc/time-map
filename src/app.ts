@@ -2739,6 +2739,7 @@ const UI = {
   _filterDocListeners: null as FilterDocListeners | null, // For managing document event listeners
   _focusRevealSetup: false, // Whether focus reveal has been initialized
   _focusRevealHideTimer: null as ReturnType<typeof setTimeout> | null, // Timer for hiding focus reveal
+  _supportPanelHideTimer: null as ReturnType<typeof setTimeout> | null,
   _mobileMql: null as MediaQueryList | null,
   _mobileModeSetup: false,
   _initialMobileDefaultsApplied: false,
@@ -2758,6 +2759,7 @@ const UI = {
     const apply = () => {
       const isMobile = this.isMobileViewport();
       document.body.classList.toggle("is-mobile", isMobile);
+      this.syncMobileDateNavPlacement(isMobile);
 
       // First-load defaults: mobile starts on Home and avoids Year as the default view.
       // (We don't persist this so desktop preferences don't get overwritten.)
@@ -2782,6 +2784,23 @@ const UI = {
         // Safari < 14
         mql.addListener(onChange);
       }
+    }
+  },
+
+  syncMobileDateNavPlacement(isMobile: boolean) {
+    const dateNav = document.querySelector(".date-nav") as HTMLElement | null;
+    const controlCenter = document.querySelector(".control-center") as HTMLElement | null;
+    const headerSlot = document.getElementById("headerMobileNav") as HTMLElement | null;
+
+    if (!dateNav || !controlCenter || !headerSlot) return;
+
+    document.body.classList.toggle("mobile-date-nav-in-header", isMobile);
+    headerSlot.setAttribute("aria-hidden", String(!isMobile));
+
+    if (isMobile) {
+      headerSlot.appendChild(dateNav);
+    } else {
+      controlCenter.appendChild(dateNav);
     }
   },
   getCurrentLevel(): GoalLevel {
@@ -3080,6 +3099,54 @@ const UI = {
       this.render();
     });
 
+    // Support tools side panel (drawer)
+    document
+      .getElementById("supportPanelBtn")
+      ?.addEventListener("click", () => this.openSupportPanel());
+    document
+      .getElementById("supportPanelClose")
+      ?.addEventListener("click", () => this.closeSupportPanel());
+    document
+      .getElementById("supportPanelOverlay")
+      ?.addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) this.closeSupportPanel();
+      });
+    document
+      .getElementById("supportPanel")
+      ?.addEventListener("click", (e) => {
+        const target = e.target as Element | null;
+        const actionEl = target?.closest("[data-action]") as HTMLElement | null;
+        const action = actionEl?.dataset.action;
+        if (!action) return;
+
+        this.closeSupportPanel();
+
+        switch (action) {
+          case "brainDump":
+            NDSupport.showBrainDumpModal();
+            break;
+          case "bodyDouble":
+            NDSupport.showBodyDoubleModal();
+            break;
+          case "quickWins":
+            NDSupport.showDopamineMenu();
+            break;
+          case "ndSettings":
+            NDSupport.showSettingsPanel();
+            break;
+          case "appearance":
+            NDSupport.showAppearancePanel();
+            break;
+        }
+      });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const overlay = document.getElementById("supportPanelOverlay");
+      if (!overlay || overlay.hasAttribute("hidden")) return;
+      this.closeSupportPanel();
+    });
+
     // Legacy year navigation (fallback)
     document
       .getElementById("prevYear")
@@ -3233,6 +3300,31 @@ const UI = {
           this.showRandomAffirmation();
         }
       });
+  },
+
+  openSupportPanel() {
+    const overlay = document.getElementById("supportPanelOverlay");
+    if (!overlay) return;
+    if (this._supportPanelHideTimer) {
+      clearTimeout(this._supportPanelHideTimer);
+      this._supportPanelHideTimer = null;
+    }
+    overlay.removeAttribute("hidden");
+    overlay.classList.add("active");
+    document.body.classList.add("support-panel-open");
+    (document.getElementById("supportPanelClose") as HTMLElement | null)?.focus();
+  },
+
+  closeSupportPanel() {
+    const overlay = document.getElementById("supportPanelOverlay");
+    if (!overlay) return;
+    overlay.classList.remove("active");
+    document.body.classList.remove("support-panel-open");
+    if (this._supportPanelHideTimer) clearTimeout(this._supportPanelHideTimer);
+    this._supportPanelHideTimer = setTimeout(() => {
+      overlay.setAttribute("hidden", "");
+      this._supportPanelHideTimer = null;
+    }, 220);
   },
 
   setupCanvasInteraction() {
@@ -5351,6 +5443,7 @@ const UI = {
         "hide-header",
         "hide-control-bar",
         "hide-sidebar",
+        "hide-now-panel",
       );
       document.getElementById("layoutHandle")?.setAttribute("hidden", "");
       document.getElementById("sidebarHandle")?.setAttribute("hidden", "");

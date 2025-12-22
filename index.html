@@ -49,6 +49,8 @@
                 <div class="logo-icon" aria-hidden="true">🌱</div>
                 <span class="logo-text">The Garden Fence</span>
             </div>
+            <!-- Mobile-only: date navigation gets moved here via JS -->
+            <div class="header-mobile-nav" id="headerMobileNav" aria-hidden="true"></div>
             <div class="header-actions">
                 <div class="toggle-group header-focus-toggle">
                     <span class="toggle-label" id="focus-toggle-label"
@@ -94,40 +96,19 @@
                         <div class="header-more-divider" role="separator"></div>
 
                         <div class="header-more-section" aria-label="Support tools">
-                            <button class="nd-dropdown-item" id="brainDumpBtn" role="menuitem" data-close-header-more>
-                                <span class="nd-icon nd-icon-brain" aria-hidden="true">🧠</span>
-                                <span class="nd-label">
-                                    <span class="nd-label-title">Brain Dump</span>
-                                    <span class="nd-label-desc">Park intrusive thoughts</span>
+                            <button class="nd-dropdown-item" id="supportPanelBtn" role="menuitem" data-close-header-more>
+                                <span class="nd-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h6v6H4z"></path>
+                                        <path d="M14 4h6v6h-6z"></path>
+                                        <path d="M4 14h6v6H4z"></path>
+                                        <path d="M14 14h6v6h-6z"></path>
+                                    </svg>
                                 </span>
-                            </button>
-                            <button class="nd-dropdown-item" id="bodyDoubleBtn" role="menuitem" data-close-header-more>
-                                <span class="nd-icon nd-icon-body" aria-hidden="true">⏱</span>
                                 <span class="nd-label">
-                                    <span class="nd-label-title">Body Double</span>
-                                    <span class="nd-label-desc">Focused work sessions</span>
-                                </span>
-                            </button>
-                            <button class="nd-dropdown-item" id="dopamineMenuBtn" role="menuitem"
-                                data-close-header-more>
-                                <span class="nd-icon nd-icon-quick" aria-hidden="true">⚡</span>
-                                <span class="nd-label">
-                                    <span class="nd-label-title">Quick Wins</span>
-                                    <span class="nd-label-desc">Low motivation tasks</span>
-                                </span>
-                            </button>
-                            <button class="nd-dropdown-item" id="ndSettingsBtn" role="menuitem" data-close-header-more>
-                                <span class="nd-icon nd-icon-settings" aria-hidden="true">⚙</span>
-                                <span class="nd-label">
-                                    <span class="nd-label-title">Accessibility &amp; Overwhelm</span>
-                                    <span class="nd-label-desc">Make this calmer</span>
-                                </span>
-                            </button>
-                            <button class="nd-dropdown-item" id="appearanceBtn" role="menuitem" data-close-header-more>
-                                <span class="nd-icon nd-icon-settings" aria-hidden="true">🎨</span>
-                                <span class="nd-label">
-                                    <span class="nd-label-title">Appearance</span>
-                                    <span class="nd-label-desc">Theme + colors</span>
+                                    <span class="nd-label-title">Support Tools</span>
+                                    <span class="nd-label-desc">Brain dump, body double, quick wins</span>
                                 </span>
                             </button>
                         </div>
@@ -413,6 +394,104 @@
         <span class="toast-message" id="toastMessage">Anchor placed.</span>
     </div>
 
+    <!-- Support Tools Panel (left drawer) -->
+    <div class="support-panel-overlay" id="supportPanelOverlay" hidden>
+        <aside class="support-panel" id="supportPanel" role="dialog" aria-modal="true"
+            aria-label="Support tools panel">
+            <div class="support-panel-header">
+                <h2 class="support-panel-title">Support Tools</h2>
+                <button class="btn btn-ghost btn-icon support-panel-close" id="supportPanelClose" type="button"
+                    aria-label="Close support tools">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="support-panel-body" role="menu" aria-label="Support tools">
+                <button class="support-panel-item" type="button" role="menuitem" data-action="brainDump">
+                    <span class="support-panel-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 18a4 4 0 1 1 0-8"></path>
+                            <path d="M12 18a4 4 0 1 0 0-8"></path>
+                            <path d="M8 10a4 4 0 1 1 0-8"></path>
+                            <path d="M12 10a4 4 0 1 0 0-8"></path>
+                            <path d="M8 18h8"></path>
+                        </svg>
+                    </span>
+                    <span class="support-panel-text">
+                        <span class="support-panel-name">Brain Dump</span>
+                        <span class="support-panel-desc">Park intrusive thoughts</span>
+                    </span>
+                </button>
+
+                <button class="support-panel-item" type="button" role="menuitem" data-action="bodyDouble">
+                    <span class="support-panel-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                    </span>
+                    <span class="support-panel-text">
+                        <span class="support-panel-name">Body Double</span>
+                        <span class="support-panel-desc">Focused work sessions</span>
+                    </span>
+                </button>
+
+                <button class="support-panel-item" type="button" role="menuitem" data-action="quickWins">
+                    <span class="support-panel-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 2 3 14h9l-1 8 10-12h-9z"></path>
+                        </svg>
+                    </span>
+                    <span class="support-panel-text">
+                        <span class="support-panel-name">Quick Wins</span>
+                        <span class="support-panel-desc">Low motivation tasks</span>
+                    </span>
+                </button>
+
+                <div class="support-panel-divider" role="separator" aria-hidden="true"></div>
+
+                <button class="support-panel-item" type="button" role="menuitem" data-action="ndSettings">
+                    <span class="support-panel-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+                            <path
+                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z"></path>
+                        </svg>
+                    </span>
+                    <span class="support-panel-text">
+                        <span class="support-panel-name">Accessibility &amp; Overwhelm</span>
+                        <span class="support-panel-desc">Make this calmer</span>
+                    </span>
+                </button>
+
+                <button class="support-panel-item" type="button" role="menuitem" data-action="appearance">
+                    <span class="support-panel-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 3v3"></path>
+                            <path d="M18.36 5.64 16.24 7.76"></path>
+                            <path d="M21 12h-3"></path>
+                            <path d="M18.36 18.36 16.24 16.24"></path>
+                            <path d="M12 21v-3"></path>
+                            <path d="M5.64 18.36 7.76 16.24"></path>
+                            <path d="M3 12h3"></path>
+                            <path d="M5.64 5.64 7.76 7.76"></path>
+                            <circle cx="12" cy="12" r="4"></circle>
+                        </svg>
+                    </span>
+                    <span class="support-panel-text">
+                        <span class="support-panel-name">Appearance</span>
+                        <span class="support-panel-desc">Theme + colors</span>
+                    </span>
+                </button>
+            </div>
+        </aside>
+    </div>
+
     <!-- Body Double Timer Display (shows when active) -->
     <div class="body-double-display" id="bodyDoubleDisplay" role="timer" aria-live="polite" hidden>
         <span class="bd-icon" aria-hidden="true"></span>
@@ -429,23 +508,66 @@
     <!-- Mobile Bottom Tab Bar -->
     <nav class="mobile-tab-bar" id="mobileTabBar" role="tablist" aria-label="Main navigation">
         <button class="mobile-tab active" data-view="home" role="tab" aria-selected="true">
-            <span class="mobile-tab-icon">🏠</span>
+            <span class="mobile-tab-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"></path>
+                </svg>
+            </span>
             <span class="mobile-tab-label">Home</span>
         </button>
         <button class="mobile-tab" data-view="day" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon">☀️</span>
+            <span class="mobile-tab-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+            </span>
             <span class="mobile-tab-label">Day</span>
         </button>
         <button class="mobile-tab" data-view="week" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon">📊</span>
+            <span class="mobile-tab-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18"></path>
+                    <path d="M18 17V9"></path>
+                    <path d="M13 17V5"></path>
+                    <path d="M8 17v-7"></path>
+                </svg>
+            </span>
             <span class="mobile-tab-label">Week</span>
         </button>
         <button class="mobile-tab" data-view="month" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon">📅</span>
+            <span class="mobile-tab-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 2v4"></path>
+                    <path d="M16 2v4"></path>
+                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                    <path d="M3 10h18"></path>
+                </svg>
+            </span>
             <span class="mobile-tab-label">Month</span>
         </button>
         <button class="mobile-tab" data-view="year" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon">🌳</span>
+            <span class="mobile-tab-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22v-7"></path>
+                    <path d="M5 10c0-4 3-8 7-8s7 4 7 8"></path>
+                    <path d="M5 10h14"></path>
+                    <path d="M6.5 14c1-2 3.1-4 5.5-4s4.5 2 5.5 4"></path>
+                    <path d="M7.5 18c1-1.5 2.7-3 4.5-3s3.5 1.5 4.5 3"></path>
+                </svg>
+            </span>
             <span class="mobile-tab-label">Year</span>
         </button>
     </nav>
