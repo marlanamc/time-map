@@ -184,6 +184,7 @@ body {
     text-rendering: optimizeLegibility;
     line-height: 1.6;
     letter-spacing: -0.01em;
+    touch-action: pan-x pan-y;
 }
 
 /* ===================================
@@ -988,6 +989,7 @@ button,
     position: relative;
     overflow: hidden;
     box-shadow: none;
+    touch-action: manipulation;
 }
 
 button:not(:disabled):hover,
@@ -1198,6 +1200,7 @@ select:focus {
     justify-content: center;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-4);
+    touch-action: manipulation;
     font-family: inherit;
     font-size: var(--text-sm);
     font-weight: 500;
@@ -1908,6 +1911,7 @@ body.night-garden .view-switcher {
     background: transparent;
     color: var(--text-secondary);
     font-size: var(--text-sm);
+    touch-action: manipulation;
     font-weight: 500;
     cursor: pointer;
     border-radius: var(--radius-full);
@@ -1972,6 +1976,7 @@ body.night-garden .view-btn.active {
     font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
+    touch-action: manipulation;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2301,6 +2306,7 @@ body.night-garden .view-btn.active {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    touch-action: pan-x pan-y pinch-zoom;
 }
 
 .canvas-container.grabbing {
@@ -3699,6 +3705,7 @@ body.night-garden .planter-resize-handle:active {
     opacity: 0;
     visibility: hidden;
     transition: all var(--duration-normal) var(--ease-out);
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }
 
 .modal-overlay.active {
@@ -3718,6 +3725,8 @@ body.night-garden .planter-resize-handle:active {
     transform: scale(0.95) translateY(10px);
     transition: transform var(--duration-normal) var(--ease-out);
     box-shadow: var(--shadow-xl);
+    margin-top: env(safe-area-inset-top, 0px);
+    margin-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .modal-overlay.active .modal {
@@ -5343,9 +5352,30 @@ body.focus-mode .sidebar-hide-btn {
         pointer-events: auto !important;
     }
 
-    /* Keep focus mode calm on mobile: hide sidebar chrome */
+    /* Keep focus mode calm on mobile: simplify sidebar instead of hiding */
     body.focus-mode .sidebar {
-        display: none !important;
+        display: flex !important;
+        /* Simplify sidebar in focus mode - reduce visual noise */
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    body.focus-mode .sidebar-section {
+        opacity: 0.85;
+    }
+
+    body.focus-mode .now-panel {
+        padding: var(--space-4);
+    }
+
+    /* Hide some decorative elements in focus mode */
+    body.focus-mode .garden-bloom {
+        opacity: 0.7;
+    }
+
+    body.focus-mode .time-stats {
+        opacity: 0.8;
     }
 }
 
@@ -5463,6 +5493,14 @@ body.focus-mode .sidebar-hide-btn {
     select,
     textarea {
         font-size: 16px;
+        touch-action: manipulation;
+    }
+
+    /* Ensure all form inputs in modals also have 16px font */
+    .modal input,
+    .modal select,
+    .modal textarea {
+        font-size: 16px !important;
     }
 
     body {
@@ -5584,9 +5622,11 @@ body.focus-mode .sidebar-hide-btn {
 
     .modal {
         margin: var(--space-4);
-        max-height: calc(100vh - var(--space-8));
+        max-height: calc(100dvh - var(--space-8) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
         border-radius: var(--radius-xl);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        padding-top: calc(var(--space-6) + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
     }
 
     .modal-header {
@@ -5634,6 +5674,45 @@ body.focus-mode .sidebar-hide-btn {
     .control-left,
     .control-right {
         display: none;
+    }
+
+    /* Show support panel toggle button on mobile */
+    .header-mobile-support-btn {
+        position: fixed;
+        top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
+        right: var(--space-4);
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-full);
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        color: var(--text-secondary);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        z-index: 300;
+        touch-action: manipulation;
+        transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .header-mobile-support-btn:active {
+        transform: scale(0.95);
+        background: var(--bg-hover);
+    }
+
+    .header-mobile-support-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Hide mobile button when support panel is open */
+    body:has(.support-panel-overlay.active) .header-mobile-support-btn {
+        opacity: 0.5;
     }
 
     .control-center {
@@ -5818,6 +5897,19 @@ body.focus-mode .sidebar-hide-btn {
     .canvas {
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
+        touch-action: pan-x pan-y;
+    }
+
+    /* Prevent pull-to-refresh on canvas */
+    .canvas-container {
+        overscroll-behavior-y: contain;
+    }
+
+    /* Ensure scrollable areas have proper touch-action */
+    .sidebar,
+    .modal,
+    .support-panel-body {
+        touch-action: pan-y;
     }
 
     /* Better spacing for mobile cards */
@@ -6941,6 +7033,45 @@ input:checked+.toggle-slider:before {
     transition: transform var(--duration-normal) var(--ease-out);
     display: flex;
     flex-direction: column;
+}
+
+@media (max-width: 600px) {
+    .support-panel-overlay {
+        justify-content: center;
+        align-items: stretch;
+    }
+
+    .support-panel {
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        border-left: none;
+        border-top: 1px solid rgba(107, 168, 169, 0.3);
+        box-shadow: 
+            0 -4px 24px rgba(0, 0, 0, 0.08),
+            0 -2px 8px rgba(0, 0, 0, 0.04);
+        transform: translateY(100%);
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        padding-top: calc(var(--space-2) + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .support-panel-overlay.active .support-panel {
+        transform: translateY(0);
+    }
+
+    .support-panel-header {
+        padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+        padding-bottom: var(--space-4);
+    }
+
+    .support-panel-body {
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+        padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    }
 }
 
 .support-panel-overlay.active .support-panel {

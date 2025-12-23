@@ -142,8 +142,93 @@ const TimeBreakdown = {
   },
 
   // Generate human-readable breakdown HTML
-  generateHTML(targetMonth: number, targetYear: number, compact: boolean = false): string {
-    const breakdown = this.calculate(targetMonth, targetYear);
+  generateHTML(targetMonth: number, targetYear: number, compact: boolean = false, level?: GoalLevel): string {
+    let breakdown: TimeBreakdownResult;
+    
+    // Use appropriate calculation based on level
+    if (level === "intention") {
+      breakdown = this.calculateForDay();
+    } else if (level === "focus") {
+      breakdown = this.calculateForWeek();
+    } else if (level === "vision") {
+      breakdown = this.calculateForYear();
+    } else {
+      // Default to month calculation (milestone)
+      breakdown = this.calculate(targetMonth, targetYear);
+    }
+
+    // Handle day (intention) level
+    if (level === "intention") {
+      const hoursLeft = breakdown.hoursLeftInDay ?? 0;
+      return `<div class="time-breakdown current">
+          <div class="time-breakdown-header">🔥 This is NOW - ${hoursLeft.toFixed(1)} hours left today!</div>
+          <div class="time-breakdown-grid">
+            <div class="time-unit">
+              <span class="time-value">${hoursLeft.toFixed(1)}</span>
+              <span class="time-label">hours</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // Handle week (focus) level
+    if (level === "focus") {
+      const daysLeft = breakdown.daysLeftInWeek ?? 0;
+      const weekends = breakdown.weekendsInWeek ?? 0;
+      return `<div class="time-breakdown current">
+          <div class="time-breakdown-header">🔥 This is NOW - ${daysLeft} days left this week!</div>
+          <div class="time-breakdown-grid">
+            <div class="time-unit">
+              <span class="time-value">${daysLeft}</span>
+              <span class="time-label">days</span>
+            </div>
+            <div class="time-unit">
+              <span class="time-value">${weekends}</span>
+              <span class="time-label">weekends</span>
+            </div>
+            <div class="time-unit">
+              <span class="time-value">${breakdown.workSessions3x}</span>
+              <span class="time-label">sessions @3x/wk</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // Handle year (vision) level
+    if (level === "vision") {
+      const monthsLeft = breakdown.months ?? 0;
+      const quartersLeft = breakdown.quartersLeft ?? 0;
+      const weeksLeft = breakdown.weeks ?? 0;
+      return `<div class="time-breakdown current">
+          <div class="time-breakdown-header">🔥 This is NOW - ${monthsLeft} months left this year!</div>
+          <div class="time-breakdown-grid">
+            <div class="time-unit">
+              <span class="time-value">${monthsLeft}</span>
+              <span class="time-label">months</span>
+            </div>
+            <div class="time-unit">
+              <span class="time-value">${quartersLeft}</span>
+              <span class="time-label">quarters</span>
+            </div>
+            <div class="time-unit">
+              <span class="time-value">${weeksLeft}</span>
+              <span class="time-label">weeks</span>
+            </div>
+          </div>
+          <div class="time-breakdown-details">
+            <div class="time-detail">
+              <span class="time-detail-icon">💪</span>
+              <span class="time-detail-text"><strong>${breakdown.workSessions3x}</strong> sessions if you work 3x/week</span>
+            </div>
+            <div class="time-detail">
+              <span class="time-detail-icon">🚀</span>
+              <span class="time-detail-text"><strong>${breakdown.workSessions5x}</strong> sessions if you work 5x/week</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // Handle month (milestone) level - existing logic
     const monthName = CONFIG.MONTHS[targetMonth];
 
     if (breakdown.isPast) {
@@ -232,6 +317,131 @@ const TimeBreakdown = {
     if (breakdown.weeks <= 4) return `${breakdown.weeks} weeks`;
     if (breakdown.months <= 2) return `${breakdown.weeks} weeks`;
     return `${breakdown.months} months`;
+  },
+
+  // Calculate hours left in the current day
+  calculateForDay(): TimeBreakdownResult {
+    const now = new Date();
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const diffMs = endOfDay.getTime() - now.getTime();
+    const hoursLeft = Math.max(0, diffMs / (1000 * 60 * 60));
+    
+    return {
+      days: 0,
+      weeks: 0,
+      months: 0,
+      weekends: 0,
+      workSessions3x: 0,
+      workSessions5x: 0,
+      focusHours1hDay: 0,
+      focusHours2hDay: 0,
+      isPast: false,
+      isCurrentMonth: false,
+      hoursLeftInDay: Math.round(hoursLeft * 10) / 10, // Round to 1 decimal place
+      isCurrentDay: true,
+    };
+  },
+
+  // Calculate week-specific metrics
+  calculateForWeek(): TimeBreakdownResult {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
+    const endOfWeek = new Date(now);
+    
+    // Calculate days until end of week (Saturday)
+    const daysUntilSaturday = 6 - currentDay;
+    endOfWeek.setDate(now.getDate() + daysUntilSaturday);
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    const diffMs = endOfWeek.getTime() - now.getTime();
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const daysLeft = Math.max(0, Math.ceil(diffMs / msPerDay));
+    
+    // Count weekends (Saturday/Sunday) in remaining days
+    let weekendsInWeek = 0;
+    const tempDate = new Date(now);
+    while (tempDate <= endOfWeek) {
+      const dayOfWeek = tempDate.getDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        weekendsInWeek++;
+      }
+      tempDate.setDate(tempDate.getDate() + 1);
+    }
+    weekendsInWeek = Math.floor(weekendsInWeek / 2); // Count weekend pairs
+    
+    // Calculate work sessions for remaining week
+    const weeksRemaining = daysLeft / 7;
+    const workSessions3x = Math.floor(weeksRemaining * 3);
+    const workSessions5x = Math.floor(weeksRemaining * 5);
+    
+    return {
+      days: daysLeft,
+      weeks: Math.floor(weeksRemaining),
+      months: 0,
+      weekends: weekendsInWeek,
+      workSessions3x: workSessions3x,
+      workSessions5x: workSessions5x,
+      focusHours1hDay: daysLeft,
+      focusHours2hDay: daysLeft * 2,
+      isPast: false,
+      isCurrentMonth: false,
+      daysLeftInWeek: daysLeft,
+      weekendsInWeek: weekendsInWeek,
+      isCurrentWeek: true,
+    };
+  },
+
+  // Calculate year-specific metrics
+  calculateForYear(): TimeBreakdownResult {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
+    
+    const diffMs = endOfYear.getTime() - now.getTime();
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const diffDays = Math.max(0, Math.ceil(diffMs / msPerDay));
+    const diffWeeks = Math.max(0, Math.floor(diffDays / 7));
+    
+    // Calculate months left (including current month)
+    const monthsLeft = 12 - currentMonth;
+    
+    // Calculate quarters left (Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec)
+    // Include current quarter in the count
+    const currentQuarter = Math.floor(currentMonth / 3) + 1;
+    const quartersLeft = 4 - currentQuarter + 1;
+    
+    // Calculate weekends
+    let weekends = 0;
+    const tempDate = new Date(now);
+    while (tempDate <= endOfYear) {
+      if (tempDate.getDay() === 0 || tempDate.getDay() === 6) {
+        weekends++;
+      }
+      tempDate.setDate(tempDate.getDate() + 1);
+    }
+    weekends = Math.floor(weekends / 2); // Count weekend pairs
+    
+    // Calculate work sessions for remaining year
+    const workSessions3x = diffWeeks * 3;
+    const workSessions5x = diffWeeks * 5;
+    
+    return {
+      days: diffDays,
+      weeks: diffWeeks,
+      months: monthsLeft,
+      weekends: weekends,
+      workSessions3x: workSessions3x,
+      workSessions5x: workSessions5x,
+      focusHours1hDay: diffDays,
+      focusHours2hDay: diffDays * 2,
+      isPast: false,
+      isCurrentMonth: false,
+      quartersLeft: quartersLeft,
+      isCurrentYear: true,
+    };
   },
 };
 
@@ -2967,6 +3177,16 @@ const UI = {
       document.body.classList.toggle("is-mobile", isMobile);
       this.syncMobileDateNavPlacement(isMobile);
 
+      // Show/hide mobile support panel button
+      const mobileSupportBtn = document.getElementById("supportPanelToggleBtnMobile");
+      if (mobileSupportBtn) {
+        if (isMobile) {
+          mobileSupportBtn.removeAttribute("hidden");
+        } else {
+          mobileSupportBtn.setAttribute("hidden", "");
+        }
+      }
+
       // First-load defaults: mobile starts on Home and avoids Year as the default view.
       // (We don't persist this so desktop preferences don't get overwritten.)
       if (isMobile && !this._initialMobileDefaultsApplied) {
@@ -2975,6 +3195,14 @@ const UI = {
         if (State.currentView === VIEWS.YEAR) {
           State.currentView = VIEWS.DAY;
         }
+      }
+
+      // Recalculate canvas dimensions on orientation change
+      if (this.elements.canvasContainer) {
+        // Force a reflow to recalculate dimensions
+        void this.elements.canvasContainer.offsetHeight;
+        // Re-render current view to adjust to new dimensions
+        this.renderCurrentView();
       }
     };
 
@@ -2991,6 +3219,19 @@ const UI = {
         mql.addListener(onChange);
       }
     }
+
+    // Handle orientation changes explicitly
+    window.addEventListener("orientationchange", () => {
+      // Delay to allow browser to update viewport
+      setTimeout(() => {
+        apply();
+      }, 100);
+    });
+
+    // Also handle resize events as fallback
+    window.addEventListener("resize", () => {
+      apply();
+    });
   },
 
   syncMobileDateNavPlacement(isMobile: boolean) {
@@ -3145,34 +3386,41 @@ const UI = {
 
   updateSyncStatus(status: 'syncing' | 'synced' | 'error' | 'local'): void {
     const el = document.getElementById("syncStatus");
-    if (!el) return;
+    const supportPanelEl = document.getElementById("supportPanelSyncStatus");
+    
+    const updateElement = (element: HTMLElement | null) => {
+      if (!element) return;
+      const icon = element.querySelector(".sync-icon");
+      const text = element.querySelector(".sync-text");
 
-    const icon = el.querySelector(".sync-icon");
-    const text = el.querySelector(".sync-text");
+      element.classList.remove("syncing", "synced", "error");
 
-    el.classList.remove("syncing", "synced", "error");
+      if (status === 'syncing') {
+        element.classList.add("syncing");
+        if (icon) icon.textContent = "⏳";
+        if (text) text.textContent = "Syncing...";
+      } else if (status === 'synced') {
+        element.classList.add("synced");
+        if (icon) icon.textContent = "✅";
+        if (text) text.textContent = "Cloud Saved";
+        // Revert to subtle synced look after 3s
+        setTimeout(() => {
+          if (icon && element.classList.contains("synced")) icon.textContent = "☁️";
+          if (text && element.classList.contains("synced")) text.textContent = "Synced";
+        }, 3000);
+      } else if (status === 'error') {
+        element.classList.add("error");
+        if (icon) icon.textContent = "❌";
+        if (text) text.textContent = "Sync Error";
+      } else {
+        if (icon) icon.textContent = "☁️";
+        if (text) text.textContent = "Local Only";
+      }
+    };
 
-    if (status === 'syncing') {
-      el.classList.add("syncing");
-      if (icon) icon.textContent = "⏳";
-      if (text) text.textContent = "Syncing...";
-    } else if (status === 'synced') {
-      el.classList.add("synced");
-      if (icon) icon.textContent = "✅";
-      if (text) text.textContent = "Cloud Saved";
-      // Revert to subtle synced look after 3s
-      setTimeout(() => {
-        if (icon && el.classList.contains("synced")) icon.textContent = "☁️";
-        if (text && el.classList.contains("synced")) text.textContent = "Synced";
-      }, 3000);
-    } else if (status === 'error') {
-      el.classList.add("error");
-      if (icon) icon.textContent = "❌";
-      if (text) text.textContent = "Sync Error";
-    } else {
-      if (icon) icon.textContent = "☁️";
-      if (text) text.textContent = "Local Only";
-    }
+    // Update both elements
+    updateElement(el);
+    updateElement(supportPanelEl);
   },
 
   init() {
@@ -3304,7 +3552,27 @@ const UI = {
     // Support tools side panel (drawer)
     document
       .getElementById("supportPanelBtn")
-      ?.addEventListener("click", () => this.openSupportPanel());
+      ?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openSupportPanel();
+      });
+    
+    // Support panel toggle buttons (desktop and mobile)
+    const supportPanelToggleBtn = document.getElementById("supportPanelToggleBtn");
+    const supportPanelToggleBtnMobile = document.getElementById("supportPanelToggleBtnMobile");
+    
+    supportPanelToggleBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.openSupportPanel();
+    });
+    
+    supportPanelToggleBtnMobile?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.openSupportPanel();
+    });
     document
       .getElementById("supportPanelClose")
       ?.addEventListener("click", () => this.closeSupportPanel());
@@ -3395,28 +3663,11 @@ const UI = {
     document
       .getElementById("focusToggle")
       ?.addEventListener("click", () => this.toggleFocusMode());
+    document
+      .getElementById("supportPanelFocusToggle")
+      ?.addEventListener("click", () => this.toggleFocusMode());
 
     // Layout visibility shortcuts
-    document.getElementById("hideHeaderBtn")?.addEventListener("click", () => {
-      if (!State.data) return;
-      State.data.preferences.layout = {
-        ...(State.data.preferences.layout || {}),
-        showHeader: false,
-      };
-      State.save();
-      this.applyLayoutVisibility();
-    });
-
-    document.getElementById("layoutHandle")?.addEventListener("click", () => {
-      if (!State.data) return;
-      State.data.preferences.layout = {
-        ...(State.data.preferences.layout || {}),
-        showHeader: true,
-      };
-      State.save();
-      this.applyLayoutVisibility();
-    });
-
     document.getElementById("hideSidebarBtn")?.addEventListener("click", () => {
       if (!State.data) return;
       State.data.preferences.layout = {
@@ -3441,6 +3692,12 @@ const UI = {
     document
       .getElementById("appSettingsBtn")
       ?.addEventListener("click", () => AppSettings.showPanel());
+    document
+      .getElementById("supportPanelSettingsBtn")
+      ?.addEventListener("click", () => {
+        this.closeSupportPanel();
+        AppSettings.showPanel();
+      });
 
     // Affirmation click
     document
@@ -3533,15 +3790,19 @@ const UI = {
     let isDragging = false;
     let startX: number, startY: number, scrollLeft: number, scrollTop: number;
 
+    // Touch gesture state for pinch-to-zoom
+    let touchStartDistance = 0;
+    let touchStartZoom = 100;
+    let isPinching = false;
+    let lastTouchCenter: { x: number; y: number } | null = null;
+
     const container = this.elements.canvasContainer;
     if (!container) return;
 
-    container.addEventListener("mousedown", (e) => {
-      const target = e.target as Element | null;
-      if (!target) return;
-      // Don't start canvas panning when interacting with UI elements.
-      // (This also enables native HTML5 drag-and-drop in Day view seed tray.)
-      if (
+    // Helper to check if target should allow panning
+    const shouldAllowPan = (target: Element | null): boolean => {
+      if (!target) return false;
+      return !(
         target.closest(".month-card") ||
         target.closest(".goal-item") ||
         target.closest(".day-goal-card") ||
@@ -3552,8 +3813,28 @@ const UI = {
         target.closest(".modal") ||
         target.closest(".header-more-dropdown") ||
         target.closest(".support-panel")
-      )
-        return;
+      );
+    };
+
+    // Helper to calculate distance between two touches
+    const getTouchDistance = (touch1: Touch, touch2: Touch): number => {
+      const dx = touch2.clientX - touch1.clientX;
+      const dy = touch2.clientY - touch1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    // Helper to get center point between two touches
+    const getTouchCenter = (touch1: Touch, touch2: Touch): { x: number; y: number } => {
+      return {
+        x: (touch1.clientX + touch2.clientX) / 2,
+        y: (touch1.clientY + touch2.clientY) / 2,
+      };
+    };
+
+    // Mouse events (desktop)
+    container.addEventListener("mousedown", (e) => {
+      const target = e.target as Element | null;
+      if (!shouldAllowPan(target)) return;
       isDragging = true;
       container.classList.add("grabbing");
       startX = e.pageX - container.offsetLeft;
@@ -3590,6 +3871,113 @@ const UI = {
         this.zoom(e.deltaY < 0 ? 10 : -10);
       }
     });
+
+    // Touch events for mobile panning and pinch-to-zoom
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartScrollLeft = 0;
+    let touchStartScrollTop = 0;
+    let touchPanning = false;
+
+    container.addEventListener("touchstart", (e: TouchEvent) => {
+      // Handle pinch-to-zoom (two touches)
+      if (e.touches.length === 2) {
+        isPinching = true;
+        touchPanning = false;
+        isDragging = false;
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        touchStartDistance = getTouchDistance(touch1, touch2);
+        touchStartZoom = State.zoom;
+        lastTouchCenter = getTouchCenter(touch1, touch2);
+        e.preventDefault();
+        return;
+      }
+
+      // Handle single touch panning
+      if (e.touches.length === 1 && !isPinching) {
+        const target = e.target as Element | null;
+        if (!shouldAllowPan(target)) return;
+        
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchStartScrollLeft = container.scrollLeft;
+        touchStartScrollTop = container.scrollTop;
+        touchPanning = true;
+      }
+    }, { passive: false });
+
+    container.addEventListener("touchmove", (e: TouchEvent) => {
+      // Handle pinch-to-zoom
+      if (e.touches.length === 2 && isPinching) {
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = getTouchDistance(touch1, touch2);
+        const currentCenter = getTouchCenter(touch1, touch2);
+        
+        if (touchStartDistance > 0) {
+          const scale = currentDistance / touchStartDistance;
+          const newZoom = Math.max(50, Math.min(150, touchStartZoom * scale));
+          
+          // Update zoom
+          State.zoom = newZoom;
+          if (this.elements.canvas) {
+            this.elements.canvas.style.transform = `scale(${State.zoom / 100})`;
+          }
+          if (this.elements.zoomLevel) {
+            this.elements.zoomLevel.textContent = `${Math.round(State.zoom)}%`;
+          }
+
+          // Adjust scroll position to keep center point under fingers
+          if (lastTouchCenter && this.elements.canvas) {
+            const deltaX = currentCenter.x - lastTouchCenter.x;
+            const deltaY = currentCenter.y - lastTouchCenter.y;
+            container.scrollLeft -= deltaX;
+            container.scrollTop -= deltaY;
+          }
+          
+          lastTouchCenter = currentCenter;
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // Handle single touch panning
+      if (e.touches.length === 1 && touchPanning && !isPinching) {
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        
+        // Only prevent default if we're actually panning (moved more than 5px)
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+          container.scrollLeft = touchStartScrollLeft - deltaX;
+          container.scrollTop = touchStartScrollTop - deltaY;
+          e.preventDefault();
+        }
+      }
+    }, { passive: false });
+
+    container.addEventListener("touchend", (e: TouchEvent) => {
+      // Reset pinch state if both touches are gone
+      if (e.touches.length < 2) {
+        isPinching = false;
+        lastTouchCenter = null;
+        touchStartDistance = 0;
+      }
+      
+      // Reset panning state if no touches remain
+      if (e.touches.length === 0) {
+        touchPanning = false;
+      }
+    }, { passive: true });
+
+    container.addEventListener("touchcancel", () => {
+      isPinching = false;
+      touchPanning = false;
+      lastTouchCenter = null;
+      touchStartDistance = 0;
+    }, { passive: true });
   },
 
   render() {
@@ -4358,8 +4746,8 @@ const UI = {
             };
 
             window.addEventListener("pointermove", onMove, { passive: false } as any);
-            window.addEventListener("pointerup", onEnd, { passive: false } as any);
-            window.addEventListener("pointercancel", onEnd, { passive: false } as any);
+            window.addEventListener("pointerup", onEnd, { passive: true } as any);
+            window.addEventListener("pointercancel", onEnd, { passive: true } as any);
 
             clearPressTimer();
             touchPressTimer = setTimeout(() => {
@@ -5304,7 +5692,47 @@ const UI = {
       }
     }
 
+    // Show time breakdown for all goal levels
+    setTimeout(() => this.updateGoalModalTimeBreakdown(), 0);
+
     this.elements.goalModal?.classList.add("active");
+    
+    // Scroll focused input into view on mobile when keyboard appears
+    if (this.isMobileViewport()) {
+      // Wait for modal animation to complete, then focus and scroll first input
+      setTimeout(() => {
+        const firstInput = this.elements.goalModal?.querySelector("input, select, textarea") as HTMLElement | null;
+        if (firstInput) {
+          firstInput.focus();
+          // Scroll into view with smooth behavior
+          setTimeout(() => {
+            firstInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 100);
+        }
+      }, 300);
+      
+      // Also handle focus events on inputs to scroll them into view when keyboard appears
+      const handleInputFocus = (e: FocusEvent) => {
+        const target = e.target as HTMLElement;
+        if (target && (target.tagName === "INPUT" || target.tagName === "SELECT" || target.tagName === "TEXTAREA")) {
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 150);
+        }
+      };
+      
+      // Store handler reference for cleanup
+      const modal = this.elements.goalModal;
+      if (modal) {
+        modal.addEventListener("focusin", handleInputFocus);
+        // Clean up on modal close
+        const originalClose = this.closeGoalModal.bind(this);
+        this.closeGoalModal = () => {
+          modal.removeEventListener("focusin", handleInputFocus);
+          originalClose();
+        };
+      }
+    }
     document.getElementById("goalTitle")?.focus();
   },
 
@@ -5348,13 +5776,8 @@ const UI = {
   },
 
   updateGoalModalTimeBreakdown() {
-    const select = this.elements.goalMonth;
-    if (!select) return;
-
-    const selectedMonth = Number.parseInt(select.value, 10);
-    if (!Number.isFinite(selectedMonth)) return;
-    const currentYear =
-      this.goalModalYear ?? State.viewingYear ?? new Date().getFullYear();
+    const level = this.goalModalLevel;
+    if (!level) return;
 
     // Find or create the time breakdown container in the modal
     let breakdownContainer = document.getElementById("modalTimeBreakdown");
@@ -5362,19 +5785,37 @@ const UI = {
       breakdownContainer = document.createElement("div");
       breakdownContainer.id = "modalTimeBreakdown";
       breakdownContainer.className = "modal-time-breakdown";
-      // Insert after the form-row
-      const formRow = this.elements.goalForm?.querySelector(".form-row");
-      if (formRow) {
-        const parent = formRow.parentNode;
-        if (parent) parent.insertBefore(breakdownContainer, formRow.nextSibling);
+      // Insert after the first form-group (title field)
+      const firstFormGroup = this.elements.goalForm?.querySelector(".form-group");
+      if (firstFormGroup) {
+        const parent = firstFormGroup.parentNode;
+        if (parent) parent.insertBefore(breakdownContainer, firstFormGroup.nextSibling);
       }
     }
 
-    breakdownContainer.innerHTML = TimeBreakdown.generateHTML(
-      selectedMonth,
-      currentYear,
-      false,
-    );
+    // Generate HTML based on goal level
+    let html = "";
+    const currentYear = this.goalModalYear ?? State.viewingYear ?? new Date().getFullYear();
+
+    if (level === "intention") {
+      // Day level - hours left in day
+      html = TimeBreakdown.generateHTML(0, currentYear, false, "intention");
+    } else if (level === "focus") {
+      // Week level - days/weekends/sessions in week
+      html = TimeBreakdown.generateHTML(0, currentYear, false, "focus");
+    } else if (level === "vision") {
+      // Year level - months/quarters/weeks/sessions in year
+      html = TimeBreakdown.generateHTML(0, currentYear, false, "vision");
+    } else if (level === "milestone") {
+      // Month level - use month selection
+      const select = this.elements.goalMonth;
+      if (!select) return;
+      const selectedMonth = Number.parseInt(select.value, 10);
+      if (!Number.isFinite(selectedMonth)) return;
+      html = TimeBreakdown.generateHTML(selectedMonth, currentYear, false, "milestone");
+    }
+
+    breakdownContainer.innerHTML = html;
   },
 
   handleGoalSubmit(e: Event) {
@@ -5495,7 +5936,7 @@ const UI = {
                         <!-- Time Breakdown Section -->
                         <div class="detail-section time-section">
                             <h3>⏰ Time You Have</h3>
-                            ${TimeBreakdown.generateHTML(goal.month, goal.year)}
+                            ${TimeBreakdown.generateHTML(goal.month, goal.year, false, goal.level)}
                         </div>
 
                         <!-- Progress Section -->
@@ -6249,6 +6690,7 @@ const UI = {
 
     const focusToggle = document.getElementById("focusToggle");
     const focusModeBtn = document.getElementById("focusModeBtn");
+    const supportPanelFocusToggle = document.getElementById("supportPanelFocusToggle");
 
     if (focusToggle) {
       focusToggle.classList.toggle("active", State.focusMode);
@@ -6257,6 +6699,10 @@ const UI = {
     if (focusModeBtn) {
       focusModeBtn.classList.toggle("active", State.focusMode);
       focusModeBtn.setAttribute("aria-pressed", String(State.focusMode));
+    }
+    if (supportPanelFocusToggle) {
+      supportPanelFocusToggle.classList.toggle("active", State.focusMode);
+      supportPanelFocusToggle.setAttribute("aria-checked", String(State.focusMode));
     }
 
     if (!silent) {
@@ -6272,10 +6718,15 @@ const UI = {
 
     const focusToggle = document.getElementById("focusToggle");
     const focusModeBtn = document.getElementById("focusModeBtn");
+    const supportPanelFocusToggle = document.getElementById("supportPanelFocusToggle");
 
     if (focusToggle) {
       focusToggle.classList.toggle("active", State.focusMode);
       focusToggle.setAttribute("aria-checked", String(State.focusMode));
+    }
+    if (supportPanelFocusToggle) {
+      supportPanelFocusToggle.classList.toggle("active", State.focusMode);
+      supportPanelFocusToggle.setAttribute("aria-checked", String(State.focusMode));
     }
     if (focusModeBtn) {
       focusModeBtn.classList.toggle("active", State.focusMode);

@@ -24,6 +24,14 @@ export interface TimeBreakdownResult {
   focusHours2hDay: number;
   isPast: boolean;
   isCurrentMonth: boolean;
+  // Additional fields for day/week/year calculations
+  hoursLeftInDay?: number;
+  daysLeftInWeek?: number;
+  weekendsInWeek?: number;
+  quartersLeft?: number;
+  isCurrentDay?: boolean;
+  isCurrentWeek?: boolean;
+  isCurrentYear?: boolean;
 }
 
 export interface Subtask {

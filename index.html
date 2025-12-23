@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description"
         content="The Garden Fence is an ADHD-friendly focus tool that helps you set boundaries and watch your day bloom." />
     <meta name="theme-color" content="#6F9B86" />
@@ -43,80 +43,6 @@
 
     <!-- Main App -->
     <div class="app">
-        <!-- Header -->
-        <header class="header" role="banner">
-            <div class="logo">
-                <div class="logo-icon" aria-hidden="true">🌱</div>
-                <span class="logo-text">The Garden Fence</span>
-            </div>
-            <!-- Mobile-only: date navigation gets moved here via JS -->
-            <div class="header-mobile-nav" id="headerMobileNav" aria-hidden="true"></div>
-            <div class="header-actions">
-                <div class="toggle-group header-focus-toggle">
-                    <span class="toggle-label" id="focus-toggle-label"
-                        title="Reduce visual noise (no productivity tracking)">Focus</span>
-                    <button class="toggle-switch" id="focusToggle" role="switch" aria-checked="false"
-                        aria-labelledby="focus-toggle-label" aria-describedby="focus-toggle-desc"></button>
-                    <span class="sr-only" id="focus-toggle-desc">Focus reduces visual noise. It doesn't track
-                        productivity.</span>
-                </div>
-                <button class="btn btn-ghost btn-icon" id="hideHeaderBtn" type="button" aria-label="Hide top bar"
-                    title="Hide top bar">
-                    <span aria-hidden="true">▴</span>
-                </button>
-                <div class="header-more">
-                    <button class="btn btn-ghost btn-icon header-more-toggle" id="headerMoreToggle" aria-label="More"
-                        aria-expanded="false" aria-haspopup="true" title="More">
-                        <span aria-hidden="true">⋯</span>
-                    </button>
-                    <div class="header-more-dropdown" id="headerMoreDropdown" role="menu" hidden>
-                        <div class="header-more-section profile-section" aria-label="User profile">
-                            <div class="user-profile" id="userProfile">
-                                <div class="user-avatar" id="userAvatar">U</div>
-                                <span class="user-name" id="userName">User</span>
-                            </div>
-                            <div class="sync-status" id="syncStatus" title="Cloud Sync Status">
-                                <span class="sync-icon">☁️</span>
-                                <span class="sync-text">Local Only</span>
-                            </div>
-                        </div>
-
-                        <div class="header-more-divider" role="separator"></div>
-
-                        <div class="header-more-section" aria-label="App actions">
-                            <button class="header-more-item" id="focusModeBtn" aria-pressed="false"
-                                data-close-header-more title="Reduce visual noise (no productivity tracking)">
-                                Focus (reduce visual noise)
-                            </button>
-                            <button class="header-more-item" id="appSettingsBtn" data-close-header-more>
-                                Settings
-                            </button>
-                        </div>
-
-                        <div class="header-more-divider" role="separator"></div>
-
-                        <div class="header-more-section" aria-label="Support tools">
-                            <button class="nd-dropdown-item" id="supportPanelBtn" role="menuitem" data-close-header-more>
-                                <span class="nd-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M4 4h6v6H4z"></path>
-                                        <path d="M14 4h6v6h-6z"></path>
-                                        <path d="M4 14h6v6H4z"></path>
-                                        <path d="M14 14h6v6h-6z"></path>
-                                    </svg>
-                                </span>
-                                <span class="nd-label">
-                                    <span class="nd-label-title">Support Tools</span>
-                                    <span class="nd-label-desc">Brain dump, body double, quick wins</span>
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar" role="complementary" aria-label="Planning sidebar">
             <button class="sidebar-hide-btn" id="hideSidebarBtn" type="button" aria-label="Hide sidebar"
@@ -125,6 +51,11 @@
             </button>
             <!-- You Are Here - Time Blindness Support -->
             <div class="now-panel" role="region" aria-label="Current time context">
+                <!-- App Title -->
+                <div class="now-panel-logo">
+                    <div class="logo-icon" aria-hidden="true">🌱</div>
+                    <span class="logo-text">The Garden Fence</span>
+                </div>
                 <div class="now-label">You Are Here</div>
                 <div class="now-date" id="nowDate" aria-live="polite">
                     Loading...
@@ -233,6 +164,7 @@
                     </div>
                 </div>
             </div>
+
         </aside>
 
         <!-- Main Content -->
@@ -282,7 +214,30 @@
                         <div class="category-filters" id="categoryFilters" role="group" aria-labelledby="filter-label">
                         </div>
                     </div>
+                    <button class="btn btn-ghost btn-icon support-panel-toggle-btn" id="supportPanelToggleBtn" type="button" aria-label="Open support tools"
+                        title="Support Tools">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                            <path d="M4 4h6v6H4z"></path>
+                            <path d="M14 4h6v6h-6z"></path>
+                            <path d="M4 14h6v6H4z"></path>
+                            <path d="M14 14h6v6h-6z"></path>
+                        </svg>
+                    </button>
                 </div>
+            </div>
+
+            <!-- Mobile Support Panel Button (shown only on mobile) -->
+            <button class="header-mobile-support-btn support-panel-toggle-btn" id="supportPanelToggleBtnMobile" type="button" aria-label="Open support tools"
+                title="Support Tools" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <path d="M4 4h6v6H4z"></path>
+                    <path d="M14 4h6v6h-6z"></path>
+                    <path d="M4 14h6v6H4z"></path>
+                    <path d="M14 14h6v6h-6z"></path>
+                </svg>
+            </button>
             </div>
 
             <!-- Zoomable Canvas -->
@@ -411,7 +366,7 @@
         <span class="toast-message" id="toastMessage">Anchor placed.</span>
     </div>
 
-    <!-- Support Tools Panel (left drawer) -->
+    <!-- Support Tools Panel (right drawer) -->
     <div class="support-panel-overlay" id="supportPanelOverlay" hidden>
         <aside class="support-panel" id="supportPanel" role="dialog" aria-modal="true"
             aria-label="Support tools panel">
@@ -423,6 +378,52 @@
                 </button>
             </div>
             <div class="support-panel-body" role="menu" aria-label="Support tools">
+                <!-- User Profile Section -->
+                <div class="support-panel-profile-section" aria-label="User profile">
+                    <div class="user-profile" id="supportPanelUserProfile">
+                        <div class="user-avatar" id="supportPanelUserAvatar">U</div>
+                        <span class="user-name" id="supportPanelUserName">User</span>
+                    </div>
+                    <div class="sync-status" id="supportPanelSyncStatus" title="Cloud Sync Status">
+                        <span class="sync-icon">☁️</span>
+                        <span class="sync-text">Local Only</span>
+                    </div>
+                </div>
+
+                <div class="support-panel-divider" role="separator" aria-hidden="true"></div>
+
+                <!-- Settings Button -->
+                <button class="support-panel-item" type="button" role="menuitem" id="supportPanelSettingsBtn">
+                    <span class="support-panel-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+                            <path
+                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z"></path>
+                        </svg>
+                    </span>
+                    <span class="support-panel-text">
+                        <span class="support-panel-name">Settings</span>
+                        <span class="support-panel-desc">App preferences and configuration</span>
+                    </span>
+                </button>
+
+                <div class="support-panel-divider" role="separator" aria-hidden="true"></div>
+
+                <!-- Focus Mode Toggle -->
+                <div class="support-panel-focus-toggle">
+                    <label for="supportPanelFocusToggle" class="support-panel-focus-label" id="support-panel-focus-label">
+                        Focus (reduce visual noise)
+                    </label>
+                    <button class="toggle-switch" id="supportPanelFocusToggle" role="switch" aria-checked="false"
+                        aria-labelledby="support-panel-focus-label" aria-describedby="support-panel-focus-desc"></button>
+                    <span class="sr-only" id="support-panel-focus-desc">Focus reduces visual noise. It doesn't track
+                        productivity.</span>
+                </div>
+
+                <div class="support-panel-divider" role="separator" aria-hidden="true"></div>
+
                 <button class="support-panel-item" type="button" role="menuitem" data-action="brainDump">
                     <span class="support-panel-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
