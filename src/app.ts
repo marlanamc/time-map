@@ -3466,8 +3466,14 @@ const UI = {
   },
 
   cacheElements() {
+    const calendarGridEl = document.getElementById("calendarGrid") as HTMLElement | null;
+    if (!calendarGridEl) {
+      console.error("cacheElements: calendarGrid element not found in DOM!");
+    } else {
+      console.log("cacheElements: calendarGrid element found");
+    }
     this.elements = {
-      calendarGrid: document.getElementById("calendarGrid") as HTMLElement | null,
+      calendarGrid: calendarGridEl,
       canvas: document.getElementById("canvas") as HTMLCanvasElement | null,
       canvasContainer: document.getElementById("canvasContainer") as HTMLElement | null,
       categoryFilters: document.getElementById("categoryFilters") as HTMLElement | null,
@@ -3864,13 +3870,13 @@ const UI = {
       container.scrollTop = scrollTop - walkY;
     });
 
-    // Mouse wheel zoom
+    // Mouse wheel zoom (non-passive because we conditionally preventDefault)
     container.addEventListener("wheel", (e) => {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
         this.zoom(e.deltaY < 0 ? 10 : -10);
       }
-    });
+    }, { passive: false });
 
     // Touch events for mobile panning and pinch-to-zoom
     let touchStartX = 0;
@@ -3988,12 +3994,25 @@ const UI = {
     this.updateYearProgress();
     Streaks.check();
     this.updateStreakDisplay();
+    
+    // Ensure canvas container is scrolled to top after rendering
+    setTimeout(() => {
+      const canvasContainer = this.elements.canvasContainer;
+      if (canvasContainer) {
+        canvasContainer.scrollTop = 0;
+        canvasContainer.scrollLeft = 0;
+      }
+    }, 100);
   },
 
   // Render based on current view
   renderCurrentView() {
     const container = this.elements.calendarGrid;
-    if (!container) return;
+    if (!container) {
+      console.error("renderCurrentView: calendarGrid element not found! Current view:", State.currentView);
+      return;
+    }
+    console.log("renderCurrentView: rendering view", State.currentView);
 
     // Update view button states
     this.syncViewButtons();
@@ -4356,12 +4375,15 @@ const UI = {
       Math.min(maxLanes, Math.max(...timedWithLane.map((t) => t.lane + 1), 1)),
     );
 
-    const bedGrid = Array.from({ length: 15 }, (_, idx) => 8 + idx) // 8AM..10PM
-      .map((h) => {
+    const bedGridHours = Array.from({ length: 15 }, (_, idx) => 8 + idx); // 8AM..10PM
+    const bedGrid = bedGridHours
+      .map((h, idx) => {
         const atPct = ((h * 60 - plotStartMin) / plotRangeMin) * 100;
         const label = `${h % 12 || 12}${h < 12 ? "AM" : "PM"}`;
+        const posClass =
+          idx === 0 ? " is-first" : idx === bedGridHours.length - 1 ? " is-last" : "";
         return `
-          <div class="bed-hour" style="--at:${atPct.toFixed(4)}">
+          <div class="bed-hour${posClass}" style="--at:${atPct.toFixed(4)}">
             <span class="bed-hour-label">${label}</span>
             <div class="bed-hour-line"></div>
           </div>
@@ -5211,7 +5233,11 @@ const UI = {
 
   renderCalendar() {
     const container = this.elements.calendarGrid;
-    if (!container) return;
+    if (!container) {
+      console.error("renderCalendar: calendarGrid element not found!");
+      return;
+    }
+    console.log("renderCalendar: rendering calendar for year", State.viewingYear);
 
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -5241,29 +5267,46 @@ const UI = {
     yearView.appendChild(header);
     yearView.appendChild(grid);
     container.appendChild(yearView);
+    console.log("renderCalendar: Created yearView structure, container children:", container.children.length);
+    
+    // Scroll to top of container to ensure content is visible (use setTimeout to ensure DOM is updated)
+    setTimeout(() => {
+      const canvasContainer = this.elements.canvasContainer;
+      if (canvasContainer) {
+        canvasContainer.scrollTop = 0;
+        canvasContainer.scrollLeft = 0;
+      }
+      // Also try scrolling the window if needed
+      window.scrollTo(0, 0);
+    }, 0);
 
     CONFIG.MONTHS.forEach((monthName, monthIndex) => {
-      const card = this.createMonthCard(
-        monthIndex,
-        monthName,
-        currentMonth,
-        currentYear,
-        viewingYear,
-      );
+      try {
+        const card = this.createMonthCard(
+          monthIndex,
+          monthName,
+          currentMonth,
+          currentYear,
+          viewingYear,
+        );
 
-      // Click handler to drill into month view
-      card.addEventListener("click", (e) => {
-        // Don't navigate if clicking on a goal item
-        const target = e.target as Element | null;
-        if (target?.closest(".goal-item")) return;
-        State.viewingMonth = monthIndex;
-        State.viewingYear = viewingYear;
-        State.viewingDate = new Date(viewingYear, monthIndex, 1);
-        State.setView(VIEWS.MONTH);
-      });
+        // Click handler to drill into month view
+        card.addEventListener("click", (e) => {
+          // Don't navigate if clicking on a goal item
+          const target = e.target as Element | null;
+          if (target?.closest(".goal-item")) return;
+          State.viewingMonth = monthIndex;
+          State.viewingYear = viewingYear;
+          State.viewingDate = new Date(viewingYear, monthIndex, 1);
+          State.setView(VIEWS.MONTH);
+        });
 
-      grid.appendChild(card);
+        grid.appendChild(card);
+      } catch (error) {
+        console.error(`renderCalendar: Error creating card for ${monthName}:`, error);
+      }
     });
+    console.log("renderCalendar: Finished creating", CONFIG.MONTHS.length, "month cards, grid children:", grid.children.length);
   },
 
   createMonthCard(

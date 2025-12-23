@@ -7,6 +7,7 @@
     <meta name="description"
         content="The Garden Fence is an ADHD-friendly focus tool that helps you set boundaries and watch your day bloom." />
     <meta name="theme-color" content="#6F9B86" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Garden Fence" />
@@ -57,6 +58,7 @@
                     <span class="logo-text">The Garden Fence</span>
                 </div>
                 <div class="now-label">You Are Here</div>
+                <div class="now-context" id="nowContext"></div>
                 <div class="now-date" id="nowDate" aria-live="polite">
                     Loading...
                 </div>
@@ -94,7 +96,6 @@
                 <div class="year-progress-bar" style="display: none;">
                     <div class="year-progress-fill" id="yearProgressFill"></div>
                 </div>
-                <div class="now-context" id="nowContext"></div>
                 <div class="time-stats" role="group" aria-label="Time remaining this year">
                     <div class="time-stat">
                         <div class="time-stat-value" id="daysLeft" aria-label="Days left in year">
@@ -238,7 +239,6 @@
                     <path d="M14 14h6v6h-6z"></path>
                 </svg>
             </button>
-            </div>
 
             <!-- Zoomable Canvas -->
             <div class="canvas-container" id="canvasContainer">
