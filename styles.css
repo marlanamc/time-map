@@ -2285,7 +2285,9 @@ body.hide-sidebar .canvas-zoom-controls {
 }
 
 .year-view {
-    padding: var(--space-2) 0;
+    padding: var(--space-6);
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .year-view-header {
@@ -2297,12 +2299,12 @@ body.hide-sidebar .canvas-zoom-controls {
     font-size: var(--text-3xl);
     font-weight: 800;
     letter-spacing: -0.03em;
-    color: var(--text-primary);
+    color: var(--accent);
+    margin-bottom: var(--space-2);
 }
 
 .year-view-subtitle {
-    margin-top: var(--space-2);
-    font-size: var(--text-sm);
+    font-size: var(--text-lg);
     color: var(--text-secondary);
 }
 
@@ -2327,15 +2329,16 @@ body.hide-sidebar .canvas-zoom-controls {
 }
 
 .month-view-title {
-    font-size: var(--text-2xl);
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--accent);
     margin-bottom: var(--space-2);
 }
 
 .month-view-subtitle {
     color: var(--text-secondary);
-    font-size: var(--text-base);
+    font-size: var(--text-lg);
 }
 
 .month-calendar {
@@ -2447,15 +2450,16 @@ body.hide-sidebar .canvas-zoom-controls {
 }
 
 .week-view-title {
-    font-size: var(--text-xl);
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--accent);
     margin-bottom: var(--space-2);
 }
 
 .week-view-range {
     color: var(--text-secondary);
-    font-size: var(--text-sm);
+    font-size: var(--text-lg);
 }
 
 .week-grid {
@@ -2561,7 +2565,7 @@ body.hide-sidebar .canvas-zoom-controls {
    =================================== */
 .day-view {
     padding: var(--space-6);
-    max-width: 1040px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
@@ -2580,15 +2584,14 @@ body.hide-sidebar .canvas-zoom-controls {
 .day-view-header {
     text-align: center;
     margin-bottom: var(--space-6);
-    padding-bottom: var(--space-5);
-    border-bottom: 1px solid var(--glass-border);
 }
 
 .day-view-title {
-    font-size: var(--text-2xl);
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--space-1);
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+    margin-bottom: var(--space-2);
 }
 
 .day-view-subtitle {

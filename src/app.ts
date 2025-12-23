@@ -850,13 +850,77 @@ const State: AppState & {
 // ============================================
 const Goals = {
   create(goalData: GoalData): Goal {
+    const now = new Date();
+    let month = goalData.month;
+    let year = goalData.year || now.getFullYear();
+    let dueDate = goalData.dueDate || null;
+
+    // Auto-anchor based on goal level
+    switch (goalData.level) {
+      case 'vision':
+        // Vision goals are for a specified duration (1-12 months)
+        const visionDurationEl = document.getElementById('visionDuration') as HTMLSelectElement;
+        const durationMonths = visionDurationEl ? parseInt(visionDurationEl.value, 10) : 4; // Default 4 months
+        
+        month = now.getMonth(); // Start from current month
+        year = now.getFullYear();
+        
+        // Set dueDate to end of duration period
+        const endDate = new Date(year, month + durationMonths, 0); // End of the last month
+        endDate.setHours(23, 59, 59, 999);
+        dueDate = endDate.toISOString();
+        break;
+        
+      case 'milestone':
+        // Milestone goals are for a specific month
+        if (month === null || month === undefined) {
+          month = now.getMonth();
+        }
+        year = now.getFullYear();
+        // Set dueDate to end of month for milestones
+        const endOfMonth = new Date(year, month + 1, 0);
+        endOfMonth.setHours(23, 59, 59, 999);
+        dueDate = endOfMonth.toISOString();
+        break;
+        
+      case 'focus':
+        // Focus goals are for the current week
+        const currentWeekNum = State.getWeekNumber(now);
+        const weekStart = State.getWeekStart(now.getFullYear(), currentWeekNum);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        month = weekStart.getMonth();
+        year = weekStart.getFullYear();
+        // Set dueDate to end of week for focus goals
+        weekEnd.setHours(23, 59, 59, 999);
+        dueDate = weekEnd.toISOString();
+        break;
+        
+      case 'intention':
+        // Intentions are for today only
+        month = now.getMonth();
+        year = now.getFullYear();
+        // Set dueDate to end of today for intentions
+        const endOfToday = new Date(now);
+        endOfToday.setHours(23, 59, 59, 999);
+        dueDate = endOfToday.toISOString();
+        break;
+        
+      default:
+        // Keep existing behavior for unknown levels
+        if (month === null || month === undefined) {
+          month = now.getMonth();
+        }
+        break;
+    }
+
     const goal: Goal = {
       id: this.generateId(),
       title: goalData.title,
       level: goalData.level,
       description: goalData.description || "",
-      month: goalData.month,
-      year: goalData.year || new Date().getFullYear(),
+      month,
+      year,
       category: goalData.category || null,
       priority: (goalData.priority || "medium") as Priority,
       status: "not-started" as GoalStatus,
@@ -868,7 +932,7 @@ const Goals = {
       updatedAt: new Date().toISOString(),
       completedAt: null,
       lastWorkedOn: null,
-      dueDate: goalData.dueDate || null,
+      dueDate,
       startTime: goalData.startTime || null,
       endTime: goalData.endTime || null,
       tags: goalData.tags || [],
@@ -898,6 +962,69 @@ const Goals = {
   update(goalId: string, updates: Partial<Goal>): Goal | null {
     const goal = this.getById(goalId);
     if (!goal) return null;
+
+    // If level is being changed, re-anchor to new level's time scope
+    if (updates.level && updates.level !== goal.level) {
+      const now = new Date();
+      let newMonth = goal.month;
+      let newYear = goal.year;
+      let newDueDate = goal.dueDate;
+
+      switch (updates.level) {
+        case 'vision':
+          // Vision goals are for a specified duration (1-12 months)
+          const visionDurationEl = document.getElementById('visionDuration') as HTMLSelectElement;
+          const durationMonths = visionDurationEl ? parseInt(visionDurationEl.value, 10) : 4; // Default 4 months
+          
+          newMonth = now.getMonth(); // Start from current month
+          newYear = now.getFullYear();
+          
+          // Set dueDate to end of duration period
+          const endDate = new Date(newYear, newMonth + durationMonths, 0); // End of the last month
+          endDate.setHours(23, 59, 59, 999);
+          newDueDate = endDate.toISOString();
+          break;
+          
+        case 'milestone':
+          // Milestone goals are for a specific month
+          if (newMonth === null || newMonth === undefined) {
+            newMonth = now.getMonth();
+          }
+          newYear = now.getFullYear();
+          // Set dueDate to end of month for milestones
+          const endOfMonth = new Date(newYear, newMonth + 1, 0);
+          endOfMonth.setHours(23, 59, 59, 999);
+          newDueDate = endOfMonth.toISOString();
+          break;
+          
+        case 'focus':
+          // Focus goals are for the current week
+          const currentWeekNum = State.getWeekNumber(now);
+          const weekStart = State.getWeekStart(now.getFullYear(), currentWeekNum);
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          newMonth = weekStart.getMonth();
+          newYear = weekStart.getFullYear();
+          // Set dueDate to end of week for focus goals
+          weekEnd.setHours(23, 59, 59, 999);
+          newDueDate = weekEnd.toISOString();
+          break;
+          
+        case 'intention':
+          // Intentions are for today only
+          newMonth = now.getMonth();
+          newYear = now.getFullYear();
+          // Set dueDate to end of today for intentions
+          const endOfToday = new Date(now);
+          endOfToday.setHours(23, 59, 59, 999);
+          newDueDate = endOfToday.toISOString();
+          break;
+      }
+
+      updates.month = newMonth;
+      updates.year = newYear;
+      updates.dueDate = newDueDate;
+    }
 
     Object.assign(goal, updates, { updatedAt: new Date().toISOString() });
 
@@ -963,6 +1090,85 @@ const Goals = {
         return priorityOrder[a.priority] - priorityOrder[b.priority];
       })
       .slice(0, limit);
+  },
+
+  // Get goals by level with proper time scope filtering
+  getByLevel(level: GoalLevel): Goal[] {
+    if (!State.data) return [];
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const currentWeek = State.getWeekNumber(now);
+    
+    return State.data.goals.filter((g) => {
+      if (g.level !== level) return false;
+      
+      switch (level) {
+        case 'vision':
+          // Vision goals are for the entire year
+          return g.year === currentYear;
+          
+        case 'milestone':
+          // Milestone goals are for a specific month
+          return g.year === currentYear && g.month === currentMonth;
+          
+        case 'focus':
+          // Focus goals are for the current week
+          if (g.year !== currentYear) return false;
+          const goalWeek = State.getWeekNumber(new Date(g.year, g.month || 0, 1));
+          return goalWeek === currentWeek;
+          
+        case 'intention':
+          // Intentions are for today only
+          if (g.dueDate) {
+            return new Date(g.dueDate).toDateString() === now.toDateString();
+          }
+          return g.year === currentYear && g.month === currentMonth;
+          
+        default:
+          return true;
+      }
+    });
+  },
+
+  // Get goals for specific date with level filtering
+  getForDate(date: Date): Goal[] {
+    if (!State.data) return [];
+    const dateStr = date.toDateString();
+    const weekNum = State.getWeekNumber(date);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    
+    return State.data.goals.filter((g) => {
+      // Skip completed goals unless specifically requested
+      if (g.status === "done") return false;
+      
+      switch (g.level) {
+        case 'vision':
+          // Show vision goals all year
+          return g.year === year;
+          
+        case 'milestone':
+          // Show milestone goals for this month
+          return g.year === year && g.month === month;
+          
+        case 'focus':
+          // Show focus goals for this week
+          if (g.year !== year) return false;
+          const goalWeek = State.getWeekNumber(new Date(g.year, g.month || 0, 1));
+          return goalWeek === weekNum;
+          
+        case 'intention':
+          // Show intentions only for this specific day
+          if (g.dueDate) {
+            return new Date(g.dueDate).toDateString() === dateStr;
+          }
+          return g.year === year && g.month === month;
+          
+        default:
+          return true;
+      }
+    });
   },
 
   complete(goalId: string): void {
@@ -2813,7 +3019,7 @@ const UI = {
     }
   },
 
-  showQuickAdd(forDate: Date = new Date()) {
+  showQuickAdd() {
     const overlay = document.createElement("div");
     overlay.className = "quick-add-overlay";
     overlay.innerHTML = `
@@ -2833,7 +3039,7 @@ const UI = {
 
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && input.value.trim()) {
-        this.saveQuickAdd(input.value.trim(), forDate);
+        this.saveQuickAdd(input.value.trim());
         overlay.remove();
       }
       if (e.key === "Escape") {
@@ -2846,18 +3052,14 @@ const UI = {
     });
   },
 
-  saveQuickAdd(title: string, forDate: Date = new Date()) {
-    const due = new Date(forDate);
-    // Stable "day" anchor time for consistent filtering/grouping.
-    due.setHours(12, 0, 0, 0);
+  saveQuickAdd(title: string) {
     Goals.create({
       title,
       level: "intention",
       category: "personal",
-      month: due.getMonth(),
-      year: due.getFullYear(),
-      dueDate: due.toISOString(),
-      priority: "medium"
+      priority: "medium",
+      month: new Date().getMonth(),
+      year: new Date().getFullYear()
     });
 
     this.render();
@@ -3624,13 +3826,7 @@ const UI = {
       const date = new Date(weekStart);
       date.setDate(date.getDate() + i);
       const isToday = date.toDateString() === today.toDateString();
-      const dayGoals = Goals.getAll().filter((g) => {
-        if (g.dueDate) {
-          return new Date(g.dueDate).toDateString() === date.toDateString();
-        }
-        // Also show goals for the month
-        return g.month === date.getMonth() && g.year === date.getFullYear();
-      });
+      const dayGoals = Goals.getForDate(date);
 
       html += `
           <div class="week-day-column ${isToday ? "today" : ""}" data-date="${date.toISOString()}">
@@ -3712,59 +3908,12 @@ const UI = {
     const plotEndMin = 22 * 60;
     const plotRangeMin = plotEndMin - plotStartMin;
 
-    // Get goals for this day/month
-    const dayGoals = Goals.getAll().filter((g) => {
-      if (g.dueDate) {
-        return new Date(g.dueDate).toDateString() === date.toDateString();
-      }
-      return g.month === date.getMonth() && g.year === date.getFullYear();
-    });
+    // Get goals for this day using proper level-based filtering
+    const dayGoals = Goals.getForDate(date);
 
     const activeGoals = dayGoals.filter((g) => g.status !== "done");
     const completedGoals = dayGoals.filter((g) => g.status === "done");
 
-    const now = new Date();
-    const currentHour = now.getHours();
-    let timeMessage = "";
-    let timeDetail = "";
-
-    if (isToday) {
-      if (currentHour >= 5 && currentHour < 12) {
-        timeMessage = "Good morning! Let's help your day bloom.";
-        timeDetail = "Set your boundaries and plant your intentions.";
-      } else if (currentHour >= 12 && currentHour < 17) {
-        timeMessage = "The sun is high. Tending to your garden?";
-        timeDetail = "Respect your fences; focus on one petal at a time.";
-      } else if (currentHour >= 17 && currentHour < 21) {
-        timeMessage = "The golden hour. Gentle progress is blooming.";
-        timeDetail = "Softly closing boundaries soon.";
-      } else {
-        timeMessage = "Quiet in the garden. Time to rest and restore.";
-        timeDetail = "The fence is closed. Sweet dreams.";
-      }
-    } else if (date > today) {
-      const todayStart = new Date(today);
-      todayStart.setHours(0, 0, 0, 0);
-      const dateStart = new Date(date);
-      dateStart.setHours(0, 0, 0, 0);
-      const daysUntil = Math.max(
-        0,
-        Math.round((dateStart.getTime() - todayStart.getTime()) / 86400000),
-      );
-      timeMessage = `Preparing for ${daysUntil} day${daysUntil === 1 ? "" : "s"} from now`;
-      timeDetail = "Visualizing future blooms.";
-    } else {
-      const todayStart = new Date(today);
-      todayStart.setHours(0, 0, 0, 0);
-      const dateStart = new Date(date);
-      dateStart.setHours(0, 0, 0, 0);
-      const daysAgo = Math.max(
-        0,
-        Math.round((todayStart.getTime() - dateStart.getTime()) / 86400000),
-      );
-      timeMessage = `${daysAgo} day${daysAgo === 1 ? "" : "s"} ago`;
-      timeDetail = "The garden has grown past this day.";
-    }
 
     const seedGoals = activeGoals.filter((g) => parseTimeToMinutes(g.startTime) === null);
 
@@ -3839,10 +3988,6 @@ const UI = {
             <p class="day-view-subtitle">${dateStr}</p>
           </div>
 
-          <div class="day-time-context">
-            <div class="day-time-message">${timeMessage}</div>
-            <div class="day-time-detail">${timeDetail}</div>
-          </div>
 
           ${activeGoals.length >= 6
         ? `
@@ -3972,15 +4117,48 @@ const UI = {
 
     const plantBtn = container.querySelector("#dayPlantBtn");
     plantBtn?.addEventListener("click", () => {
-      this.showQuickAdd(State.viewingDate);
+      this.showQuickAdd();
     });
 
     // Drag + drop: move seed tray intentions into the day bed to assign a start time.
     const dayBed = container.querySelector(".day-bed-canvas") as HTMLElement | null;
+    
+    // Define drag state variables outside the if block so they're accessible throughout
+    let draggingPlanterId: string | null = null;
+    let draggingSeedId: string | null = null;
+    let isResizing = false;
+    let currentResizeHandle: HTMLElement | null = null;
+    let currentResizeGoalId: string | null = null;
+    let currentResizeType: string | null = null;
+    
+    // Touch drag state variables
+    let touchDragging = false;
+    let touchGoalId: string | null = null;
+    let touchPointerId: number | null = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchPressTimer: ReturnType<typeof setTimeout> | null = null;
+    let ghostEl: HTMLElement | null = null;
+    let suppressClickUntil = 0;
+    
+    // Cleanup functions for proper event listener removal
+    const cleanupTouchDrag = () => {
+      touchDragging = false;
+      touchGoalId = null;
+      touchPointerId = null;
+      if (touchPressTimer) {
+        clearTimeout(touchPressTimer);
+        touchPressTimer = null;
+      }
+      if (ghostEl) {
+        ghostEl.remove();
+        ghostEl = null;
+      }
+      document.body.classList.remove("is-touch-dragging-seed");
+      dayBed?.classList.remove("is-drop-target", "is-drop-over");
+    };
+    
     if (dayBed) {
-      // Track dragging state (dataTransfer.getData doesn't work in dragover)
-      let draggingPlanterId: string | null = null;
-      let draggingSeedId: string | null = null;
       
       const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
       const toTimeString = (mins: number) => {
@@ -4000,7 +4178,7 @@ const UI = {
         const rect = dayBed.getBoundingClientRect();
         const y = clamp(clientY - rect.top, 0, rect.height);
         const pct = rect.height > 0 ? y / rect.height : 0;
-        let minutes = Math.round((plotStartMin + pct * plotRangeMin) / 15) * 15;
+        let minutes = Math.round((plotStartMin + pct * plotRangeMin) / 5) * 5;
         minutes = clamp(minutes, plotStartMin, plotEndMin - 15);
 
         const goal = Goals.getById(goalId);
@@ -4058,13 +4236,13 @@ const UI = {
           if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
           (card as HTMLElement).setAttribute("aria-grabbed", "true");
           document.body.classList.add("is-dragging-seed");
-          dayBed.classList.add("is-drop-target");
+          dayBed?.classList.add("is-drop-target");
         });
 
         card.addEventListener("dragend", () => {
           (card as HTMLElement).setAttribute("aria-grabbed", "false");
           document.body.classList.remove("is-dragging-seed");
-          dayBed.classList.remove("is-drop-target", "is-drop-over");
+          dayBed?.classList.remove("is-drop-target", "is-drop-over");
           draggingSeedId = null;
         });
       });
@@ -4076,41 +4254,22 @@ const UI = {
       const longPressMs = 180;
       const moveCancelPx = 8;
 
-      let touchDragging = false;
-      let touchGoalId: string | null = null;
-      let touchPointerId: number | null = null;
-      let touchStartX = 0;
-      let touchStartY = 0;
-      let touchPressTimer: ReturnType<typeof setTimeout> | null = null;
-      let ghostEl: HTMLElement | null = null;
-      let suppressClickUntil = 0;
-
       const clearPressTimer = () => {
-        if (!touchPressTimer) return;
-        clearTimeout(touchPressTimer);
-        touchPressTimer = null;
-      };
-
-      const cleanupTouchDrag = () => {
-        touchDragging = false;
-        touchGoalId = null;
-        touchPointerId = null;
-        clearPressTimer();
-        if (ghostEl) {
-          ghostEl.remove();
-          ghostEl = null;
+        if (touchPressTimer) {
+          clearTimeout(touchPressTimer);
+          touchPressTimer = null;
         }
-        document.body.classList.remove("is-touch-dragging-seed");
-        dayBed.classList.remove("is-drop-target", "is-drop-over");
       };
 
       const setGhostPosition = (clientX: number, clientY: number) => {
-        if (!ghostEl) return;
-        ghostEl.style.left = `${clientX}px`;
-        ghostEl.style.top = `${clientY}px`;
+        if (ghostEl) {
+          ghostEl.style.left = `${clientX}px`;
+          ghostEl.style.top = `${clientY}px`;
+        }
       };
 
       const isPointOverDayBed = (clientX: number, clientY: number) => {
+        if (!dayBed) return false;
         const rect = dayBed.getBoundingClientRect();
         return (
           clientX >= rect.left &&
@@ -4125,7 +4284,7 @@ const UI = {
         touchGoalId = goalId;
         suppressClickUntil = Date.now() + 800;
         document.body.classList.add("is-touch-dragging-seed");
-        dayBed.classList.add("is-drop-target");
+        dayBed?.classList.add("is-drop-target");
 
         ghostEl = card.cloneNode(true) as HTMLElement;
         ghostEl.classList.add("drag-ghost");
@@ -4316,7 +4475,7 @@ const UI = {
         const rect = dayBed.getBoundingClientRect();
         const y = clamp(clientY - rect.top, 0, rect.height);
         const pct = rect.height > 0 ? y / rect.height : 0;
-        let newStartMin = Math.round((plotStartMin + pct * plotRangeMin) / 15) * 15;
+        let newStartMin = Math.round((plotStartMin + pct * plotRangeMin) / 5) * 5;
         newStartMin = clamp(newStartMin, plotStartMin, plotEndMin - Math.max(duration, 30));
         const newEndMin = Math.min(newStartMin + duration, plotEndMin);
 
@@ -4330,11 +4489,18 @@ const UI = {
         if (!draggingPlanterId && !draggingSeedId) return;
         e.preventDefault();
         if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-        dayBed.classList.add("is-drop-over");
+        dayBed?.classList.add("is-drop-over");
       };
 
-      const onDayBedDragLeave = () => {
-        dayBed.classList.remove("is-drop-over");
+      const onDayBedDragLeave = (e: DragEvent) => {
+        // Only remove drop-over class if actually leaving the day bed
+        if (!dayBed) return;
+        const rect = dayBed.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+          dayBed.classList.remove("is-drop-over");
+        }
       };
 
       const onDayBedDrop = (e: DragEvent) => {
@@ -4345,7 +4511,7 @@ const UI = {
           const id = draggingPlanterId;
           draggingPlanterId = null;
           movePlanter(id, e.clientY);
-          dayBed.classList.remove("is-drop-over");
+          dayBed?.classList.remove("is-drop-over");
           return;
         }
 
@@ -4356,16 +4522,16 @@ const UI = {
         draggingSeedId = null;
         if (!goalId) return;
         placeGoalAtY(goalId, e.clientY);
-        dayBed.classList.remove("is-drop-over");
+        dayBed?.classList.remove("is-drop-over");
       };
 
-      dayBed.addEventListener("dragover", onDayBedDragOver, true);
-      dayBed.addEventListener("drop", onDayBedDrop, true);
-      dayBed.addEventListener("dragleave", onDayBedDragLeave, true);
+      dayBed?.addEventListener("dragover", onDayBedDragOver, true);
+      dayBed?.addEventListener("drop", onDayBedDrop, true);
+      dayBed?.addEventListener("dragleave", onDayBedDragLeave, true);
 
       const resizePlanterTop = (goalId: string, clientY: number, skipRender = false) => {
         const goal = Goals.getById(goalId);
-        if (!goal) return;
+        if (!goal || !dayBed) return;
 
         const startMinRaw = parseTimeToMinutes(goal.startTime);
         const endMinRaw = parseTimeToMinutes(goal.endTime);
@@ -4374,7 +4540,7 @@ const UI = {
         const rect = dayBed.getBoundingClientRect();
         const y = clamp(clientY - rect.top, 0, rect.height);
         const pct = rect.height > 0 ? y / rect.height : 0;
-        let newStartMin = Math.round((plotStartMin + pct * plotRangeMin) / 15) * 15;
+        let newStartMin = Math.round((plotStartMin + pct * plotRangeMin) / 5) * 5;
         newStartMin = clamp(newStartMin, plotStartMin, endMinRaw - 30);
         const newEndMin = endMinRaw;
 
@@ -4383,20 +4549,15 @@ const UI = {
 
       const resizePlanterBottom = (goalId: string, clientY: number, skipRender = false) => {
         const goal = Goals.getById(goalId);
-        if (!goal) return;
+        if (!goal || !dayBed) return;
 
         const startMinRaw = parseTimeToMinutes(goal.startTime);
-        const endMinRaw = parseTimeToMinutes(goal.endTime);
         if (startMinRaw === null) return;
-
-        const currentEndMin = (endMinRaw !== null && endMinRaw > startMinRaw)
-          ? endMinRaw
-          : startMinRaw + 60;
 
         const rect = dayBed.getBoundingClientRect();
         const y = clamp(clientY - rect.top, 0, rect.height);
         const pct = rect.height > 0 ? y / rect.height : 0;
-        let newEndMin = Math.round((plotStartMin + pct * plotRangeMin) / 15) * 15;
+        let newEndMin = Math.round((plotStartMin + pct * plotRangeMin) / 5) * 5;
         newEndMin = clamp(newEndMin, startMinRaw + 30, plotEndMin);
         const newStartMin = startMinRaw;
 
@@ -4429,13 +4590,13 @@ const UI = {
           if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
           (card as HTMLElement).setAttribute("aria-grabbed", "true");
           document.body.classList.add("is-dragging-planter");
-          dayBed.classList.add("is-drop-target");
+          dayBed?.classList.add("is-drop-target");
         });
 
         card.addEventListener("dragend", () => {
           (card as HTMLElement).setAttribute("aria-grabbed", "false");
           document.body.classList.remove("is-dragging-planter");
-          dayBed.classList.remove("is-drop-target", "is-drop-over");
+          dayBed?.classList.remove("is-drop-target", "is-drop-over");
           draggingPlanterId = null;
         });
 
@@ -4456,11 +4617,6 @@ const UI = {
         container.querySelectorAll(".planter-resize-handle"),
       ) as HTMLElement[];
 
-      let isResizing = false;
-      let currentResizeHandle: HTMLElement | null = null;
-      let currentResizeGoalId: string | null = null;
-      let currentResizeType: string | null = null;
-
       const startResize = (e: MouseEvent | PointerEvent, handle: HTMLElement) => {
         e.preventDefault();
         e.stopPropagation();
@@ -4468,7 +4624,7 @@ const UI = {
         const goalId = planterCard?.dataset.goalId;
         const resizeType = handle.dataset.resize;
 
-        if (!goalId || !resizeType) return;
+        if (!goalId || !resizeType || !dayBed) return;
 
         isResizing = true;
         currentResizeHandle = handle;
@@ -5096,7 +5252,58 @@ const UI = {
       else if (level === "intention") label.textContent = "What is your intention for today?";
     }
 
-    this.populateMonthSelect(preselectedMonth, this.goalModalYear);
+    // Customize modal fields based on goal level
+    const monthGroup = document.querySelector('label[for="goalMonth"]')?.parentElement as HTMLElement;
+    const monthLabel = document.querySelector('label[for="goalMonth"]') as HTMLElement;
+    const monthSelect = document.getElementById("goalMonth");
+    const categoryGroup = document.querySelector('label[for="goalCategory"]')?.parentElement as HTMLElement;
+    const timeGroup = document.querySelector('.form-row:nth-child(3)') as HTMLElement; // Time fields row
+    const priorityGroup = document.querySelector('label[for="goalPriority"]')?.parentElement as HTMLElement;
+    const durationGroup = document.getElementById('visionDurationGroup') as HTMLElement;
+    const submitBtn = document.querySelector('#goalForm button[type="submit"]') as HTMLElement;
+    
+    // Update submit button text based on goal level
+    if (submitBtn) {
+      if (level === "vision") submitBtn.textContent = "Create Vision";
+      else if (level === "milestone") submitBtn.textContent = "Set Milestone";
+      else if (level === "focus") submitBtn.textContent = "Define Focus";
+      else if (level === "intention") submitBtn.textContent = "Set Intention";
+    }
+
+    if (monthGroup && monthLabel && monthSelect) {
+      if (level === "vision") {
+        // Vision: yearly goals - hide time-specific fields, show duration
+        monthGroup.style.display = "none";
+        if (timeGroup) timeGroup.style.display = "none";
+        if (priorityGroup) priorityGroup.style.display = "block";
+        if (categoryGroup) categoryGroup.style.display = "block";
+        if (durationGroup) durationGroup.style.display = "block";
+      } else if (level === "milestone") {
+        // Milestone: monthly goals - show month selection, hide time/duration
+        monthGroup.style.display = "block";
+        monthLabel.textContent = "Which month?";
+        this.populateMonthSelect(preselectedMonth, this.goalModalYear);
+        if (timeGroup) timeGroup.style.display = "none";
+        if (priorityGroup) priorityGroup.style.display = "block";
+        if (categoryGroup) categoryGroup.style.display = "block";
+        if (durationGroup) durationGroup.style.display = "none";
+      } else if (level === "focus") {
+        // Focus: weekly goals - hide month/time/duration, show category/priority
+        monthGroup.style.display = "none";
+        if (timeGroup) timeGroup.style.display = "none";
+        if (priorityGroup) priorityGroup.style.display = "block";
+        if (categoryGroup) categoryGroup.style.display = "block";
+        if (durationGroup) durationGroup.style.display = "none";
+      } else if (level === "intention") {
+        // Intention: daily goals - show time fields, hide month/duration
+        monthGroup.style.display = "none";
+        if (timeGroup) timeGroup.style.display = "block";
+        if (priorityGroup) priorityGroup.style.display = "none";
+        if (categoryGroup) categoryGroup.style.display = "none";
+        if (durationGroup) durationGroup.style.display = "none";
+      }
+    }
+
     this.elements.goalModal?.classList.add("active");
     document.getElementById("goalTitle")?.focus();
   },
@@ -5181,35 +5388,68 @@ const UI = {
     const endTimeEl = document.getElementById("goalEndTime") as HTMLInputElement | null;
 
     const title = titleEl?.value.trim() ?? "";
-    const month = monthEl ? parseInt(monthEl.value, 10) : NaN;
-    const categoryRaw = categoryEl?.value;
-    const category: Category =
-      categoryRaw && categoryRaw in CONFIG.CATEGORIES
-        ? (categoryRaw as Exclude<Category, null>)
-        : null;
-    const priorityRaw = priorityEl?.value;
-    const priority: Priority =
-      priorityRaw === "low" ||
-        priorityRaw === "medium" ||
-        priorityRaw === "high" ||
-        priorityRaw === "urgent"
-        ? priorityRaw
-        : "medium";
+    if (!title) return;
+
+    // Get values based on goal level - some fields may be hidden
+    let month = NaN;
+    let category: Category = null;
+    let priority: Priority = "medium";
+    let startTime: string | null = null;
+    let endTime: string | null = null;
+
+    // Only get month if the field is visible (milestones)
+    if (monthEl && (monthEl.parentElement as HTMLElement)?.style.display !== "none") {
+      month = parseInt(monthEl.value, 10);
+    }
+
+    // Only get category if the field is visible
+    if (categoryEl && (categoryEl.parentElement as HTMLElement)?.style.display !== "none") {
+      const categoryRaw = categoryEl?.value;
+      category =
+        categoryRaw && categoryRaw in CONFIG.CATEGORIES
+          ? (categoryRaw as Exclude<Category, null>)
+          : null;
+    }
+
+    // Only get priority if the field is visible
+    if (priorityEl && (priorityEl.parentElement as HTMLElement)?.style.display !== "none") {
+      const priorityRaw = priorityEl?.value;
+      priority =
+        priorityRaw === "low" ||
+          priorityRaw === "medium" ||
+          priorityRaw === "high" ||
+          priorityRaw === "urgent"
+          ? (priorityRaw as Priority)
+          : "medium";
+    }
+
+    // Only get time fields if they're visible (intentions)
+    if (startTimeEl && (startTimeEl.parentElement?.parentElement as HTMLElement)?.style.display !== "none") {
+      startTime = startTimeEl?.value || null;
+      endTime = endTimeEl?.value || null;
+    }
     const year =
       this.goalModalYear ?? State.viewingYear ?? new Date().getFullYear();
 
-    if (!title || !Number.isFinite(month)) return;
+    if (!title) return;
 
-    Goals.create({
+    // For levels that don't use month selection, let Goals.create handle auto-anchoring
+    const goalData: any = {
       title,
       level: this.goalModalLevel,
-      month,
-      year,
       category,
       priority,
-      startTime: startTimeEl?.value || null,
-      endTime: endTimeEl?.value || null,
-    });
+      startTime,
+      endTime,
+    };
+
+    // Only include month/year for levels that use it (milestones)
+    if (this.goalModalLevel === "milestone" && Number.isFinite(month)) {
+      goalData.month = month;
+      goalData.year = year;
+    }
+
+    Goals.create(goalData);
 
     this.closeGoalModal();
     this.render();
