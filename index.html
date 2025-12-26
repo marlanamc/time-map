@@ -26,10 +26,18 @@
 </head>
 
 <body>
-    <!-- Background -->
-    <div class="bg-canvas" aria-hidden="true">
-        <div class="bg-gradient"></div>
-        <div class="grid-pattern"></div>
+    <!-- Garden Background -->
+    <div class="garden-background" id="gardenBackground" aria-hidden="true">
+        <div class="garden-sky" id="gardenSky"></div>
+        <div class="garden-backdrop" id="gardenBackdrop"></div>
+        <div class="garden-midground" id="gardenMidground"></div>
+        <canvas class="garden-effects" id="gardenEffects" aria-hidden="true"></canvas>
+
+        <!-- Celestial Bodies (Sun & Moon) -->
+        <div class="celestial-container" aria-hidden="true">
+            <div class="sun" id="sun" aria-label="Current time indicator">☀️</div>
+            <div class="moon" id="moon" aria-label="Night time indicator">🌙</div>
+        </div>
     </div>
 
     <!-- Confetti Container -->
@@ -108,6 +116,28 @@
                             --
                         </div>
                         <div class="time-stat-label">Weeks Left</div>
+                    </div>
+                </div>
+
+                <!-- Time Remaining Visualization -->
+                <div class="time-garden-plot">
+                    <div class="plot-label">Time Remaining Today</div>
+                    <div class="time-visualization" id="timeVisualization">
+                        <!-- Hour blocks populated by JS -->
+                        <div class="hour-blocks" id="hourBlocks"></div>
+                    </div>
+                </div>
+
+                <!-- Garden Sound Controls -->
+                <div class="sound-controls">
+                    <button class="sound-toggle" id="soundToggle" aria-label="Toggle ambient sounds" title="Toggle garden sounds">
+                        <span class="sound-icon" id="soundIcon">🔇</span>
+                        <span class="sound-label">Garden Sounds</span>
+                    </button>
+                    <div class="sound-volume-container" id="soundVolumeContainer" style="display: none;">
+                        <input type="range" id="soundVolume" min="0" max="100" value="50"
+                               aria-label="Sound volume" class="sound-slider" />
+                        <span class="volume-label" id="volumeLabel">50%</span>
                     </div>
                 </div>
             </div>
@@ -245,6 +275,8 @@
                 <div class="canvas" id="canvas">
                     <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Year calendar with anchors">
                     </div>
+                    <!-- Now Beam - Visual indicator for current time in day view -->
+                    <div class="now-beam" id="nowBeam" aria-hidden="true" style="display: none;"></div>
                 </div>
                 <div class="zoom-controls canvas-zoom-controls" role="group" aria-label="Zoom controls">
                     <button class="zoom-btn" id="zoomOut" aria-label="Zoom out">

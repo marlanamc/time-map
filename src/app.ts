@@ -31,6 +31,7 @@ import type {
 import { SupabaseService } from './services/SupabaseService';
 import { AuthComponent } from './components/Auth';
 import { ModalManager } from './utils/modalManager';
+import { GardenEngine } from './garden/gardenEngine';
 
 // UI Elements interface for proper typing
 interface UIElements {
@@ -7392,6 +7393,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       UI.showToast("👋", "Welcome! Place your first anchor to get started.");
     }, 1000);
   }
+
+  // ============================================
+  // Initialize Garden Engine
+  // ============================================
+  const savedGardenPrefs = GardenEngine.loadPreferences();
+  const garden = new GardenEngine(savedGardenPrefs);
+  garden.initialize();
+
+  // Log garden state changes for debugging
+  garden.on('timeChanged', (state) => {
+    console.log('🌅 Time changed:', state.time.timeOfDay);
+  });
+
+  garden.on('seasonChanged', (state) => {
+    console.log('🍂 Season changed:', state.season.season);
+  });
+
+  // Expose garden for debugging
+  (window as any).garden = garden;
 });
 
 // Expose for debugging (optional)

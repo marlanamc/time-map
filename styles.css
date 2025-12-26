@@ -141,6 +141,20 @@
     --text-xl: 1.25rem;
     --text-2xl: 1.5rem;
     --text-3xl: 2rem;
+
+    /* Garden Engine - Dynamic Time & Season Variables */
+    --time-brightness: 1;
+    --time-saturation: 1;
+    --time-hue-shift: 0deg;
+    --shadow-opacity: 0.3;
+    --shadow-length: 4px;
+    --shadow-angle: 45deg;
+
+    /* Seasonal colors (defaults to current) */
+    --seasonal-accent: var(--sage);
+    --seasonal-bg: var(--bg-base);
+    --seasonal-flower: var(--petal);
+    --seasonal-secondary: var(--teal);
 }
 
 /* Import Google Fonts */
@@ -427,64 +441,155 @@ body.hide-achievements .achievements-panel {
 /* ===================================
    Background
    =================================== */
-.bg-canvas {
+/* ============================================
+   Garden Background System
+   ============================================ */
+
+.garden-background {
     position: fixed;
     inset: 0;
     z-index: -1;
     overflow: hidden;
-    background: var(--bg-base);
+    background: var(--seasonal-bg);
+    transition: background 2s ease-out;
 }
 
-.bg-gradient {
+.garden-sky {
     position: absolute;
     inset: 0;
-    background:
-        radial-gradient(ellipse 110% 90% at 50% -10%,
-            rgba(74, 144, 226, 0.22) 0%,
-            /* primary sky blue */
-            transparent 75%),
-        radial-gradient(ellipse 90% 70% at 85% 20%,
-            rgba(90, 155, 141, 0.18) 0%,
-            /* leaf green */
-            transparent 65%),
-        radial-gradient(ellipse 80% 60% at 15% 85%,
-            rgba(74, 144, 153, 0.16) 0%,
-            /* calm teal water */
-            transparent 60%),
-        radial-gradient(circle at 75% 45%,
-            rgba(240, 180, 41, 0.12) 0%,
-            /* bright sunbeam */
-            transparent 50%),
-        radial-gradient(circle at 25% 35%,
-            rgba(255, 255, 255, 0.15) 0%,
-            /* white daylight puff */
-            transparent 40%);
-    filter: blur(50px);
+    background: linear-gradient(
+        to bottom,
+        var(--seasonal-bg) 0%,
+        var(--bg-base) 100%
+    );
+    transition: background 1s ease-out;
+}
+
+/* Time-based sky gradients */
+body.time-dawn .garden-sky {
+    background: linear-gradient(
+        to bottom,
+        #B8D4E8 0%,
+        #E8C8D8 50%,
+        #F0E8D8 100%
+    );
+}
+
+body.time-morning .garden-sky {
+    background: linear-gradient(
+        to bottom,
+        #87CEEB 0%,
+        #B0E0E6 50%,
+        #E8F4F8 100%
+    );
+}
+
+body.time-afternoon .garden-sky {
+    background: linear-gradient(
+        to bottom,
+        #4A90E2 0%,
+        #87CEEB 50%,
+        #E8F4F8 100%
+    );
+}
+
+body.time-evening .garden-sky {
+    background: linear-gradient(
+        to bottom,
+        #FF8C42 0%,
+        #FFB347 30%,
+        #F4A989 70%,
+        #D9C8B8 100%
+    );
+}
+
+body.time-night .garden-sky {
+    background: linear-gradient(
+        to bottom,
+        #0A1A2E 0%,
+        #16213E 40%,
+        #1A2332 100%
+    );
+}
+
+.garden-backdrop {
+    position: absolute;
+    inset: 0;
+    background-position: center bottom;
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    transition: opacity 2s ease-out, transform 0.3s ease-out;
+}
+
+.garden-midground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(
+        to top,
+        var(--seasonal-accent) 0%,
+        transparent 100%
+    );
+    opacity: 0.08;
+    transition: opacity 2s ease-out;
+}
+
+.garden-effects {
+    position: absolute;
+    inset: 0;
     pointer-events: none;
+    z-index: 1;
 }
 
-body.night-garden .bg-gradient {
-    background:
-        radial-gradient(ellipse 100% 70% at 40% -10%,
-            rgba(164, 185, 217, 0.18) 0%,
-            /* moon glow */
-            transparent 65%),
-        radial-gradient(ellipse 80% 60% at 90% 15%,
-            rgba(38, 54, 94, 0.22) 0%,
-            /* midnight sky */
-            transparent 60%),
-        radial-gradient(ellipse 70% 50% at 15% 85%,
-            rgba(18, 26, 46, 0.2) 0%,
-            /* deep corner shadowing */
-            transparent 55%),
-        radial-gradient(circle at 65% 40%,
-            rgba(255, 255, 255, 0.05) 0%,
-            /* white distant moonbeam */
-            transparent 45%);
-    filter: blur(60px);
+/* Celestial Bodies */
+.celestial-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
 }
 
-body.night-garden .bg-canvas::after {
+.sun,
+.moon {
+    position: absolute;
+    font-size: 48px;
+    filter: drop-shadow(0 0 20px currentColor);
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+.sun {
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+}
+
+.moon {
+    color: #F0F0F0;
+    text-shadow: 0 0 30px rgba(240, 240, 240, 0.6);
+}
+
+/* Show sun during day */
+body.time-dawn .sun,
+body.time-morning .sun,
+body.time-afternoon .sun,
+body.time-evening .sun {
+    opacity: 1;
+}
+
+/* Show moon at night */
+body.time-night .moon {
+    opacity: 1;
+}
+
+/* Stars at night */
+body.time-night .garden-sky::after {
+    content: '';
+    position: absolute;
+    inset: 0;
     opacity: 0.55;
     background-image:
         radial-gradient(circle at 10% 18%, rgba(255, 255, 255, 0.9) 0 0.8px, transparent 1.6px),
@@ -500,32 +605,11 @@ body.night-garden .bg-canvas::after {
     animation: firefly-twinkle 6s ease-in-out infinite alternate;
 }
 
+/* Compatibility with old styles */
+.bg-canvas,
+.bg-gradient,
 .grid-pattern {
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(to right,
-            rgba(255, 255, 255, 0.02) 1px,
-            transparent 1px),
-        linear-gradient(to bottom,
-            rgba(255, 255, 255, 0.02) 1px,
-            transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 70% 70% at 50% 50%,
-            black 0%,
-            transparent 70%);
-    opacity: 0.5;
-}
-
-body.night-garden .grid-pattern {
-    background-image:
-        linear-gradient(to right,
-            rgba(255, 255, 255, 0.05) 1px,
-            transparent 1px),
-        linear-gradient(to bottom,
-            rgba(255, 255, 255, 0.05) 1px,
-            transparent 1px);
-    opacity: 0.18;
+    display: none; /* Hide old background elements */
 }
 
 /* ===================================
@@ -8052,4 +8136,1177 @@ kbd {
     #auth-modal p {
         font-size: var(--text-sm) !important;
     }
+}
+
+/* ============================================
+   Garden Engine - Seasonal & Time Themes
+   ============================================ */
+
+/* Seasonal Color Palettes */
+body.season-spring {
+    --seasonal-accent: #7EC8A3; /* fresh green */
+    --seasonal-bg: #F0F9F4; /* light spring green */
+    --seasonal-flower: #FFB7D5; /* cherry blossom pink */
+    --seasonal-secondary: #A8D5BA;
+    --seasonal-accent-rgb: 126, 200, 163; /* soft mint */
+}
+
+body.season-summer {
+    --seasonal-accent-rgb: 74, 155, 141;
+    --seasonal-accent: #4A9B8D; /* deep garden green */
+    --seasonal-bg: #E8F8F0; /* lush green tint */
+    --seasonal-flower: #FFC940; /* sunflower yellow */
+    --seasonal-secondary: #68B5A0; /* seafoam */
+}
+
+body.season-fall {
+    --seasonal-accent: #D4A574; /* golden brown */
+    --seasonal-bg: #F5EDE0; /* warm cream */
+    --seasonal-flower: #E87461; /* autumn orange */
+    --seasonal-secondary: #C4915F; /* harvest gold */
+}
+
+body.season-winter {
+    --seasonal-accent: #8BA8B8; /* cool blue-gray */
+    --seasonal-bg: #EDF4F7; /* frosty white */
+    --seasonal-flower: #C9E4EC; /* ice blue */
+    --seasonal-secondary: #A1B5C1; /* winter sky */
+}
+
+/* Time of Day Visual Effects (subtle overlays) */
+body.time-dawn {
+    /* Cool, dim morning light */
+    filter: brightness(var(--time-brightness))
+            saturate(var(--time-saturation))
+            hue-rotate(var(--time-hue-shift));
+}
+
+body.time-morning {
+    /* Bright, vibrant daylight */
+    filter: brightness(var(--time-brightness))
+            saturate(var(--time-saturation))
+            hue-rotate(var(--time-hue-shift));
+}
+
+body.time-afternoon {
+    /* Warm, peak sunshine */
+    filter: brightness(var(--time-brightness))
+            saturate(var(--time-saturation))
+            hue-rotate(var(--time-hue-shift));
+}
+
+body.time-evening {
+    /* Golden hour warmth */
+    filter: brightness(var(--time-brightness))
+            saturate(var(--time-saturation))
+            hue-rotate(var(--time-hue-shift));
+}
+
+body.time-night {
+    /* Moonlit blue tones */
+    filter: brightness(var(--time-brightness))
+            saturate(var(--time-saturation))
+            hue-rotate(var(--time-hue-shift));
+}
+
+/* Goal cards get dynamic shadows based on sun position */
+.goal-card,
+.day-planter,
+.anchor-card {
+    box-shadow:
+        var(--shadow-length) var(--shadow-length)
+        calc(var(--shadow-length) * 2)
+        rgba(0, 0, 0, var(--shadow-opacity)),
+        var(--shadow-sm);
+    transition: box-shadow var(--duration-slow) var(--ease-out);
+}
+
+/* Reduce animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    body.time-dawn,
+    body.time-morning,
+    body.time-afternoon,
+    body.time-evening,
+    body.time-night {
+        filter: none;
+    }
+    
+    .goal-card,
+    .day-planter,
+    .anchor-card {
+        transition: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    body.time-dawn,
+    body.time-morning,
+    body.time-afternoon,
+    body.time-evening,
+    body.time-night {
+        filter: none;
+    }
+}
+
+/* ============================================
+   Time Visualizations - ADHD Time Blindness Support
+   ============================================ */
+
+/* Time Garden Plot - Hour Blocks */
+.time-garden-plot {
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    background: var(--glass-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+}
+
+.plot-label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-3);
+}
+
+.hour-blocks {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hour-block {
+    font-size: 24px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: all var(--duration-normal) var(--ease-out);
+    cursor: help;
+}
+
+.hour-block.hour-past {
+    filter: saturate(1.2) brightness(1.1);
+    animation: bloom-complete 0.5s ease-out;
+}
+
+.hour-block.hour-current {
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 8px var(--seasonal-flower));
+    animation: bloom-pulse 2s ease-in-out infinite;
+}
+
+.hour-block.hour-future {
+    opacity: 0.5;
+    filter: saturate(0.6);
+}
+
+.hour-block:hover {
+    transform: scale(1.2);
+}
+
+@keyframes bloom-complete {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bloom-pulse {
+    0%, 100% { transform: scale(1.3); filter: drop-shadow(0 0 8px var(--seasonal-flower)); }
+    50% { transform: scale(1.4); filter: drop-shadow(0 0 12px var(--seasonal-flower)); }
+}
+
+/* Now Beam - Current Time Indicator */
+.now-beam {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(255, 223, 128, 0.9) 10%,
+        rgba(255, 223, 128, 0.9) 90%,
+        transparent 100%
+    );
+    box-shadow: 0 0 20px rgba(255, 223, 128, 0.6);
+    pointer-events: none;
+    z-index: 100;
+    animation: now-beam-pulse 3s ease-in-out infinite;
+}
+
+.now-beam::before {
+    content: '◆';
+    position: absolute;
+    left: -10px;
+    top: -8px;
+    font-size: 16px;
+    color: rgba(255, 223, 128, 1);
+    filter: drop-shadow(0 0 4px rgba(255, 223, 128, 0.8));
+}
+
+.now-beam::after {
+    content: '◆';
+    position: absolute;
+    right: -10px;
+    top: -8px;
+    font-size: 16px;
+    color: rgba(255, 223, 128, 1);
+    filter: drop-shadow(0 0 4px rgba(255, 223, 128, 0.8));
+}
+
+@keyframes now-beam-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 20px rgba(255, 223, 128, 0.6); }
+    50% { opacity: 0.8; box-shadow: 0 0 30px rgba(255, 223, 128, 0.8); }
+}
+
+/* Time Transitions */
+.time-transition {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: var(--space-6) var(--space-8);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--glass-border);
+    box-shadow: var(--shadow-xl);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    color: var(--text-primary);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
+    pointer-events: none;
+}
+
+.time-transition.transition-sun-intensifies {
+    animation: sun-intensify 3s ease-out;
+}
+
+.time-transition.transition-golden-hour {
+    animation: golden-glow 3s ease-out;
+}
+
+.time-transition.transition-moonrise {
+    animation: moon-rise 3s ease-out;
+}
+
+.time-transition.transition-dawn {
+    animation: dawn-break 3s ease-out;
+}
+
+.time-transition.transition-day-awakening {
+    animation: day-awaken 3s ease-out;
+}
+
+@keyframes sun-intensify {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.5) saturate(1.3); }
+    100% { filter: brightness(1); }
+}
+
+@keyframes golden-glow {
+    0% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(30deg) saturate(1.4); }
+    100% { filter: hue-rotate(15deg); }
+}
+
+@keyframes moon-rise {
+    0% { transform: translate(-50%, -50%) translateY(20px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translate(-50%, -50%) translateY(0); }
+}
+
+@keyframes dawn-break {
+    0% { filter: brightness(0.5) saturate(0.7); }
+    100% { filter: brightness(1) saturate(1); }
+}
+
+@keyframes day-awaken {
+    0% { filter: brightness(0.7); }
+    100% { filter: brightness(1.1) saturate(1.1); }
+}
+
+/* Time Anchor Points */
+.time-anchor-now {
+    position: relative;
+    animation: time-anchor-pulse 2s ease-in-out infinite;
+}
+
+@keyframes time-anchor-pulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 223, 128, 0.6);
+        border-color: rgba(255, 223, 128, 0.8);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 223, 128, 0.8);
+        border-color: rgba(255, 223, 128, 1);
+    }
+}
+
+.time-anchor-upcoming {
+    border-left: 3px solid var(--seasonal-accent);
+}
+
+.time-anchor-past {
+    opacity: 0.6;
+    filter: saturate(0.7);
+}
+
+/* Enhanced Garden Bloom Animations */
+.petal {
+    transition: transform 0.5s var(--ease-out), opacity 0.5s var(--ease-out);
+    transform-origin: center;
+}
+
+.flower-stem {
+    transition: d 1s var(--ease-out);
+}
+
+.flower-center {
+    transition: filter 0.5s var(--ease-out);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .now-beam,
+    .time-transition,
+    .time-anchor-now,
+    .hour-block.hour-current,
+    .hour-block.hour-past {
+        animation: none !important;
+    }
+
+    .hour-block.hour-current {
+        transform: scale(1.1);
+    }
+}
+
+/* ============================================
+   Sound Controls
+   ============================================ */
+
+.sound-controls {
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    background: var(--glass-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+}
+
+.sound-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    transition: background var(--duration-fast) var(--ease-out);
+}
+
+.sound-toggle:hover {
+    background: var(--bg-hover);
+}
+
+.sound-toggle:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.sound-icon {
+    font-size: 20px;
+}
+
+.sound-volume-container {
+    margin-top: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.sound-slider {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--bg-hover);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.sound-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--seasonal-accent);
+    cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.sound-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.sound-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--seasonal-accent);
+    border: none;
+    cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.sound-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+.volume-label {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    min-width: 35px;
+    text-align: right;
+}
+
+/* ============================================
+   CUSTOM GARDEN MENU REDESIGN
+   Breaking away from generic templates
+   ============================================ */
+
+/* Support Panel - Garden Greenhouse */
+.support-panel-overlay {
+    background: linear-gradient(
+        135deg,
+        rgba(10, 26, 15, 0.4) 0%,
+        rgba(26, 54, 31, 0.6) 100%
+    );
+    backdrop-filter: blur(12px);
+    animation: overlay-bloom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes overlay-bloom {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.support-panel {
+    background: linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(248, 252, 250, 0.92) 100%
+    );
+    border-radius: 24px 0 0 24px;
+    border: none;
+    border-left: 4px solid var(--seasonal-accent);
+    box-shadow: 
+        -8px 0 40px rgba(0, 0, 0, 0.12),
+        -2px 0 8px rgba(90, 155, 141, 0.08),
+        inset 2px 0 0 rgba(255, 255, 255, 0.5);
+    animation: panel-slide-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.support-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: radial-gradient(
+        ellipse at top,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+}
+
+@keyframes panel-slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.support-panel-header {
+    background: transparent;
+    padding: var(--space-6) var(--space-5);
+    border-bottom: 2px solid rgba(90, 155, 141, 0.12);
+    position: relative;
+}
+
+.support-panel-header::after {
+    content: '🌿';
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px;
+    opacity: 0.3;
+}
+
+.support-panel-title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.support-panel-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08);
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.support-panel-close:hover {
+    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+    transform: rotate(90deg) scale(1.1);
+    color: var(--seasonal-accent);
+}
+
+/* Profile Section - Garden Tag */
+.support-panel-profile-section {
+    padding: var(--space-4) var(--space-5);
+    background: linear-gradient(
+        135deg,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.06) 0%,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.02) 100%
+    );
+    border-radius: 16px;
+    margin: var(--space-4) var(--space-5);
+    border: 1px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+}
+
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    color: white;
+    font-weight: 600;
+    font-size: var(--text-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.3);
+    position: relative;
+}
+
+.user-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--seasonal-accent), var(--seasonal-secondary));
+    z-index: -1;
+    opacity: 0.2;
+    filter: blur(8px);
+}
+
+/* Support Panel Items - Organic Cards */
+.support-panel-item {
+    padding: var(--space-4);
+    margin: var(--space-2) var(--space-5);
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px solid transparent;
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.support-panel-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.1),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.support-panel-item:hover::before {
+    left: 100%;
+}
+
+.support-panel-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--seasonal-accent);
+    transform: translateX(4px) scale(1.02);
+    box-shadow: 
+        0 8px 24px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15),
+        0 0 0 4px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.05);
+}
+
+.support-panel-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.25);
+}
+
+.support-panel-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.support-panel-name {
+    font-weight: 600;
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.support-panel-desc {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Dividers - Natural Vines */
+.support-panel-divider {
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2) 50%,
+        transparent 100%
+    );
+    margin: var(--space-3) var(--space-5);
+    position: relative;
+}
+
+.support-panel-divider::after {
+    content: '✿';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-surface);
+    padding: 0 var(--space-2);
+    color: var(--seasonal-accent);
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+/* Toggle Switch - Organic Shape */
+.toggle-switch {
+    width: 52px;
+    height: 28px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.08);
+    border: none;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+}
+
+.toggle-switch::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toggle-switch[aria-checked="true"] {
+    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    box-shadow: 0 0 0 4px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+}
+
+.toggle-switch[aria-checked="true"]::before {
+    left: 27px;
+    transform: rotate(360deg);
+}
+
+/* Modals - Flowing Organic Shapes */
+.modal-overlay {
+    background: linear-gradient(
+        135deg,
+        rgba(10, 26, 15, 0.6) 0%,
+        rgba(26, 54, 31, 0.8) 100%
+    );
+    backdrop-filter: blur(16px);
+    animation: overlay-bloom 0.3s ease-out;
+}
+
+.modal {
+    background: linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(248, 252, 250, 0.95) 100%
+    );
+    border-radius: 28px;
+    border: none;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    animation: modal-bloom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.modal::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(
+        circle,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+}
+
+@keyframes modal-bloom {
+    from {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: var(--space-6);
+    border-bottom: 2px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.12);
+    background: linear-gradient(
+        to bottom,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.03) 0%,
+        transparent 100%
+    );
+}
+
+.modal-title {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    margin: 0;
+    position: relative;
+    display: inline-block;
+}
+
+.modal-title::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--seasonal-accent) 0%, transparent 100%);
+    border-radius: 2px;
+}
+
+.modal-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08);
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-close:hover {
+    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+    transform: rotate(90deg) scale(1.1);
+    color: var(--seasonal-accent);
+}
+
+/* Custom Buttons - Handcrafted Feel */
+.btn-primary {
+    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    border: none;
+    border-radius: 14px;
+    padding: var(--space-3) var(--space-5);
+    font-weight: 600;
+    color: white;
+    box-shadow: 
+        0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.3),
+        0 0 0 0 rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.4);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+        0 8px 20px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.4),
+        0 0 0 6px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.1);
+}
+
+.btn-primary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 2px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+    border-radius: 14px;
+    padding: var(--space-3) var(--space-5);
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-ghost:hover {
+    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08);
+    border-color: var(--seasonal-accent);
+    color: var(--seasonal-accent);
+    transform: translateY(-1px);
+}
+
+/* Affirmation Panel - Mystical Garden Sign */
+.affirmation-panel {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.05) 100%
+    );
+    border-radius: 20px;
+    border: 2px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+    padding: var(--space-5);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.affirmation-panel::before {
+    content: '✨';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 20px;
+    opacity: 0.3;
+    transition: all 0.3s ease;
+}
+
+.affirmation-panel:hover::before {
+    transform: rotate(20deg) scale(1.2);
+    opacity: 0.6;
+}
+
+.affirmation-panel:hover {
+    transform: translateY(-4px) rotate(-1deg);
+    box-shadow: 
+        0 12px 32px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2),
+        0 0 0 4px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.1);
+    border-color: var(--seasonal-accent);
+}
+
+/* Achievements - Garden Medals */
+.achievements-panel {
+    background: linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.03) 100%
+    );
+    border-radius: 16px;
+    padding: var(--space-4);
+    border: 1px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+}
+
+.achievement-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 
+        0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.3),
+        0 0 0 3px rgba(255, 255, 255, 0.5),
+        0 0 0 5px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.achievement-badge:hover {
+    transform: rotate(12deg) scale(1.15);
+    box-shadow: 
+        0 8px 20px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.4),
+        0 0 0 3px rgba(255, 255, 255, 0.8),
+        0 0 0 6px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.3);
+}
+
+/* Mobile Bottom Bar - Garden Path */
+.mobile-bottom-bar {
+    background: linear-gradient(
+        to top,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(248, 252, 250, 0.92) 100%
+    );
+    border-top: 3px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+    box-shadow: 
+        0 -4px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.mobile-bottom-bar button {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mobile-bottom-bar button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    background: var(--seasonal-accent);
+    border-radius: 0 0 3px 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-bottom-bar button.active::after {
+    opacity: 1;
+}
+
+.mobile-bottom-bar button.active {
+    color: var(--seasonal-accent);
+    transform: translateY(-4px);
+}
+
+/* Form Inputs - Natural Styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+    border: 2px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+    border-radius: 12px;
+    padding: var(--space-3);
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--seasonal-accent);
+    background: white;
+    box-shadow: 
+        0 0 0 4px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.1),
+        0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+    outline: none;
+}
+
+/* Add subtle sparkle animation */
+@keyframes sparkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+.support-panel-item:hover .support-panel-icon {
+    animation: sparkle 1.5s ease-in-out infinite;
+}
+
+/* Extra Garden Polish - Unique Details */
+
+/* Add organic randomness to cards */
+.support-panel-item:nth-child(odd) {
+    border-radius: 16px 18px 16px 14px;
+}
+
+.support-panel-item:nth-child(even) {
+    border-radius: 18px 16px 14px 16px;
+}
+
+/* Subtle leaf pattern on hover */
+.modal::after {
+    content: '🍃';
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    font-size: 48px;
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+/* Garden dew drops on glass surfaces */
+.support-panel::after,
+.modal-header::before {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.5);
+    opacity: 0.4;
+}
+
+.support-panel::after {
+    top: 100px;
+    right: 40px;
+}
+
+.modal-header::before {
+    top: 30px;
+    right: 80px;
+}
+
+/* Handwritten feel for titles */
+.modal-title,
+.support-panel-title {
+    position: relative;
+}
+
+.modal-title:first-letter,
+.support-panel-title:first-letter {
+    color: var(--seasonal-accent);
+    font-size: 1.2em;
+}
+
+/* Organic button press */
+.btn-primary:active,
+.btn-ghost:active,
+.support-panel-item:active {
+    transition: transform 0.1s ease;
+}
+
+/* Add subtle texture to backgrounds */
+.support-panel-body,
+.modal-body {
+    position: relative;
+}
+
+.support-panel-body::before,
+.modal-body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.008) 10px,
+            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.008) 20px
+        );
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Celebration modal - extra special */
+.celebration-overlay {
+    animation: celebration-bloom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes celebration-bloom {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Focus visible states - accessibility with style */
+*:focus-visible {
+    outline: 3px solid var(--seasonal-accent);
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+
+/* Smooth all transitions */
+* {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Override any remaining generic styles */
+.modal,
+.support-panel,
+.btn {
+    font-family: var(--font-sans) !important;
 }
