@@ -39,6 +39,15 @@ import { cacheService } from './services/CacheService';
 import { DayViewController } from './components/dayView/DayViewController';
 import { ThemeManager } from './theme/ThemeManager';
 
+// View constants
+const VIEWS = {
+  YEAR: "year" as const,
+  MONTH: "month" as const,
+  WEEK: "week" as const,
+  DAY: "day" as const,
+  HOME: "home" as const,
+} as const;
+
 // UI Elements interface for proper typing
 interface UIElements {
   calendarGrid: HTMLElement | null;
@@ -46,6 +55,20 @@ interface UIElements {
   canvasContainer: HTMLElement | null;
   categoryFilters: HTMLElement | null;
   upcomingGoals: HTMLElement | null;
+
+  // Mobile Home Elements
+  mobileHomeView: HTMLElement | null;
+  mobileDateDisplay: HTMLElement | null;
+  mobileNowContext: HTMLElement | null;
+  mobileTimeVis: HTMLElement | null;
+  mobileTimeStats: HTMLElement | null;
+  mobileGardenBloom: HTMLElement | null;
+  mobileBloomText: HTMLElement | null;
+  mobileAffirmationText: HTMLElement | null;
+  mobileUpcomingList: HTMLElement | null;
+  mobileSurpriseBtn: HTMLButtonElement | null;
+  mobileTabHome: HTMLElement | null;
+
   goalModal: HTMLElement | null;
   goalForm: HTMLFormElement | null;
   goalMonth: HTMLInputElement | null;
@@ -151,7 +174,7 @@ const TimeBreakdown = {
   // Generate human-readable breakdown HTML
   generateHTML(targetMonth: number, targetYear: number, compact: boolean = false, level?: GoalLevel): string {
     let breakdown: TimeBreakdownResult;
-    
+
     // Use appropriate calculation based on level
     if (level === "intention") {
       breakdown = this.calculateForDay();
@@ -331,10 +354,10 @@ const TimeBreakdown = {
     const now = new Date();
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999);
-    
+
     const diffMs = endOfDay.getTime() - now.getTime();
     const hoursLeft = Math.max(0, diffMs / (1000 * 60 * 60));
-    
+
     return {
       days: 0,
       weeks: 0,
@@ -356,16 +379,16 @@ const TimeBreakdown = {
     const now = new Date();
     const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
     const endOfWeek = new Date(now);
-    
+
     // Calculate days until end of week (Saturday)
     const daysUntilSaturday = 6 - currentDay;
     endOfWeek.setDate(now.getDate() + daysUntilSaturday);
     endOfWeek.setHours(23, 59, 59, 999);
-    
+
     const diffMs = endOfWeek.getTime() - now.getTime();
     const msPerDay = 1000 * 60 * 60 * 24;
     const daysLeft = Math.max(0, Math.ceil(diffMs / msPerDay));
-    
+
     // Count weekends (Saturday/Sunday) in remaining days
     let weekendsInWeek = 0;
     const tempDate = new Date(now);
@@ -377,12 +400,12 @@ const TimeBreakdown = {
       tempDate.setDate(tempDate.getDate() + 1);
     }
     weekendsInWeek = Math.floor(weekendsInWeek / 2); // Count weekend pairs
-    
+
     // Calculate work sessions for remaining week
     const weeksRemaining = daysLeft / 7;
     const workSessions3x = Math.floor(weeksRemaining * 3);
     const workSessions5x = Math.floor(weeksRemaining * 5);
-    
+
     return {
       days: daysLeft,
       weeks: Math.floor(weeksRemaining),
@@ -406,20 +429,20 @@ const TimeBreakdown = {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
-    
+
     const diffMs = endOfYear.getTime() - now.getTime();
     const msPerDay = 1000 * 60 * 60 * 24;
     const diffDays = Math.max(0, Math.ceil(diffMs / msPerDay));
     const diffWeeks = Math.max(0, Math.floor(diffDays / 7));
-    
+
     // Calculate months left (including current month)
     const monthsLeft = 12 - currentMonth;
-    
+
     // Calculate quarters left (Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec)
     // Include current quarter in the count
     const currentQuarter = Math.floor(currentMonth / 3) + 1;
     const quartersLeft = 4 - currentQuarter + 1;
-    
+
     // Calculate weekends
     let weekends = 0;
     const tempDate = new Date(now);
@@ -430,11 +453,11 @@ const TimeBreakdown = {
       tempDate.setDate(tempDate.getDate() + 1);
     }
     weekends = Math.floor(weekends / 2); // Count weekend pairs
-    
+
     // Calculate work sessions for remaining year
     const workSessions3x = diffWeeks * 3;
     const workSessions5x = diffWeeks * 5;
-    
+
     return {
       days: diffDays,
       weeks: diffWeeks,
@@ -721,13 +744,8 @@ const CONFIG = {
 // ============================================
 // State Management
 // ============================================
-// View constants
-const VIEWS = {
-  YEAR: "year" as const,
-  MONTH: "month" as const,
-  WEEK: "week" as const,
-  DAY: "day" as const,
-} as const;
+// State Management
+// ============================================
 
 const State: AppState & {
   init: () => void;
@@ -1068,6 +1086,13 @@ const State: AppState & {
 // Goal Management
 // ============================================
 const Goals = {
+  getStats() {
+    if (!State.data) return { total: 0, completed: 0 };
+    const goals = State.data.goals;
+    const total = goals.length;
+    const completed = goals.filter((g) => g.status === "done").length;
+    return { total, completed };
+  },
   create(goalData: GoalData): Goal {
     const now = new Date();
     let month = goalData.month;
@@ -1080,16 +1105,16 @@ const Goals = {
         // Vision goals are for a specified duration (1-12 months)
         const visionDurationEl = document.getElementById('visionDuration') as HTMLSelectElement;
         const durationMonths = visionDurationEl ? parseInt(visionDurationEl.value, 10) : 4; // Default 4 months
-        
+
         month = now.getMonth(); // Start from current month
         year = now.getFullYear();
-        
+
         // Set dueDate to end of duration period
         const endDate = new Date(year, month + durationMonths, 0); // End of the last month
         endDate.setHours(23, 59, 59, 999);
         dueDate = endDate.toISOString();
         break;
-        
+
       case 'milestone':
         // Milestone goals are for a specific month
         if (month === null || month === undefined) {
@@ -1101,7 +1126,7 @@ const Goals = {
         endOfMonth.setHours(23, 59, 59, 999);
         dueDate = endOfMonth.toISOString();
         break;
-        
+
       case 'focus':
         // Focus goals are for the current week
         const currentWeekNum = State.getWeekNumber(now);
@@ -1114,7 +1139,7 @@ const Goals = {
         weekEnd.setHours(23, 59, 59, 999);
         dueDate = weekEnd.toISOString();
         break;
-        
+
       case 'intention':
         // Intentions are for today only
         month = now.getMonth();
@@ -1124,7 +1149,7 @@ const Goals = {
         endOfToday.setHours(23, 59, 59, 999);
         dueDate = endOfToday.toISOString();
         break;
-        
+
       default:
         // Keep existing behavior for unknown levels
         if (month === null || month === undefined) {
@@ -1169,13 +1194,13 @@ const Goals = {
     dirtyTracker.markDirty('goal', goal.id);
     UI.updateSyncStatus('syncing');
     debouncedGoalSync(goal);
-	    // UI will update to 'synced' after successful cloud sync
-	    setTimeout(() => UI.updateSyncStatus('synced'), 2100); // After debounce completes
+    // UI will update to 'synced' after successful cloud sync
+    setTimeout(() => UI.updateSyncStatus('synced'), 2100); // After debounce completes
 
-	    this.checkAchievements();
-	    UI.scheduleRender();
-	    return goal;
-	  },
+    this.checkAchievements();
+    UI.scheduleRender();
+    return goal;
+  },
 
   update(goalId: string, updates: Partial<Goal>): Goal | null {
     const goal = this.getById(goalId);
@@ -1193,16 +1218,16 @@ const Goals = {
           // Vision goals are for a specified duration (1-12 months)
           const visionDurationEl = document.getElementById('visionDuration') as HTMLSelectElement;
           const durationMonths = visionDurationEl ? parseInt(visionDurationEl.value, 10) : 4; // Default 4 months
-          
+
           newMonth = now.getMonth(); // Start from current month
           newYear = now.getFullYear();
-          
+
           // Set dueDate to end of duration period
           const endDate = new Date(newYear, newMonth + durationMonths, 0); // End of the last month
           endDate.setHours(23, 59, 59, 999);
           newDueDate = endDate.toISOString();
           break;
-          
+
         case 'milestone':
           // Milestone goals are for a specific month
           if (newMonth === null || newMonth === undefined) {
@@ -1214,7 +1239,7 @@ const Goals = {
           endOfMonth.setHours(23, 59, 59, 999);
           newDueDate = endOfMonth.toISOString();
           break;
-          
+
         case 'focus':
           // Focus goals are for the current week
           const currentWeekNum = State.getWeekNumber(now);
@@ -1227,7 +1252,7 @@ const Goals = {
           weekEnd.setHours(23, 59, 59, 999);
           newDueDate = weekEnd.toISOString();
           break;
-          
+
         case 'intention':
           // Intentions are for today only
           newMonth = now.getMonth();
@@ -1257,22 +1282,22 @@ const Goals = {
       this.complete(goalId);
     }
 
-	    State.save();
-	    // Mark dirty and debounce cloud sync
-	    dirtyTracker.markDirty('goal', goalId);
-	    debouncedGoalSync(goal);
-	    UI.scheduleRender();
-	    return goal;
-	  },
+    State.save();
+    // Mark dirty and debounce cloud sync
+    dirtyTracker.markDirty('goal', goalId);
+    debouncedGoalSync(goal);
+    UI.scheduleRender();
+    return goal;
+  },
 
-	  delete(goalId: string): void {
-	    if (!State.data) return;
-	    State.data.goals = State.data.goals.filter((g) => g.id !== goalId);
-	    State.save();
-	    UI.scheduleRender();
-	    // Cloud Delete
-	    SupabaseService.deleteGoal(goalId).catch(err => console.error('Failed to delete goal from cloud', err));
-	  },
+  delete(goalId: string): void {
+    if (!State.data) return;
+    State.data.goals = State.data.goals.filter((g) => g.id !== goalId);
+    State.save();
+    UI.scheduleRender();
+    // Cloud Delete
+    SupabaseService.deleteGoal(goalId).catch(err => console.error('Failed to delete goal from cloud', err));
+  },
 
   getById(goalId: string): Goal | undefined {
     if (!State.data) return undefined;
@@ -1320,32 +1345,32 @@ const Goals = {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     const currentWeek = State.getWeekNumber(now);
-    
+
     return State.data.goals.filter((g) => {
       if (g.level !== level) return false;
-      
+
       switch (level) {
         case 'vision':
           // Vision goals are for the entire year
           return g.year === currentYear;
-          
+
         case 'milestone':
           // Milestone goals are for a specific month
           return g.year === currentYear && g.month === currentMonth;
-          
+
         case 'focus':
           // Focus goals are for the current week
           if (g.year !== currentYear) return false;
           const goalWeek = State.getWeekNumber(new Date(g.year, g.month || 0, 1));
           return goalWeek === currentWeek;
-          
+
         case 'intention':
           // Intentions are for today only
           if (g.dueDate) {
             return new Date(g.dueDate).toDateString() === now.toDateString();
           }
           return g.year === currentYear && g.month === currentMonth;
-          
+
         default:
           return true;
       }
@@ -1359,33 +1384,33 @@ const Goals = {
     const weekNum = State.getWeekNumber(date);
     const year = date.getFullYear();
     const month = date.getMonth();
-    
+
     return State.data.goals.filter((g) => {
       // Skip completed goals unless specifically requested
       if (g.status === "done") return false;
-      
+
       switch (g.level) {
         case 'vision':
           // Show vision goals all year
           return g.year === year;
-          
+
         case 'milestone':
           // Show milestone goals for this month
           return g.year === year && g.month === month;
-          
+
         case 'focus':
           // Show focus goals for this week
           if (g.year !== year) return false;
           const goalWeek = State.getWeekNumber(new Date(g.year, g.month || 0, 1));
           return goalWeek === weekNum;
-          
+
         case 'intention':
           // Show intentions only for this specific day
           if (g.dueDate) {
             return new Date(g.dueDate).toDateString() === dateStr;
           }
           return g.year === year && g.month === month;
-          
+
         default:
           return true;
       }
@@ -1403,14 +1428,14 @@ const Goals = {
 
     State.save();
     // Mark dirty and debounce cloud sync
-	    dirtyTracker.markDirty('goal', goalId);
-	    debouncedGoalSync(goal);
-	    this.checkAchievements();
-	    UI.scheduleRender();
+    dirtyTracker.markDirty('goal', goalId);
+    debouncedGoalSync(goal);
+    this.checkAchievements();
+    UI.scheduleRender();
 
-	    // Trigger celebration
-	    UI.celebrate("✨", "Anchor updated", `"${goal.title}" marked done.`);
-	  },
+    // Trigger celebration
+    UI.celebrate("✨", "Anchor updated", `"${goal.title}" marked done.`);
+  },
 
   addSubtask(goalId: string, subtaskTitle: string): Subtask | null {
     const goal = this.getById(goalId);
@@ -3175,6 +3200,7 @@ const UI = {
   _renderRaf: null as number | null,
   _pendingViewTransition: false,
   _scrollResetRaf: null as number | null,
+  _mobileLayoutRaf: null as number | null,
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
   isMobileViewport(): boolean {
@@ -3220,6 +3246,8 @@ const UI = {
         // Re-render current view to adjust to new dimensions
         this.renderCurrentView();
       }
+
+      this.updateMobileLayoutVars();
     };
 
     apply();
@@ -3265,6 +3293,38 @@ const UI = {
     } else {
       controlCenter.appendChild(dateNav);
     }
+  },
+
+  updateMobileLayoutVars() {
+    if (this._mobileLayoutRaf !== null) {
+      cancelAnimationFrame(this._mobileLayoutRaf);
+    }
+
+    this._mobileLayoutRaf = requestAnimationFrame(() => {
+      this._mobileLayoutRaf = null;
+
+      const root = document.documentElement;
+      const isMobile = this.isMobileViewport();
+
+      if (!isMobile) {
+        root.style.removeProperty("--mobile-tab-bar-height");
+        root.style.removeProperty("--mobile-home-stats-height");
+        return;
+      }
+
+      const tabBar = document.getElementById("mobileTabBar");
+      const tabBarHeight = tabBar
+        ? Math.round(tabBar.getBoundingClientRect().height)
+        : 0;
+      root.style.setProperty("--mobile-tab-bar-height", `${tabBarHeight}px`);
+
+      const isMobileHomeView = document.body.classList.contains("mobile-home-view");
+      const timeStats = document.querySelector(".time-stats") as HTMLElement | null;
+      const statsHeight = isMobileHomeView && timeStats
+        ? Math.round(timeStats.getBoundingClientRect().height)
+        : 0;
+      root.style.setProperty("--mobile-home-stats-height", `${statsHeight}px`);
+    });
   },
   getCurrentLevel(): GoalLevel {
     switch (State.currentView) {
@@ -3403,7 +3463,7 @@ const UI = {
   updateSyncStatus(status: 'syncing' | 'synced' | 'error' | 'local'): void {
     const el = document.getElementById("syncStatus");
     const supportPanelEl = document.getElementById("supportPanelSyncStatus");
-    
+
     const updateElement = (element: HTMLElement | null) => {
       if (!element) return;
       const icon = element.querySelector(".sync-icon");
@@ -3523,6 +3583,20 @@ const UI = {
       celebrationTitle: document.getElementById("celebrationTitle") as HTMLElement | null,
       celebrationText: document.getElementById("celebrationText") as HTMLElement | null,
       confettiContainer: document.getElementById("confettiContainer") as HTMLElement | null,
+
+      // Mobile Home Elements
+      mobileHomeView: document.getElementById("mobileHomeView") as HTMLElement | null,
+      mobileDateDisplay: document.getElementById("mobileDateDisplay") as HTMLElement | null,
+      mobileNowContext: document.getElementById("mobileNowContext") as HTMLElement | null,
+      mobileTimeVis: document.getElementById("mobileTimeVis") as HTMLElement | null,
+      mobileTimeStats: document.getElementById("mobileTimeStats") as HTMLElement | null,
+      mobileGardenBloom: document.getElementById("mobileGardenBloom") as HTMLElement | null,
+      mobileBloomText: document.getElementById("mobileBloomText") as HTMLElement | null,
+      mobileAffirmationText: document.getElementById("mobileAffirmationText") as HTMLElement | null,
+      mobileUpcomingList: document.getElementById("mobileUpcomingList") as HTMLElement | null,
+      mobileSurpriseBtn: document.getElementById("mobileSurpriseBtn") as HTMLButtonElement | null,
+      mobileTabHome: document.querySelector('.mobile-tab[data-view="home"]') as HTMLElement | null,
+
       // ND Support elements (may not exist yet)
       brainDumpBtn: document.getElementById("brainDumpBtn") as HTMLElement | null,
       bodyDoubleBtn: document.getElementById("bodyDoubleBtn") as HTMLElement | null,
@@ -3544,18 +3618,13 @@ const UI = {
     });
 
     // Mobile tab bar
+    // Mobile tab bar
     document.querySelectorAll(".mobile-tab").forEach((tab) => {
       tab.addEventListener("click", () => {
         const view = (tab as HTMLElement).dataset.view;
-        if (view === "home") {
-          // Show sidebar as main content
-          document.body.classList.add("mobile-home-view");
-        } else {
-          // Switch to the selected view
-          document.body.classList.remove("mobile-home-view");
-          State.setView(view as ViewType);
-        }
+        State.setView(view as ViewType);
         this.syncViewButtons();
+        this.updateMobileLayoutVars();
       });
     });
 
@@ -3579,17 +3648,17 @@ const UI = {
         e.stopPropagation();
         this.openSupportPanel();
       });
-    
+
     // Support panel toggle buttons (desktop and mobile)
     const supportPanelToggleBtn = document.getElementById("supportPanelToggleBtn");
     const supportPanelToggleBtnMobile = document.getElementById("supportPanelToggleBtnMobile");
-    
+
     supportPanelToggleBtn?.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       this.openSupportPanel();
     });
-    
+
     supportPanelToggleBtnMobile?.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -3872,41 +3941,41 @@ const UI = {
         this.zoom(e.deltaY < 0 ? 10 : -10);
       }
     }, { passive: false });
-	  },
+  },
 
-	  scheduleRender(opts?: { transition?: boolean }) {
-	    if (opts?.transition) this._pendingViewTransition = true;
-	    if (this._renderRaf !== null) return;
+  scheduleRender(opts?: { transition?: boolean }) {
+    if (opts?.transition) this._pendingViewTransition = true;
+    if (this._renderRaf !== null) return;
 
-	    this._renderRaf = window.requestAnimationFrame(() => {
-	      this._renderRaf = null;
-	      const useViewTransition = this._pendingViewTransition;
-	      this._pendingViewTransition = false;
+    this._renderRaf = window.requestAnimationFrame(() => {
+      this._renderRaf = null;
+      const useViewTransition = this._pendingViewTransition;
+      this._pendingViewTransition = false;
 
-	      const doc = document as unknown as {
-	        startViewTransition?: (cb: () => void) => void;
-	      };
+      const doc = document as unknown as {
+        startViewTransition?: (cb: () => void) => void;
+      };
 
-	      if (useViewTransition && typeof doc.startViewTransition === "function") {
-	        doc.startViewTransition(() => {
-	          this.render();
-	        });
-	        return;
-	      }
+      if (useViewTransition && typeof doc.startViewTransition === "function") {
+        doc.startViewTransition(() => {
+          this.render();
+        });
+        return;
+      }
 
-	      this.render();
-	    });
-	  },
+      this.render();
+    });
+  },
 
-		  render() {
-		    if (this._renderRaf !== null) {
-		      cancelAnimationFrame(this._renderRaf);
-		      this._renderRaf = null;
-		      this._pendingViewTransition = false;
-		    }
+  render() {
+    if (this._renderRaf !== null) {
+      cancelAnimationFrame(this._renderRaf);
+      this._renderRaf = null;
+      this._pendingViewTransition = false;
+    }
 
-		    const navKey = (() => {
-	      const year = State.viewingYear;
+    const navKey = (() => {
+      const year = State.viewingYear;
       const month = State.viewingMonth;
       const week = State.viewingWeek;
       const day = State.viewingDate ? State.viewingDate.toISOString().slice(0, 10) : "";
@@ -3925,54 +3994,151 @@ const UI = {
       }
     })();
 
-	    const shouldResetScroll = navKey !== this._lastNavKey;
-	    this._lastNavKey = navKey;
+    const shouldResetScroll = navKey !== this._lastNavKey;
+    this._lastNavKey = navKey;
 
-	    // Mobile Day view should be readable at default scale; reset zoom only when navigating.
-	    if (
-	      shouldResetScroll &&
-	      this.isMobileViewport() &&
-	      State.currentView === VIEWS.DAY &&
-	      State.zoom !== 100
-	    ) {
-	      State.zoom = 100;
-	      if (this.elements.canvas) {
-	        this.elements.canvas.style.transform = `scale(${State.zoom / 100})`;
-	      }
-	      if (this.elements.zoomLevel) {
-	        this.elements.zoomLevel.textContent = `${State.zoom}%`;
-	      }
-	    }
+    // Mobile Day view should be readable at default scale; reset zoom only when navigating.
+    if (
+      shouldResetScroll &&
+      this.isMobileViewport() &&
+      State.currentView === VIEWS.DAY &&
+      State.zoom !== 100
+    ) {
+      State.zoom = 100;
+      if (this.elements.canvas) {
+        this.elements.canvas.style.transform = `scale(${State.zoom / 100})`;
+      }
+      if (this.elements.zoomLevel) {
+        this.elements.zoomLevel.textContent = `${State.zoom}%`;
+      }
+    }
 
-	    this.renderCurrentView();
-	    this.renderCategoryFilters();
-	    this.renderUpcomingGoals();
+    this.renderCurrentView();
+    this.renderCategoryFilters();
+    this.renderUpcomingGoals();
     this.updateDateDisplay();
     this.updateYearProgress();
-	    Streaks.check();
-	    this.updateStreakDisplay();
+    Streaks.check();
+    this.updateStreakDisplay();
+    this.updateYearProgress();
+    Streaks.check();
+    this.updateStreakDisplay();
 
-	    if (shouldResetScroll) {
-	      if (this._scrollResetRaf !== null) {
-	        cancelAnimationFrame(this._scrollResetRaf);
-	      }
+    // Mobile Home View Logic
+    const mobileHomeView = document.getElementById("mobileHomeView");
+    if (State.currentView === VIEWS.HOME) {
+      document.body.classList.add("mobile-home-view");
+      if (mobileHomeView) mobileHomeView.removeAttribute("hidden");
+      this.updateMobileHomeView();
+    } else {
+      document.body.classList.remove("mobile-home-view");
+      if (mobileHomeView) mobileHomeView.setAttribute("hidden", "");
+    }
 
-	      this._scrollResetRaf = requestAnimationFrame(() => {
-	        this._scrollResetRaf = null;
-	        const canvasContainer = this.elements.canvasContainer;
-	        if (canvasContainer) {
-	          canvasContainer.scrollTop = 0;
-	          canvasContainer.scrollLeft = 0;
-	        }
+    this.updateMobileLayoutVars();
+
+    if (shouldResetScroll) {
+      if (this._scrollResetRaf !== null) {
+        cancelAnimationFrame(this._scrollResetRaf);
+      }
+
+      this._scrollResetRaf = requestAnimationFrame(() => {
+        this._scrollResetRaf = null;
+        const canvasContainer = this.elements.canvasContainer;
+        if (canvasContainer) {
+          canvasContainer.scrollTop = 0;
+          canvasContainer.scrollLeft = 0;
+        }
 
         const appEl = document.querySelector(".app") as HTMLElement | null;
         if (appEl) appEl.scrollTop = 0;
 
-	        const scrollingElement = document.scrollingElement as HTMLElement | null;
-	        if (scrollingElement) scrollingElement.scrollTop = 0;
-	      });
-	    }
-	  },
+        const scrollingElement = document.scrollingElement as HTMLElement | null;
+        if (scrollingElement) scrollingElement.scrollTop = 0;
+      });
+    }
+  },
+
+  updateMobileHomeView() {
+    if (!State.data) return;
+
+    // 1. Update Date
+    if (this.elements.mobileDateDisplay) {
+      this.elements.mobileDateDisplay.textContent = new Date().toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+    }
+
+    // 2. Update Context (Now Panel)
+    if (this.elements.mobileNowContext) {
+      // Reuse logic from updateTimeDisplay or context calculation
+      const now = new Date();
+      const hour = now.getHours();
+      let context = "";
+      if (hour < 12) context = "Good Morning";
+      else if (hour < 18) context = "Good Afternoon";
+      else context = "Good Evening";
+      this.elements.mobileNowContext.textContent = context;
+    }
+
+    // 3. Update Stats (Time Vis)
+    if (this.elements.mobileTimeVis) {
+      // Simple visual representation or text stats
+      const breakdown = TimeBreakdown.calculate(State.viewingMonth, State.viewingYear);
+      if (breakdown.isCurrentMonth) {
+        this.elements.mobileTimeVis.innerHTML = `
+           <div class="time-stat-mobile">
+             <span class="stat-value">${breakdown.days}</span>
+             <span class="stat-label">Days Left</span>
+           </div>
+         `;
+      } else {
+        this.elements.mobileTimeVis.innerHTML = '';
+      }
+    }
+
+    // 4. Update Bloom (Progress)
+    if (this.elements.mobileBloomText) {
+      const stats = Goals.getStats();
+      const completed = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+      this.elements.mobileBloomText.textContent = `${completed}% In Bloom`;
+    }
+
+    if (this.elements.mobileGardenBloom && this.elements.mobileGardenBloom.children.length === 0) {
+      const desktopFlower = document.querySelector('.flower-container');
+      if (desktopFlower) {
+        this.elements.mobileGardenBloom.appendChild(desktopFlower.cloneNode(true));
+      }
+    }
+
+    // 5. Update Affirmation
+    if (this.elements.mobileAffirmationText) {
+      // Use existing affirmation text or preference
+      const affirmation = this.elements.affirmationText?.textContent || "You are doing great.";
+      this.elements.mobileAffirmationText.textContent = affirmation;
+    }
+
+    // 6. Update Upcoming List
+    if (this.elements.mobileUpcomingList) {
+      const goals = Goals.getAll().filter(g => g.status !== 'done' && g.dueDate);
+      // Sort by due date
+      goals.sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime());
+      const upcoming = goals.slice(0, 3);
+
+      if (upcoming.length > 0) {
+        this.elements.mobileUpcomingList.innerHTML = upcoming.map(g => `
+                <div class="mobile-goal-item">
+                    <span class="goal-time">${new Date(g.dueDate!).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                    <span class="goal-title">${this.escapeHtml(g.title)}</span>
+                </div>
+            `).join('');
+      } else {
+        this.elements.mobileUpcomingList.innerHTML = '<div class="empty-state-small">No upcoming deadlines</div>';
+      }
+    }
+  },
 
   // Render based on current view
   renderCurrentView() {
@@ -3983,15 +4149,15 @@ const UI = {
     }
     console.log("renderCurrentView: rendering view", State.currentView);
 
-	    // Update view button states
-	    this.syncViewButtons();
+    // Update view button states
+    this.syncViewButtons();
 
-	    if (State.currentView !== VIEWS.DAY && this.dayViewController) {
-	      this.dayViewController.unmount();
-	      this.dayViewController = null;
-	    }
+    if (State.currentView !== VIEWS.DAY && this.dayViewController) {
+      this.dayViewController.unmount();
+      this.dayViewController = null;
+    }
 
-	    switch (State.currentView) {
+    switch (State.currentView) {
       case VIEWS.YEAR:
         this.renderCalendar();
         break;
@@ -4003,6 +4169,9 @@ const UI = {
         break;
       case VIEWS.DAY:
         this.renderDayView();
+        break;
+      case VIEWS.HOME:
+        // Do nothing for main grid, overlay is handled in render()
         break;
       default:
         this.renderCalendar();
@@ -4274,13 +4443,13 @@ const UI = {
       this.dayViewController = new DayViewController(
         container,
         {
-	          onGoalUpdate: (goalId: string, updates: Partial<Goal>) => {
-	            Goals.update(goalId, updates);
-	            // Re-render to update the view
-	            if (this.dayViewController) {
-	              this.dayViewController.setGoals(State.viewingDate, State.data?.goals || []);
-	            }
-	          },
+          onGoalUpdate: (goalId: string, updates: Partial<Goal>) => {
+            Goals.update(goalId, updates);
+            // Re-render to update the view
+            if (this.dayViewController) {
+              this.dayViewController.setGoals(State.viewingDate, State.data?.goals || []);
+            }
+          },
           onGoalClick: (goalId: string) => {
             this.showGoalDetail(goalId);
           },
@@ -4856,7 +5025,7 @@ const UI = {
     const priorityGroup = document.querySelector('label[for="goalPriority"]')?.parentElement as HTMLElement;
     const durationGroup = document.getElementById('visionDurationGroup') as HTMLElement;
     const submitBtn = document.querySelector('#goalForm button[type="submit"]') as HTMLElement;
-    
+
     // Update submit button text based on goal level
     if (submitBtn) {
       if (level === "vision") submitBtn.textContent = "Create Vision";
@@ -4903,7 +5072,7 @@ const UI = {
     setTimeout(() => this.updateGoalModalTimeBreakdown(), 0);
 
     this.elements.goalModal?.classList.add("active");
-    
+
     // Scroll focused input into view on mobile when keyboard appears
     if (this.isMobileViewport()) {
       // Wait for modal animation to complete, then focus and scroll first input
@@ -4917,7 +5086,7 @@ const UI = {
           }, 100);
         }
       }, 300);
-      
+
       // Also handle focus events on inputs to scroll them into view when keyboard appears
       const handleInputFocus = (e: FocusEvent) => {
         const target = e.target as HTMLElement;
@@ -4927,7 +5096,7 @@ const UI = {
           }, 150);
         }
       };
-      
+
       // Store handler reference for cleanup
       const modal = this.elements.goalModal;
       if (modal) {

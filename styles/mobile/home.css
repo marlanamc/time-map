@@ -1,0 +1,157 @@
+/* Mobile Home View Styles */
+.mobile-home-view {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    /* Ensure it sits above the canvas but below the tab bar if needed, 
+       though tab bar usually has higher z-index. 
+       Let's check z-indices. */
+    background: var(--bg-base);
+    overflow-y: auto;
+    padding: var(--space-4) var(--space-4) calc(var(--mobile-tab-bar-height) + var(--space-6));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    /* Improve scrolling */
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-2);
+    min-height: 40px;
+}
+
+.current-date-small {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.mobile-home-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-bottom: var(--space-8);
+    /* Extra padding for bottom scroll */
+}
+
+.mobile-card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.card-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    font-weight: 600;
+}
+
+/* Time Card */
+.now-context-mobile {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.time-stats-row {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+}
+
+.time-stat-mobile {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+/* Bloom Card */
+.bloom-card {
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);
+}
+
+.garden-bloom-mobile {
+    height: 120px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Affirmation Card */
+.affirmation-card {
+    background: linear-gradient(135deg, var(--accent-subtle) 0%, var(--bg-surface) 100%);
+    border-color: var(--accent-muted);
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.card-icon {
+    font-size: 1.5rem;
+}
+
+.affirmation-text-mobile {
+    font-style: italic;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: var(--text-sm);
+}
+
+/* Upcoming Card */
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.upcoming-list-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.mobile-goal-item {
+    padding: var(--space-3);
+    background: var(--bg-base);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+}
+
+/* Night Mode Overrides */
+:root.night-garden .mobile-card {
+    backdrop-filter: blur(10px);
+}
+
+/* Hide 'You Are Here' panel in sidebar on mobile since it's now in Home view */
+@media (max-width: 768px) {
+    .sidebar .now-panel {
+        display: none !important;
+    }
+}

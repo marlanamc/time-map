@@ -1,6 +1,6 @@
 // Type definitions for Time Map application
 
-export type ViewType = "year" | "month" | "week" | "day";
+export type ViewType = 'year' | 'month' | 'week' | 'day' | 'home';
 export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
 export type GoalStatus = "not-started" | "in-progress" | "done" | "blocked";
 export type Priority = "low" | "medium" | "high" | "urgent";

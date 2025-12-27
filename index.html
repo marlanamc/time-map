@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description"
         content="The Garden Fence is an ADHD-friendly focus tool that helps you set boundaries and watch your day bloom." />
     <meta name="theme-color" content="#6F9B86" />
@@ -72,6 +73,7 @@
     <link rel="stylesheet" href="styles/dayView/cards.css" />
     <link rel="stylesheet" href="styles/dayView/drag.css" />
     <link rel="stylesheet" href="styles/dayView/responsive.css" />
+    <link rel="stylesheet" href="styles/mobile/home.css" />
 </head>
 
 <body>
@@ -98,6 +100,55 @@
     <button class="focus-handle" id="focusHandle" type="button" aria-label="Toggle focus controls" hidden></button>
     <button class="layout-handle" id="layoutHandle" type="button" aria-label="Show top bar" hidden></button>
     <button class="sidebar-handle" id="sidebarHandle" type="button" aria-label="Show sidebar" hidden></button>
+
+    <!-- Mobile Home View (Distinct from Desktop Sidebar) -->
+    <div id="mobileHomeView" class="mobile-home-view" hidden>
+        <!-- Content will be populated by JS or replicated here -->
+        <header class="mobile-home-header">
+            <div class="logo-text">The Garden Fence</div>
+            <div class="current-date-small" id="mobileDateDisplay"></div>
+        </header>
+
+        <div class="mobile-home-content">
+            <!-- You Are Here -->
+            <section class="mobile-card time-card">
+                <div class="card-label">You Are Here</div>
+                <div class="now-context-mobile" id="mobileNowContext"></div>
+                <div class="time-visualization-mobile" id="mobileTimeVis"></div>
+                <div class="time-stats-row" id="mobileTimeStats">
+                    <!-- populated by JS -->
+                </div>
+            </section>
+
+            <!-- Daily Bloom -->
+            <section class="mobile-card bloom-card">
+                <div class="card-label">Daily Bloom</div>
+                <div class="garden-bloom-mobile" id="mobileGardenBloom">
+                    <!-- Clone of flower SVG will go here -->
+                </div>
+                <div class="bloom-stats-mobile">
+                    <span id="mobileBloomText">Growing...</span>
+                </div>
+            </section>
+
+            <!-- Affirmation -->
+            <section class="mobile-card affirmation-card" id="mobileAffirmationCard">
+                <div class="card-icon">✨</div>
+                <div class="affirmation-text-mobile" id="mobileAffirmationText">
+                    "You're doing better than you think."
+                </div>
+            </section>
+
+            <!-- What's Next -->
+            <section class="mobile-card upcoming-card">
+                <div class="card-header-row">
+                    <div class="card-label">Coming Up</div>
+                    <button class="btn-xs btn-ghost" id="mobileSurpriseBtn">Surprise Me</button>
+                </div>
+                <div id="mobileUpcomingList" class="upcoming-list-mobile"></div>
+            </section>
+        </div>
+    </div>
 
     <!-- Main App -->
     <div class="app">
@@ -179,13 +230,14 @@
 
                 <!-- Garden Sound Controls -->
                 <div class="sound-controls">
-                    <button class="sound-toggle" id="soundToggle" aria-label="Toggle ambient sounds" title="Toggle garden sounds">
+                    <button class="sound-toggle" id="soundToggle" aria-label="Toggle ambient sounds"
+                        title="Toggle garden sounds">
                         <span class="sound-icon" id="soundIcon">🔇</span>
                         <span class="sound-label">Garden Sounds</span>
                     </button>
                     <div class="sound-volume-container" id="soundVolumeContainer" style="display: none;">
-                        <input type="range" id="soundVolume" min="0" max="100" value="50"
-                               aria-label="Sound volume" class="sound-slider" />
+                        <input type="range" id="soundVolume" min="0" max="100" value="50" aria-label="Sound volume"
+                            class="sound-slider" />
                         <span class="volume-label" id="volumeLabel">50%</span>
                     </div>
                 </div>
@@ -294,8 +346,8 @@
                         <div class="category-filters" id="categoryFilters" role="group" aria-labelledby="filter-label">
                         </div>
                     </div>
-                    <button class="btn btn-ghost btn-icon support-panel-toggle-btn" id="supportPanelToggleBtn" type="button" aria-label="Open support tools"
-                        title="Support Tools">
+                    <button class="btn btn-ghost btn-icon support-panel-toggle-btn" id="supportPanelToggleBtn"
+                        type="button" aria-label="Open support tools" title="Support Tools">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
                             <path d="M4 4h6v6H4z"></path>
@@ -308,10 +360,10 @@
             </div>
 
             <!-- Mobile Support Panel Button (shown only on mobile) -->
-            <button class="header-mobile-support-btn support-panel-toggle-btn" id="supportPanelToggleBtnMobile" type="button" aria-label="Open support tools"
-                title="Support Tools" hidden>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <button class="header-mobile-support-btn support-panel-toggle-btn" id="supportPanelToggleBtnMobile"
+                type="button" aria-label="Open support tools" title="Support Tools" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" width="20" height="20">
                     <path d="M4 4h6v6H4z"></path>
                     <path d="M14 4h6v6h-6z"></path>
                     <path d="M4 14h6v6H4z"></path>
@@ -449,8 +501,7 @@
 
     <!-- Support Tools Panel (right drawer) -->
     <div class="support-panel-overlay" id="supportPanelOverlay" hidden>
-        <aside class="support-panel" id="supportPanel" role="dialog" aria-modal="true"
-            aria-label="Support tools panel">
+        <aside class="support-panel" id="supportPanel" role="dialog" aria-modal="true" aria-label="Support tools panel">
             <div class="support-panel-header">
                 <h2 class="support-panel-title">Support Tools</h2>
                 <button class="btn btn-ghost btn-icon support-panel-close" id="supportPanelClose" type="button"
@@ -478,10 +529,10 @@
                     <span class="support-panel-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
                             <path
-                                d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
-                            <path
-                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z"></path>
+                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z">
+                            </path>
                         </svg>
                     </span>
                     <span class="support-panel-text">
@@ -494,11 +545,13 @@
 
                 <!-- Focus Mode Toggle -->
                 <div class="support-panel-focus-toggle">
-                    <label for="supportPanelFocusToggle" class="support-panel-focus-label" id="support-panel-focus-label">
+                    <label for="supportPanelFocusToggle" class="support-panel-focus-label"
+                        id="support-panel-focus-label">
                         Focus (reduce visual noise)
                     </label>
                     <button class="toggle-switch" id="supportPanelFocusToggle" role="switch" aria-checked="false"
-                        aria-labelledby="support-panel-focus-label" aria-describedby="support-panel-focus-desc"></button>
+                        aria-labelledby="support-panel-focus-label"
+                        aria-describedby="support-panel-focus-desc"></button>
                     <span class="sr-only" id="support-panel-focus-desc">Focus reduces visual noise. It doesn't track
                         productivity.</span>
                 </div>
@@ -555,10 +608,10 @@
                     <span class="support-panel-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
                             <path
-                                d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
-                            <path
-                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z"></path>
+                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z">
+                            </path>
                         </svg>
                     </span>
                     <span class="support-panel-text">
@@ -608,17 +661,17 @@
     <nav class="mobile-tab-bar" id="mobileTabBar" role="tablist" aria-label="Main navigation">
         <button class="mobile-tab active" data-view="home" role="tab" aria-selected="true">
             <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"></path>
                 </svg>
             </span>
-            <span class="mobile-tab-label">Home</span>
+            <span class="mobile-tab-label">You Are Here</span>
         </button>
         <button class="mobile-tab" data-view="day" role="tab" aria-selected="false">
             <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <circle cx="12" cy="12" r="4"></circle>
                     <path d="M12 2v2"></path>
                     <path d="M12 20v2"></path>
@@ -634,8 +687,8 @@
         </button>
         <button class="mobile-tab" data-view="week" role="tab" aria-selected="false">
             <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <path d="M3 3v18h18"></path>
                     <path d="M18 17V9"></path>
                     <path d="M13 17V5"></path>
@@ -646,8 +699,8 @@
         </button>
         <button class="mobile-tab" data-view="month" role="tab" aria-selected="false">
             <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <path d="M8 2v4"></path>
                     <path d="M16 2v4"></path>
                     <rect x="3" y="4" width="18" height="18" rx="2"></rect>
@@ -658,8 +711,8 @@
         </button>
         <button class="mobile-tab" data-view="year" role="tab" aria-selected="false">
             <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <path d="M12 22v-7"></path>
                     <path d="M5 10c0-4 3-8 7-8s7 4 7 8"></path>
                     <path d="M5 10h14"></path>
