@@ -21,12 +21,26 @@ export class CelestialBodies {
       this.updateContainerDimensions();
       this.update();
     });
+
+    // Listen to visual viewport changes (mobile URL bar show/hide)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        this.updateContainerDimensions();
+        this.update();
+      });
+    }
   }
 
   private updateContainerDimensions(): void {
-    // Use window dimensions for positioning
-    this.containerWidth = window.innerWidth;
-    this.containerHeight = window.innerHeight;
+    // Use visualViewport if available (better mobile support)
+    if (window.visualViewport) {
+      this.containerWidth = window.visualViewport.width;
+      this.containerHeight = window.visualViewport.height;
+    } else {
+      // Fallback for older browsers
+      this.containerWidth = document.documentElement.clientWidth || window.innerWidth;
+      this.containerHeight = document.documentElement.clientHeight || window.innerHeight;
+    }
   }
 
   /**
@@ -80,19 +94,21 @@ export class CelestialBodies {
     const progress = hoursActive / 12;
 
     // Horizontal position (10% to 90% of width)
-    const x = 10 + (progress * 80);
+    const xPercent = 10 + (progress * 80);
 
     // Vertical position (create arc)
     // Use parabolic curve: highest at midpoint
-    const y = 70 - (position * 0.6); // Top of sky is 10%, bottom is 70%
+    const yPercent = 70 - (position * 0.6); // Top of sky is 10%, bottom is 70%
 
-    // Apply transform
-    element.style.transform = `translate(${x}vw, ${y}vh)`;
-    element.style.opacity = '1';
-
-    // Add scale effect (bigger at zenith)
     const scale = 0.8 + (position / 100) * 0.4; // Scale from 0.8 to 1.2
-    element.style.transform += ` scale(${scale})`;
+
+    // Convert to pixel positions (visualViewport-aware) to avoid mobile URL bar jank.
+    const xPx = (xPercent / 100) * this.containerWidth;
+    const yPx = (yPercent / 100) * this.containerHeight;
+
+    // Apply transform with a safe-area offset for mobile (CSS variable)
+    element.style.transform = `translate3d(${xPx}px, calc(${yPx}px + var(--celestial-offset, 0px)), 0) scale(${scale})`;
+    element.style.opacity = '1';
   }
 
   /**

@@ -1,0 +1,487 @@
+/* Day View Drag & Drop - Botanical Greenhouse Drag States */
+
+/* ============================================
+   DRAG STATE - BODY CLASSES
+   ============================================ */
+
+body.is-dragging {
+  cursor: grabbing !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body.is-dragging * {
+  cursor: grabbing !important;
+}
+
+body.is-dragging-seed .day-goal-variant-seed[draggable="true"] {
+  cursor: grabbing;
+}
+
+body.is-dragging-planter .day-goal-variant-planter[draggable="true"] {
+  cursor: grabbing;
+}
+
+/* Prevent text selection during touch drag */
+body.is-touch-dragging-seed {
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+body.is-touch-dragging-seed .day-view-container {
+  touch-action: none;
+}
+
+/* ============================================
+   DRAGGABLE ELEMENTS
+   ============================================ */
+
+[draggable="true"] {
+  cursor: grab;
+  touch-action: none;
+}
+
+[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+[draggable="true"][aria-grabbed="true"] {
+  opacity: 0.5;
+  transform: scale(0.95);
+  transition: all 0.2s ease;
+}
+
+/* ============================================
+   GHOST ELEMENT (Drag Preview)
+   ============================================ */
+
+.drag-ghost {
+  position: fixed;
+  z-index: 3000;
+  pointer-events: none;
+  opacity: 0.95;
+  transform: translate(-50%, -50%) rotate(-2deg);
+  box-shadow:
+    0 12px 40px rgba(180, 106, 74, 0.3),
+    0 24px 80px rgba(111, 155, 134, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+  filter: brightness(1.05) saturate(1.1);
+  animation: ghostFloat 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  border-color: var(--sage, #6F9B86) !important;
+}
+
+@keyframes ghostFloat {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(-2deg) scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+/* Pulsing glow effect on ghost */
+.drag-ghost::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  background: radial-gradient(circle,
+    rgba(111, 155, 134, 0.3) 0%,
+    transparent 70%);
+  border-radius: inherit;
+  animation: ghostGlow 1.5s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes ghostGlow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.night-garden .drag-ghost {
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.6),
+    0 24px 80px rgba(140, 183, 217, 0.2),
+    0 0 0 1px rgba(140, 183, 217, 0.3);
+  filter: brightness(1.15) saturate(1.2);
+}
+
+/* ============================================
+   DROP ZONES
+   ============================================ */
+
+[data-drop-zone="true"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Active drop zone (when drag starts) */
+.day-bed-canvas.is-drop-target {
+  outline: 2px dashed rgba(111, 155, 134, 0.4);
+  outline-offset: 8px;
+  background:
+    radial-gradient(1200px 700px at 40% -10%,
+      rgba(111, 155, 134, 0.18) 0%,
+      transparent 60%),
+    linear-gradient(180deg,
+      rgba(111, 155, 134, 0.14) 0%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(180, 106, 74, 0.10) 100%);
+  animation: dropZonePulse 2s ease-in-out infinite;
+}
+
+@keyframes dropZonePulse {
+  0%, 100% { outline-color: rgba(111, 155, 134, 0.4); }
+  50% { outline-color: rgba(111, 155, 134, 0.6); }
+}
+
+/* Drop zone when hovering over it */
+.day-bed-canvas.is-drop-over {
+  outline-color: var(--sage, #6F9B86);
+  outline-width: 3px;
+  outline-style: solid;
+  outline-offset: 6px;
+  background:
+    radial-gradient(1200px 700px at 40% -10%,
+      rgba(111, 155, 134, 0.25) 0%,
+      transparent 60%),
+    linear-gradient(180deg,
+      rgba(111, 155, 134, 0.20) 0%,
+      rgba(255, 255, 255, 0.30) 50%,
+      rgba(180, 106, 74, 0.12) 100%);
+  box-shadow:
+    inset 0 2px 16px rgba(111, 155, 134, 0.15),
+    inset 0 -2px 16px rgba(180, 106, 74, 0.08),
+    0 0 40px rgba(111, 155, 134, 0.2);
+}
+
+.night-garden .day-bed-canvas.is-drop-target {
+  outline-color: rgba(111, 155, 134, 0.5);
+  background:
+    radial-gradient(1200px 700px at 40% -10%,
+      rgba(111, 155, 134, 0.25) 0%,
+      transparent 70%),
+    linear-gradient(180deg,
+      rgba(15, 23, 42, 0.65) 0%,
+      rgba(8, 12, 26, 0.85) 50%,
+      rgba(30, 41, 79, 0.18) 100%);
+}
+
+.night-garden .day-bed-canvas.is-drop-over {
+  outline-color: var(--sage, #6F9B86);
+  background:
+    radial-gradient(1200px 700px at 40% -10%,
+      rgba(111, 155, 134, 0.35) 0%,
+      transparent 70%),
+    linear-gradient(180deg,
+      rgba(15, 23, 42, 0.70) 0%,
+      rgba(8, 12, 26, 0.90) 50%,
+      rgba(30, 41, 79, 0.22) 100%);
+  box-shadow:
+    inset 0 2px 16px rgba(111, 155, 134, 0.2),
+    inset 0 -2px 16px rgba(30, 41, 79, 0.15),
+    0 0 40px rgba(111, 155, 134, 0.3);
+}
+
+/* ============================================
+   DROP INDICATOR LINE (Visual feedback)
+   ============================================ */
+
+.drop-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--sage, #6F9B86) 10%,
+    var(--sage, #6F9B86) 90%,
+    transparent 100%);
+  pointer-events: none;
+  z-index: 100;
+  box-shadow:
+    0 0 12px rgba(111, 155, 134, 0.6),
+    0 0 24px rgba(111, 155, 134, 0.3);
+  animation: dropIndicatorPulse 1s ease-in-out infinite;
+}
+
+@keyframes dropIndicatorPulse {
+  0%, 100% { opacity: 0.8; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.5); }
+}
+
+.drop-indicator::before {
+  content: "";
+  position: absolute;
+  left: var(--time-gutter, 72px);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  background: var(--sage, #6F9B86);
+  border-radius: 50%;
+  box-shadow:
+    0 0 16px rgba(111, 155, 134, 0.8),
+    0 0 32px rgba(111, 155, 134, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.drop-indicator::after {
+  content: attr(data-time);
+  position: absolute;
+  left: calc(var(--time-gutter, 72px) + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.375rem 0.75rem;
+  background: var(--sage, #6F9B86);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-radius: 8px;
+  white-space: nowrap;
+  box-shadow:
+    0 4px 12px rgba(111, 155, 134, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.02em;
+}
+
+/* ============================================
+   DRAG OVER CARD STATES
+   ============================================ */
+
+.day-goal-card.drag-over {
+  border-color: var(--sage, #6F9B86);
+  box-shadow:
+    0 0 0 3px rgba(111, 155, 134, 0.2),
+    0 8px 24px rgba(111, 155, 134, 0.25);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* ============================================
+   SEED CARD SPECIFIC DRAG STATES
+   ============================================ */
+
+.day-goal-variant-seed[draggable="true"]:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 16px rgba(111, 155, 134, 0.15),
+    0 12px 32px rgba(180, 106, 74, 0.08);
+  cursor: grab;
+}
+
+.day-goal-variant-seed[draggable="true"]:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+body.is-dragging-seed .day-goal-variant-seed:not([aria-grabbed="true"]) {
+  opacity: 0.6;
+  transform: scale(0.97);
+  filter: saturate(0.7);
+}
+
+/* ============================================
+   PLANTER CARD SPECIFIC DRAG STATES
+   ============================================ */
+
+.day-goal-variant-planter[draggable="true"]:hover {
+  cursor: grab;
+  border-color: rgba(180, 106, 74, 0.4);
+}
+
+.day-goal-variant-planter[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+body.is-dragging-planter .day-goal-variant-planter:not([aria-grabbed="true"]) {
+  opacity: 0.5;
+  filter: saturate(0.7);
+}
+
+/* ============================================
+   RESIZE STATES
+   ============================================ */
+
+body.is-resizing {
+  cursor: ns-resize !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body.is-resizing * {
+  cursor: ns-resize !important;
+}
+
+.day-goal-variant-planter.is-resizing {
+  z-index: 100;
+  outline: 2px solid var(--earth, #B46A4A);
+  outline-offset: 2px;
+  box-shadow:
+    0 8px 32px rgba(180, 106, 74, 0.3),
+    0 16px 64px rgba(111, 155, 134, 0.15);
+}
+
+.planter-resize-handle.is-resizing::before {
+  background: var(--earth, #B46A4A);
+  width: 48px;
+  height: 6px;
+  box-shadow: 0 0 12px rgba(180, 106, 74, 0.6);
+}
+
+/* ============================================
+   DRAG FEEDBACK ANIMATIONS
+   ============================================ */
+
+/* Successful drop animation */
+@keyframes dropSuccess {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.day-goal-card.drop-success {
+  animation: dropSuccess 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-color: var(--success, #10b981);
+  box-shadow:
+    0 0 0 4px rgba(16, 185, 129, 0.2),
+    0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+/* Failed drop animation */
+@keyframes dropFail {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.day-goal-card.drop-fail {
+  animation: dropFail 0.4s ease;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ============================================
+   TOUCH DRAG ENHANCEMENTS
+   ============================================ */
+
+/* Enlarge touch targets on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .planter-resize-handle {
+    height: 24px;
+  }
+
+  .planter-resize-handle::before {
+    height: 5px;
+    width: 40px;
+  }
+
+  [draggable="true"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Long press visual feedback */
+.day-goal-card.long-press-active {
+  animation: longPressScale 0.2s ease forwards;
+}
+
+@keyframes longPressScale {
+  0% { transform: scale(1); }
+  100% { transform: scale(0.95); }
+}
+
+/* ============================================
+   HAPTIC FEEDBACK INDICATOR
+   ============================================ */
+
+/* Ripple effect on drag start (touch devices) */
+.drag-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(111, 155, 134, 0.4) 0%,
+    transparent 70%);
+  pointer-events: none;
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY - KEYBOARD DRAG STATES
+   ============================================ */
+
+.day-goal-card[aria-grabbed="true"]:focus-visible {
+  outline: 3px solid var(--sage, #6F9B86);
+  outline-offset: 4px;
+  box-shadow:
+    0 0 0 6px rgba(111, 155, 134, 0.2),
+    0 8px 24px rgba(111, 155, 134, 0.3);
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .drag-ghost,
+  .drop-indicator,
+  .day-goal-card.drop-success,
+  .day-goal-card.drop-fail,
+  .day-goal-card.long-press-active,
+  .drag-ripple {
+    animation: none;
+  }
+
+  .drag-ghost::after {
+    animation: none;
+  }
+
+  .day-bed-canvas.is-drop-target {
+    animation: none;
+  }
+
+  [draggable="true"][aria-grabbed="true"] {
+    transition: none;
+  }
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* Use GPU acceleration for drag elements */
+.drag-ghost,
+.drop-indicator,
+.day-goal-card.is-resizing,
+[draggable="true"][aria-grabbed="true"] {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Clean up will-change after drag ends */
+body:not(.is-dragging) .day-goal-card,
+body:not(.is-resizing) .day-goal-variant-planter {
+  will-change: auto;
+}

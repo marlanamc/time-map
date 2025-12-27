@@ -32,6 +32,12 @@ import { SupabaseService } from './services/SupabaseService';
 import { AuthComponent } from './components/Auth';
 import { ModalManager } from './utils/modalManager';
 import { GardenEngine } from './garden/gardenEngine';
+import { debouncedGoalSync, throttledPreferencesSync } from './utils/syncHelpers';
+import { dirtyTracker } from './services/DirtyTracker';
+import { batchSaveService } from './services/BatchSaveService';
+import { cacheService } from './services/CacheService';
+import { DayViewController } from './components/dayView/DayViewController';
+import { ThemeManager } from './theme/ThemeManager';
 
 // UI Elements interface for proper typing
 interface UIElements {
@@ -763,6 +769,11 @@ const State: AppState & {
       // Load cloud data
       console.log('User logged in, loading cloud data...');
       await this.load();
+
+      // Start optimization services
+      batchSaveService.start();
+      await cacheService.warmCache(user.id);
+      console.log('✓ Performance optimization services started');
     }
 
     if (!this.data) {
@@ -810,7 +821,7 @@ const State: AppState & {
   // Navigate views
   setView(view: ViewType) {
     this.currentView = view;
-    UI.render();
+    UI.scheduleRender({ transition: true });
     UI.syncViewButtons?.();
   },
 
@@ -842,7 +853,7 @@ const State: AppState & {
         this.goToDate(d);
         break;
     }
-    UI.render();
+    UI.scheduleRender({ transition: true });
   },
 
   getDefaultData(): AppData {
@@ -857,7 +868,9 @@ const State: AppState & {
         focusMode: false,
         reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)")
           .matches,
-        theme: "day",
+        theme: window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "night"
+          : "day",
         defaultView: VIEWS.YEAR,
         layout: {
           showHeader: true,
@@ -1039,15 +1052,10 @@ const State: AppState & {
         // Local backup always
         localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
 
-        // Cloud save - simplified for now, ideally should be granular
+        // Cloud save - use throttled sync for preferences (max once per 5s)
         const user = await SupabaseService.getUser();
-        if (user) {
-          // We can't save everything at once easily without a huge payload.
-          // We should rely on granular updates.
-          // So this save() might just be for preferences?
-          if (this.data.preferences) {
-            await SupabaseService.savePreferences(this.data.preferences);
-          }
+        if (user && this.data.preferences) {
+          throttledPreferencesSync(this.data.preferences);
         }
       }
     } catch (e) {
@@ -1157,18 +1165,17 @@ const Goals = {
     State.data.analytics.goalsCreated++;
     State.save();
 
-    // Cloud Save
+    // Mark dirty and debounce cloud sync (instant local, deferred cloud)
+    dirtyTracker.markDirty('goal', goal.id);
     UI.updateSyncStatus('syncing');
-    SupabaseService.saveGoal(goal)
-      .then(() => UI.updateSyncStatus('synced'))
-      .catch(err => {
-        console.error('Failed to save goal to cloud', err);
-        UI.updateSyncStatus('error');
-      });
+    debouncedGoalSync(goal);
+	    // UI will update to 'synced' after successful cloud sync
+	    setTimeout(() => UI.updateSyncStatus('synced'), 2100); // After debounce completes
 
-    this.checkAchievements();
-    return goal;
-  },
+	    this.checkAchievements();
+	    UI.scheduleRender();
+	    return goal;
+	  },
 
   update(goalId: string, updates: Partial<Goal>): Goal | null {
     const goal = this.getById(goalId);
@@ -1250,19 +1257,22 @@ const Goals = {
       this.complete(goalId);
     }
 
-    State.save();
-    // Cloud Save
-    SupabaseService.saveGoal(goal).catch(err => console.error('Failed to update goal to cloud', err));
-    return goal;
-  },
+	    State.save();
+	    // Mark dirty and debounce cloud sync
+	    dirtyTracker.markDirty('goal', goalId);
+	    debouncedGoalSync(goal);
+	    UI.scheduleRender();
+	    return goal;
+	  },
 
-  delete(goalId: string): void {
-    if (!State.data) return;
-    State.data.goals = State.data.goals.filter((g) => g.id !== goalId);
-    State.save();
-    // Cloud Delete
-    SupabaseService.deleteGoal(goalId).catch(err => console.error('Failed to delete goal from cloud', err));
-  },
+	  delete(goalId: string): void {
+	    if (!State.data) return;
+	    State.data.goals = State.data.goals.filter((g) => g.id !== goalId);
+	    State.save();
+	    UI.scheduleRender();
+	    // Cloud Delete
+	    SupabaseService.deleteGoal(goalId).catch(err => console.error('Failed to delete goal from cloud', err));
+	  },
 
   getById(goalId: string): Goal | undefined {
     if (!State.data) return undefined;
@@ -1392,13 +1402,15 @@ const Goals = {
     State.data.analytics.goalsCompleted++;
 
     State.save();
-    // Cloud Save
-    SupabaseService.saveGoal(goal).catch(err => console.error('Failed to complete goal to cloud', err));
-    this.checkAchievements();
+    // Mark dirty and debounce cloud sync
+	    dirtyTracker.markDirty('goal', goalId);
+	    debouncedGoalSync(goal);
+	    this.checkAchievements();
+	    UI.scheduleRender();
 
-    // Trigger celebration
-    UI.celebrate("✨", "Anchor updated", `"${goal.title}" marked done.`);
-  },
+	    // Trigger celebration
+	    UI.celebrate("✨", "Anchor updated", `"${goal.title}" marked done.`);
+	  },
 
   addSubtask(goalId: string, subtaskTitle: string): Subtask | null {
     const goal = this.getById(goalId);
@@ -1414,8 +1426,9 @@ const Goals = {
     goal.subtasks.push(subtask);
     goal.updatedAt = new Date().toISOString();
     State.save();
-    // Cloud Save
-    SupabaseService.saveGoal(goal).catch(err => console.error('Failed to add subtask to cloud', err));
+    // Mark dirty and debounce cloud sync
+    dirtyTracker.markDirty('goal', goalId);
+    debouncedGoalSync(goal);
 
     this.checkAchievements();
     return subtask;
@@ -1453,8 +1466,9 @@ const Goals = {
     goal.notes.push(note);
     goal.updatedAt = new Date().toISOString();
     State.save();
-    // Cloud Save
-    SupabaseService.saveGoal(goal).catch(err => console.error('Failed to add note to cloud', err));
+    // Mark dirty and debounce cloud sync
+    dirtyTracker.markDirty('goal', goalId);
+    debouncedGoalSync(goal);
 
     this.checkAchievements();
     return note;
@@ -1475,8 +1489,9 @@ const Goals = {
     goal.lastWorkedOn = new Date().toISOString();
     State.data.analytics.totalTimeSpent += minutes;
     State.save();
-    // Cloud Save
-    SupabaseService.saveGoal(goal).catch(err => console.error('Failed to log time to cloud', err));
+    // Mark dirty and debounce cloud sync
+    dirtyTracker.markDirty('goal', goalId);
+    debouncedGoalSync(goal);
   },
 
   getTotalTime(goalId: string): number {
@@ -1769,12 +1784,7 @@ const NDSupport = {
     const prefs = State.data.preferences.nd;
     const root = document.documentElement;
 
-    // Apply night garden mode (dark theme)
-    document.body.classList.toggle(
-      "night-garden",
-      State.data.preferences.theme === "night" ||
-      State.data.preferences.theme === "dark",
-    );
+    ThemeManager.applyFromPreference(State.data.preferences.theme);
 
     // Apply accent theme
     if (prefs.accentTheme) {
@@ -2480,7 +2490,7 @@ const NDSupport = {
         this.startBreakReminder();
         modal.remove();
         UI.showToast("Settings saved! ✨", "success");
-        UI.render();
+        UI.scheduleRender();
       });
 
     modal.addEventListener("click", (e) => {
@@ -2569,7 +2579,7 @@ const NDSupport = {
       State.save();
 
       this.applyAccessibilityPreferences();
-      UI.render();
+      UI.scheduleRender();
       modalManager.remove();
       UI.showToast("✨", "Appearance saved");
     });
@@ -3020,7 +3030,7 @@ const AppSettings = {
       UI.applyLayoutVisibility?.();
       UI.applySidebarVisibility?.();
       UI.syncViewButtons();
-      UI.render();
+      UI.scheduleRender();
       modal.remove();
       UI.showToast("✅", "Settings saved");
     });
@@ -3153,6 +3163,7 @@ const AppSettings = {
 const UI = {
   els: {}, // Shortcut reference for elements
   elements: {} as UIElements, // Will be populated by cacheElements
+  dayViewController: null as DayViewController | null, // New day view controller
   _filterDocListeners: null as FilterDocListeners | null, // For managing document event listeners
   _focusRevealSetup: false, // Whether focus reveal has been initialized
   _focusRevealHideTimer: null as ReturnType<typeof setTimeout> | null, // Timer for hiding focus reveal
@@ -3160,6 +3171,10 @@ const UI = {
   _mobileMql: null as MediaQueryList | null,
   _mobileModeSetup: false,
   _initialMobileDefaultsApplied: false,
+  _lastNavKey: null as string | null,
+  _renderRaf: null as number | null,
+  _pendingViewTransition: false,
+  _scrollResetRaf: null as number | null,
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
   isMobileViewport(): boolean {
@@ -3797,12 +3812,6 @@ const UI = {
     let isDragging = false;
     let startX: number, startY: number, scrollLeft: number, scrollTop: number;
 
-    // Touch gesture state for pinch-to-zoom
-    let touchStartDistance = 0;
-    let touchStartZoom = 100;
-    let isPinching = false;
-    let lastTouchCenter: { x: number; y: number } | null = null;
-
     const container = this.elements.canvasContainer;
     if (!container) return;
 
@@ -3821,21 +3830,6 @@ const UI = {
         target.closest(".header-more-dropdown") ||
         target.closest(".support-panel")
       );
-    };
-
-    // Helper to calculate distance between two touches
-    const getTouchDistance = (touch1: Touch, touch2: Touch): number => {
-      const dx = touch2.clientX - touch1.clientX;
-      const dy = touch2.clientY - touch1.clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
-
-    // Helper to get center point between two touches
-    const getTouchCenter = (touch1: Touch, touch2: Touch): { x: number; y: number } => {
-      return {
-        x: (touch1.clientX + touch2.clientX) / 2,
-        y: (touch1.clientY + touch2.clientY) / 2,
-      };
     };
 
     // Mouse events (desktop)
@@ -3878,133 +3872,107 @@ const UI = {
         this.zoom(e.deltaY < 0 ? 10 : -10);
       }
     }, { passive: false });
+	  },
 
-    // Touch events for mobile panning and pinch-to-zoom
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartScrollLeft = 0;
-    let touchStartScrollTop = 0;
-    let touchPanning = false;
+	  scheduleRender(opts?: { transition?: boolean }) {
+	    if (opts?.transition) this._pendingViewTransition = true;
+	    if (this._renderRaf !== null) return;
 
-    container.addEventListener("touchstart", (e: TouchEvent) => {
-      // Handle pinch-to-zoom (two touches)
-      if (e.touches.length === 2) {
-        isPinching = true;
-        touchPanning = false;
-        isDragging = false;
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        touchStartDistance = getTouchDistance(touch1, touch2);
-        touchStartZoom = State.zoom;
-        lastTouchCenter = getTouchCenter(touch1, touch2);
-        e.preventDefault();
-        return;
+	    this._renderRaf = window.requestAnimationFrame(() => {
+	      this._renderRaf = null;
+	      const useViewTransition = this._pendingViewTransition;
+	      this._pendingViewTransition = false;
+
+	      const doc = document as unknown as {
+	        startViewTransition?: (cb: () => void) => void;
+	      };
+
+	      if (useViewTransition && typeof doc.startViewTransition === "function") {
+	        doc.startViewTransition(() => {
+	          this.render();
+	        });
+	        return;
+	      }
+
+	      this.render();
+	    });
+	  },
+
+		  render() {
+		    if (this._renderRaf !== null) {
+		      cancelAnimationFrame(this._renderRaf);
+		      this._renderRaf = null;
+		      this._pendingViewTransition = false;
+		    }
+
+		    const navKey = (() => {
+	      const year = State.viewingYear;
+      const month = State.viewingMonth;
+      const week = State.viewingWeek;
+      const day = State.viewingDate ? State.viewingDate.toISOString().slice(0, 10) : "";
+
+      switch (State.currentView) {
+        case VIEWS.YEAR:
+          return `year:${year}`;
+        case VIEWS.MONTH:
+          return `month:${year}-${month}`;
+        case VIEWS.WEEK:
+          return `week:${year}-${week}`;
+        case VIEWS.DAY:
+          return `day:${day}`;
+        default:
+          return `${State.currentView}:${day}`;
       }
+    })();
 
-      // Handle single touch panning
-      if (e.touches.length === 1 && !isPinching) {
-        const target = e.target as Element | null;
-        if (!shouldAllowPan(target)) return;
-        
-        const touch = e.touches[0];
-        touchStartX = touch.clientX;
-        touchStartY = touch.clientY;
-        touchStartScrollLeft = container.scrollLeft;
-        touchStartScrollTop = container.scrollTop;
-        touchPanning = true;
-      }
-    }, { passive: false });
+	    const shouldResetScroll = navKey !== this._lastNavKey;
+	    this._lastNavKey = navKey;
 
-    container.addEventListener("touchmove", (e: TouchEvent) => {
-      // Handle pinch-to-zoom
-      if (e.touches.length === 2 && isPinching) {
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        const currentDistance = getTouchDistance(touch1, touch2);
-        const currentCenter = getTouchCenter(touch1, touch2);
-        
-        if (touchStartDistance > 0) {
-          const scale = currentDistance / touchStartDistance;
-          const newZoom = Math.max(50, Math.min(150, touchStartZoom * scale));
-          
-          // Update zoom
-          State.zoom = newZoom;
-          if (this.elements.canvas) {
-            this.elements.canvas.style.transform = `scale(${State.zoom / 100})`;
-          }
-          if (this.elements.zoomLevel) {
-            this.elements.zoomLevel.textContent = `${Math.round(State.zoom)}%`;
-          }
+	    // Mobile Day view should be readable at default scale; reset zoom only when navigating.
+	    if (
+	      shouldResetScroll &&
+	      this.isMobileViewport() &&
+	      State.currentView === VIEWS.DAY &&
+	      State.zoom !== 100
+	    ) {
+	      State.zoom = 100;
+	      if (this.elements.canvas) {
+	        this.elements.canvas.style.transform = `scale(${State.zoom / 100})`;
+	      }
+	      if (this.elements.zoomLevel) {
+	        this.elements.zoomLevel.textContent = `${State.zoom}%`;
+	      }
+	    }
 
-          // Adjust scroll position to keep center point under fingers
-          if (lastTouchCenter && this.elements.canvas) {
-            const deltaX = currentCenter.x - lastTouchCenter.x;
-            const deltaY = currentCenter.y - lastTouchCenter.y;
-            container.scrollLeft -= deltaX;
-            container.scrollTop -= deltaY;
-          }
-          
-          lastTouchCenter = currentCenter;
-        }
-        e.preventDefault();
-        return;
-      }
-
-      // Handle single touch panning
-      if (e.touches.length === 1 && touchPanning && !isPinching) {
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = touch.clientY - touchStartY;
-        
-        // Only prevent default if we're actually panning (moved more than 5px)
-        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-          container.scrollLeft = touchStartScrollLeft - deltaX;
-          container.scrollTop = touchStartScrollTop - deltaY;
-          e.preventDefault();
-        }
-      }
-    }, { passive: false });
-
-    container.addEventListener("touchend", (e: TouchEvent) => {
-      // Reset pinch state if both touches are gone
-      if (e.touches.length < 2) {
-        isPinching = false;
-        lastTouchCenter = null;
-        touchStartDistance = 0;
-      }
-      
-      // Reset panning state if no touches remain
-      if (e.touches.length === 0) {
-        touchPanning = false;
-      }
-    }, { passive: true });
-
-    container.addEventListener("touchcancel", () => {
-      isPinching = false;
-      touchPanning = false;
-      lastTouchCenter = null;
-      touchStartDistance = 0;
-    }, { passive: true });
-  },
-
-  render() {
-    this.renderCurrentView();
-    this.renderCategoryFilters();
-    this.renderUpcomingGoals();
+	    this.renderCurrentView();
+	    this.renderCategoryFilters();
+	    this.renderUpcomingGoals();
     this.updateDateDisplay();
     this.updateYearProgress();
-    Streaks.check();
-    this.updateStreakDisplay();
-    
-    // Ensure canvas container is scrolled to top after rendering
-    setTimeout(() => {
-      const canvasContainer = this.elements.canvasContainer;
-      if (canvasContainer) {
-        canvasContainer.scrollTop = 0;
-        canvasContainer.scrollLeft = 0;
-      }
-    }, 100);
-  },
+	    Streaks.check();
+	    this.updateStreakDisplay();
+
+	    if (shouldResetScroll) {
+	      if (this._scrollResetRaf !== null) {
+	        cancelAnimationFrame(this._scrollResetRaf);
+	      }
+
+	      this._scrollResetRaf = requestAnimationFrame(() => {
+	        this._scrollResetRaf = null;
+	        const canvasContainer = this.elements.canvasContainer;
+	        if (canvasContainer) {
+	          canvasContainer.scrollTop = 0;
+	          canvasContainer.scrollLeft = 0;
+	        }
+
+        const appEl = document.querySelector(".app") as HTMLElement | null;
+        if (appEl) appEl.scrollTop = 0;
+
+	        const scrollingElement = document.scrollingElement as HTMLElement | null;
+	        if (scrollingElement) scrollingElement.scrollTop = 0;
+	      });
+	    }
+	  },
 
   // Render based on current view
   renderCurrentView() {
@@ -4015,10 +3983,15 @@ const UI = {
     }
     console.log("renderCurrentView: rendering view", State.currentView);
 
-    // Update view button states
-    this.syncViewButtons();
+	    // Update view button states
+	    this.syncViewButtons();
 
-    switch (State.currentView) {
+	    if (State.currentView !== VIEWS.DAY && this.dayViewController) {
+	      this.dayViewController.unmount();
+	      this.dayViewController = null;
+	    }
+
+	    switch (State.currentView) {
       case VIEWS.YEAR:
         this.renderCalendar();
         break;
@@ -4288,850 +4261,51 @@ const UI = {
     });
   },
 
-  // Render Day View
+  // Render Day View (New Modernized Implementation)
   renderDayView() {
     const container = this.elements.calendarGrid;
     if (!container) return;
 
     const date = State.viewingDate;
-    const today = new Date();
-    const isToday = date.toDateString() === today.toDateString();
-    const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
-    const dateStr = date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+    const allGoals = State.data?.goals || [];
 
-    const parseTimeToMinutes = (time: string | null | undefined): number | null => {
-      if (!time) return null;
-      const [hRaw, mRaw] = time.split(":");
-      const hours = Number.parseInt(hRaw ?? "", 10);
-      const minutes = Number.parseInt(mRaw ?? "", 10);
-      if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
-      return hours * 60 + minutes;
-    };
-
-    const plotStartMin = 8 * 60;
-    const plotEndMin = 22 * 60;
-    const plotRangeMin = plotEndMin - plotStartMin;
-
-    // Get goals for this day using proper level-based filtering
-    const dayGoals = Goals.getForDate(date);
-
-    const activeGoals = dayGoals.filter((g) => g.status !== "done");
-    const completedGoals = dayGoals.filter((g) => g.status === "done");
-
-
-    const seedGoals = activeGoals.filter((g) => parseTimeToMinutes(g.startTime) === null);
-
-    const timedCandidates = activeGoals
-      .map((goal) => {
-        const startMinRaw = parseTimeToMinutes(goal.startTime);
-        if (startMinRaw === null) return null;
-
-        const endMinRaw = parseTimeToMinutes(goal.endTime);
-        const startMin = Math.min(
-          Math.max(startMinRaw, plotStartMin),
-          plotEndMin - 15,
-        );
-
-        let endMin =
-          endMinRaw !== null && endMinRaw > startMinRaw
-            ? endMinRaw
-            : startMinRaw + 60;
-        // Ensure minimum duration of 30 minutes
-        endMin = Math.min(Math.max(endMin, startMin + 30), plotEndMin);
-
-        return { goal, startMin, endMin };
-      })
-      .filter((v): v is { goal: Goal; startMin: number; endMin: number } => Boolean(v))
-      .sort((a, b) => a.startMin - b.startMin);
-
-    // Interval partitioning to create non-overlapping lanes.
-    const laneEndTimes: number[] = [];
-    const maxLanes = 4;
-    const timedWithLane = timedCandidates.map((item) => {
-      let lane = laneEndTimes.findIndex((end) => item.startMin >= end);
-      if (lane === -1) {
-        lane = laneEndTimes.length;
-        laneEndTimes.push(item.endMin);
-      } else {
-        laneEndTimes[lane] = item.endMin;
-      }
-      const laneClamped = lane % maxLanes;
-
-      const startPct = ((item.startMin - plotStartMin) / plotRangeMin) * 100;
-      const durPct = ((item.endMin - item.startMin) / plotRangeMin) * 100;
-
-      return {
-        ...item,
-        lane: laneClamped,
-        style: `--start:${startPct.toFixed(4)};--dur:${durPct.toFixed(4)};--lane:${laneClamped};`,
-      };
-    });
-
-    const laneCount = Math.max(
-      1,
-      Math.min(maxLanes, Math.max(...timedWithLane.map((t) => t.lane + 1), 1)),
-    );
-
-    const bedGridHours = Array.from({ length: 15 }, (_, idx) => 8 + idx); // 8AM..10PM
-    const bedGrid = bedGridHours
-      .map((h, idx) => {
-        const atPct = ((h * 60 - plotStartMin) / plotRangeMin) * 100;
-        const label = `${h % 12 || 12}${h < 12 ? "AM" : "PM"}`;
-        const posClass =
-          idx === 0 ? " is-first" : idx === bedGridHours.length - 1 ? " is-last" : "";
-        return `
-          <div class="bed-hour${posClass}" style="--at:${atPct.toFixed(4)}">
-            <span class="bed-hour-label">${label}</span>
-            <div class="bed-hour-line"></div>
-          </div>
-        `;
-      })
-      .join("");
-
-    let html = `
-        <div class="day-view ${isToday ? "is-today" : ""}">
-          <div class="day-view-header">
-            <h2 class="day-view-title">${dayName}</h2>
-            <p class="day-view-subtitle">${dateStr}</p>
-          </div>
-
-
-          ${activeGoals.length >= 6
-        ? `
-            <div class="garden-capacity-warning">
-              <span class="warning-icon">🌸</span>
-              <div class="warning-text">
-                <strong>Your garden bed is full!</strong>
-                <span>Refining your fences (boundaries) helps you focus. Consider moving some blooms to tomorrow.</span>
-              </div>
-            </div>
-          `
-        : ""
-      }
-          <div class="day-land">
-            <div class="day-land-topbar">
-              <div class="day-land-fence" role="status" aria-live="polite">
-                <span class="fence-label">Fence</span>
-                <span class="fence-value">${activeGoals.length} active</span>
-                <span class="fence-hint">Aim for 3–5 planters</span>
-              </div>
-              <button class="btn btn-primary btn-sm day-plant-btn" id="dayPlantBtn" type="button">
-                Plant something
-              </button>
-            </div>
-
-            <div class="day-plot" style="--lanes:${laneCount}">
-              <div class="day-seed-tray" role="region" aria-label="Seed tray (unscheduled)">
-                <div class="seed-tray-header">
-                  <span class="seed-tray-title">Seed tray</span>
-                  <span class="seed-tray-subtitle">Small tasks without a start time</span>
-                </div>
-                <div class="seed-tray-grid" role="list">
-                  ${seedGoals.length > 0
-        ? seedGoals.map((g) => this.renderDayGoalCard(g, { variant: "seed" })).join("")
-        : `
-                        <div class="seed-tray-empty">
-                          Leave this empty if you need breathing room.
-                        </div>
-                      `
-      }
-                </div>
-              </div>
-
-              <div class="day-bed" role="region" aria-label="Garden bed (your day)">
-                <div class="day-bed-header">
-                  <span class="day-bed-title">Your day</span>
-                  <span class="day-bed-subtitle">Add a start time to place a planter</span>
-                </div>
-                <div class="day-bed-canvas" role="list" aria-label="Scheduled planters">
-                  <div class="day-bed-grid" aria-hidden="true">
-                    ${bedGrid}
-                  </div>
-                  ${timedWithLane.length > 0
-        ? timedWithLane
-          .map((t) =>
-            this.renderDayGoalCard(t.goal, { variant: "planter", style: t.style }),
-          )
-          .join("")
-        : `
-                        <div class="bed-empty">
-                          No planters placed yet. Add a start time to any task, or plant one small intention.
-                        </div>
-                      `
-      }
-                </div>
-              </div>
-
-              ${completedGoals.length > 0
-        ? `
-                    <div class="day-compost" role="region" aria-label="Compost (done)">
-                      <div class="compost-header">
-                        <span class="compost-title">Compost</span>
-                        <span class="compost-subtitle">${completedGoals.length} done</span>
-                      </div>
-                      <div class="compost-grid" role="list">
-                        ${completedGoals.map((g) => this.renderDayGoalCard(g, { variant: "compost" })).join("")}
-                      </div>
-                    </div>
-                  `
-        : ""
-      }
-            </div>
-          </div>
-        </div>`;
-
-    container.innerHTML = html;
-    container.className = "day-view-container";
-
-    // Event handlers
-    container.querySelectorAll(".day-goal-card").forEach((card) => {
-      card.addEventListener("click", () => {
-        this.showGoalDetail((card as HTMLElement).dataset.goalId);
-      });
-      card.addEventListener("keydown", (e) => {
-        if (!(e instanceof KeyboardEvent)) return;
-        if (e.key !== "Enter" && e.key !== " ") return;
-        e.preventDefault();
-        this.showGoalDetail((card as HTMLElement).dataset.goalId);
-      });
-    });
-
-    container.querySelectorAll(".day-goal-checkbox").forEach((checkbox) => {
-      checkbox.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const goalCard = checkbox.closest(".day-goal-card") as HTMLElement | null;
-        const goalId = goalCard?.dataset.goalId;
-        if (!goalId) return;
-        const goal = Goals.getById(goalId);
-        if (goal) {
-          const newStatus = goal.status === "done" ? "in-progress" : "done";
-          Goals.update(goalId, { status: newStatus });
-          if (newStatus === "done") {
-            this.celebrate("🎉", "Nice work!", "You completed a task!");
-          }
-          this.render();
-        }
-      });
-    });
-
-    container.querySelectorAll(".btn-zen-focus").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const goalId = (btn as HTMLElement).dataset.goalId;
-        if (goalId) this.openZenFocus(goalId);
-      });
-    });
-
-    const plantBtn = container.querySelector("#dayPlantBtn");
-    plantBtn?.addEventListener("click", () => {
-      this.showQuickAdd();
-    });
-
-    // Drag + drop: move seed tray intentions into the day bed to assign a start time.
-    const dayBed = container.querySelector(".day-bed-canvas") as HTMLElement | null;
-    
-    // Define drag state variables outside the if block so they're accessible throughout
-    let draggingPlanterId: string | null = null;
-    let draggingSeedId: string | null = null;
-    let isResizing = false;
-    let currentResizeHandle: HTMLElement | null = null;
-    let currentResizeGoalId: string | null = null;
-    let currentResizeType: string | null = null;
-    
-    // Touch drag state variables
-    let touchDragging = false;
-    let touchGoalId: string | null = null;
-    let touchPointerId: number | null = null;
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchPressTimer: ReturnType<typeof setTimeout> | null = null;
-    let ghostEl: HTMLElement | null = null;
-    let suppressClickUntil = 0;
-    
-    // Cleanup functions for proper event listener removal
-    const cleanupTouchDrag = () => {
-      touchDragging = false;
-      touchGoalId = null;
-      touchPointerId = null;
-      if (touchPressTimer) {
-        clearTimeout(touchPressTimer);
-        touchPressTimer = null;
-      }
-      if (ghostEl) {
-        ghostEl.remove();
-        ghostEl = null;
-      }
-      document.body.classList.remove("is-touch-dragging-seed");
-      dayBed?.classList.remove("is-drop-target", "is-drop-over");
-    };
-    
-    if (dayBed) {
-      
-      const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
-      const toTimeString = (mins: number) => {
-        const hh = Math.floor(mins / 60);
-        const mm = mins % 60;
-        return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-      };
-      const format12h = (mins: number) => {
-        const h24 = Math.floor(mins / 60) % 24;
-        const mm = mins % 60;
-        const suffix = h24 < 12 ? "AM" : "PM";
-        const h12 = h24 % 12 || 12;
-        return `${h12}:${String(mm).padStart(2, "0")} ${suffix}`;
-      };
-
-      const placeGoalAtY = (goalId: string, clientY: number) => {
-        const rect = dayBed.getBoundingClientRect();
-        const y = clamp(clientY - rect.top, 0, rect.height);
-        const pct = rect.height > 0 ? y / rect.height : 0;
-        let minutes = Math.round((plotStartMin + pct * plotRangeMin) / 5) * 5;
-        minutes = clamp(minutes, plotStartMin, plotEndMin - 15);
-
-        const goal = Goals.getById(goalId);
-        if (!goal) return;
-
-        const prevStartMin = parseTimeToMinutes(goal.startTime);
-        const prevEndMin = parseTimeToMinutes(goal.endTime);
-        const durationMin =
-          prevStartMin !== null &&
-            prevEndMin !== null &&
-            prevEndMin > prevStartMin
-            ? prevEndMin - prevStartMin
-            : null;
-
-        const due = new Date(State.viewingDate);
-        due.setHours(12, 0, 0, 0);
-
-        const nextStart = toTimeString(minutes);
-        const nextEnd =
-          durationMin !== null
-            ? toTimeString(clamp(minutes + durationMin, plotStartMin + 15, plotEndMin))
-            : null;
-
-        Goals.update(goalId, {
-          startTime: nextStart,
-          ...(nextEnd ? { endTime: nextEnd } : {}),
-          // When you place something into a specific day, anchor it to that day.
-          dueDate: due.toISOString(),
-          month: due.getMonth(),
-          year: due.getFullYear(),
-        });
-
-        this.showToast("🌱", `Planted at ${format12h(minutes)}`);
-        this.render();
-      };
-
-      const seedCards = Array.from(
-        container.querySelectorAll(
-          ".day-goal-card.day-goal-variant-seed[draggable='true']",
-        ),
-      ) as HTMLElement[];
-
-      // Desktop HTML5 drag and drop.
-      seedCards.forEach((card) => {
-        card.addEventListener("dragstart", (e) => {
-          if (!(e instanceof DragEvent)) return;
-          const goalId = (card as HTMLElement).dataset.goalId;
-          if (!goalId) return;
-          
-          // Track dragging state
-          draggingSeedId = goalId;
-          
-          e.dataTransfer?.setData("text/plain", goalId);
-          e.dataTransfer?.setData("application/x-garden-goal-id", goalId);
-          if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
-          (card as HTMLElement).setAttribute("aria-grabbed", "true");
-          document.body.classList.add("is-dragging-seed");
-          dayBed?.classList.add("is-drop-target");
-        });
-
-        card.addEventListener("dragend", () => {
-          (card as HTMLElement).setAttribute("aria-grabbed", "false");
-          document.body.classList.remove("is-dragging-seed");
-          dayBed?.classList.remove("is-drop-target", "is-drop-over");
-          draggingSeedId = null;
-        });
-      });
-
-      // Touch / iOS fallback: long-press + drag with a visual ghost.
-      // HTML5 drag-and-drop is poorly supported on iOS Safari, so we emulate it.
-      const supportsPointerEvents =
-        typeof window !== "undefined" && "PointerEvent" in window;
-      const longPressMs = 180;
-      const moveCancelPx = 8;
-
-      const clearPressTimer = () => {
-        if (touchPressTimer) {
-          clearTimeout(touchPressTimer);
-          touchPressTimer = null;
-        }
-      };
-
-      const setGhostPosition = (clientX: number, clientY: number) => {
-        if (ghostEl) {
-          ghostEl.style.left = `${clientX}px`;
-          ghostEl.style.top = `${clientY}px`;
-        }
-      };
-
-      const isPointOverDayBed = (clientX: number, clientY: number) => {
-        if (!dayBed) return false;
-        const rect = dayBed.getBoundingClientRect();
-        return (
-          clientX >= rect.left &&
-          clientX <= rect.right &&
-          clientY >= rect.top &&
-          clientY <= rect.bottom
-        );
-      };
-
-      const startTouchDrag = (card: HTMLElement, goalId: string, clientX: number, clientY: number) => {
-        touchDragging = true;
-        touchGoalId = goalId;
-        suppressClickUntil = Date.now() + 800;
-        document.body.classList.add("is-touch-dragging-seed");
-        dayBed?.classList.add("is-drop-target");
-
-        ghostEl = card.cloneNode(true) as HTMLElement;
-        ghostEl.classList.add("drag-ghost");
-        ghostEl.style.width = `${card.getBoundingClientRect().width}px`;
-        document.body.appendChild(ghostEl);
-        setGhostPosition(clientX, clientY);
-      };
-
-      // Suppress accidental click after a drag.
-      seedCards.forEach((card) => {
-        card.addEventListener(
-          "click",
-          (e) => {
-            if (Date.now() < suppressClickUntil) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
+    // Initialize DayViewController if not already done
+    if (!this.dayViewController) {
+      this.dayViewController = new DayViewController(
+        container,
+        {
+	          onGoalUpdate: (goalId: string, updates: Partial<Goal>) => {
+	            Goals.update(goalId, updates);
+	            // Re-render to update the view
+	            if (this.dayViewController) {
+	              this.dayViewController.setGoals(State.viewingDate, State.data?.goals || []);
+	            }
+	          },
+          onGoalClick: (goalId: string) => {
+            this.showGoalDetail(goalId);
           },
-          true,
-        );
-      });
+          onZenFocus: (goalId: string) => {
+            this.openZenFocus(goalId);
+          },
+          onShowToast: (emoji: string, message: string) => {
+            this.showToast(emoji, message);
+          },
+          onCelebrate: (emoji: string, title: string, message: string) => {
+            this.celebrate(emoji, title, message);
+          },
+          onPlantSomething: () => {
+            this.showQuickAdd();
+          },
+        },
+        CONFIG,
+      );
 
-      if (supportsPointerEvents) {
-        seedCards.forEach((card) => {
-          card.addEventListener("pointerdown", (e: PointerEvent) => {
-            if (e.pointerType !== "touch") return;
-            const goalId = card.dataset.goalId;
-            if (!goalId) return;
-
-            touchStartX = e.clientX;
-            touchStartY = e.clientY;
-            touchPointerId = e.pointerId;
-
-            const onMove = (ev: PointerEvent) => {
-              if (ev.pointerType !== "touch") return;
-              if (touchPointerId !== null && ev.pointerId !== touchPointerId) return;
-
-              const dx = Math.abs(ev.clientX - touchStartX);
-              const dy = Math.abs(ev.clientY - touchStartY);
-
-              if (!touchDragging) {
-                // Cancel long press if they start scrolling/moving first.
-                if (dx > moveCancelPx || dy > moveCancelPx) clearPressTimer();
-                return;
-              }
-
-              ev.preventDefault();
-              setGhostPosition(ev.clientX, ev.clientY);
-              dayBed.classList.toggle("is-drop-over", isPointOverDayBed(ev.clientX, ev.clientY));
-            };
-
-            const onEnd = (ev: PointerEvent) => {
-              if (ev.pointerType !== "touch") return;
-              if (touchPointerId !== null && ev.pointerId !== touchPointerId) return;
-
-              window.removeEventListener("pointermove", onMove);
-              window.removeEventListener("pointerup", onEnd);
-              window.removeEventListener("pointercancel", onEnd);
-
-              if (!touchDragging) {
-                clearPressTimer();
-                touchPointerId = null;
-                return;
-              }
-
-              ev.preventDefault();
-              const goalId = touchGoalId;
-              const shouldDrop = isPointOverDayBed(ev.clientX, ev.clientY);
-              cleanupTouchDrag();
-              if (goalId && shouldDrop) placeGoalAtY(goalId, ev.clientY);
-            };
-
-            window.addEventListener("pointermove", onMove, { passive: false } as any);
-            window.addEventListener("pointerup", onEnd, { passive: true } as any);
-            window.addEventListener("pointercancel", onEnd, { passive: true } as any);
-
-            clearPressTimer();
-            touchPressTimer = setTimeout(() => {
-              startTouchDrag(card, goalId, e.clientX, e.clientY);
-            }, longPressMs);
-          });
-        });
-      } else {
-        // Legacy iOS Safari fallback (no PointerEvent)
-        seedCards.forEach((card) => {
-          card.addEventListener(
-            "touchstart",
-            (e: TouchEvent) => {
-              const t = e.touches[0];
-              if (!t) return;
-              const goalId = card.dataset.goalId;
-              if (!goalId) return;
-
-              touchStartX = t.clientX;
-              touchStartY = t.clientY;
-              clearPressTimer();
-              touchPressTimer = setTimeout(() => {
-                startTouchDrag(card, goalId, t.clientX, t.clientY);
-              }, longPressMs);
-            },
-            { passive: true },
-          );
-
-          card.addEventListener(
-            "touchmove",
-            (e: TouchEvent) => {
-              const t = e.touches[0];
-              if (!t) return;
-
-              const dx = Math.abs(t.clientX - touchStartX);
-              const dy = Math.abs(t.clientY - touchStartY);
-              if (!touchDragging && (dx > moveCancelPx || dy > moveCancelPx)) {
-                clearPressTimer();
-                return;
-              }
-              if (!touchDragging) return;
-              e.preventDefault();
-              setGhostPosition(t.clientX, t.clientY);
-              dayBed.classList.toggle("is-drop-over", isPointOverDayBed(t.clientX, t.clientY));
-            },
-            { passive: false },
-          );
-
-          card.addEventListener("touchend", (e: TouchEvent) => {
-            const t = e.changedTouches[0];
-            if (!t) {
-              cleanupTouchDrag();
-              return;
-            }
-            if (!touchDragging) {
-              clearPressTimer();
-              return;
-            }
-            e.preventDefault();
-            const goalId = touchGoalId;
-            const shouldDrop = isPointOverDayBed(t.clientX, t.clientY);
-            cleanupTouchDrag();
-            if (goalId && shouldDrop) {
-              placeGoalAtY(goalId, t.clientY);
-            }
-          });
-
-          card.addEventListener("touchcancel", () => {
-            cleanupTouchDrag();
-          });
-        });
-      }
-
-      // Drag + resize: move and resize planters in the day bed
-      const planterCards = Array.from(
-        container.querySelectorAll(
-          ".day-goal-card.day-goal-variant-planter:not(.completed)",
-        ),
-      ) as HTMLElement[];
-
-      const updatePlanterTime = (goalId: string, startMin: number, endMin: number, skipRender = false) => {
-        const goal = Goals.getById(goalId);
-        if (!goal) return;
-
-        const due = new Date(State.viewingDate);
-        due.setHours(12, 0, 0, 0);
-
-        Goals.update(goalId, {
-          startTime: toTimeString(startMin),
-          endTime: toTimeString(endMin),
-          dueDate: due.toISOString(),
-          month: due.getMonth(),
-          year: due.getFullYear(),
-        });
-
-        if (!skipRender) {
-          this.render();
-        }
-      };
-
-      const movePlanter = (goalId: string, clientY: number) => {
-        const goal = Goals.getById(goalId);
-        if (!goal) return;
-
-        const startMinRaw = parseTimeToMinutes(goal.startTime);
-        const endMinRaw = parseTimeToMinutes(goal.endTime);
-        if (startMinRaw === null) return;
-
-        const duration = (endMinRaw !== null && endMinRaw > startMinRaw)
-          ? endMinRaw - startMinRaw
-          : 60;
-
-        const rect = dayBed.getBoundingClientRect();
-        const y = clamp(clientY - rect.top, 0, rect.height);
-        const pct = rect.height > 0 ? y / rect.height : 0;
-        let newStartMin = Math.round((plotStartMin + pct * plotRangeMin) / 5) * 5;
-        newStartMin = clamp(newStartMin, plotStartMin, plotEndMin - Math.max(duration, 30));
-        const newEndMin = Math.min(newStartMin + duration, plotEndMin);
-
-        updatePlanterTime(goalId, newStartMin, newEndMin);
-        this.showToast("🌱", `Moved to ${format12h(newStartMin)}`);
-      };
-
-      // Unified desktop drag/drop handler (capture) so drops on child elements still work.
-      const onDayBedDragOver = (e: DragEvent) => {
-        if (!(e instanceof DragEvent)) return;
-        if (!draggingPlanterId && !draggingSeedId) return;
-        e.preventDefault();
-        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-        dayBed?.classList.add("is-drop-over");
-      };
-
-      const onDayBedDragLeave = (e: DragEvent) => {
-        // Only remove drop-over class if actually leaving the day bed
-        if (!dayBed) return;
-        const rect = dayBed.getBoundingClientRect();
-        const x = e.clientX;
-        const y = e.clientY;
-        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-          dayBed.classList.remove("is-drop-over");
-        }
-      };
-
-      const onDayBedDrop = (e: DragEvent) => {
-        if (!(e instanceof DragEvent)) return;
-        e.preventDefault();
-
-        if (draggingPlanterId) {
-          const id = draggingPlanterId;
-          draggingPlanterId = null;
-          movePlanter(id, e.clientY);
-          dayBed?.classList.remove("is-drop-over");
-          return;
-        }
-
-        const goalId =
-          draggingSeedId ||
-          e.dataTransfer?.getData("application/x-garden-goal-id") ||
-          e.dataTransfer?.getData("text/plain");
-        draggingSeedId = null;
-        if (!goalId) return;
-        placeGoalAtY(goalId, e.clientY);
-        dayBed?.classList.remove("is-drop-over");
-      };
-
-      dayBed?.addEventListener("dragover", onDayBedDragOver, true);
-      dayBed?.addEventListener("drop", onDayBedDrop, true);
-      dayBed?.addEventListener("dragleave", onDayBedDragLeave, true);
-
-      const resizePlanterTop = (goalId: string, clientY: number, skipRender = false) => {
-        const goal = Goals.getById(goalId);
-        if (!goal || !dayBed) return;
-
-        const startMinRaw = parseTimeToMinutes(goal.startTime);
-        const endMinRaw = parseTimeToMinutes(goal.endTime);
-        if (startMinRaw === null || endMinRaw === null || endMinRaw <= startMinRaw) return;
-
-        const rect = dayBed.getBoundingClientRect();
-        const y = clamp(clientY - rect.top, 0, rect.height);
-        const pct = rect.height > 0 ? y / rect.height : 0;
-        let newStartMin = Math.round((plotStartMin + pct * plotRangeMin) / 5) * 5;
-        newStartMin = clamp(newStartMin, plotStartMin, endMinRaw - 30);
-        const newEndMin = endMinRaw;
-
-        updatePlanterTime(goalId, newStartMin, newEndMin, skipRender);
-      };
-
-      const resizePlanterBottom = (goalId: string, clientY: number, skipRender = false) => {
-        const goal = Goals.getById(goalId);
-        if (!goal || !dayBed) return;
-
-        const startMinRaw = parseTimeToMinutes(goal.startTime);
-        if (startMinRaw === null) return;
-
-        const rect = dayBed.getBoundingClientRect();
-        const y = clamp(clientY - rect.top, 0, rect.height);
-        const pct = rect.height > 0 ? y / rect.height : 0;
-        let newEndMin = Math.round((plotStartMin + pct * plotRangeMin) / 5) * 5;
-        newEndMin = clamp(newEndMin, startMinRaw + 30, plotEndMin);
-        const newStartMin = startMinRaw;
-
-        updatePlanterTime(goalId, newStartMin, newEndMin, skipRender);
-      };
-
-      // Desktop HTML5 drag and drop for planters
-      planterCards.forEach((card) => {
-        card.addEventListener("dragstart", (e) => {
-          if (!(e instanceof DragEvent)) return;
-          // Don't drag if we're resizing
-          if (isResizing) {
-            e.preventDefault();
-            return;
-          }
-          // Don't drag if clicking on resize handles
-          const target = e.target as HTMLElement;
-          if (target.closest(".planter-resize-handle")) {
-            e.preventDefault();
-            return;
-          }
-          const goalId = (card as HTMLElement).dataset.goalId;
-          if (!goalId) return;
-          
-          // Track dragging state
-          draggingPlanterId = goalId;
-          
-          e.dataTransfer?.setData("text/plain", goalId);
-          e.dataTransfer?.setData("application/x-garden-planter-id", goalId);
-          if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
-          (card as HTMLElement).setAttribute("aria-grabbed", "true");
-          document.body.classList.add("is-dragging-planter");
-          dayBed?.classList.add("is-drop-target");
-        });
-
-        card.addEventListener("dragend", () => {
-          (card as HTMLElement).setAttribute("aria-grabbed", "false");
-          document.body.classList.remove("is-dragging-planter");
-          dayBed?.classList.remove("is-drop-target", "is-drop-over");
-          draggingPlanterId = null;
-        });
-
-        // Prevent card click when clicking on resize handles
-        card.addEventListener("click", (e) => {
-          const target = e.target as HTMLElement;
-          if (target.closest(".planter-resize-handle")) {
-            e.stopPropagation();
-            e.preventDefault();
-          }
-        });
-      });
-
-      // Drop handler is installed above (capture) to support drops on planters/children.
-
-      // Resize handles for planters
-      const resizeHandles = Array.from(
-        container.querySelectorAll(".planter-resize-handle"),
-      ) as HTMLElement[];
-
-      const startResize = (e: MouseEvent | PointerEvent, handle: HTMLElement) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const planterCard = handle.closest(".day-goal-variant-planter") as HTMLElement | null;
-        const goalId = planterCard?.dataset.goalId;
-        const resizeType = handle.dataset.resize;
-
-        if (!goalId || !resizeType || !dayBed) return;
-
-        isResizing = true;
-        currentResizeHandle = handle;
-        currentResizeGoalId = goalId;
-        currentResizeType = resizeType;
-        document.body.classList.add("is-resizing-planter");
-        planterCard?.classList.add("is-resizing");
-        // Prevent dragging while resizing
-        planterCard?.setAttribute("draggable", "false");
-
-        if (resizeType === "top") {
-          resizePlanterTop(goalId, e.clientY);
-        } else if (resizeType === "bottom") {
-          resizePlanterBottom(goalId, e.clientY);
-        }
-      };
-
-      const doResize = (e: MouseEvent | PointerEvent) => {
-        if (!isResizing || !currentResizeGoalId || !currentResizeType) return;
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Update during resize without full render for performance
-        if (currentResizeType === "top") {
-          resizePlanterTop(currentResizeGoalId, e.clientY, true);
-        } else if (currentResizeType === "bottom") {
-          resizePlanterBottom(currentResizeGoalId, e.clientY, true);
-        }
-
-        // Update the planter's visual position via CSS variables
-        const planterCard = currentResizeHandle?.closest(".day-goal-variant-planter") as HTMLElement | null;
-        if (planterCard) {
-          const goal = Goals.getById(currentResizeGoalId);
-          if (goal) {
-            const startMinRaw = parseTimeToMinutes(goal.startTime);
-            const endMinRaw = parseTimeToMinutes(goal.endTime);
-            if (startMinRaw !== null) {
-              const endMin = (endMinRaw !== null && endMinRaw > startMinRaw) ? endMinRaw : startMinRaw + 60;
-              const startPct = ((startMinRaw - plotStartMin) / plotRangeMin) * 100;
-              const durPct = ((endMin - startMinRaw) / plotRangeMin) * 100;
-              planterCard.style.setProperty("--start", startPct.toFixed(4));
-              planterCard.style.setProperty("--dur", durPct.toFixed(4));
-            }
-          }
-        }
-      };
-
-      const endResize = () => {
-        if (!isResizing) return;
-        isResizing = false;
-        if (currentResizeHandle) {
-          const planterCard = currentResizeHandle.closest(".day-goal-variant-planter") as HTMLElement | null;
-          planterCard?.classList.remove("is-resizing");
-          // Re-enable dragging after resize
-          planterCard?.setAttribute("draggable", "true");
-        }
-        document.body.classList.remove("is-resizing-planter");
-        // Final render to update everything properly
-        this.render();
-        currentResizeHandle = null;
-        currentResizeGoalId = null;
-        currentResizeType = null;
-      };
-
-      resizeHandles.forEach((handle) => {
-        // Prevent drag events on resize handles
-        handle.addEventListener("mousedown", (e) => {
-          e.stopPropagation();
-          startResize(e, handle);
-        });
-        handle.setAttribute("draggable", "false");
-      });
-
-      // Global mouse move/up for resize
-      document.addEventListener("mousemove", doResize);
-      document.addEventListener("mouseup", endResize);
-
-      // Touch support for resize
-      if (typeof window !== "undefined" && "PointerEvent" in window) {
-        resizeHandles.forEach((handle) => {
-          handle.addEventListener("pointerdown", (e: PointerEvent) => {
-            if (e.pointerType === "touch") {
-              startResize(e, handle);
-            }
-          });
-        });
-
-        document.addEventListener("pointermove", (e: PointerEvent) => {
-          if (e.pointerType === "touch" && isResizing) {
-            doResize(e);
-          }
-        });
-        document.addEventListener("pointerup", endResize);
-        document.addEventListener("pointercancel", endResize);
-      }
+      // Mount the controller
+      this.dayViewController.mount();
     }
+
+    // Set goals and render
+    this.dayViewController.setGoals(date, allGoals);
   },
 
   // Render a single goal card for day view
@@ -5176,7 +4350,7 @@ const UI = {
           <div class="day-goal-meta">
             ${goal.startTime ? `<span class="day-goal-time">🕒 ${goal.startTime}${goal.endTime ? ` - ${goal.endTime}` : ""}</span>` : ""}
             ${cat ? `<span class="day-goal-cat" style="color: ${cat.color}">${cat.emoji} ${cat.label}</span>` : ""}
-            ${goal.priority !== "medium" ? `<span class="day-goal-priority priority-${goal.priority}">${goal.priority}</span>` : ""}
+            ${goal.priority !== "medium" ? `<span class="day-goal-priority priority-${goal.priority}">${CONFIG.PRIORITIES[goal.priority]?.symbol || ""} ${goal.priority}</span>` : ""}
             <button class="btn-zen-focus" title="Zen Focus Mode" data-goal-id="${goal.id}">👁️ Focus</button>
           </div>
         </div>
@@ -5269,17 +4443,6 @@ const UI = {
     yearView.appendChild(grid);
     container.appendChild(yearView);
     console.log("renderCalendar: Created yearView structure, container children:", container.children.length);
-    
-    // Scroll to top of container to ensure content is visible (use setTimeout to ensure DOM is updated)
-    setTimeout(() => {
-      const canvasContainer = this.elements.canvasContainer;
-      if (canvasContainer) {
-        canvasContainer.scrollTop = 0;
-        canvasContainer.scrollLeft = 0;
-      }
-      // Also try scrolling the window if needed
-      window.scrollTo(0, 0);
-    }, 0);
 
     CONFIG.MONTHS.forEach((monthName, monthIndex) => {
       try {
@@ -5434,7 +4597,7 @@ const UI = {
         const statusClass = goal.status === "done" ? "completed" : "";
         const priorityTag =
           goal.priority === "urgent" || goal.priority === "high"
-            ? `<span class="goal-tag priority-${goal.priority}">${goal.priority}</span>`
+            ? `<span class="goal-tag priority-${goal.priority}">${CONFIG.PRIORITIES[goal.priority]?.symbol || ""} ${goal.priority}</span>`
             : "";
 
         const level = CONFIG.LEVELS[goal.level] || CONFIG.LEVELS.milestone;
@@ -6098,16 +5261,27 @@ const UI = {
       }
     });
 
-    // Progress slider
+    // Progress slider: update modal UI on input, persist on change (prevents render/sync churn).
+    const progressFill = modal.querySelector(".progress-fill-lg") as HTMLElement | null;
+    const progressValue = modal.querySelector(".progress-value") as HTMLElement | null;
+    const setProgressUI = (progress: number) => {
+      if (progressFill) progressFill.style.width = `${progress}%`;
+      if (progressValue) progressValue.textContent = `${progress}%`;
+    };
+
     modal.querySelector("#progressSlider")?.addEventListener("input", (e: Event) => {
       const target = e.target as HTMLInputElement | null;
       const progress = target ? parseInt(target.value, 10) : NaN;
       if (!Number.isFinite(progress)) return;
+      setProgressUI(progress);
+    });
+
+    modal.querySelector("#progressSlider")?.addEventListener("change", (e: Event) => {
+      const target = e.target as HTMLInputElement | null;
+      const progress = target ? parseInt(target.value, 10) : NaN;
+      if (!Number.isFinite(progress)) return;
       Goals.update(goalId, { progress });
-      const progressFill = modal.querySelector(".progress-fill-lg") as HTMLElement | null;
-      const progressValue = modal.querySelector(".progress-value") as HTMLElement | null;
-      if (progressFill) progressFill.style.width = `${progress}%`;
-      if (progressValue) progressValue.textContent = `${progress}%`;
+      setProgressUI(progress);
     });
 
     // Status buttons
@@ -6785,10 +5959,7 @@ const UI = {
 
   applyThemePreference() {
     const theme = State.data?.preferences?.theme;
-    document.body.classList.toggle(
-      "night-garden",
-      theme === "night" || theme === "dark",
-    );
+    ThemeManager.applyFromPreference(theme);
   },
 
   applyLayoutVisibility() {

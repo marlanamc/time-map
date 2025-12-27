@@ -16,11 +16,15 @@ export class PerformanceMonitor {
   public start(onQualityChange?: (quality: 'low' | 'medium' | 'high') => void): void {
     this.onQualityChange = onQualityChange;
 
-    // Check FPS every 2 seconds
+    // Adaptive check interval based on device capability
+    const isMobile = DeviceCapabilities.isMobile();
+    const checkIntervalMs = isMobile ? 5000 : 2000; // 5s on mobile, 2s on desktop
+
+    // Check FPS at adaptive interval
     this.checkInterval = window.setInterval(() => {
       this.checkFPS();
       this.autoAdjustQuality();
-    }, 2000);
+    }, checkIntervalMs);
 
     // Start frame counting
     this.measureFPS();

@@ -3,6 +3,26 @@
  * Uses Canvas API for smooth animations
  */
 
+/**
+ * Get viewport width (mobile-aware)
+ */
+function getViewportWidth(): number {
+  if (window.visualViewport) {
+    return window.visualViewport.width;
+  }
+  return document.documentElement.clientWidth || window.innerWidth;
+}
+
+/**
+ * Get viewport height (mobile-aware)
+ */
+function getViewportHeight(): number {
+  if (window.visualViewport) {
+    return window.visualViewport.height;
+  }
+  return document.documentElement.clientHeight || window.innerHeight;
+}
+
 export interface Particle {
   x: number;
   y: number;
@@ -31,14 +51,26 @@ export class ParticleSystem {
     if (this.canvas) {
       this.resizeCanvas();
       window.addEventListener('resize', () => this.resizeCanvas());
+
+      // Listen to visual viewport changes (mobile URL bar show/hide)
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => this.resizeCanvas());
+      }
     }
   }
 
   private resizeCanvas(): void {
     if (!this.canvas) return;
 
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    // Use visualViewport if available (better mobile support)
+    if (window.visualViewport) {
+      this.canvas.width = window.visualViewport.width;
+      this.canvas.height = window.visualViewport.height;
+    } else {
+      // Fallback for older browsers
+      this.canvas.width = document.documentElement.clientWidth;
+      this.canvas.height = document.documentElement.clientHeight;
+    }
   }
 
   public start(): void {
@@ -70,16 +102,20 @@ export class ParticleSystem {
     // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Update and draw particles
-    this.particles = this.particles.filter(particle => {
+    // Update and draw particles - in-place filtering to reduce GC pressure
+    let writeIndex = 0;
+    for (let i = 0; i < this.particles.length; i++) {
+      const particle = this.particles[i];
       particle.update();
 
       if (!particle.isDead()) {
         particle.draw(this.ctx!);
-        return true;
+        this.particles[writeIndex++] = particle; // Keep alive particles
       }
-      return false;
-    });
+    }
+
+    // Truncate dead particles
+    this.particles.length = writeIndex;
 
     this.animationFrame = requestAnimationFrame(this.animate);
   };
@@ -144,11 +180,13 @@ export class Butterfly implements Particle {
     this.x += this.vx + Math.sin(this.wingPhase) * 0.3;
     this.y += this.vy + Math.cos(this.wingPhase) * 0.2;
 
-    // Wrap around edges
-    if (this.x < -20) this.x = window.innerWidth + 20;
-    if (this.x > window.innerWidth + 20) this.x = -20;
-    if (this.y < -20) this.y = window.innerHeight + 20;
-    if (this.y > window.innerHeight + 20) this.y = -20;
+    // Wrap around edges (use mobile-aware viewport)
+    const viewportWidth = getViewportWidth();
+    const viewportHeight = getViewportHeight();
+    if (this.x < -20) this.x = viewportWidth + 20;
+    if (this.x > viewportWidth + 20) this.x = -20;
+    if (this.y < -20) this.y = viewportHeight + 20;
+    if (this.y > viewportHeight + 20) this.y = -20;
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
@@ -269,6 +307,6 @@ export class FallingPetal implements Particle {
   }
 
   isDead(): boolean {
-    return this.life >= this.maxLife || this.y > window.innerHeight + 50;
+    return this.life >= this.maxLife || this.y > getViewportHeight() + 50;
   }
 }

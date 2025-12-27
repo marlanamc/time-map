@@ -2,6 +2,8 @@
  * Background Renderer - Manages garden background layers and parallax
  */
 
+import { DeviceCapabilities } from './performanceMonitor';
+
 export class BackgroundRenderer {
   private backdropElement: HTMLElement | null;
   private midgroundElement: HTMLElement | null;
@@ -23,6 +25,13 @@ export class BackgroundRenderer {
     // Check if user prefers reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
+      this.parallaxEnabled = false;
+      return;
+    }
+
+    // Check mobile ONCE on initialization (not on every scroll)
+    const isMobile = DeviceCapabilities.isMobile();
+    if (isMobile) {
       this.parallaxEnabled = false;
       return;
     }
@@ -49,12 +58,6 @@ export class BackgroundRenderer {
    */
   private updateParallax(): void {
     if (!this.parallaxEnabled) return;
-
-    // Check if on mobile (disable parallax if janky)
-    const isMobile = window.innerWidth <= 600;
-    if (isMobile) {
-      return; // Skip parallax on mobile for performance
-    }
 
     // Background moves slower than foreground (depth illusion)
     if (this.backdropElement) {

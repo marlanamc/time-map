@@ -1,0 +1,611 @@
+/* Day View Cards - Botanical Greenhouse Card Styles */
+
+/* ============================================
+   BASE CARD STRUCTURE
+   ============================================ */
+
+.day-goal-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(180, 106, 74, 0.15);
+  border-radius: 14px;
+  padding: 1rem 1.125rem;
+  cursor: pointer;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s ease;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 2px 8px rgba(180, 106, 74, 0.06),
+    0 4px 16px rgba(111, 155, 134, 0.04);
+  overflow: hidden;
+}
+
+/* Subtle grain texture */
+.day-goal-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 30% 30%, rgba(111, 155, 134, 0.03) 0%, transparent 70%),
+    radial-gradient(circle at 70% 70%, rgba(180, 106, 74, 0.02) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.day-goal-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow:
+    0 6px 16px rgba(180, 106, 74, 0.12),
+    0 12px 32px rgba(111, 155, 134, 0.08);
+  border-color: rgba(111, 155, 134, 0.3);
+}
+
+.day-goal-card:active {
+  transform: translateY(-1px) scale(1);
+}
+
+/* Focus state */
+.day-goal-card:focus-visible {
+  outline: 2px solid var(--sage, #6F9B86);
+  outline-offset: 3px;
+  border-color: var(--sage, #6F9B86);
+}
+
+/* Completed state */
+.day-goal-card.completed {
+  opacity: 0.75;
+  filter: saturate(0.7);
+}
+
+.day-goal-card.completed:hover {
+  opacity: 0.85;
+}
+
+.night-garden .day-goal-card {
+  background: rgba(15, 23, 42, 0.75);
+  border-color: rgba(140, 183, 217, 0.15);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.night-garden .day-goal-card:hover {
+  border-color: rgba(140, 183, 217, 0.3);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.3),
+    0 12px 32px rgba(140, 183, 217, 0.1);
+}
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+
+.day-goal-checkbox {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(111, 155, 134, 0.3);
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(247, 243, 237, 0.7) 100%);
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(111, 155, 134, 0.1);
+}
+
+.day-goal-checkbox::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(111, 155, 134, 0.15) 0%,
+    transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.day-goal-checkbox:hover {
+  border-color: var(--sage, #6F9B86);
+  transform: scale(1.1);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.08),
+    0 4px 8px rgba(111, 155, 134, 0.2);
+}
+
+.day-goal-checkbox:hover::after {
+  opacity: 1;
+}
+
+.day-goal-checkbox.checked {
+  background: linear-gradient(135deg,
+    var(--success, #10b981) 0%,
+    var(--sage, #6F9B86) 100%);
+  border-color: var(--success, #10b981);
+  box-shadow:
+    0 4px 12px rgba(16, 185, 129, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  animation: checkBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes checkBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.day-goal-checkbox.checked::after {
+  content: "✓";
+  color: white;
+  font-size: 15px;
+  font-weight: 900;
+  position: static;
+  inset: auto;
+  background: none;
+  opacity: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.night-garden .day-goal-checkbox {
+  background: linear-gradient(135deg,
+    rgba(30, 41, 79, 0.6) 0%,
+    rgba(15, 23, 42, 0.8) 100%);
+  border-color: rgba(111, 155, 134, 0.4);
+}
+
+.night-garden .day-goal-checkbox:hover {
+  border-color: var(--sage, #6F9B86);
+}
+
+/* ============================================
+   CARD CONTENT
+   ============================================ */
+
+.day-goal-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.day-goal-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.5));
+  margin-bottom: -0.125rem;
+}
+
+.day-goal-level-emoji {
+  font-size: 1rem;
+  filter: saturate(1.1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.night-garden .day-goal-level {
+  color: rgba(234, 246, 240, 0.5);
+}
+
+.day-goal-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a1a);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.day-goal-card.completed .day-goal-title {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(111, 155, 134, 0.4);
+  color: var(--text-secondary, rgba(0, 0, 0, 0.5));
+}
+
+.night-garden .day-goal-title {
+  color: rgba(234, 246, 240, 0.95);
+}
+
+.night-garden .day-goal-card.completed .day-goal-title {
+  color: rgba(234, 246, 240, 0.5);
+  text-decoration-color: rgba(111, 155, 134, 0.3);
+}
+
+.day-goal-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.65));
+  line-height: 1.5;
+  margin: -0.125rem 0 0 0;
+}
+
+.night-garden .day-goal-desc {
+  color: rgba(234, 246, 240, 0.65);
+}
+
+/* ============================================
+   METADATA ROW
+   ============================================ */
+
+.day-goal-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.5));
+  margin-top: 0.125rem;
+}
+
+.day-goal-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+  color: var(--earth, #B46A4A);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-goal-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  background: rgba(111, 155, 134, 0.08);
+  border-radius: 6px;
+}
+
+.day-goal-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.day-goal-priority.priority-high {
+  background: rgba(239, 68, 68, 0.12);
+  color: rgb(185, 28, 28);
+}
+
+.day-goal-priority.priority-low {
+  background: rgba(107, 114, 128, 0.12);
+  color: rgb(75, 85, 99);
+}
+
+.night-garden .day-goal-time {
+  color: rgba(180, 106, 74, 0.9);
+}
+
+.night-garden .day-goal-cat {
+  background: rgba(111, 155, 134, 0.15);
+}
+
+.night-garden .day-goal-priority.priority-high {
+  background: rgba(239, 68, 68, 0.2);
+  color: rgb(254, 202, 202);
+}
+
+/* ============================================
+   ZEN FOCUS BUTTON
+   ============================================ */
+
+.btn-zen-focus {
+  margin-left: auto;
+  border: 1px solid rgba(111, 155, 134, 0.25);
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(247, 243, 237, 0.5) 100%);
+  color: var(--text-secondary, rgba(0, 0, 0, 0.7));
+  border-radius: 8px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(111, 155, 134, 0.1);
+  white-space: nowrap;
+}
+
+.btn-zen-focus:hover {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(247, 243, 237, 0.8) 100%);
+  border-color: var(--sage, #6F9B86);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(111, 155, 134, 0.2);
+}
+
+.btn-zen-focus:active {
+  transform: translateY(0);
+}
+
+.night-garden .btn-zen-focus {
+  background: linear-gradient(135deg,
+    rgba(30, 41, 79, 0.5) 0%,
+    rgba(15, 23, 42, 0.7) 100%);
+  border-color: rgba(140, 183, 217, 0.2);
+  color: rgba(234, 246, 240, 0.8);
+}
+
+.night-garden .btn-zen-focus:hover {
+  background: linear-gradient(135deg,
+    rgba(30, 41, 79, 0.7) 0%,
+    rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(140, 183, 217, 0.4);
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+
+.day-goal-progress {
+  margin-top: 0.5rem;
+}
+
+.progress-bar-lg {
+  height: 6px;
+  background: rgba(111, 155, 134, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.progress-fill-lg {
+  height: 100%;
+  background: linear-gradient(90deg,
+    var(--sage, #6F9B86) 0%,
+    var(--success, #10b981) 100%);
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow:
+    0 0 8px rgba(111, 155, 134, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Animated shimmer effect */
+.progress-fill-lg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.night-garden .progress-bar-lg {
+  background: rgba(30, 41, 79, 0.6);
+}
+
+/* ============================================
+   CARD VARIANTS
+   ============================================ */
+
+/* SEED VARIANT - Unscheduled tasks */
+.day-goal-variant-seed {
+  border-left: 4px solid var(--sage, #6F9B86);
+  background:
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(247, 243, 237, 0.85) 100%);
+  position: relative;
+}
+
+.day-goal-variant-seed::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg,
+    rgba(111, 155, 134, 0.8) 0%,
+    rgba(111, 155, 134, 1) 50%,
+    rgba(111, 155, 134, 0.8) 100%);
+  box-shadow: 0 0 8px rgba(111, 155, 134, 0.4);
+}
+
+.night-garden .day-goal-variant-seed {
+  background:
+    linear-gradient(135deg,
+      rgba(15, 23, 42, 0.75) 0%,
+      rgba(10, 22, 18, 0.65) 100%);
+  border-left-color: var(--sage, #6F9B86);
+}
+
+/* PLANTER VARIANT - Scheduled tasks in timeline */
+.day-goal-variant-planter {
+  position: absolute;
+  top: calc(var(--start) * 1%);
+  height: calc(var(--dur) * 1%);
+  left: calc(var(--time-gutter) + (var(--lane) * (100% - var(--time-gutter))) / var(--lanes));
+  width: calc(((100% - var(--time-gutter)) / var(--lanes)) - 12px);
+  min-height: 96px;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 106, 74, 0.25);
+  border-top: 6px solid var(--earth, #B46A4A);
+  background:
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.8) 60%,
+      rgba(180, 106, 74, 0.08) 100%);
+  box-shadow:
+    0 4px 16px rgba(180, 106, 74, 0.15),
+    0 8px 32px rgba(111, 155, 134, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  z-index: 2;
+}
+
+.day-goal-variant-planter:hover {
+  z-index: 3;
+  border-color: rgba(180, 106, 74, 0.4);
+  box-shadow:
+    0 8px 24px rgba(180, 106, 74, 0.25),
+    0 16px 48px rgba(111, 155, 134, 0.12);
+}
+
+/* Earth-like gradient accent */
+.day-goal-variant-planter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at bottom,
+      rgba(180, 106, 74, 0.06) 0%,
+      transparent 50%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.night-garden .day-goal-variant-planter {
+  border-color: rgba(140, 183, 217, 0.18);
+  border-top-color: rgba(180, 106, 74, 0.7);
+  background:
+    linear-gradient(180deg,
+      rgba(15, 23, 42, 0.85) 0%,
+      rgba(10, 22, 18, 0.75) 60%,
+      rgba(140, 183, 217, 0.08) 100%);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 16px 48px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(140, 183, 217, 0.1);
+}
+
+/* COMPOST VARIANT - Completed tasks */
+.day-goal-variant-compost {
+  border-left: 4px solid var(--success, #10b981);
+  background:
+    linear-gradient(135deg,
+      rgba(16, 185, 129, 0.08) 0%,
+      rgba(111, 155, 134, 0.06) 100%);
+  opacity: 0.85;
+}
+
+.day-goal-variant-compost::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg,
+    rgba(16, 185, 129, 0.7) 0%,
+    rgba(16, 185, 129, 1) 50%,
+    rgba(16, 185, 129, 0.7) 100%);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.day-goal-variant-compost .btn-zen-focus {
+  display: none;
+}
+
+.night-garden .day-goal-variant-compost {
+  background:
+    linear-gradient(135deg,
+      rgba(16, 185, 129, 0.12) 0%,
+      rgba(111, 155, 134, 0.08) 100%);
+}
+
+/* ============================================
+   PLANTER RESIZE HANDLES
+   ============================================ */
+
+.planter-resize-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 16px;
+  cursor: ns-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.planter-resize-handle::before {
+  content: "";
+  width: 32px;
+  height: 4px;
+  background: rgba(180, 106, 74, 0.4);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.day-goal-variant-planter:hover .planter-resize-handle {
+  opacity: 1;
+}
+
+.planter-resize-handle:hover::before {
+  background: var(--earth, #B46A4A);
+  width: 40px;
+  height: 5px;
+}
+
+.planter-resize-handle-top {
+  top: 0;
+}
+
+.planter-resize-handle-bottom {
+  bottom: 0;
+}
+
+.night-garden .planter-resize-handle::before {
+  background: rgba(180, 106, 74, 0.6);
+}
+
+.night-garden .planter-resize-handle:hover::before {
+  background: rgba(180, 106, 74, 0.9);
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .day-goal-card,
+  .day-goal-checkbox,
+  .btn-zen-focus,
+  .progress-fill-lg {
+    transition: none;
+  }
+
+  .day-goal-checkbox.checked {
+    animation: none;
+  }
+
+  .progress-fill-lg::after {
+    animation: none;
+  }
+}

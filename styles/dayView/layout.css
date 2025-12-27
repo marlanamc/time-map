@@ -1,0 +1,676 @@
+/* Day View Layout - Botanical Greenhouse Aesthetic */
+
+/* ============================================
+   DAY VIEW CONTAINER
+   ============================================ */
+
+.day-view-container {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+.day-view {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.day-view-header {
+  text-align: center;
+  margin-bottom: clamp(2rem, 5vw, 4rem);
+  position: relative;
+}
+
+.day-view-title {
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg,
+    var(--earth, #B46A4A) 0%,
+    var(--sage, #6F9B86) 50%,
+    var(--sky, #8CB7D9) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  line-height: 1.1;
+  animation: titleShimmer 8s ease-in-out infinite;
+}
+
+@keyframes titleShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.day-view-subtitle {
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+  color: var(--text-secondary, rgba(0, 0, 0, 0.6));
+  margin: 0.5rem 0 0 0;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.night-garden .day-view-subtitle {
+  color: rgba(234, 246, 240, 0.65);
+}
+
+/* ============================================
+   CAPACITY WARNING
+   ============================================ */
+
+.garden-capacity-warning {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg,
+    rgba(255, 193, 7, 0.12) 0%,
+    rgba(255, 152, 0, 0.08) 100%);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-left: 4px solid rgba(255, 193, 7, 0.7);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  animation: warningPulse 2s ease-in-out infinite;
+}
+
+@keyframes warningPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 193, 7, 0); }
+}
+
+.warning-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(255, 193, 7, 0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.warning-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.warning-text strong {
+  font-weight: 700;
+  color: var(--text-primary, #1a1a1a);
+  font-size: 1rem;
+}
+
+.warning-text span {
+  font-size: 0.875rem;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.7));
+  line-height: 1.5;
+}
+
+.night-garden .warning-text strong {
+  color: rgba(255, 224, 130, 0.95);
+}
+
+.night-garden .warning-text span {
+  color: rgba(255, 224, 130, 0.75);
+}
+
+/* ============================================
+   DAY LAND CONTAINER
+   ============================================ */
+
+.day-land {
+  background:
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(247, 243, 237, 0.65) 100%);
+  border: 1px solid rgba(180, 106, 74, 0.15);
+  border-radius: 24px;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 4px 24px rgba(111, 155, 134, 0.08),
+    0 12px 48px rgba(180, 106, 74, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Organic texture overlay */
+.day-land::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(111, 155, 134, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(180, 106, 74, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.night-garden .day-land {
+  background:
+    linear-gradient(180deg,
+      rgba(15, 23, 42, 0.75) 0%,
+      rgba(8, 12, 26, 0.85) 100%);
+  border: 1px solid rgba(140, 183, 217, 0.12);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 16px 64px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(140, 183, 217, 0.08);
+}
+
+/* ============================================
+   TOPBAR (Fence + Plant Button)
+   ============================================ */
+
+.day-land-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.day-land-fence {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg,
+    rgba(180, 106, 74, 0.08) 0%,
+    rgba(111, 155, 134, 0.08) 100%);
+  border: 1px solid rgba(180, 106, 74, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.fence-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--earth, #B46A4A);
+}
+
+.fence-value {
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: var(--text-primary, #1a1a1a);
+  min-width: 80px;
+}
+
+.fence-hint {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.5));
+  font-weight: 500;
+}
+
+.night-garden .day-land-fence {
+  background: linear-gradient(135deg,
+    rgba(180, 106, 74, 0.15) 0%,
+    rgba(111, 155, 134, 0.12) 100%);
+  border-color: rgba(180, 106, 74, 0.25);
+}
+
+.night-garden .fence-value {
+  color: rgba(234, 246, 240, 0.95);
+}
+
+.night-garden .fence-hint {
+  color: rgba(234, 246, 240, 0.5);
+}
+
+.day-plant-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg,
+    var(--sage, #6F9B86) 0%,
+    var(--earth, #B46A4A) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(111, 155, 134, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.day-plant-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.day-plant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(111, 155, 134, 0.35);
+}
+
+.day-plant-btn:hover::before {
+  opacity: 1;
+}
+
+.day-plant-btn:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   DAY PLOT (Main container for sections)
+   ============================================ */
+
+.day-plot {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  --lanes: 1;
+}
+
+/* ============================================
+   SEED TRAY
+   ============================================ */
+
+.day-seed-tray {
+  background: linear-gradient(135deg,
+    rgba(111, 155, 134, 0.08) 0%,
+    rgba(111, 155, 134, 0.04) 100%);
+  border: 1px solid rgba(111, 155, 134, 0.2);
+  border-radius: 18px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.day-seed-tray::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--sage, #6F9B86) 0%,
+    transparent 100%);
+  opacity: 0.6;
+}
+
+.seed-tray-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+.seed-tray-title {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--text-primary, #1a1a1a);
+  letter-spacing: -0.01em;
+}
+
+.seed-tray-subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.5));
+  font-weight: 500;
+}
+
+.seed-tray-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.seed-tray-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.4));
+  font-size: 0.9375rem;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.night-garden .day-seed-tray {
+  background: linear-gradient(135deg,
+    rgba(111, 155, 134, 0.12) 0%,
+    rgba(111, 155, 134, 0.06) 100%);
+  border-color: rgba(111, 155, 134, 0.2);
+}
+
+.night-garden .seed-tray-title {
+  color: rgba(234, 246, 240, 0.95);
+}
+
+.night-garden .seed-tray-subtitle {
+  color: rgba(234, 246, 240, 0.5);
+}
+
+/* ============================================
+   DAY BED (Timeline)
+   ============================================ */
+
+.day-bed {
+  position: relative;
+}
+
+.day-bed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+.day-bed-title {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--text-primary, #1a1a1a);
+  letter-spacing: -0.01em;
+}
+
+.day-bed-subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.5));
+  font-weight: 500;
+}
+
+.night-garden .day-bed-title {
+  color: rgba(234, 246, 240, 0.95);
+}
+
+.night-garden .day-bed-subtitle {
+  color: rgba(234, 246, 240, 0.5);
+}
+
+/* ============================================
+   DAY BED CANVAS (Timeline Container)
+   ============================================ */
+
+.day-bed-canvas {
+  position: relative;
+  height: clamp(540px, 64vh, 860px);
+  border-radius: 18px;
+  border: 1px solid rgba(111, 155, 134, 0.2);
+  --time-gutter: 72px;
+  background:
+    radial-gradient(1200px 700px at 40% -10%,
+      rgba(140, 183, 217, 0.14) 0%,
+      transparent 60%),
+    linear-gradient(180deg,
+      rgba(111, 155, 134, 0.12) 0%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(180, 106, 74, 0.08) 100%);
+  overflow: hidden;
+  padding: var(--space-3, 1rem);
+  box-shadow:
+    inset 0 2px 12px rgba(111, 155, 134, 0.08),
+    inset 0 -2px 12px rgba(180, 106, 74, 0.05);
+}
+
+/* Glass reflection effect */
+.day-bed-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 15% 15%,
+      rgba(255, 255, 255, 0.5) 0%,
+      transparent 35%);
+  opacity: 0.6;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.night-garden .day-bed-canvas {
+  border: 1px solid rgba(140, 183, 217, 0.12);
+  background:
+    radial-gradient(1200px 700px at 40% -10%,
+      rgba(30, 41, 79, 0.3) 0%,
+      transparent 70%),
+    linear-gradient(180deg,
+      rgba(15, 23, 42, 0.6) 0%,
+      rgba(8, 12, 26, 0.8) 50%,
+      rgba(30, 41, 79, 0.12) 100%);
+  box-shadow:
+    inset 0 2px 12px rgba(0, 0, 0, 0.3),
+    inset 0 -2px 12px rgba(30, 41, 79, 0.2);
+}
+
+.night-garden .day-bed-canvas::before {
+  background-image:
+    radial-gradient(circle at 15% 15%,
+      rgba(140, 183, 217, 0.12) 0%,
+      transparent 40%);
+  opacity: 0.8;
+}
+
+/* ============================================
+   TIME GRID
+   ============================================ */
+
+.day-bed-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bed-hour {
+  position: absolute;
+  top: calc(var(--at) * 1%);
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0;
+}
+
+.bed-hour-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.4));
+  min-width: var(--time-gutter);
+  padding-left: 0.5rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.bed-hour-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(111, 155, 134, 0.3) 0%,
+    rgba(111, 155, 134, 0.1) 50%,
+    transparent 100%);
+  position: relative;
+}
+
+/* Subtle glow on hour lines */
+.bed-hour-line::after {
+  content: "";
+  position: absolute;
+  inset: -2px 0;
+  background: inherit;
+  filter: blur(2px);
+  opacity: 0.4;
+}
+
+.bed-hour.is-first .bed-hour-line,
+.bed-hour.is-last .bed-hour-line {
+  opacity: 0.5;
+}
+
+.night-garden .bed-hour-label {
+  color: rgba(234, 246, 240, 0.4);
+}
+
+.night-garden .bed-hour-line {
+  background: linear-gradient(90deg,
+    rgba(140, 183, 217, 0.25) 0%,
+    rgba(140, 183, 217, 0.08) 50%,
+    transparent 100%);
+}
+
+/* ============================================
+   CURRENT TIME INDICATOR
+   ============================================ */
+
+.current-time-indicator {
+  position: absolute;
+  top: calc(var(--at) * 1%);
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.current-time-line {
+  height: 2px;
+  background: linear-gradient(90deg,
+    rgba(255, 193, 7, 0) 0%,
+    rgba(255, 193, 7, 0.9) 10%,
+    rgba(255, 193, 7, 0.9) 90%,
+    rgba(255, 193, 7, 0) 100%);
+  position: relative;
+  box-shadow:
+    0 0 8px rgba(255, 193, 7, 0.6),
+    0 0 16px rgba(255, 193, 7, 0.3);
+  animation: timePulse 2s ease-in-out infinite;
+}
+
+@keyframes timePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.current-time-dot {
+  position: absolute;
+  left: var(--time-gutter);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle,
+    rgba(255, 193, 7, 1) 0%,
+    rgba(255, 193, 7, 0.8) 50%,
+    rgba(255, 193, 7, 0) 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 12px rgba(255, 193, 7, 0.8),
+    0 0 24px rgba(255, 193, 7, 0.4);
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.bed-empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  max-width: 400px;
+  padding: 2rem;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.35));
+  font-size: 0.9375rem;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.night-garden .bed-empty {
+  color: rgba(234, 246, 240, 0.3);
+}
+
+/* ============================================
+   COMPOST SECTION
+   ============================================ */
+
+.day-compost {
+  background: linear-gradient(135deg,
+    rgba(16, 185, 129, 0.08) 0%,
+    rgba(16, 185, 129, 0.04) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 18px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.day-compost::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--success, #10b981) 0%,
+    transparent 100%);
+  opacity: 0.6;
+}
+
+.compost-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+.compost-title {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--text-primary, #1a1a1a);
+  letter-spacing: -0.01em;
+}
+
+.compost-subtitle {
+  font-size: 0.8125rem;
+  color: var(--success, #10b981);
+  font-weight: 700;
+}
+
+.compost-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.night-garden .day-compost {
+  background: linear-gradient(135deg,
+    rgba(16, 185, 129, 0.12) 0%,
+    rgba(16, 185, 129, 0.06) 100%);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.night-garden .compost-title {
+  color: rgba(234, 246, 240, 0.95);
+}

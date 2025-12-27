@@ -1,5 +1,6 @@
 import DB from '../db';
 import { errorHandler, DatabaseError } from '../utils/errorHandler';
+import { dirtyTracker } from './DirtyTracker';
 
 class ADHDSupportService {
   constructor() {
@@ -90,11 +91,11 @@ class ADHDSupportService {
 
       this.currentFocusSession = session;
       this.focusSessions.push(session);
-      
-      // Auto-save the session every 30 seconds
+
+      // Auto-save the session every 60 seconds (optimized from 30s)
       this.autoSaveInterval = setInterval(() => {
         this.saveFocusSessions();
-      }, 30000);
+      }, 60000);
 
       return session;
     } catch (error) {
@@ -284,14 +285,40 @@ class ADHDSupportService {
 
   async saveFocusSessions() {
     try {
-      // Save all active focus sessions
-      for (const session of this.focusSessions) {
-        if (session.status === 'active') {
-          await DB.update('focusSessions', session);
-        }
+      // Only save sessions that are dirty (modified)
+      const sessionsToSave = this.focusSessions.filter(s =>
+        s.status === 'active' && dirtyTracker.isDirty('focusSession', s.id)
+      );
+
+      if (sessionsToSave.length === 0) {
+        // Nothing to save, skip this interval
+        return;
       }
+
+      // Batch update in IndexedDB
+      if (sessionsToSave.length > 1) {
+        await DB.bulkUpdate('focusSessions', sessionsToSave);
+      } else {
+        await DB.update('focusSessions', sessionsToSave[0]);
+      }
+
+      // Mark all as clean after successful save
+      sessionsToSave.forEach(s => {
+        dirtyTracker.markClean('focusSession', s.id);
+      });
+
+      console.log(`Auto-saved ${sessionsToSave.length} focus sessions`);
     } catch (error) {
       console.error('Failed to auto-save focus sessions:', error);
+    }
+  }
+
+  recordDistraction(sessionId) {
+    const session = this.focusSessions.find(s => s.id === sessionId);
+    if (session) {
+      session.distractions.push(new Date());
+      // Mark session as dirty when modified
+      dirtyTracker.markDirty('focusSession', sessionId);
     }
   }
 }

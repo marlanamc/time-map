@@ -27,10 +27,10 @@
     /* deep spruce */
     --text-secondary: #455C61;
     /* stone grey */
-    --text-tertiary: #728B91;
-    /* morning mist */
-    --text-ghost: #A4B9BE;
-    /* light silver */
+    --text-tertiary: #4A5F65;
+    /* darker morning mist - WCAG AA compliant (was #728B91) */
+    --text-ghost: #5A6F75;
+    /* darker silver - WCAG AA compliant (was #A4B9BE) */
 
     /* Daylight Garden Colors (Vibrant Primary) */
     --sage: #5A9B8D;
@@ -149,12 +149,20 @@
     --shadow-opacity: 0.3;
     --shadow-length: 4px;
     --shadow-angle: 45deg;
+    --celestial-offset: 0px; /* Offset for celestial bodies on mobile */
 
     /* Seasonal colors (defaults to current) */
     --seasonal-accent: var(--sage);
     --seasonal-bg: var(--bg-base);
     --seasonal-flower: var(--petal);
     --seasonal-secondary: var(--teal);
+}
+
+/* Mobile viewport adjustments */
+@media (max-width: 600px) {
+    :root {
+        --celestial-offset: env(safe-area-inset-top, 0px);
+    }
 }
 
 /* Import Google Fonts */
@@ -222,7 +230,7 @@ body {
     mix-blend-mode: overlay;
 }
 
-body.night-garden .bg-canvas::before {
+.night-garden .bg-canvas::before {
     display: none;
 }
 
@@ -245,7 +253,7 @@ body.night-garden .bg-canvas::before {
     animation: grain-shift 12s steps(4, end) infinite;
 }
 
-body.night-garden .bg-canvas::after {
+.night-garden .bg-canvas::after {
     opacity: 0.38;
     background-image:
         radial-gradient(circle at 10% 18%, rgba(255, 255, 255, 0.72) 0 1px, transparent 3px),
@@ -318,7 +326,7 @@ body.night-garden .bg-canvas::after {
 }
 
 /* Night Garden (dark mode) */
-body.night-garden {
+:root.night-garden {
     --bg-base: #0A1A0F;
     /* deep forest night */
     --bg-elevated: #0F1B14;
@@ -340,10 +348,10 @@ body.night-garden {
     /* moonlit mist */
     --text-secondary: #94A3B8;
     /* cool silver */
-    --text-tertiary: #64748B;
-    /* starlight shadow */
-    --text-ghost: #334155;
-    /* deep void */
+    --text-tertiary: #A8B8C8;
+    /* brighter starlight - WCAG AA compliant (was #64748B) */
+    --text-ghost: #8A9AA8;
+    /* lighter void - WCAG AA compliant (was #334155) */
 
     --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.6);
     --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.7);
@@ -408,6 +416,30 @@ body.hide-achievements .achievements-panel {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* WCAG AA: High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    :root {
+        --text-tertiary: var(--text-primary);
+        --text-ghost: var(--text-secondary);
+        --glass-border: var(--text-secondary);
+    }
+
+    :root.night-garden {
+        --text-tertiary: var(--text-primary);
+        --text-ghost: var(--text-secondary);
+    }
+
+    /* Strengthen all borders in high contrast mode */
+    input,
+    textarea,
+    select,
+    .goal-checkbox,
+    .category-filter,
+    button {
+        border-width: 2px !important;
     }
 }
 
@@ -648,7 +680,7 @@ body.time-night .garden-sky::after {
 }
 
 /* Light theme: sunny, grounded header (less "faded") */
-body:not(.night-garden) .header {
+:root:not(.night-garden) .header {
     background:
         radial-gradient(1100px 250px at 12% -30%,
             rgba(74, 144, 226, 0.38) 0%,
@@ -676,7 +708,7 @@ body:not(.night-garden) .header {
     pointer-events: none;
 }
 
-body:not(.night-garden) .header::before {
+:root:not(.night-garden) .header::before {
     background:
         linear-gradient(135deg,
             rgba(255, 255, 255, 0.85) 0%,
@@ -715,7 +747,7 @@ body:not(.night-garden) .header::before {
     filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.08));
 }
 
-body:not(.night-garden) .logo-text {
+:root:not(.night-garden) .logo-text {
     background: linear-gradient(110deg,
             #4A90E2 0%,
             #4A90E2 30%,
@@ -732,7 +764,7 @@ body:not(.night-garden) .logo-text {
     letter-spacing: -0.02em;
 }
 
-body.night-garden .logo-text {
+.night-garden .logo-text {
     background: linear-gradient(110deg,
             #E2E8F0 0%,
             /* moon white */
@@ -745,7 +777,7 @@ body.night-garden .logo-text {
     filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
 }
 
-body.night-garden .logo-icon {
+.night-garden .logo-icon {
     filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25)) drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
 }
 
@@ -1122,7 +1154,8 @@ select {
     font-family: var(--font-sans);
     font-size: var(--text-base);
     background: var(--bg-surface);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--text-secondary);
+    /* WCAG AA: stronger border for 3:1 contrast (was --glass-border) */
     border-radius: var(--radius-md);
     padding: 0.75rem 1rem;
     color: var(--text-primary);
@@ -1133,8 +1166,9 @@ select {
 
 input::placeholder,
 textarea::placeholder {
-    color: var(--text-ghost);
-    opacity: 0.7;
+    color: var(--text-tertiary);
+    /* WCAG AA: readable placeholder (was --text-ghost with 0.7 opacity) */
+    opacity: 1;
 }
 
 input:focus,
@@ -1354,7 +1388,21 @@ select:focus {
 .toggle-switch:focus-visible,
 .pick-btn:focus-visible,
 .category-filter:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 3px solid var(--accent);
+    /* WCAG AA: 3px for better visibility (was 2px) */
+    outline-offset: 2px;
+}
+
+/* WCAG AA: Ensure all interactive elements have visible focus */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 3px solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -1492,7 +1540,7 @@ select:focus {
     box-shadow: var(--shadow-sm);
 }
 
-body.night-garden .now-panel {
+.night-garden .now-panel {
     background:
         radial-gradient(800px 240px at 50% 0%,
             rgba(140, 183, 217, 0.16) 0%,
@@ -1542,7 +1590,7 @@ body.night-garden .now-panel {
     filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.08));
 }
 
-body:not(.night-garden) .now-panel-logo .logo-text {
+:root:not(.night-garden) .now-panel-logo .logo-text {
     background: linear-gradient(110deg,
             #4A90E2 0%,
             #4A90E2 30%,
@@ -1553,7 +1601,7 @@ body:not(.night-garden) .now-panel-logo .logo-text {
     -webkit-text-fill-color: transparent;
 }
 
-body.night-garden .now-panel-logo .logo-text {
+.night-garden .now-panel-logo .logo-text {
     background: linear-gradient(110deg,
             #E2E8F0 0%,
             #E2E8F0 40%,
@@ -1565,7 +1613,7 @@ body.night-garden .now-panel-logo .logo-text {
     filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
 }
 
-body.night-garden .now-panel-logo .logo-icon {
+.night-garden .now-panel-logo .logo-icon {
     filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25)) drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
 }
 
@@ -1626,7 +1674,7 @@ body.night-garden .now-panel-logo .logo-icon {
     padding-bottom: 0.12em; /* avoid descender clipping with overflow/gradient text */
 }
 
-body.night-garden .time-stat-value {
+.night-garden .time-stat-value {
     background: linear-gradient(90deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.72) 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -1654,9 +1702,9 @@ body.night-garden .time-stat-value {
     box-shadow: var(--shadow-xs);
 }
 
-body.night-garden .affirmation-panel,
-body.night-garden .whats-next,
-body.night-garden .achievements-panel {
+.night-garden .affirmation-panel,
+.night-garden .whats-next,
+.night-garden .achievements-panel {
     background: rgba(10, 22, 18, 0.62);
     border: 1px solid rgba(140, 183, 217, 0.12);
 }
@@ -1857,7 +1905,7 @@ body.night-garden .achievements-panel {
     box-shadow: 0 8px 32px rgba(115, 158, 130, 0.06), var(--shadow-sm);
 }
 
-body.night-garden .control-bar {
+.night-garden .control-bar {
     background:
         radial-gradient(900px 120px at 15% 0%,
             rgba(140, 183, 217, 0.16) 0%,
@@ -1986,7 +2034,7 @@ body.night-garden .control-bar {
     gap: 2px;
 }
 
-body.night-garden .view-switcher {
+.night-garden .view-switcher {
     background: rgba(10, 22, 18, 0.68);
     border: 1px solid rgba(140, 183, 217, 0.16);
 }
@@ -2005,7 +2053,7 @@ body.night-garden .view-switcher {
     min-width: 56px;
 }
 
-body.night-garden .view-btn {
+.night-garden .view-btn {
     color: rgba(234, 246, 240, 0.72);
 }
 
@@ -2014,7 +2062,7 @@ body.night-garden .view-btn {
     background: var(--bg-hover);
 }
 
-body.night-garden .view-btn:hover {
+.night-garden .view-btn:hover {
     background: rgba(140, 183, 217, 0.08);
     color: rgba(234, 246, 240, 0.92);
 }
@@ -2027,7 +2075,7 @@ body.night-garden .view-btn:hover {
     border: 1px solid rgba(111, 155, 134, 0.35);
 }
 
-body.night-garden .view-btn.active {
+.night-garden .view-btn.active {
     background: rgba(140, 183, 217, 0.14);
     border: 1px solid rgba(140, 183, 217, 0.18);
     color: var(--text-primary);
@@ -2238,7 +2286,8 @@ body.night-garden .view-btn.active {
 .category-filter {
     padding: var(--space-2) var(--space-3);
     background: transparent;
-    border: none;
+    border: 2px solid transparent;
+    /* WCAG AA: border for active state differentiation */
     border-radius: var(--radius-sm);
     color: var(--text-tertiary);
     font-family: inherit;
@@ -2256,6 +2305,15 @@ body.night-garden .view-btn.active {
 .category-filter.active {
     color: var(--text-primary);
     background: var(--bg-active);
+    border-color: var(--accent);
+    /* WCAG AA: non-color indicator */
+    font-weight: 600;
+    /* WCAG AA: visual weight change */
+}
+
+.category-filter.active::before {
+    content: "✓ ";
+    /* WCAG AA: non-color indicator for active state */
 }
 
 .category-filter[data-category="career"].active {
@@ -2841,7 +2899,7 @@ body.hide-sidebar .canvas-zoom-controls {
     pointer-events: none;
 }
 
-body.night-garden .day-land {
+.night-garden .day-land {
     border: 1px solid rgba(164, 185, 217, 0.12);
     background:
         radial-gradient(1200px 600px at 10% 0%,
@@ -2854,7 +2912,7 @@ body.night-garden .day-land {
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
 }
 
-body.night-garden .day-land::before {
+.night-garden .day-land::before {
     opacity: 0.10;
     background-image:
         repeating-linear-gradient(45deg,
@@ -2885,7 +2943,7 @@ body.night-garden .day-land::before {
     box-shadow: var(--shadow-xs);
 }
 
-body.night-garden .day-land-fence {
+.night-garden .day-land-fence {
     background: var(--bg-surface);
     border: 1px solid var(--glass-border);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
@@ -2898,7 +2956,7 @@ body.night-garden .day-land-fence {
     letter-spacing: -0.02em;
 }
 
-body.night-garden .fence-label {
+.night-garden .fence-label {
     color: var(--sky);
 }
 
@@ -2928,9 +2986,9 @@ body.night-garden .fence-label {
     padding: var(--space-4);
 }
 
-body.night-garden .day-seed-tray,
-body.night-garden .day-bed,
-body.night-garden .day-compost {
+.night-garden .day-seed-tray,
+.night-garden .day-bed,
+.night-garden .day-compost {
     background: var(--bg-surface);
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(12px);
@@ -2979,7 +3037,7 @@ body.night-garden .day-compost {
     text-align: center;
 }
 
-body.night-garden .seed-tray-empty {
+.night-garden .seed-tray-empty {
     background: rgba(140, 183, 217, 0.06);
     border: 1px dashed rgba(140, 183, 217, 0.22);
     color: var(--text-secondary);
@@ -3036,7 +3094,7 @@ body.is-touch-dragging-seed .day-view-container {
     outline-color: var(--accent);
 }
 
-body.night-garden .day-bed-canvas {
+.night-garden .day-bed-canvas {
     border: 1px solid rgba(164, 185, 217, 0.08);
     background:
         radial-gradient(1000px 600px at 40% -10%,
@@ -3060,7 +3118,7 @@ body.night-garden .day-bed-canvas {
     pointer-events: none;
 }
 
-body.night-garden .day-bed-canvas::before {
+.night-garden .day-bed-canvas::before {
     background-image:
         radial-gradient(circle at 10% 10%,
             rgba(164, 185, 217, 0.15) 0%,
@@ -3108,7 +3166,7 @@ body.night-garden .day-bed-canvas::before {
     text-align: right;
 }
 
-body.night-garden .bed-hour-label {
+.night-garden .bed-hour-label {
     background: rgba(15, 23, 42, 0.75);
     border: 1px solid rgba(164, 185, 217, 0.2);
     color: var(--text-primary);
@@ -3124,7 +3182,7 @@ body.night-garden .bed-hour-label {
     opacity: 0.3;
 }
 
-body.night-garden .bed-hour-line {
+.night-garden .bed-hour-line {
     background: linear-gradient(90deg,
             rgba(140, 180, 220, 0.04) 0%,
             transparent 40%);
@@ -3245,7 +3303,7 @@ body.night-garden .bed-hour-line {
         transform var(--duration-fast) var(--ease-out);
 }
 
-body.night-garden .btn-zen-focus {
+.night-garden .btn-zen-focus {
     background: rgba(7, 17, 14, 0.45);
     border: 1px solid rgba(140, 183, 217, 0.14);
     color: rgba(234, 246, 240, 0.78);
@@ -3257,7 +3315,7 @@ body.night-garden .btn-zen-focus {
     transform: translateY(-1px);
 }
 
-body.night-garden .btn-zen-focus:hover {
+.night-garden .btn-zen-focus:hover {
     background: rgba(140, 183, 217, 0.10);
     border-color: rgba(140, 183, 217, 0.22);
 }
@@ -3284,7 +3342,7 @@ body.night-garden .btn-zen-focus:hover {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(247, 243, 237, 0.8));
 }
 
-body.night-garden .day-goal-variant-seed {
+.night-garden .day-goal-variant-seed {
     background: rgba(10, 22, 18, 0.60);
     border: 1px solid rgba(140, 183, 217, 0.12);
     border-left: 4px solid var(--sage);
@@ -3295,7 +3353,7 @@ body.night-garden .day-goal-variant-seed {
     background: rgba(111, 155, 134, 0.12);
 }
 
-body.night-garden .day-goal-variant-compost {
+.night-garden .day-goal-variant-compost {
     background: rgba(111, 155, 134, 0.10);
     border: 1px solid rgba(140, 183, 217, 0.10);
 }
@@ -3324,7 +3382,7 @@ body.night-garden .day-goal-variant-compost {
     z-index: 2;
 }
 
-body.night-garden .day-goal-variant-planter {
+.night-garden .day-goal-variant-planter {
     border: 1px solid rgba(140, 183, 217, 0.14);
     border-top-color: rgba(180, 106, 74, 0.55);
     background:
@@ -3360,7 +3418,7 @@ body.night-garden .day-goal-variant-planter {
 @media (prefers-reduced-motion: reduce) {
 
     .bg-canvas::before,
-    body.night-garden .bg-canvas::after {
+    .night-garden .bg-canvas::after {
         animation: none !important;
     }
 
@@ -3461,11 +3519,11 @@ body.is-resizing-planter {
     background: rgba(180, 106, 74, 0.25);
 }
 
-body.night-garden .planter-resize-handle:hover {
+.night-garden .planter-resize-handle:hover {
     background: rgba(140, 183, 217, 0.12);
 }
 
-body.night-garden .planter-resize-handle:active {
+.night-garden .planter-resize-handle:active {
     background: rgba(140, 183, 217, 0.20);
 }
 
@@ -3644,7 +3702,8 @@ body.night-garden .planter-resize-handle:active {
 .goal-checkbox {
     width: 16px;
     height: 16px;
-    border: 2px solid var(--text-ghost);
+    border: 2px solid var(--text-secondary);
+    /* WCAG AA: stronger border (was --text-ghost) */
     border-radius: var(--radius-sm);
     cursor: pointer;
     display: flex;
@@ -4415,7 +4474,7 @@ body.night-garden .planter-resize-handle:active {
     transition: all var(--duration-fast) var(--ease-out);
 }
 
-body.night-garden .time-unit {
+.night-garden .time-unit {
     background: rgba(7, 17, 14, 0.45);
     border: 1px solid rgba(140, 183, 217, 0.14);
 }
@@ -4455,7 +4514,7 @@ body.night-garden .time-unit {
     margin-bottom: var(--space-3);
 }
 
-body.night-garden .time-breakdown-details {
+.night-garden .time-breakdown-details {
     background: rgba(7, 17, 14, 0.40);
     border: 1px solid rgba(140, 183, 217, 0.12);
 }
@@ -5059,7 +5118,7 @@ body.focus-mode .month-card:not(.current) {
     -webkit-backdrop-filter: blur(10px);
 }
 
-body.night-garden .quick-add-overlay {
+.night-garden .quick-add-overlay {
     background: rgba(7, 17, 14, 0.62);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -5074,7 +5133,7 @@ body.night-garden .quick-add-overlay {
     box-shadow: var(--shadow-lg);
 }
 
-body.night-garden .quick-add-container {
+.night-garden .quick-add-container {
     background: rgba(10, 22, 18, 0.72);
     border: 1px solid rgba(140, 183, 217, 0.14);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
@@ -5110,7 +5169,7 @@ body.night-garden .quick-add-container {
     box-shadow: inset 0 0 0 1px rgba(180, 106, 74, 0.08);
 }
 
-body.night-garden .quick-add-overlay input#quickAddInput {
+.night-garden .quick-add-overlay input#quickAddInput {
     background: rgba(7, 17, 14, 0.45);
     border: 1px solid rgba(140, 183, 217, 0.16);
     box-shadow: inset 0 0 0 1px rgba(140, 183, 217, 0.08);
@@ -5609,8 +5668,8 @@ body.focus-mode .sidebar-hide-btn {
     }
 
     body {
-        /* Let the page scroll normally on iOS/Android */
-        overflow-y: auto;
+        /* Keep scrolling inside app containers for stability */
+        overflow-y: hidden;
     }
 
     /* Header: keep compact on mobile */
@@ -5665,20 +5724,20 @@ body.focus-mode .sidebar-hide-btn {
         padding: var(--space-4);
     }
 
-    /* Better mobile canvas container */
-    .canvas-container {
-        padding: 0;
-        margin: 0 var(--space-3);
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-    }
+	    /* Better mobile canvas container */
+	    .canvas-container {
+	        padding: 0;
+	        margin: 0;
+	        border-radius: 0;
+	        overflow: auto;
+	    }
 
     .app {
         grid-template-rows: auto 1fr auto;
         gap: var(--space-3);
         padding: 0;
-        height: auto;
-        min-height: 100dvh;
+        height: 100dvh;
+        overflow: hidden;
     }
 
     .today-btn {
@@ -5918,8 +5977,145 @@ body.focus-mode .sidebar-hide-btn {
         padding: var(--space-1);
     }
 
-    .day-view {
-        padding: var(--space-3);
+	    /* Day view: full-width + readable timeline */
+	    .day-view {
+	        padding: var(--space-3) 0;
+	        max-width: none;
+	        margin: 0;
+	    }
+
+	    .day-view-header {
+	        margin-bottom: var(--space-4);
+	    }
+
+	    .day-view-title {
+	        font-size: var(--text-2xl);
+	    }
+
+	    .day-view-subtitle {
+	        font-size: var(--text-sm);
+	    }
+
+	    .day-land {
+	        padding: var(--space-3);
+	        border-radius: var(--radius-lg);
+	    }
+
+	    .day-land-topbar {
+	        margin-bottom: var(--space-3);
+	        align-items: stretch;
+	    }
+
+	    .day-land-fence {
+	        width: 100%;
+	        justify-content: space-between;
+	        flex-wrap: wrap;
+	    }
+
+	    .day-plant-btn {
+	        width: 100%;
+	        min-height: 48px;
+	    }
+
+	    .day-plot {
+	        gap: var(--space-4);
+	    }
+
+	    .day-seed-tray,
+	    .day-bed,
+	    .day-compost {
+	        padding: var(--space-3);
+	    }
+
+	    .seed-tray-header,
+	    .day-bed-header,
+	    .compost-header {
+	        flex-direction: column;
+	        align-items: flex-start;
+	        gap: var(--space-1);
+	    }
+
+	    .seed-tray-subtitle,
+	    .day-bed-subtitle {
+	        font-size: var(--text-xs);
+	    }
+
+	    .day-bed-canvas {
+	        --time-gutter: 56px;
+	        padding: var(--space-2);
+	        height: auto;
+	        min-height: calc(72px * 14);
+	    }
+
+	    .bed-hour-label {
+	        font-size: var(--text-sm);
+	        padding: 4px 8px;
+	    }
+
+	    /* Compact planters so they fit at smaller durations */
+	    .day-goal-card.day-goal-variant-planter {
+	        padding: var(--space-2);
+	        min-height: 72px;
+	    }
+
+	    .day-goal-card.day-goal-variant-planter .day-goal-checkbox {
+	        position: absolute;
+	        top: var(--space-2);
+	        right: var(--space-2);
+	        width: 22px;
+	        height: 22px;
+	        margin: 0;
+	    }
+
+	    .day-goal-card.day-goal-variant-planter .day-goal-content {
+	        padding-right: 34px;
+	    }
+
+	    .day-goal-card.day-goal-variant-planter .day-goal-desc,
+	    .day-goal-card.day-goal-variant-planter .btn-zen-focus {
+	        display: none;
+	    }
+
+	    .day-goal-card.day-goal-variant-planter .day-goal-meta {
+	        font-size: var(--text-xs);
+	        gap: var(--space-1);
+	    }
+
+    /* Improve touch targets for resize handles */
+    .planter-resize-handle {
+        height: 20px;
+        z-index: 10;
+    }
+
+    .planter-resize-handle-top {
+        top: -10px;
+    }
+
+    .planter-resize-handle-bottom {
+        bottom: -10px;
+    }
+
+    .planter-resize-handle::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 4px;
+        background: currentColor;
+        border-radius: 2px;
+        opacity: 0.3;
+    }
+
+    /* Optimize seed tray grid for mobile */
+    .seed-tray-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+
+    .day-goal-card {
+        min-height: 80px;
     }
 
     .view-btn {
@@ -5946,6 +6142,10 @@ body.focus-mode .sidebar-hide-btn {
         border: 2px solid var(--glass-border);
     }
 
+    .canvas-zoom-controls {
+        bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    }
+
     .fab-add-anchor:active {
         transform: scale(0.94);
     }
@@ -5967,7 +6167,8 @@ body.focus-mode .sidebar-hide-btn {
         gap: var(--space-4);
         grid-area: main;
         overflow-y: auto;
-        padding: var(--space-4) var(--space-4) var(--space-6);
+        padding: var(--space-4);
+        padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); /* Space for time-stats + tab bar */
         -webkit-overflow-scrolling: touch;
     }
 
@@ -5989,6 +6190,36 @@ body.focus-mode .sidebar-hide-btn {
 
     body.mobile-home-view .main-content {
         display: none;
+    }
+
+    /* Pin time-stats to bottom on mobile home view */
+    body.mobile-home-view .time-stats {
+        position: fixed;
+        bottom: calc(64px + env(safe-area-inset-bottom, 0px)); /* Above tab bar */
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: var(--space-4);
+        background: linear-gradient(
+            to top,
+            rgba(255, 255, 255, 0.98) 0%,
+            rgba(248, 252, 250, 0.95) 100%
+        );
+        backdrop-filter: blur(24px) saturate(1.2);
+        -webkit-backdrop-filter: blur(24px) saturate(1.2);
+        border-top: 1px solid rgba(180, 106, 74, 0.15);
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+        z-index: 1100; /* Above content, below tab bar (9999) */
+    }
+
+    /* Night garden variant for time-stats */
+    :root.night-garden body.mobile-home-view .time-stats {
+        background: linear-gradient(
+            to top,
+            rgba(8, 12, 26, 0.98) 0%,
+            rgba(15, 20, 35, 0.95) 100%
+        );
+        border-top-color: rgba(140, 183, 217, 0.15);
     }
 
     /* Add bottom padding to app for tab bar */
@@ -6092,10 +6323,12 @@ body.focus-mode .sidebar-hide-btn {
         -webkit-backdrop-filter: blur(24px) saturate(1.2);
         border-top: 1px solid var(--glass-border);
         box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
-        z-index: 1000;
+        z-index: 9999;
+        isolation: isolate;
+        transform: translate3d(0, 0, 0);
     }
 
-    body.night-garden .mobile-tab-bar {
+    .night-garden .mobile-tab-bar {
         background: rgba(8, 12, 26, 0.85);
         border-top-color: rgba(140, 183, 217, 0.12);
     }
@@ -7487,37 +7720,37 @@ body.support-panel-open {
 }
 
 /* Night Garden Theme Support for Support Panel */
-body.night-garden .support-panel {
+.night-garden .support-panel {
     background: 
         linear-gradient(180deg, rgba(10, 22, 18, 0.95) 0%, rgba(10, 22, 18, 0.92) 100%),
         rgba(10, 22, 18, 0.85);
     border-left-color: rgba(140, 183, 217, 0.25);
 }
 
-body.night-garden .support-panel-header {
+.night-garden .support-panel-header {
     background: rgba(10, 22, 18, 0.6);
     border-bottom-color: rgba(140, 183, 217, 0.15);
 }
 
-body.night-garden .support-panel-profile-section,
-body.night-garden .support-panel-focus-toggle,
-body.night-garden .support-panel-item {
+.night-garden .support-panel-profile-section,
+.night-garden .support-panel-focus-toggle,
+.night-garden .support-panel-item {
     background: 
         linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%),
         rgba(10, 22, 18, 0.6);
     border-color: rgba(140, 183, 217, 0.15);
 }
 
-body.night-garden .support-panel-profile-section:hover,
-body.night-garden .support-panel-focus-toggle:hover,
-body.night-garden .support-panel-item:hover {
+.night-garden .support-panel-profile-section:hover,
+.night-garden .support-panel-focus-toggle:hover,
+.night-garden .support-panel-item:hover {
     background: 
         linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%),
         rgba(10, 22, 18, 0.7);
     border-color: rgba(140, 183, 217, 0.25);
 }
 
-body.night-garden .support-panel-divider {
+.night-garden .support-panel-divider {
     background: linear-gradient(90deg, 
         transparent 0%, 
         rgba(140, 183, 217, 0.15) 20%, 
@@ -8173,40 +8406,53 @@ body.season-winter {
     --seasonal-secondary: #A1B5C1; /* winter sky */
 }
 
-/* Time of Day Visual Effects (subtle overlays) */
-body.time-dawn {
-    /* Cool, dim morning light */
-    filter: brightness(var(--time-brightness))
-            saturate(var(--time-saturation))
-            hue-rotate(var(--time-hue-shift));
+/* Time of Day Visual Effects - Desktop only for performance */
+@media (min-width: 601px) {
+    body.time-dawn {
+        /* Cool, dim morning light */
+        filter: brightness(var(--time-brightness))
+                saturate(var(--time-saturation))
+                hue-rotate(var(--time-hue-shift));
+    }
+
+    body.time-morning {
+        /* Bright, vibrant daylight */
+        filter: brightness(var(--time-brightness))
+                saturate(var(--time-saturation))
+                hue-rotate(var(--time-hue-shift));
+    }
+
+    body.time-afternoon {
+        /* Warm, peak sunshine */
+        filter: brightness(var(--time-brightness))
+                saturate(var(--time-saturation))
+                hue-rotate(var(--time-hue-shift));
+    }
+
+    body.time-evening {
+        /* Golden hour warmth */
+        filter: brightness(var(--time-brightness))
+                saturate(var(--time-saturation))
+                hue-rotate(var(--time-hue-shift));
+    }
+
+    body.time-night {
+        /* Moonlit blue tones */
+        filter: brightness(var(--time-brightness))
+                saturate(var(--time-saturation))
+                hue-rotate(var(--time-hue-shift));
+    }
 }
 
-body.time-morning {
-    /* Bright, vibrant daylight */
-    filter: brightness(var(--time-brightness))
-            saturate(var(--time-saturation))
-            hue-rotate(var(--time-hue-shift));
-}
-
-body.time-afternoon {
-    /* Warm, peak sunshine */
-    filter: brightness(var(--time-brightness))
-            saturate(var(--time-saturation))
-            hue-rotate(var(--time-hue-shift));
-}
-
-body.time-evening {
-    /* Golden hour warmth */
-    filter: brightness(var(--time-brightness))
-            saturate(var(--time-saturation))
-            hue-rotate(var(--time-hue-shift));
-}
-
-body.time-night {
-    /* Moonlit blue tones */
-    filter: brightness(var(--time-brightness))
-            saturate(var(--time-saturation))
-            hue-rotate(var(--time-hue-shift));
+/* Mobile: no expensive filters - use background color tints only */
+@media (max-width: 600px) {
+    body.time-dawn,
+    body.time-morning,
+    body.time-afternoon,
+    body.time-evening,
+    body.time-night {
+        filter: none;
+    }
 }
 
 /* Goal cards get dynamic shadows based on sun position */
@@ -8269,7 +8515,8 @@ body.time-night {
     margin-bottom: var(--space-3);
 }
 
-.hour-blocks {
+.hour-blocks,
+.hour-blocks-container {
     display: flex;
     gap: var(--space-2);
     flex-wrap: wrap;
@@ -8308,6 +8555,29 @@ body.time-night {
     transform: scale(1.2);
 }
 
+/* Mobile: Larger touch targets, bigger spacing */
+@media (max-width: 600px) {
+    .hour-blocks,
+    .hour-blocks-container {
+        gap: var(--space-3); /* Increase gap from 8px to 12px */
+    }
+
+    .hour-block {
+        width: 44px; /* WCAG compliant */
+        height: 44px;
+        font-size: 28px; /* Bigger emoji */
+    }
+
+    /* Reduce transform scale on mobile to prevent overflow */
+    .hour-block.hour-current {
+        transform: scale(1.15); /* Was 1.3 - prevent overlapping */
+    }
+
+    .hour-block:hover {
+        transform: scale(1.1); /* Was 1.2 */
+    }
+}
+
 @keyframes bloom-complete {
     0% { transform: scale(0.8); opacity: 0.5; }
     50% { transform: scale(1.3); }
@@ -8317,6 +8587,36 @@ body.time-night {
 @keyframes bloom-pulse {
     0%, 100% { transform: scale(1.3); filter: drop-shadow(0 0 8px var(--seasonal-flower)); }
     50% { transform: scale(1.4); filter: drop-shadow(0 0 12px var(--seasonal-flower)); }
+}
+
+/* Mobile-optimized animations - disable expensive effects */
+@media (max-width: 600px), (pointer: coarse) {
+    body[data-garden-quality="low"] .hour-block.hour-current,
+    body[data-garden-quality="medium"] .hour-block.hour-current {
+        /* Remove expensive drop-shadow filter */
+        filter: none;
+        /* Use simpler transform only */
+        transform: scale(1.2);
+        /* Replace with border glow (cheaper) */
+        outline: 2px solid var(--seasonal-flower);
+        outline-offset: 2px;
+        animation: none;
+    }
+
+    body[data-garden-quality="low"] .now-beam,
+    body[data-garden-quality="medium"] .now-beam {
+        /* Disable pulsing animation */
+        animation: none;
+        /* Static glow instead */
+        box-shadow: none;
+        background: rgba(255, 223, 128, 1);
+    }
+
+    /* Disable time transition animations on low-end mobile */
+    body[data-garden-quality="low"] .time-transition {
+        animation: none !important;
+        filter: none !important;
+    }
 }
 
 /* Now Beam - Current Time Indicator */
@@ -8538,37 +8838,56 @@ body.time-night {
 
 .sound-slider {
     flex: 1;
-    height: 4px;
+    height: 44px; /* Match thumb height for easier targeting */
     border-radius: var(--radius-full);
-    background: var(--bg-hover);
+    background: transparent; /* Transparent, track is in ::before */
     outline: none;
     -webkit-appearance: none;
     appearance: none;
+    position: relative;
+}
+
+/* Create visible track using pseudo-element */
+.sound-slider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--bg-hover);
+    border-radius: var(--radius-full);
+    transform: translateY(-50%);
+    pointer-events: none;
 }
 
 .sound-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 16px;
-    height: 16px;
+    width: 44px; /* WCAG 2.2 AA compliant touch target */
+    height: 44px;
     border-radius: 50%;
     background: var(--seasonal-accent);
     cursor: pointer;
     transition: transform var(--duration-fast) var(--ease-out);
+    /* Add visual indicator that size increased */
+    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.9); /* Inner white circle */
 }
 
 .sound-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
+    transform: scale(1.1);
 }
 
 .sound-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
+    width: 44px; /* WCAG 2.2 AA compliant touch target */
+    height: 44px;
     border-radius: 50%;
     background: var(--seasonal-accent);
     border: none;
     cursor: pointer;
     transition: transform var(--duration-fast) var(--ease-out);
+    /* Add visual indicator that size increased */
+    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.9); /* Inner white circle */
 }
 
 .sound-slider::-moz-range-thumb:hover {
@@ -8580,6 +8899,43 @@ body.time-night {
     color: var(--text-secondary);
     min-width: 35px;
     text-align: right;
+}
+
+/* Mobile-specific garden optimizations */
+@media (max-width: 600px) {
+    .sound-controls {
+        padding: var(--space-4); /* More padding for easier tapping */
+    }
+
+    .sound-toggle {
+        padding: var(--space-4); /* Larger touch target */
+        font-size: var(--text-base);
+    }
+
+    .sound-icon {
+        font-size: 24px; /* Bigger icon */
+    }
+
+    .time-garden-plot {
+        padding: var(--space-4);
+    }
+
+    .plot-label {
+        font-size: var(--text-base); /* Bigger label */
+        margin-bottom: var(--space-4);
+    }
+
+    /* Ensure celestial bodies are visible and don't interfere with touch */
+    .sun, .moon {
+        font-size: 32px; /* Bigger on mobile */
+        pointer-events: none; /* Prevent touch interference */
+    }
+
+    /* Disable parallax transform on mobile (already done in JS) */
+    .garden-backdrop,
+    .garden-midground {
+        transform: none !important;
+    }
 }
 
 /* ============================================

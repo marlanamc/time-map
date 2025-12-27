@@ -221,12 +221,37 @@ export class GardenEngine {
       }
     });
 
-    // Also listen for touch events
+    // Long-press detection for touch to prevent accidental spawns during scrolling
+    let touchStartTime = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const LONG_PRESS_DURATION = 500; // ms
+    const MOVE_THRESHOLD = 10; // px
+
     document.addEventListener('touchstart', (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('goal-card') || target.classList.contains('day-planter')) {
         const touch = e.touches[0];
-        this.spawnPetals(touch.clientX, touch.clientY);
+        touchStartTime = Date.now();
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('goal-card') || target.classList.contains('day-planter')) {
+        const touchDuration = Date.now() - touchStartTime;
+        const touch = e.changedTouches[0];
+        const moveDistance = Math.hypot(
+          touch.clientX - touchStartX,
+          touch.clientY - touchStartY
+        );
+
+        // Only spawn if long-press and minimal movement (not scrolling)
+        if (touchDuration >= LONG_PRESS_DURATION && moveDistance < MOVE_THRESHOLD) {
+          this.spawnPetals(touch.clientX, touch.clientY);
+        }
       }
     }, { passive: true });
   }
@@ -327,12 +352,8 @@ export class GardenEngine {
     document.body.classList.add(`season-${season.season}`);
     document.body.classList.add(`time-${time.timeOfDay}`);
 
-    // If night mode, add night-garden class (for existing dark theme)
-    if (time.isNightTime) {
-      document.body.classList.add('night-garden');
-    } else {
-      document.body.classList.remove('night-garden');
-    }
+    // Add quality level as data attribute for CSS targeting (mobile optimization)
+    document.body.dataset.gardenQuality = this.state.effects.qualityLevel;
 
     // Update CSS custom properties
     const root = document.documentElement;

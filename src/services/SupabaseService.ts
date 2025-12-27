@@ -1,5 +1,6 @@
 
 import { supabase } from '../supabaseClient';
+import { cacheService } from './CacheService';
 import {
     Goal,
     BrainDumpEntry,
@@ -8,6 +9,12 @@ import {
     AppData,
     Preferences
 } from '../types';
+
+interface AchievementRecord {
+    achievement_id: string;
+    user_id: string;
+    unlocked_at: string;
+}
 
 export const SupabaseService = {
     // --- Auth ---
@@ -69,14 +76,9 @@ export const SupabaseService = {
         const user = await this.getUser();
         if (!user) return null;
 
-        const [
-            goals,
-            brainDump,
-            preferences,
-            achievements,
-            weeklyReviews,
-            bodyDoubleHistory
-        ] = await Promise.all([
+        // Use Promise.allSettled for error-resilient parallel loading
+        // If one query fails, others still succeed
+        const results = await Promise.allSettled([
             this.getGoals(),
             this.getBrainDump(),
             this.getPreferences(),
@@ -85,11 +87,38 @@ export const SupabaseService = {
             this.getBodyDoubleHistory()
         ]);
 
+        const [
+            goalsResult,
+            brainDumpResult,
+            preferencesResult,
+            achievementsResult,
+            weeklyReviewsResult,
+            bodyDoubleResult
+        ] = results;
+
+        // Extract successful results, use empty arrays for failures
+        const goals = goalsResult.status === 'fulfilled' ? goalsResult.value : [];
+        const brainDump = brainDumpResult.status === 'fulfilled' ? brainDumpResult.value : [];
+        const preferences = preferencesResult.status === 'fulfilled' ? preferencesResult.value : undefined;
+        const achievements = achievementsResult.status === 'fulfilled'
+            ? achievementsResult.value.map((a: AchievementRecord) => a.achievement_id)
+            : [];
+        const weeklyReviews = weeklyReviewsResult.status === 'fulfilled' ? weeklyReviewsResult.value : [];
+        const bodyDoubleHistory = bodyDoubleResult.status === 'fulfilled' ? bodyDoubleResult.value : [];
+
+        // Log any failures (non-critical, app still works with partial data)
+        results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                const entities = ['goals', 'brainDump', 'preferences', 'achievements', 'weeklyReviews', 'bodyDoubleHistory'];
+                console.warn(`Failed to load ${entities[index]}:`, result.reason);
+            }
+        });
+
         return {
             goals,
             brainDump,
-            preferences: preferences || undefined,
-            achievements: achievements.map((a: any) => a.achievement_id),
+            preferences,
+            achievements,
             weeklyReviews,
             bodyDoubleHistory
         };
@@ -97,6 +126,14 @@ export const SupabaseService = {
 
     // --- Goals ---
     async getGoals(): Promise<Goal[]> {
+        const cacheKey = 'goals:all';
+        const cached = cacheService.get<Goal[]>(cacheKey);
+
+        if (cached) {
+            console.log('✓ Goals loaded from cache');
+            return cached;
+        }
+
         const { data, error } = await supabase
             .from('goals')
             .select('*');
@@ -104,7 +141,7 @@ export const SupabaseService = {
         if (error) throw error;
 
         // Transform snake_case to camelCase and parse JSON fields if needed
-        return data.map(g => ({
+        const goals = data.map(g => ({
             ...g,
             level: g.level || 'milestone',
             createdAt: g.created_at,
@@ -116,6 +153,9 @@ export const SupabaseService = {
             subtasks: g.subtasks || [],
             notes: g.notes || []
         }));
+
+        cacheService.set(cacheKey, goals, cacheService.TTL.GOALS);
+        return goals;
     },
 
     async saveGoal(goal: Goal) {
@@ -150,6 +190,9 @@ export const SupabaseService = {
             });
 
         if (error) throw error;
+
+        // Invalidate goals cache after save
+        cacheService.invalidate(/^goals:/);
     },
 
     async deleteGoal(goalId: string) {
@@ -158,6 +201,54 @@ export const SupabaseService = {
             .delete()
             .eq('id', goalId);
         if (error) throw error;
+
+        // Invalidate goals cache after delete
+        cacheService.invalidate(/^goals:/);
+    },
+
+    // Batch operations for performance
+    async saveGoals(goals: Goal[]) {
+        const user = await this.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        // Transform to snake_case for batch insert
+        const goalsData = goals.map(goal => ({
+            id: goal.id,
+            user_id: user.id,
+            title: goal.title,
+            level: goal.level,
+            description: goal.description,
+            month: goal.month,
+            year: goal.year,
+            category: goal.category,
+            priority: goal.priority,
+            status: goal.status,
+            progress: goal.progress,
+            subtasks: goal.subtasks,
+            notes: goal.notes,
+            time_log: goal.timeLog,
+            created_at: goal.createdAt,
+            updated_at: goal.updatedAt,
+            completed_at: goal.completedAt,
+            last_worked_on: goal.lastWorkedOn,
+            due_date: goal.dueDate,
+            start_time: goal.startTime,
+            end_time: goal.endTime,
+            tags: goal.tags
+        }));
+
+        const { error } = await supabase
+            .from('goals')
+            .upsert(goalsData, {
+                onConflict: 'id',
+                ignoreDuplicates: false
+            });
+
+        if (error) throw error;
+
+        // Invalidate goals cache after batch save
+        cacheService.invalidate(/^goals:/);
+        console.log(`✓ Batch synced ${goals.length} goals to cloud`);
     },
 
     // --- Brain Dump ---
@@ -205,10 +296,41 @@ export const SupabaseService = {
         if (error) throw error;
     },
 
+    async saveBrainDumpBatch(entries: BrainDumpEntry[]) {
+        const user = await this.getUser();
+        if (!user) return;
+
+        const entriesData = entries.map(entry => ({
+            id: entry.id,
+            user_id: user.id,
+            text: entry.text,
+            created_at: entry.createdAt,
+            processed: entry.processed,
+            archived: entry.archived,
+            processed_action: entry.processedAction,
+            processed_at: entry.processedAt
+        }));
+
+        const { error } = await supabase
+            .from('brain_dump')
+            .upsert(entriesData);
+
+        if (error) throw error;
+        console.log(`✓ Batch synced ${entries.length} brain dump entries to cloud`);
+    },
+
     // --- Preferences ---
     async getPreferences(): Promise<Preferences | null> {
         const user = await this.getUser();
         if (!user) return null;
+
+        const cacheKey = `preferences:${user.id}`;
+        const cached = cacheService.get<Preferences>(cacheKey);
+
+        if (cached) {
+            console.log('✓ Preferences loaded from cache');
+            return cached;
+        }
 
         const { data, error } = await supabase
             .from('preferences')
@@ -217,7 +339,13 @@ export const SupabaseService = {
             .single();
 
         if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows found"
-        return data ? data.data : null;
+
+        const prefs = data ? data.data : null;
+        if (prefs) {
+            cacheService.set(cacheKey, prefs, cacheService.TTL.PREFERENCES);
+        }
+
+        return prefs;
     },
 
     async savePreferences(prefs: Preferences) {
@@ -233,10 +361,13 @@ export const SupabaseService = {
             });
 
         if (error) throw error;
+
+        // Invalidate preferences cache after save
+        cacheService.invalidate(/^preferences:/);
     },
 
     // --- Achievements ---
-    async getAchievements(): Promise<any[]> {
+    async getAchievements(): Promise<AchievementRecord[]> {
         const { data, error } = await supabase.from('achievements').select('*');
         if (error) throw error;
         return data;

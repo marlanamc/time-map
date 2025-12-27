@@ -22,7 +22,56 @@
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
+    <style>
+        html {
+            background: #E8F4F8;
+        }
+
+        html.night-garden {
+            background: #0A1A0F;
+        }
+    </style>
+    <script>
+        (function () {
+            try {
+                var storageKey = "gardenFence.theme";
+                var legacyKey = "visionboard_data";
+
+                var theme = localStorage.getItem(storageKey);
+                if (!theme) {
+                    var legacy = localStorage.getItem(legacyKey);
+                    if (legacy) {
+                        try {
+                            var parsed = JSON.parse(legacy);
+                            theme = parsed && parsed.preferences && parsed.preferences.theme;
+                        } catch (e) {
+                            // no-op
+                        }
+                    }
+                }
+
+                var isNight = theme === "night" || theme === "dark";
+                var isDay = theme === "day" || theme === "light";
+                if (!isNight && !isDay) {
+                    isNight = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+                }
+
+                var root = document.documentElement;
+                root.classList.toggle("night-garden", isNight);
+                root.style.colorScheme = isNight ? "dark" : "light";
+
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute("content", isNight ? "#0A1A0F" : "#E8F4F8");
+            } catch (e) {
+                // no-op
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles/dayView/layout.css" />
+    <link rel="stylesheet" href="styles/dayView/cards.css" />
+    <link rel="stylesheet" href="styles/dayView/drag.css" />
+    <link rel="stylesheet" href="styles/dayView/responsive.css" />
 </head>
 
 <body>
