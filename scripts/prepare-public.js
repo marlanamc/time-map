@@ -57,6 +57,9 @@ async function main() {
   await copyFileIfExists(path.join(root, "env.js"), path.join(publicDir, "env.js"));
   await copyFileIfExists(path.join(root, "manifest.webmanifest"), path.join(publicDir, "manifest.webmanifest"));
 
+  // Copy styles directory (needed for mobile/home.css, dayView/*.css, etc.)
+  await copyDirIfExists(path.join(root, "styles"), path.join(publicDir, "styles"));
+
   // Bundles
   await copyDirIfExists(path.join(root, "dist"), path.join(publicDir, "dist"));
   await copyFileIfExists(path.join(root, "app.min.js"), path.join(publicDir, "app.min.js"));
