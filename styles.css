@@ -1598,9 +1598,7 @@ select:focus-visible,
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    margin-bottom: var(--space-6);
-    padding-bottom: var(--space-5);
-    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: var(--space-4);
 }
 
 .now-panel-logo .logo-icon {
@@ -4031,6 +4029,10 @@ body.is-resizing-planter {
     visibility: visible;
 }
 
+.night-garden .modal-overlay {
+    background: rgba(0, 0, 0, 0.88);
+}
+
 .modal {
     background: var(--bg-elevated);
     border: 1px solid var(--glass-border);
@@ -4045,6 +4047,12 @@ body.is-resizing-planter {
     box-shadow: var(--shadow-xl);
     margin-top: env(safe-area-inset-top, 0px);
     margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.night-garden .modal {
+    background: rgba(10, 22, 18, 0.95);
+    border-color: rgba(140, 183, 217, 0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .modal-overlay.active .modal {
@@ -4147,6 +4155,25 @@ body.is-resizing-planter {
     padding-right: 36px;
 }
 
+.night-garden .form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238CB7D9' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
+.night-garden .form-group input,
+.night-garden .form-group select,
+.night-garden .form-group textarea {
+    background: rgba(10, 22, 18, 0.5);
+    border-color: rgba(140, 183, 217, 0.15);
+}
+
+.night-garden .form-group input:focus,
+.night-garden .form-group select:focus,
+.night-garden .form-group textarea:focus {
+    background: rgba(10, 22, 18, 0.7);
+    border-color: rgba(140, 183, 217, 0.4);
+    box-shadow: 0 0 0 3px rgba(140, 183, 217, 0.15);
+}
+
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -4160,6 +4187,10 @@ body.is-resizing-planter {
     margin-top: var(--space-5);
     padding-top: var(--space-5);
     border-top: 1px solid var(--glass-border);
+}
+
+.night-garden .modal-actions {
+    border-top-color: rgba(140, 183, 217, 0.12);
 }
 
 /* ===================================
@@ -4966,6 +4997,20 @@ body.reduce-emojis .celebration-icon {
     font-size: var(--text-lg);
     color: var(--text-secondary);
     margin-bottom: var(--space-6);
+}
+
+.night-garden .celebration-overlay {
+    background: rgba(0, 0, 0, 0.92);
+}
+
+.night-garden .celebration-title {
+    background: linear-gradient(135deg,
+            rgba(140, 183, 217, 1) 0%,
+            rgba(90, 155, 141, 1) 50%,
+            rgba(240, 180, 41, 1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* ===================================
