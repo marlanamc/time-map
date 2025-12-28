@@ -40,11 +40,18 @@ export const ThemeManager = {
   apply(theme: ThemeMode): void {
     const isNight = theme === "night";
     const root = document.documentElement;
+
+    // Only apply if the theme is actually changing (prevents flash on page load)
+    const currentlyNight = root.classList.contains("night-garden");
+    if (currentlyNight === isNight) {
+      return; // Theme is already applied, no need to toggle
+    }
+
     root.classList.toggle("night-garden", isNight);
     root.style.colorScheme = isNight ? "dark" : "light";
 
     // Match the app's primary surfaces (helps mobile browser chrome).
-    setMetaThemeColor(isNight ? "#0A1A0F" : "#E8F4F8");
+    setMetaThemeColor(isNight ? "#0A1A2E" : "#E8F4F8");
   },
 
   applyFromPreference(preference: ThemePreference): ThemeMode {

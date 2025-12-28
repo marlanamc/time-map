@@ -4229,9 +4229,10 @@
       }
 
       // Days and weeks left in year
-      const endOfYear = new Date(now.getFullYear(), 11, 31);
+      // Use conservative calculation (floor) for time blindness - only count full weeks
+      const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
       const daysLeft = Math.ceil((endOfYear - now) / (1000 * 60 * 60 * 24));
-      const weeksLeft = Math.ceil(daysLeft / 7);
+      const weeksLeft = Math.floor(daysLeft / 7);
 
       if (this.elements.daysLeft) {
         this.elements.daysLeft.textContent = daysLeft;

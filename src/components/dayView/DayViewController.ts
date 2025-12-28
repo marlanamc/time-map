@@ -249,8 +249,8 @@ export class DayViewController {
       });
     });
 
-    // Set up day bed as drop zone
-    const dayBed = this.container.querySelector(".day-bed-canvas") as HTMLElement;
+    // Set up timeline as drop zone
+    const dayBed = this.container.querySelector(".day-timeline") as HTMLElement;
     if (dayBed) {
       this.dragDropManager.enableDropZone(dayBed, {
         element: dayBed,
@@ -308,11 +308,7 @@ export class DayViewController {
       return;
     }
 
-    // Handle "Plant something" button
-    if (target.id === "dayPlantBtn" || target.closest("#dayPlantBtn")) {
-      this.callbacks.onPlantSomething?.();
-      return;
-    }
+    // Note: Removed "Plant something" button - users can add tasks via the main add button
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
@@ -372,7 +368,7 @@ export class DayViewController {
   private handleDrop(data: DragData, clientX: number, clientY: number): void {
     if (!this.currentDate) return;
 
-    const dayBed = this.container.querySelector(".day-bed-canvas") as HTMLElement;
+    const dayBed = this.container.querySelector(".day-timeline") as HTMLElement;
     if (!dayBed) return;
 
     const rect = dayBed.getBoundingClientRect();

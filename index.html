@@ -29,7 +29,7 @@
         }
 
         html.night-garden {
-            background: #0A1A0F;
+            background: #0A1A2E;
         }
     </style>
     <script>
@@ -62,7 +62,43 @@
                 root.style.colorScheme = isNight ? "dark" : "light";
 
                 var meta = document.querySelector('meta[name="theme-color"]');
-                if (meta) meta.setAttribute("content", isNight ? "#0A1A0F" : "#E8F4F8");
+                if (meta) meta.setAttribute("content", isNight ? "#0A1A2E" : "#E8F4F8");
+
+                // Apply time-of-day and season classes immediately to prevent flash
+                (function applyTimeClasses() {
+                    var body = document.body;
+                    if (!body) {
+                        // Body doesn't exist yet, try on next tick
+                        if (document.readyState === "loading") {
+                            document.addEventListener("DOMContentLoaded", applyTimeClasses);
+                        } else {
+                            setTimeout(applyTimeClasses, 0);
+                        }
+                        return;
+                    }
+
+                    var now = new Date();
+                    var hour = now.getHours();
+                    var timeOfDay = "night";
+                    if (hour >= 5 && hour < 7) timeOfDay = "dawn";
+                    else if (hour >= 7 && hour < 12) timeOfDay = "morning";
+                    else if (hour >= 12 && hour < 17) timeOfDay = "afternoon";
+                    else if (hour >= 17 && hour < 20) timeOfDay = "evening";
+
+                    body.classList.remove("time-dawn", "time-morning", "time-afternoon", "time-evening", "time-night");
+                    body.classList.add("time-" + timeOfDay);
+
+                    // Apply season class
+                    var month = now.getMonth();
+                    var season = "spring";
+                    if (month >= 2 && month < 5) season = "spring";
+                    else if (month >= 5 && month < 8) season = "summer";
+                    else if (month >= 8 && month < 11) season = "fall";
+                    else season = "winter";
+
+                    body.classList.remove("season-spring", "season-summer", "season-fall", "season-winter");
+                    body.classList.add("season-" + season);
+                })();
             } catch (e) {
                 // no-op
             }
@@ -83,12 +119,12 @@
         <div class="garden-backdrop" id="gardenBackdrop"></div>
         <div class="garden-midground" id="gardenMidground"></div>
         <canvas class="garden-effects" id="gardenEffects" aria-hidden="true"></canvas>
+    </div>
 
-        <!-- Celestial Bodies (Sun & Moon) -->
-        <div class="celestial-container" aria-hidden="true">
-            <div class="sun" id="sun" aria-label="Current time indicator">☀️</div>
-            <div class="moon" id="moon" aria-label="Night time indicator">🌙</div>
-        </div>
+    <!-- Celestial Bodies (Sun & Moon) -->
+    <div class="celestial-container" aria-hidden="true">
+        <div class="sun" id="sun" aria-label="Current time indicator">☀️</div>
+        <div class="moon" id="moon" aria-label="Night time indicator">🌙</div>
     </div>
 
     <!-- Confetti Container -->
@@ -116,6 +152,14 @@
                 <div class="now-context-mobile" id="mobileNowContext"></div>
                 <div class="time-visualization-mobile" id="mobileTimeVis"></div>
                 <div class="time-stats-row" id="mobileTimeStats">
+                    <!-- populated by JS -->
+                </div>
+            </section>
+
+            <!-- All Goals -->
+            <section class="mobile-card goals-card">
+                <div class="card-label">Your Garden</div>
+                <div class="goals-by-level" id="mobileGoalsByLevel">
                     <!-- populated by JS -->
                 </div>
             </section>
@@ -200,9 +244,6 @@
                         <span class="bloom-label" id="yearProgressLabel">Blooming...</span>
                         <span class="bloom-value" id="yearProgressValue">0%</span>
                     </div>
-                </div>
-                <div class="year-progress-bar" style="display: none;">
-                    <div class="year-progress-fill" id="yearProgressFill"></div>
                 </div>
                 <div class="time-stats" role="group" aria-label="Time remaining this year">
                     <div class="time-stat">

@@ -68,6 +68,7 @@ interface UIElements {
   mobileUpcomingList: HTMLElement | null;
   mobileSurpriseBtn: HTMLButtonElement | null;
   mobileTabHome: HTMLElement | null;
+  mobileGoalsByLevel: HTMLElement | null;
 
   goalModal: HTMLElement | null;
   goalForm: HTMLFormElement | null;
@@ -1386,9 +1387,6 @@ const Goals = {
     const month = date.getMonth();
 
     return State.data.goals.filter((g) => {
-      // Skip completed goals unless specifically requested
-      if (g.status === "done") return false;
-
       switch (g.level) {
         case 'vision':
           // Show vision goals all year
@@ -1401,7 +1399,10 @@ const Goals = {
         case 'focus':
           // Show focus goals for this week
           if (g.year !== year) return false;
-          const goalWeek = State.getWeekNumber(new Date(g.year, g.month || 0, 1));
+          const focusDate = g.dueDate
+            ? new Date(g.dueDate)
+            : new Date(g.year, g.month || 0, 1);
+          const goalWeek = State.getWeekNumber(focusDate);
           return goalWeek === weekNum;
 
         case 'intention':
@@ -3596,6 +3597,7 @@ const UI = {
       mobileUpcomingList: document.getElementById("mobileUpcomingList") as HTMLElement | null,
       mobileSurpriseBtn: document.getElementById("mobileSurpriseBtn") as HTMLButtonElement | null,
       mobileTabHome: document.querySelector('.mobile-tab[data-view="home"]') as HTMLElement | null,
+      mobileGoalsByLevel: document.getElementById("mobileGoalsByLevel") as HTMLElement | null,
 
       // ND Support elements (may not exist yet)
       brainDumpBtn: document.getElementById("brainDumpBtn") as HTMLElement | null,
@@ -4120,7 +4122,121 @@ const UI = {
       this.elements.mobileAffirmationText.textContent = affirmation;
     }
 
-    // 6. Update Upcoming List
+    // 6. Update Goals By Level (only goals applicable for today)
+    if (this.elements.mobileGoalsByLevel) {
+      const today = new Date();
+      const todayGoals = Goals.getForDate(today).filter(g => g.status !== 'done');
+      
+      // Organize by level
+      const intentions = todayGoals.filter(g => g.level === 'intention');
+      const focus = todayGoals.filter(g => g.level === 'focus');
+      const milestones = todayGoals.filter(g => g.level === 'milestone');
+      const visions = todayGoals.filter(g => g.level === 'vision');
+
+      let html = '';
+
+      // Intentions
+      if (intentions.length > 0) {
+        html += `
+          <div class="goals-level-section">
+            <div class="goals-level-header">
+              <span class="goals-level-emoji">${CONFIG.LEVELS.intention.emoji}</span>
+              <span class="goals-level-label">Intentions</span>
+              <span class="goals-level-count">${intentions.length}</span>
+            </div>
+            <div class="goals-level-list">
+              ${intentions.slice(0, 5).map(g => `
+                <div class="mobile-goal-item" data-goal-id="${g.id}">
+                  <span class="goal-title">${this.escapeHtml(g.title)}</span>
+                </div>
+              `).join('')}
+              ${intentions.length > 5 ? `<div class="goals-more">+${intentions.length - 5} more</div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // Focus
+      if (focus.length > 0) {
+        html += `
+          <div class="goals-level-section">
+            <div class="goals-level-header">
+              <span class="goals-level-emoji">${CONFIG.LEVELS.focus.emoji}</span>
+              <span class="goals-level-label">Focus</span>
+              <span class="goals-level-count">${focus.length}</span>
+            </div>
+            <div class="goals-level-list">
+              ${focus.slice(0, 5).map(g => `
+                <div class="mobile-goal-item" data-goal-id="${g.id}">
+                  <span class="goal-title">${this.escapeHtml(g.title)}</span>
+                </div>
+              `).join('')}
+              ${focus.length > 5 ? `<div class="goals-more">+${focus.length - 5} more</div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // Milestones
+      if (milestones.length > 0) {
+        html += `
+          <div class="goals-level-section">
+            <div class="goals-level-header">
+              <span class="goals-level-emoji">${CONFIG.LEVELS.milestone.emoji}</span>
+              <span class="goals-level-label">Milestones</span>
+              <span class="goals-level-count">${milestones.length}</span>
+            </div>
+            <div class="goals-level-list">
+              ${milestones.slice(0, 5).map(g => `
+                <div class="mobile-goal-item" data-goal-id="${g.id}">
+                  <span class="goal-title">${this.escapeHtml(g.title)}</span>
+                </div>
+              `).join('')}
+              ${milestones.length > 5 ? `<div class="goals-more">+${milestones.length - 5} more</div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // Visions
+      if (visions.length > 0) {
+        html += `
+          <div class="goals-level-section">
+            <div class="goals-level-header">
+              <span class="goals-level-emoji">${CONFIG.LEVELS.vision.emoji}</span>
+              <span class="goals-level-label">Visions</span>
+              <span class="goals-level-count">${visions.length}</span>
+            </div>
+            <div class="goals-level-list">
+              ${visions.slice(0, 5).map(g => `
+                <div class="mobile-goal-item" data-goal-id="${g.id}">
+                  <span class="goal-title">${this.escapeHtml(g.title)}</span>
+                </div>
+              `).join('')}
+              ${visions.length > 5 ? `<div class="goals-more">+${visions.length - 5} more</div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      if (html === '') {
+        html = '<div class="empty-state-small">No active goals</div>';
+      }
+
+      this.elements.mobileGoalsByLevel.innerHTML = html;
+
+      // Add click handlers
+      this.elements.mobileGoalsByLevel.querySelectorAll('.mobile-goal-item[data-goal-id]').forEach(item => {
+        item.addEventListener('click', () => {
+          const goalId = (item as HTMLElement).dataset.goalId;
+          if (goalId) {
+            this.showGoalDetail(goalId);
+          }
+        });
+      });
+    }
+
+    // 7. Update Upcoming List
     if (this.elements.mobileUpcomingList) {
       const goals = Goals.getAll().filter(g => g.status !== 'done' && g.dueDate);
       // Sort by due date
@@ -4245,7 +4361,7 @@ const UI = {
     const startPadding = firstDay.getDay(); // 0 = Sunday
     const daysInMonth = lastDay.getDate();
 
-    const monthGoals = Goals.getByMonth(month, year);
+    const monthGoals = Goals.getByMonth(month, year).filter((g) => g.level !== 'intention');
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     // Time context
@@ -4376,7 +4492,7 @@ const UI = {
       const date = new Date(weekStart);
       date.setDate(date.getDate() + i);
       const isToday = date.toDateString() === today.toDateString();
-      const dayGoals = Goals.getForDate(date);
+      const dayGoals = Goals.getForDate(date).filter((g) => g.level !== 'intention');
 
       html += `
           <div class="week-day-column ${isToday ? "today" : ""}" data-date="${date.toISOString()}">
@@ -4390,7 +4506,7 @@ const UI = {
           .map(
             (g) => `
                 <div class="week-goal-item ${g.status === "done" ? "completed" : ""}" data-goal-id="${g.id}">
-                  <div class="week-goal-title">${this.escapeHtml(g.title)}</div>
+                  <div class="week-goal-title">${g.status === "done" ? '<span class="goal-checkmark">✓</span> ' : ''}${this.escapeHtml(g.title)}</div>
                   <div class="week-goal-category">${g.category ? (CONFIG.CATEGORIES[g.category]?.emoji || "") : ""} ${g.category ? (CONFIG.CATEGORIES[g.category]?.label || "") : ""}</div>
                 </div>
               `,
@@ -4667,8 +4783,8 @@ const UI = {
       card.classList.add("future");
     }
 
-    // Get goals for this month
-    const monthGoals = Goals.getByMonth(monthIndex, viewingYear);
+    // Get goals for this month (exclude intentions - they only show in day view)
+    const monthGoals = Goals.getByMonth(monthIndex, viewingYear).filter((g) => g.level !== 'intention');
     const completedCount = monthGoals.filter(
       (g) => g.status === "done",
     ).length;
@@ -5570,7 +5686,7 @@ const UI = {
   // Month Detail View
   // ============================================
   showMonthDetail(monthIndex: number, year: number = new Date().getFullYear()) {
-    const monthGoals = Goals.getByMonth(monthIndex, year);
+    const monthGoals = Goals.getByMonth(monthIndex, year).filter((g) => g.level !== 'intention');
     const monthName = CONFIG.MONTHS[monthIndex];
 
     const modal = document.createElement("div");
@@ -5879,9 +5995,10 @@ const UI = {
     }
 
     // Days and weeks left in year
-    const endOfYear = new Date(now.getFullYear(), 11, 31);
+    // Use conservative calculation (floor) for time blindness - only count full weeks
+    const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
     const daysLeft = Math.ceil((endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    const weeksLeft = Math.ceil(daysLeft / 7);
+    const weeksLeft = Math.floor(daysLeft / 7);
 
     if (this.elements.daysLeft) {
       this.elements.daysLeft.textContent = String(daysLeft);

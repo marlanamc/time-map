@@ -28,25 +28,13 @@
 }
 
 .day-view-title {
-  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 6vw, 2.75rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
-  background: linear-gradient(135deg,
-    var(--earth, #B46A4A) 0%,
-    var(--sage, #6F9B86) 50%,
-    var(--sky, #8CB7D9) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0;
+  letter-spacing: -0.04em;
   line-height: 1.1;
-  animation: titleShimmer 8s ease-in-out infinite;
-}
-
-@keyframes titleShimmer {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .day-view-subtitle {
@@ -484,50 +472,43 @@
 }
 
 .bed-hour-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-tertiary, rgba(0, 0, 0, 0.4));
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.5));
   min-width: var(--time-gutter);
-  padding-left: 0.5rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  padding: 0;
+  letter-spacing: 0;
+  text-transform: none;
   font-variant-numeric: tabular-nums;
+  background: none;
+  border: none;
 }
 
 .bed-hour-line {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg,
-    rgba(111, 155, 134, 0.3) 0%,
-    rgba(111, 155, 134, 0.1) 50%,
-    transparent 100%);
+  background: var(--glass-border, rgba(0, 0, 0, 0.1));
+  opacity: 0.4;
   position: relative;
 }
 
-/* Subtle glow on hour lines */
+/* Remove glow effect */
 .bed-hour-line::after {
-  content: "";
-  position: absolute;
-  inset: -2px 0;
-  background: inherit;
-  filter: blur(2px);
-  opacity: 0.4;
+  display: none;
 }
 
 .bed-hour.is-first .bed-hour-line,
 .bed-hour.is-last .bed-hour-line {
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 .night-garden .bed-hour-label {
-  color: rgba(234, 246, 240, 0.4);
+  color: rgba(234, 246, 240, 0.6);
 }
 
 .night-garden .bed-hour-line {
-  background: linear-gradient(90deg,
-    rgba(140, 183, 217, 0.25) 0%,
-    rgba(140, 183, 217, 0.08) 50%,
-    transparent 100%);
+  background: rgba(234, 246, 240, 0.15);
+  opacity: 0.5;
 }
 
 /* ============================================
@@ -596,17 +577,23 @@
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  max-width: 400px;
-  padding: 2rem;
-  color: var(--text-tertiary, rgba(0, 0, 0, 0.35));
-  font-size: 0.9375rem;
+  max-width: 280px;
+  padding: 1.5rem;
+  color: var(--text-tertiary, rgba(0, 0, 0, 0.4));
+  font-size: 0.875rem;
   font-style: italic;
   font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px dashed rgba(111, 155, 134, 0.25);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
 }
 
 .night-garden .bed-empty {
-  color: rgba(234, 246, 240, 0.3);
+  color: rgba(234, 246, 240, 0.4);
+  background: rgba(15, 23, 42, 0.4);
+  border-color: rgba(140, 183, 217, 0.2);
 }
 
 /* ============================================

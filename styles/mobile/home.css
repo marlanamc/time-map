@@ -1,18 +1,11 @@
-/* Mobile Home View Styles */
+/* Mobile Home View Styles - Clean, Professional Design */
 .mobile-home-view {
     position: fixed;
     inset: 0;
     z-index: 100;
-    /* Ensure it sits above the canvas but below the tab bar if needed, 
-       though tab bar usually has higher z-index. 
-       Let's check z-indices. */
-    background: var(--bg-base);
+    background: transparent;
     overflow-y: auto;
-    padding: var(--space-4) var(--space-4) calc(var(--mobile-tab-bar-height) + var(--space-6));
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    /* Improve scrolling */
+    padding: var(--space-5) var(--space-4) calc(var(--mobile-tab-bar-height) + var(--space-6));
     -webkit-overflow-scrolling: touch;
 }
 
@@ -20,14 +13,25 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: var(--space-2);
-    min-height: 40px;
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-2);
+}
+
+.mobile-home-header .logo-text {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
 }
 
 .current-date-small {
     font-size: var(--text-sm);
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-weight: 500;
+}
+
+.night-garden .current-date-small {
+    color: var(--text-tertiary);
 }
 
 .mobile-home-content {
@@ -35,39 +39,58 @@
     flex-direction: column;
     gap: var(--space-4);
     padding-bottom: var(--space-8);
-    /* Extra padding for bottom scroll */
 }
 
 .mobile-card {
     background: var(--bg-surface);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    box-shadow: var(--shadow-sm);
+    border-radius: 16px;
+    padding: var(--space-5);
     border: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    transition: background-color 0.2s ease;
+}
+
+.mobile-card:active {
+    background: var(--bg-hover);
+}
+
+.night-garden .mobile-card {
+    background: var(--bg-surface);
+    border-color: var(--glass-border);
+}
+
+.night-garden .mobile-card:active {
+    background: var(--bg-hover);
 }
 
 .card-label {
-    font-size: var(--text-xs);
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
     color: var(--text-tertiary);
     font-weight: 600;
+    margin-bottom: var(--space-3);
+}
+
+.night-garden .card-label {
+    color: var(--text-secondary);
 }
 
 /* Time Card */
 .now-context-mobile {
-    font-size: var(--text-lg);
-    font-weight: 600;
+    font-size: 28px;
+    font-weight: 700;
     color: var(--text-primary);
+    margin-bottom: var(--space-4);
+    letter-spacing: -0.02em;
 }
 
 .time-stats-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-4);
-    margin-top: var(--space-2);
+    margin-top: var(--space-1);
 }
 
 .time-stat-mobile {
@@ -76,22 +99,27 @@
 }
 
 .stat-value {
-    font-size: var(--text-xl);
+    font-size: 32px;
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: -0.03em;
 }
 
 .stat-label {
-    font-size: var(--text-xs);
+    font-size: 13px;
     color: var(--text-secondary);
+    font-weight: 500;
 }
 
 /* Bloom Card */
 .bloom-card {
     align-items: center;
     text-align: center;
-    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);
+    min-height: 180px;
+    justify-content: center;
+    padding: var(--space-6) var(--space-5);
 }
 
 .garden-bloom-mobile {
@@ -100,26 +128,43 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: var(--space-4);
+}
+
+.bloom-stats-mobile {
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.night-garden .bloom-stats-mobile {
+    color: var(--text-tertiary);
 }
 
 /* Affirmation Card */
 .affirmation-card {
-    background: linear-gradient(135deg, var(--accent-subtle) 0%, var(--bg-surface) 100%);
-    border-color: var(--accent-muted);
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
 }
 
 .card-icon {
-    font-size: 1.5rem;
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .affirmation-text-mobile {
     font-style: italic;
     color: var(--text-secondary);
-    font-weight: 500;
-    font-size: var(--text-sm);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.night-garden .affirmation-text-mobile {
+    color: var(--text-tertiary);
 }
 
 /* Upcoming Card */
@@ -136,18 +181,95 @@
 }
 
 .mobile-goal-item {
-    padding: var(--space-3);
-    background: var(--bg-base);
-    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    background: var(--bg-elevated);
+    border-radius: 12px;
     border: 1px solid var(--glass-border);
-    font-size: var(--text-sm);
+    font-size: 15px;
     color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* Night Mode Overrides */
-:root.night-garden .mobile-card {
-    backdrop-filter: blur(10px);
+.mobile-goal-item:active {
+    background: var(--bg-hover);
+    transform: scale(0.98);
 }
+
+.night-garden .mobile-goal-item {
+    background: var(--bg-elevated);
+    border-color: var(--glass-border);
+}
+
+.night-garden .mobile-goal-item:active {
+    background: var(--bg-hover);
+}
+
+/* Goals By Level */
+.goals-by-level {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.goals-level-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.goals-level-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.goals-level-emoji {
+    font-size: 16px;
+}
+
+.goals-level-label {
+    flex: 1;
+}
+
+.goals-level-count {
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.goals-level-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.goals-more {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    font-style: italic;
+    padding-left: var(--space-4);
+}
+
+.empty-state-small {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    text-align: center;
+    padding: var(--space-4);
+    font-style: italic;
+}
+
+/* Additional night mode styling handled above */
 
 /* Hide 'You Are Here' panel in sidebar on mobile since it's now in Home view */
 @media (max-width: 768px) {

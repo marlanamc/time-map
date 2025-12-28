@@ -345,24 +345,24 @@ body {
     }
 }
 
-/* Night Garden (dark mode) */
+/* Night Garden (dark mode) - Moonlight Theme */
 :root.night-garden {
-    --bg-base: #0A1A0F;
-    /* deep forest night */
-    --bg-elevated: #0F1B14;
-    /* garden shadows */
-    --bg-surface: rgba(20, 35, 28, 0.72);
-    /* warm garden glass */
-    --bg-hover: rgba(30, 50, 38, 0.72);
-    /* lantern glow */
-    --bg-active: rgba(40, 65, 48, 0.72);
-    /* string light warmth */
+    --bg-base: #0A1A2E;
+    /* dark moonlight blue */
+    --bg-elevated: #16213E;
+    /* deeper moonlit shadows */
+    --bg-surface: rgba(22, 33, 62, 0.85);
+    /* moonlit glass */
+    --bg-hover: rgba(30, 45, 75, 0.85);
+    /* brighter moon glow */
+    --bg-active: rgba(40, 55, 85, 0.85);
+    /* active moonlight */
 
-    --glass-bg: rgba(15, 28, 22, 0.65);
-    --glass-border: rgba(140, 180, 220, 0.2);
-    /* blue flower glow */
-    --glass-shine: rgba(180, 210, 240, 0.08);
-    /* soft blue petal light */
+    --glass-bg: rgba(16, 26, 50, 0.75);
+    --glass-border: rgba(140, 180, 220, 0.25);
+    /* moonlight border glow */
+    --glass-shine: rgba(180, 210, 240, 0.1);
+    /* soft moonlight shine */
 
     --text-primary: #E2E8F0;
     /* moonlit mist */
@@ -584,10 +584,11 @@ body.time-night .garden-sky {
 
 /* Celestial Bodies */
 .celestial-container {
-    position: absolute;
+    position: fixed;
     inset: 0;
     pointer-events: none;
     overflow: hidden;
+    z-index: 110;
 }
 
 .sun,
@@ -1701,7 +1702,6 @@ select:focus-visible,
     grid-template-columns: 1fr 1fr;
     gap: var(--space-4);
     padding-top: var(--space-4);
-    border-top: 1px solid rgba(180, 106, 74, 0.12);
 }
 
 .time-stat {
@@ -1962,7 +1962,6 @@ select:focus-visible,
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--glass-border);
     margin-bottom: 0;
     width: 100%;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
@@ -1970,7 +1969,6 @@ select:focus-visible,
 
 .night-garden .control-bar {
     background: rgba(10, 22, 18, 0.85);
-    border-bottom: 1px solid rgba(140, 183, 217, 0.14);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }
 
@@ -2595,8 +2593,8 @@ body.hide-sidebar .canvas-zoom-controls {
 .year-view-header {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
+    align-items: center;
+    text-align: center;
     gap: var(--space-2);
     margin-bottom: var(--space-5);
 }
@@ -2620,7 +2618,9 @@ body.hide-sidebar .canvas-zoom-controls {
 @supports ((-webkit-background-clip: text) and (-webkit-text-fill-color: transparent)) or (background-clip: text) {
 
     .year-view-title,
-    .month-view-title {
+    .month-view-title,
+    .week-view-title,
+    .day-view-title {
         background: linear-gradient(110deg,
                 var(--text-primary) 0%,
                 var(--accent) 65%,
@@ -2638,8 +2638,9 @@ body.hide-sidebar .canvas-zoom-controls {
     width: 44px;
     height: 2px;
     border-radius: var(--radius-full);
-    background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
     opacity: 0.7;
+    margin: 0 auto;
 }
 
 .month-view-container .calendar-grid,
@@ -2660,8 +2661,8 @@ body.hide-sidebar .canvas-zoom-controls {
 .month-view-header {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
+    align-items: center;
+    text-align: center;
     gap: var(--space-2);
     margin-bottom: var(--space-5);
 }
@@ -2780,7 +2781,6 @@ body.hide-sidebar .canvas-zoom-controls {
    =================================== */
 .week-view {
     padding: var(--space-6);
-    height: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -2791,10 +2791,12 @@ body.hide-sidebar .canvas-zoom-controls {
 }
 
 .week-view-title {
-    font-size: var(--text-3xl);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 6vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    color: var(--text-primary);
     margin-bottom: var(--space-2);
 }
 
@@ -2817,7 +2819,8 @@ body.hide-sidebar .canvas-zoom-controls {
     padding: var(--space-4);
     display: flex;
     flex-direction: column;
-    min-height: 400px;
+    min-height: 200px;
+    max-height: 600px;
     border: 1px solid var(--glass-border);
 }
 
@@ -2859,18 +2862,26 @@ body.hide-sidebar .canvas-zoom-controls {
     overflow-y: auto;
 }
 
-.week-goal-item {
-    padding: var(--space-3);
-    background: var(--bg-hover);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--duration-fast);
-    border-left: 3px solid var(--accent);
-}
+    .week-goal-item {
+        padding: var(--space-3);
+        background: var(--bg-hover);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--duration-fast);
+        border-left: 3px solid var(--accent);
+        min-height: 44px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-.week-goal-item:hover {
-    background: var(--accent-subtle);
-}
+    .week-goal-item:hover {
+        background: var(--accent-subtle);
+    }
+
+    .week-goal-item:active {
+        transform: scale(0.98);
+        background: var(--bg-active);
+    }
 
 .week-goal-item.completed {
     opacity: 0.6;
@@ -2886,6 +2897,12 @@ body.hide-sidebar .canvas-zoom-controls {
 
 .week-goal-item.completed .week-goal-title {
     text-decoration: line-through;
+}
+
+.goal-checkmark {
+    color: var(--success);
+    font-weight: bold;
+    margin-right: var(--space-1);
 }
 
 .week-goal-category {
@@ -2928,20 +2945,18 @@ body.hide-sidebar .canvas-zoom-controls {
 }
 
 .day-view-title {
-    font-size: var(--text-3xl);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--accent);
-    margin-bottom: var(--space-2);
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 6vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
 }
 
 .day-view-subtitle {
-    font-size: var(--text-lg);
+    font-size: var(--text-sm);
     color: var(--text-secondary);
-}
-
-.day-view.is-today .day-view-title {
-    color: var(--accent);
 }
 
 .day-time-context {
@@ -3070,96 +3085,93 @@ body.hide-sidebar .canvas-zoom-controls {
     color: var(--text-tertiary);
 }
 
-.day-plot {
-    position: relative;
+.day-sections {
     display: grid;
-    gap: var(--space-5);
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    --lanes: 1;
 }
 
-.day-seed-tray,
-.day-bed,
-.day-compost {
-    position: relative;
-    background: rgba(255, 255, 255, 0.78);
-    border: 1px solid var(--glass-border);
+.day-section {
+    background: var(--bg-surface);
     border-radius: var(--radius-lg);
     padding: var(--space-4);
+    border: 1px solid var(--glass-border);
 }
 
-.night-garden .day-seed-tray,
-.night-garden .day-bed,
-.night-garden .day-compost {
+.night-garden .day-section {
     background: var(--bg-surface);
     border: 1px solid var(--glass-border);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
-.seed-tray-header,
-.day-bed-header,
-.compost-header {
+.day-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--glass-border);
     margin-bottom: var(--space-3);
 }
 
-.seed-tray-title,
-.day-bed-title,
-.compost-title {
-    font-weight: 800;
-    letter-spacing: -0.02em;
+.day-section-title {
+    font-size: var(--text-base);
+    font-weight: 600;
     color: var(--text-primary);
+    letter-spacing: -0.01em;
 }
 
-.seed-tray-subtitle,
-.day-bed-subtitle,
-.compost-subtitle {
+.day-section-count {
     font-size: var(--text-sm);
+    font-weight: 600;
     color: var(--text-tertiary);
+    background: var(--bg-hover);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
 }
 
-.seed-tray-grid,
-.compost-grid {
+.day-section-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.day-section-unscheduled .day-section-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-3);
 }
 
-.seed-tray-empty {
-    grid-column: 1 / -1;
-    color: var(--text-secondary);
-    background: rgba(140, 183, 217, 0.10);
-    border: 1px dashed rgba(140, 183, 217, 0.35);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    text-align: center;
+.day-section-completed .day-section-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-3);
 }
 
-.night-garden .seed-tray-empty {
-    background: rgba(140, 183, 217, 0.06);
-    border: 1px dashed rgba(140, 183, 217, 0.22);
-    color: var(--text-secondary);
-}
-
-.day-bed-canvas {
+.day-section-content.day-timeline {
     position: relative;
+    min-height: 400px;
     height: clamp(540px, 64vh, 860px);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(111, 155, 134, 0.25);
+    border-radius: var(--radius-md);
     --time-gutter: 68px;
-    background:
-        radial-gradient(1000px 600px at 40% -10%,
-            rgba(140, 183, 217, 0.18) 0%,
-            transparent 55%),
-        linear-gradient(180deg,
-            rgba(111, 155, 134, 0.16) 0%,
-            rgba(255, 255, 255, 0.35) 55%,
-            rgba(180, 106, 74, 0.10) 100%);
+    background: var(--bg-base);
+    padding: var(--space-4) var(--space-3);
     overflow: hidden;
-    padding: var(--space-3);
 }
+
+.night-garden .day-section-content.day-timeline {
+    background: rgba(10, 26, 15, 0.6);
+}
+
+.day-section-empty {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    text-align: center;
+    padding: var(--space-6);
+    font-style: italic;
+}
+
+/* Old .day-bed-canvas styles removed - now using .day-section-content.day-timeline */
 
 /* Drag-and-drop scheduling (Day View) */
 body.is-dragging-seed .day-goal-card.day-goal-variant-seed[draggable="true"] {
@@ -3194,37 +3206,7 @@ body.is-touch-dragging-seed .day-view-container {
     outline-color: var(--accent);
 }
 
-.night-garden .day-bed-canvas {
-    border: 1px solid rgba(164, 185, 217, 0.08);
-    background:
-        radial-gradient(1000px 600px at 40% -10%,
-            rgba(30, 41, 79, 0.35) 0%,
-            transparent 70%),
-        linear-gradient(180deg,
-            rgba(15, 23, 42, 0.65) 0%,
-            rgba(8, 12, 26, 0.85) 55%,
-            rgba(30, 41, 79, 0.15) 100%);
-}
-
-.day-bed-canvas::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-        radial-gradient(circle at 10% 10%,
-            rgba(255, 255, 255, 0.65) 0%,
-            transparent 30%);
-    opacity: 0.75;
-    pointer-events: none;
-}
-
-.night-garden .day-bed-canvas::before {
-    background-image:
-        radial-gradient(circle at 10% 10%,
-            rgba(164, 185, 217, 0.15) 0%,
-            transparent 40%);
-    opacity: 1;
-}
+/* Old .day-bed-canvas background styles removed - using simplified styling */
 
 .day-bed-grid {
     position: absolute;
@@ -3241,8 +3223,9 @@ body.is-touch-dragging-seed .day-view-container {
     transform: translateY(-50%);
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     padding: 0;
+    padding-left: var(--space-2);
 }
 
 .bed-hour.is-first {
@@ -3254,39 +3237,34 @@ body.is-touch-dragging-seed .day-view-container {
 }
 
 .bed-hour-label {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--text-tertiary);
-    background: rgba(253, 251, 247, 0.65);
-    border: 1px solid rgba(180, 106, 74, 0.18);
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    backdrop-filter: blur(8px);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--text-secondary);
     min-width: var(--time-gutter);
-    text-align: right;
+    text-align: left;
+    padding: 0;
+    background: none;
+    border: none;
+    letter-spacing: 0;
 }
 
 .night-garden .bed-hour-label {
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(164, 185, 217, 0.2);
-    color: var(--text-primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: rgba(234, 246, 240, 0.6);
+    background: none;
+    border: none;
+    box-shadow: none;
 }
 
 .bed-hour-line {
     flex: 1;
     height: 1px;
-    background: linear-gradient(90deg,
-            rgba(180, 106, 74, 0.06) 0%,
-            transparent 40%);
-    opacity: 0.3;
+    background: var(--glass-border);
+    opacity: 0.4;
 }
 
 .night-garden .bed-hour-line {
-    background: linear-gradient(90deg,
-            rgba(140, 180, 220, 0.04) 0%,
-            transparent 40%);
-    opacity: 0.4;
+    background: rgba(234, 246, 240, 0.15);
+    opacity: 0.5;
 }
 
 .bed-empty {
@@ -5755,14 +5733,6 @@ body.focus-mode .sidebar-hide-btn {
     .goals-by-status {
         grid-template-columns: repeat(2, 1fr);
     }
-
-    .week-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-
-    .week-day-column:nth-child(n + 5) {
-        grid-column: span 1;
-    }
 }
 
 @media (max-width: 900px) {
@@ -5847,6 +5817,23 @@ body.focus-mode .sidebar-hide-btn {
     /* Fix horizontal scroll */
     .sidebar {
         overflow-x: hidden;
+    }
+
+    /* Week view: horizontal scroll for tablets */
+    .week-view {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .week-grid {
+        min-width: 700px;
+        grid-template-columns: repeat(7, minmax(90px, 1fr));
+    }
+
+    .week-day-column {
+        min-width: 90px;
+        min-height: 150px;
+        max-height: 500px;
     }
 
 }
@@ -6159,14 +6146,40 @@ body.focus-mode .sidebar-hide-btn {
     .week-grid {
         grid-template-columns: 1fr;
         gap: var(--space-2);
+        min-width: 0;
     }
 
     .week-day-column {
-        min-height: 120px;
+        min-width: 0;
+        min-height: 140px;
+        max-height: none;
+        touch-action: manipulation;
+        padding: var(--space-4);
+    }
+
+    .week-day-column:active {
+        transform: scale(0.99);
+        background: var(--bg-hover);
+    }
+
+    .week-day-header {
+        padding-bottom: var(--space-4);
+        margin-bottom: var(--space-4);
+    }
+
+    .week-goal-item {
+        min-height: 56px;
+        padding: var(--space-4);
+    }
+
+    .week-day-column:active {
+        transform: scale(0.99);
+        background: var(--bg-hover);
     }
 
     .week-view {
         padding: var(--space-3);
+        overflow-x: visible;
     }
 
     .month-view {
@@ -6182,23 +6195,53 @@ body.focus-mode .sidebar-hide-btn {
         padding: var(--space-1);
     }
 
-    /* Day view: full-width + readable timeline */
+    /* Day view: full-width + readable timeline - simplified mobile layout */
     .day-view {
-        padding: var(--space-3) 0;
+        padding: var(--space-4);
         max-width: none;
         margin: 0;
     }
 
     .day-view-header {
-        margin-bottom: var(--space-4);
-    }
-
-    .day-view-title {
-        font-size: var(--text-2xl);
+        margin-bottom: var(--space-5);
+        padding: 0 var(--space-2);
     }
 
     .day-view-subtitle {
-        font-size: var(--text-sm);
+        font-size: var(--text-xs);
+    }
+
+    .day-sections {
+        gap: var(--space-5);
+    }
+
+    .day-section {
+        padding: var(--space-4);
+    }
+
+    .day-section-unscheduled .day-section-content,
+    .day-section-completed .day-section-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+
+    .day-goal-card {
+        min-height: 80px;
+        padding: var(--space-4);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .day-goal-card:active {
+        transform: scale(0.98);
+        background: var(--bg-hover);
+    }
+
+    .day-goal-checkbox {
+        min-width: 28px;
+        min-height: 28px;
+        width: 28px;
+        height: 28px;
     }
 
     .day-land {
@@ -6474,11 +6517,6 @@ body.focus-mode .sidebar-hide-btn {
         padding: var(--space-2);
     }
 
-    /* Better mobile week view */
-    .week-day-column {
-        min-height: 140px;
-        padding: var(--space-3);
-    }
 }
 
 /* ===================================
@@ -6498,21 +6536,18 @@ body.focus-mode .sidebar-hide-btn {
         display: flex;
         justify-content: space-around;
         align-items: stretch;
-        height: calc(64px + env(safe-area-inset-bottom, 0px));
-        padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
-        background: var(--glass-bg);
-        backdrop-filter: blur(24px) saturate(1.2);
-        -webkit-backdrop-filter: blur(24px) saturate(1.2);
+        height: calc(60px + env(safe-area-inset-bottom, 0px));
+        padding: 6px env(safe-area-inset-left, 0px) calc(6px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-right, 0px);
+        background: var(--bg-surface);
         border-top: 1px solid var(--glass-border);
-        box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
         z-index: 9999;
         isolation: isolate;
-        transform: translate3d(0, 0, 0);
     }
 
     .night-garden .mobile-tab-bar {
-        background: rgba(8, 12, 26, 0.85);
-        border-top-color: rgba(140, 183, 217, 0.12);
+        background: var(--bg-surface);
+        border-top-color: var(--glass-border);
+        backdrop-filter: blur(20px);
     }
 
     .mobile-tab {
@@ -6524,74 +6559,40 @@ body.focus-mode .sidebar-hide-btn {
         gap: 4px;
         background: transparent;
         border: none;
-        padding: var(--space-2) var(--space-1);
+        padding: 8px 4px;
         color: var(--text-tertiary);
         cursor: pointer;
-        transition: all var(--duration-fast) var(--ease-out);
+        transition: color 0.2s ease;
         position: relative;
-        border-radius: var(--radius-md);
-        min-height: 56px;
-    }
-
-    .mobile-tab::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 2px;
-        background: var(--accent);
-        border-radius: 0 0 2px 2px;
-        transition: width var(--duration-fast) var(--ease-out);
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .mobile-tab.active {
         color: var(--accent);
-        background: var(--accent-subtle);
     }
 
-    .mobile-tab.active::before {
-        width: 32px;
-        height: 3px;
-    }
-
-    .mobile-tab:hover:not(.active) {
+    .mobile-tab:active:not(.active) {
         color: var(--text-secondary);
-        background: var(--bg-hover);
-    }
-
-    .mobile-tab:active {
-        transform: scale(0.96);
-    }
-
-    .mobile-tab:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: -2px;
     }
 
     .mobile-tab-icon {
         width: 24px;
         height: 24px;
-        display: inline-flex;
+        display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform var(--duration-fast) var(--ease-out);
     }
 
     .mobile-tab-icon svg {
-        width: 100%;
-        height: 100%;
-        stroke: currentColor;
-    }
-
-    .mobile-tab.active .mobile-tab-icon {
-        transform: scale(1.1);
+        width: 24px;
+        height: 24px;
+        stroke-width: 2;
     }
 
     .mobile-tab-label {
-        font-size: var(--text-xs);
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 500;
         letter-spacing: 0.01em;
     }
 

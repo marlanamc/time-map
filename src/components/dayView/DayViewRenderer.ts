@@ -150,10 +150,10 @@ export class DayViewRenderer {
   // --- Private Methods ---
 
   private cacheElements(): void {
-    this.dayBedCanvas = this.container.querySelector(".day-bed-canvas");
-    this.seedTrayGrid = this.container.querySelector(".seed-tray-grid");
-    this.compostGrid = this.container.querySelector(".compost-grid");
-    this.fenceValueEl = this.container.querySelector(".fence-value");
+    this.dayBedCanvas = this.container.querySelector(".day-timeline") as HTMLElement;
+    this.seedTrayGrid = this.container.querySelector(".day-section-unscheduled .day-section-content") as HTMLElement;
+    this.compostGrid = this.container.querySelector(".day-section-completed .day-section-content") as HTMLElement;
+    this.fenceValueEl = null; // Removed fence section
   }
 
   private cacheAllCards(): void {
@@ -237,13 +237,7 @@ export class DayViewRenderer {
         const cardEl = this.cardComponent.createElement(goal, { variant: "planter", style });
 
         if (this.dayBedCanvas) {
-          // Insert before empty message or at end
-          const emptyMsg = this.dayBedCanvas.querySelector(".bed-empty");
-          if (emptyMsg) {
-            this.dayBedCanvas.insertBefore(cardEl, emptyMsg);
-          } else {
-            this.dayBedCanvas.appendChild(cardEl);
-          }
+          this.dayBedCanvas.appendChild(cardEl);
 
           this.cachedCards.set(goal.id, {
             element: cardEl,
@@ -254,16 +248,7 @@ export class DayViewRenderer {
       }
     });
 
-    // Show/hide empty message
-    const emptyMsg = this.dayBedCanvas.querySelector(".bed-empty");
-    if (positionedGoals.length === 0 && !emptyMsg) {
-      const msg = document.createElement("div");
-      msg.className = "bed-empty";
-      msg.textContent = "No planters placed yet. Add a start time to any task, or plant one small intention.";
-      this.dayBedCanvas.appendChild(msg);
-    } else if (positionedGoals.length > 0 && emptyMsg) {
-      emptyMsg.remove();
-    }
+    // Empty message is now handled in HTML template via conditional rendering
   }
 
   private updateCompost(completedGoals: Goal[]): void {
@@ -282,7 +267,7 @@ export class DayViewRenderer {
   }
 
   private updateTimelineGrid(): void {
-    const gridEl = this.container.querySelector(".day-bed-grid") as HTMLElement;
+    const gridEl = this.container.querySelector(".day-timeline .day-bed-grid") as HTMLElement;
     if (gridEl) {
       this.timelineGrid.updateElement(gridEl);
     }
@@ -375,44 +360,33 @@ export class DayViewRenderer {
 
         ${capacityWarning}
 
-        <div class="day-land">
-          <div class="day-land-topbar">
-            <div class="day-land-fence" role="status" aria-live="polite">
-              <span class="fence-label">Fence</span>
-              <span class="fence-value">${activeCount} active</span>
-              <span class="fence-hint">Aim for 3–5 planters</span>
-            </div>
-            <button class="btn btn-primary btn-sm day-plant-btn" id="dayPlantBtn" type="button">
-              Plant something
-            </button>
-          </div>
-
-          <div class="day-plot" style="--lanes:${laneCount}">
-            <div class="day-seed-tray" role="region" aria-label="Seed tray (unscheduled)">
-              <div class="seed-tray-header">
-                <span class="seed-tray-title">Seed tray</span>
-                <span class="seed-tray-subtitle">Small tasks without a start time</span>
+        <div class="day-content">
+          <div class="day-sections" style="--lanes:${laneCount}">
+            <div class="day-section day-section-unscheduled" role="region" aria-label="Unscheduled tasks">
+              <div class="day-section-header">
+                <span class="day-section-title">Unscheduled</span>
+                ${seedGoals.length > 0 ? `<span class="day-section-count">${seedGoals.length}</span>` : ""}
               </div>
-              <div class="seed-tray-grid" role="list">
+              <div class="day-section-content" role="list">
                 ${
                   seedGoals.length > 0
                     ? seedCardsHtml
-                    : '<div class="seed-tray-empty">Leave this empty if you need breathing room.</div>'
+                    : '<div class="day-section-empty">No unscheduled tasks</div>'
                 }
               </div>
             </div>
 
-            <div class="day-bed" role="region" aria-label="Garden bed (your day)">
-              <div class="day-bed-header">
-                <span class="day-bed-title">Your day</span>
-                <span class="day-bed-subtitle">Add a start time to place a planter</span>
+            <div class="day-section day-section-scheduled" role="region" aria-label="Scheduled tasks">
+              <div class="day-section-header">
+                <span class="day-section-title">Scheduled</span>
+                ${positionedGoals.length > 0 ? `<span class="day-section-count">${positionedGoals.length}</span>` : ""}
               </div>
-              <div class="day-bed-canvas" role="list" aria-label="Scheduled planters">
+              <div class="day-section-content day-timeline" role="list" aria-label="Scheduled tasks">
                 ${this.timelineGrid.render()}
                 ${
                   positionedGoals.length > 0
                     ? planterCardsHtml
-                    : '<div class="bed-empty">No planters placed yet. Add a start time to any task, or plant one small intention.</div>'
+                    : '<div class="day-section-empty">No scheduled tasks. Add a start time to schedule a task.</div>'
                 }
               </div>
             </div>
@@ -420,12 +394,12 @@ export class DayViewRenderer {
             ${
               completedGoals.length > 0
                 ? `
-              <div class="day-compost" role="region" aria-label="Compost (done)">
-                <div class="compost-header">
-                  <span class="compost-title">Compost</span>
-                  <span class="compost-subtitle">${completedGoals.length} done</span>
+              <div class="day-section day-section-completed" role="region" aria-label="Completed tasks">
+                <div class="day-section-header">
+                  <span class="day-section-title">Completed</span>
+                  <span class="day-section-count">${completedGoals.length}</span>
                 </div>
-                <div class="compost-grid" role="list">
+                <div class="day-section-content" role="list">
                   ${compostCardsHtml}
                 </div>
               </div>

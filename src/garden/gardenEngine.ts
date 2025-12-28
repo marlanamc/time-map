@@ -346,11 +346,21 @@ export class GardenEngine {
   private applyStateToDOM(): void {
     const { time, season, weather, lighting, shadowAngle } = this.state;
 
-    // Update body classes
-    document.body.classList.remove('season-spring', 'season-summer', 'season-fall', 'season-winter');
-    document.body.classList.remove('time-dawn', 'time-morning', 'time-afternoon', 'time-evening', 'time-night');
-    document.body.classList.add(`season-${season.season}`);
-    document.body.classList.add(`time-${time.timeOfDay}`);
+    // Update body classes - only change if different to prevent flash
+    const currentSeasonClass = Array.from(document.body.classList).find(c => c.startsWith('season-'));
+    const currentTimeClass = Array.from(document.body.classList).find(c => c.startsWith('time-'));
+    const targetSeasonClass = `season-${season.season}`;
+    const targetTimeClass = `time-${time.timeOfDay}`;
+
+    if (currentSeasonClass !== targetSeasonClass) {
+      document.body.classList.remove('season-spring', 'season-summer', 'season-fall', 'season-winter');
+      document.body.classList.add(targetSeasonClass);
+    }
+
+    if (currentTimeClass !== targetTimeClass) {
+      document.body.classList.remove('time-dawn', 'time-morning', 'time-afternoon', 'time-evening', 'time-night');
+      document.body.classList.add(targetTimeClass);
+    }
 
     // Add quality level as data attribute for CSS targeting (mobile optimization)
     document.body.dataset.gardenQuality = this.state.effects.qualityLevel;
