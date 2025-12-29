@@ -1,5 +1,5 @@
 import type { Goal } from "../../types";
-import type { PositionedGoal, DayViewCallbacks } from "./types";
+import type { PositionedGoal } from "./types";
 import { TimeSlotCalculator } from "./TimeSlotCalculator";
 import { CardComponent } from "./CardComponent";
 import { TimelineGrid } from "./TimelineGrid";
@@ -15,7 +15,6 @@ export class DayViewRenderer {
   private calculator: TimeSlotCalculator;
   private cardComponent: CardComponent;
   private timelineGrid: TimelineGrid;
-  private callbacks: DayViewCallbacks;
 
   // DOM element caches
   private cachedCards: Map<string, CachedCard> = new Map();
@@ -32,14 +31,12 @@ export class DayViewRenderer {
     container: HTMLElement,
     calculator: TimeSlotCalculator,
     cardComponent: CardComponent,
-    timelineGrid: TimelineGrid,
-    callbacks: DayViewCallbacks,
+    timelineGrid: TimelineGrid
   ) {
     this.container = container;
     this.calculator = calculator;
     this.cardComponent = cardComponent;
     this.timelineGrid = timelineGrid;
-    this.callbacks = callbacks;
   }
 
   /**
@@ -368,11 +365,10 @@ export class DayViewRenderer {
                 ${seedGoals.length > 0 ? `<span class="day-section-count">${seedGoals.length}</span>` : ""}
               </div>
               <div class="day-section-content" role="list">
-                ${
-                  seedGoals.length > 0
-                    ? seedCardsHtml
-                    : '<div class="day-section-empty">No unscheduled tasks</div>'
-                }
+                ${seedGoals.length > 0
+        ? seedCardsHtml
+        : '<div class="day-section-empty">No unscheduled tasks</div>'
+      }
               </div>
             </div>
 
@@ -383,17 +379,15 @@ export class DayViewRenderer {
               </div>
               <div class="day-section-content day-timeline" role="list" aria-label="Scheduled tasks">
                 ${this.timelineGrid.render()}
-                ${
-                  positionedGoals.length > 0
-                    ? planterCardsHtml
-                    : '<div class="day-section-empty">No scheduled tasks. Add a start time to schedule a task.</div>'
-                }
+                ${positionedGoals.length > 0
+        ? planterCardsHtml
+        : '<div class="day-section-empty">No scheduled tasks. Add a start time to schedule a task.</div>'
+      }
               </div>
             </div>
 
-            ${
-              completedGoals.length > 0
-                ? `
+            ${completedGoals.length > 0
+        ? `
               <div class="day-section day-section-completed" role="region" aria-label="Completed tasks">
                 <div class="day-section-header">
                   <span class="day-section-title">Completed</span>
@@ -404,8 +398,8 @@ export class DayViewRenderer {
                 </div>
               </div>
             `
-                : ""
-            }
+        : ""
+      }
           </div>
         </div>
       </div>

@@ -16,8 +16,7 @@ import {
 import {
   getWeatherForTime,
   getWeatherEffects,
-  type WeatherState,
-  type Weather
+  type WeatherState
 } from './weatherSystem';
 
 import { CelestialBodies } from './celestialBodies';
@@ -188,13 +187,13 @@ export class GardenEngine {
 
     // Initialize particle system
     const maxParticles = this.preferences.qualityLevel === 'high' ? 50 :
-                        this.preferences.qualityLevel === 'medium' ? 30 : 10;
+      this.preferences.qualityLevel === 'medium' ? 30 : 10;
     this.particleSystem = new ParticleSystem('gardenEffects', maxParticles);
     this.particleSystem.start();
 
     // Initialize butterflies
     const maxButterflies = this.preferences.qualityLevel === 'high' ? 5 :
-                          this.preferences.qualityLevel === 'medium' ? 3 : 2;
+      this.preferences.qualityLevel === 'medium' ? 3 : 2;
     this.butterflies = new ButterfliesManager(this.particleSystem, maxButterflies);
     this.butterflies.start();
 
@@ -263,7 +262,7 @@ export class GardenEngine {
     if (!this.particleSystem || !this.state.effects.particlesEnabled) return;
 
     const petalCount = this.preferences.qualityLevel === 'high' ? 5 :
-                       this.preferences.qualityLevel === 'medium' ? 3 : 2;
+      this.preferences.qualityLevel === 'medium' ? 3 : 2;
 
     for (let i = 0; i < petalCount; i++) {
       const petal = new FallingPetal(x + (Math.random() - 0.5) * 20, y);
@@ -275,7 +274,7 @@ export class GardenEngine {
    * Update garden state
    */
   public update(): void {
-    const previousState = { ...this.state };
+    // const previousState = { ...this.state };
 
     // Update time
     const newTime = getCurrentTimeState();
@@ -347,26 +346,27 @@ export class GardenEngine {
     const { time, season, weather, lighting, shadowAngle } = this.state;
 
     // Update body classes - only change if different to prevent flash
-    const currentSeasonClass = Array.from(document.body.classList).find(c => c.startsWith('season-'));
-    const currentTimeClass = Array.from(document.body.classList).find(c => c.startsWith('time-'));
+    const root = document.documentElement;
+    const currentSeasonClass = Array.from(root.classList).find(c => c.startsWith('season-'));
+    const currentTimeClass = Array.from(root.classList).find(c => c.startsWith('time-'));
     const targetSeasonClass = `season-${season.season}`;
     const targetTimeClass = `time-${time.timeOfDay}`;
 
     if (currentSeasonClass !== targetSeasonClass) {
-      document.body.classList.remove('season-spring', 'season-summer', 'season-fall', 'season-winter');
-      document.body.classList.add(targetSeasonClass);
+      root.classList.remove('season-spring', 'season-summer', 'season-fall', 'season-winter');
+      root.classList.add(targetSeasonClass);
     }
 
     if (currentTimeClass !== targetTimeClass) {
-      document.body.classList.remove('time-dawn', 'time-morning', 'time-afternoon', 'time-evening', 'time-night');
-      document.body.classList.add(targetTimeClass);
+      root.classList.remove('time-dawn', 'time-morning', 'time-afternoon', 'time-evening', 'time-night');
+      root.classList.add(targetTimeClass);
     }
 
     // Add quality level as data attribute for CSS targeting (mobile optimization)
-    document.body.dataset.gardenQuality = this.state.effects.qualityLevel;
+    root.dataset.gardenQuality = this.state.effects.qualityLevel;
 
     // Update CSS custom properties
-    const root = document.documentElement;
+    // root is already defined above from document.documentElement
 
     // Lighting
     root.style.setProperty('--time-brightness', lighting.brightness.toString());

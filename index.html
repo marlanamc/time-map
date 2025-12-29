@@ -35,70 +35,50 @@
     <script>
         (function () {
             try {
-                var storageKey = "gardenFence.theme";
-                var legacyKey = "visionboard_data";
-
-                var theme = localStorage.getItem(storageKey);
-                if (!theme) {
-                    var legacy = localStorage.getItem(legacyKey);
-                    if (legacy) {
-                        try {
-                            var parsed = JSON.parse(legacy);
-                            theme = parsed && parsed.preferences && parsed.preferences.theme;
-                        } catch (e) {
-                            // no-op
-                        }
-                    }
-                }
-
-                var isNight = theme === "night" || theme === "dark";
-                var isDay = theme === "day" || theme === "light";
-                if (!isNight && !isDay) {
-                    isNight = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-                }
-
                 var root = document.documentElement;
-                root.classList.toggle("night-garden", isNight);
-                root.style.colorScheme = isNight ? "dark" : "light";
+
+                // Apply time-of-day class to html element immediately (no flash!)
+                var now = new Date();
+                var hour = now.getHours();
+                var timeOfDay = "night";
+                if (hour >= 5 && hour < 7) timeOfDay = "dawn";
+                else if (hour >= 7 && hour < 12) timeOfDay = "morning";
+                else if (hour >= 12 && hour < 17) timeOfDay = "afternoon";
+                else if (hour >= 17 && hour < 20) timeOfDay = "evening"; // Sunset phase ends at 8 PM
+
+                // Apply night-garden class only for actual night time
+                var isNightTime = timeOfDay === "night";
+                // Set initial background color to transparent to allow garden-background to show
+                root.style.backgroundColor = "transparent";
+                root.classList.toggle("night-garden", isNightTime);
+                root.style.colorScheme = isNightTime ? "dark" : "light";
 
                 var meta = document.querySelector('meta[name="theme-color"]');
-                if (meta) meta.setAttribute("content", isNight ? "#0A1A2E" : "#E8F4F8");
+                if (meta) {
+                    // Set theme color based on time of day
+                    var themeColors = {
+                        dawn: "#E8C8D8",
+                        morning: "#87CEEB",
+                        afternoon: "#4A90E2",
+                        evening: "#FF8C42",
+                        night: "#0A1A2E"
+                    };
+                    meta.setAttribute("content", themeColors[timeOfDay] || "#E8F4F8");
+                }
 
-                // Apply time-of-day and season classes immediately to prevent flash
-                (function applyTimeClasses() {
-                    var body = document.body;
-                    if (!body) {
-                        // Body doesn't exist yet, try on next tick
-                        if (document.readyState === "loading") {
-                            document.addEventListener("DOMContentLoaded", applyTimeClasses);
-                        } else {
-                            setTimeout(applyTimeClasses, 0);
-                        }
-                        return;
-                    }
+                root.classList.remove("time-dawn", "time-morning", "time-afternoon", "time-evening", "time-night");
+                root.classList.add("time-" + timeOfDay);
 
-                    var now = new Date();
-                    var hour = now.getHours();
-                    var timeOfDay = "night";
-                    if (hour >= 5 && hour < 7) timeOfDay = "dawn";
-                    else if (hour >= 7 && hour < 12) timeOfDay = "morning";
-                    else if (hour >= 12 && hour < 17) timeOfDay = "afternoon";
-                    else if (hour >= 17 && hour < 20) timeOfDay = "evening";
+                // Apply season class to html element
+                var month = now.getMonth();
+                var season = "spring";
+                if (month >= 2 && month < 5) season = "spring";
+                else if (month >= 5 && month < 8) season = "summer";
+                else if (month >= 8 && month < 11) season = "fall";
+                else season = "winter";
 
-                    body.classList.remove("time-dawn", "time-morning", "time-afternoon", "time-evening", "time-night");
-                    body.classList.add("time-" + timeOfDay);
-
-                    // Apply season class
-                    var month = now.getMonth();
-                    var season = "spring";
-                    if (month >= 2 && month < 5) season = "spring";
-                    else if (month >= 5 && month < 8) season = "summer";
-                    else if (month >= 8 && month < 11) season = "fall";
-                    else season = "winter";
-
-                    body.classList.remove("season-spring", "season-summer", "season-fall", "season-winter");
-                    body.classList.add("season-" + season);
-                })();
+                root.classList.remove("season-spring", "season-summer", "season-fall", "season-winter");
+                root.classList.add("season-" + season);
             } catch (e) {
                 // no-op
             }
@@ -109,6 +89,8 @@
     <link rel="stylesheet" href="styles/dayView/cards.css" />
     <link rel="stylesheet" href="styles/dayView/drag.css" />
     <link rel="stylesheet" href="styles/dayView/responsive.css" />
+    <link rel="stylesheet" href="styles/dayView/simple.css" />
+    <link rel="stylesheet" href="styles/dayView/planner.css" />
     <link rel="stylesheet" href="styles/mobile/home.css" />
 </head>
 
@@ -117,8 +99,7 @@
     <div class="garden-background" id="gardenBackground" aria-hidden="true">
         <div class="garden-sky" id="gardenSky"></div>
         <div class="garden-backdrop" id="gardenBackdrop"></div>
-        <div class="garden-midground" id="gardenMidground"></div>
-        <canvas class="garden-effects" id="gardenEffects" aria-hidden="true"></canvas>
+        <div id="gardenMidground" class="garden-midground"></div>
     </div>
 
     <!-- Celestial Bodies (Sun & Moon) -->
@@ -276,10 +257,10 @@
                         <span class="sound-icon" id="soundIcon">🔇</span>
                         <span class="sound-label">Garden Sounds</span>
                     </button>
-                    <div class="sound-volume-container" id="soundVolumeContainer" style="display: none;">
-                        <input type="range" id="soundVolume" min="0" max="100" value="50" aria-label="Sound volume"
-                            class="sound-slider" />
-                        <span class="volume-label" id="volumeLabel">50%</span>
+                    <!-- Garden Sound Engine -->
+                    <div id="soundVolumeContainer" class="sound-volume-container">
+                        <span id="volumeLabel">50%</span>
+                        <input type="range" id="soundVolume" min="0" max="100" value="50">
                     </div>
                 </div>
             </div>
@@ -764,6 +745,9 @@
             <span class="mobile-tab-label">Year</span>
         </button>
     </nav>
+
+    <!-- Global Garden Effects Overlay (Particles, Butterflies, Petals) -->
+    <canvas id="gardenEffects" class="garden-effects-overlay"></canvas>
 
     <script src="env.js"></script>
     <script src="dist/app.js"></script>

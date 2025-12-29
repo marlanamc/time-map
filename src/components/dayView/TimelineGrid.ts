@@ -1,4 +1,3 @@
-import type { TimeSlot } from "./types";
 import { TimeSlotCalculator } from "./TimeSlotCalculator";
 
 export class TimelineGrid {

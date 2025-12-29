@@ -138,7 +138,7 @@ export class SoundManager {
     // Start new sound at 0 volume
     toSound.volume = 0;
     toSound.loop = true;
-    await toSound.play().catch(() => {});
+    await toSound.play().catch(() => { });
 
     // Crossfade
     const steps = 50;
@@ -208,7 +208,7 @@ export class SoundManager {
   /**
    * Ensure ambience is loaded
    */
-  private async ensureAmbienceLoaded(name: string, timeOfDay: TimeOfDay, season: Season): Promise<void> {
+  private async ensureAmbienceLoaded(name: string, _timeOfDay: TimeOfDay, _season: Season): Promise<void> {
     if (this.loadedSounds.has(name)) return;
 
     // In production, load actual files from /public/assets/garden/sounds/
@@ -248,7 +248,7 @@ export class SoundManager {
    * Stop all sounds
    */
   public stopAllSounds(): void {
-    this.sounds.forEach((sound, name) => {
+    this.sounds.forEach((_, name) => {
       this.stop(name);
     });
     this.currentAmbience = undefined;

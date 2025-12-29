@@ -12,6 +12,7 @@
 
 import { dirtyTracker } from './DirtyTracker';
 import { SupabaseService } from './SupabaseService';
+// @ts-ignore
 import DB, { DB_STORES } from '../db';
 
 class BatchSaveService {
@@ -115,7 +116,7 @@ class BatchSaveService {
       const goals = await Promise.all(goalsPromises);
 
       // Filter out null/undefined
-      const validGoals = goals.filter(g => g !== undefined && g !== null);
+      const validGoals = goals.filter((g: any) => g !== undefined && g !== null);
 
       if (validGoals.length === 0) return;
 
@@ -123,7 +124,7 @@ class BatchSaveService {
       await SupabaseService.saveGoals(validGoals);
 
       // Mark all as clean
-      validGoals.forEach(goal => {
+      validGoals.forEach((goal: any) => {
         dirtyTracker.markClean('goal', goal.id);
       });
 
@@ -147,7 +148,7 @@ class BatchSaveService {
       const entriesPromises = dirtyEntryIds.map(id => DB.get(DB_STORES.BRAIN_DUMP, id));
       const entries = await Promise.all(entriesPromises);
 
-      const validEntries = entries.filter(e => e !== undefined && e !== null);
+      const validEntries = entries.filter((e: any) => e !== undefined && e !== null);
 
       if (validEntries.length === 0) return;
 
@@ -155,7 +156,7 @@ class BatchSaveService {
       await SupabaseService.saveBrainDumpBatch(validEntries);
 
       // Mark all as clean
-      validEntries.forEach(entry => {
+      validEntries.forEach((entry: any) => {
         dirtyTracker.markClean('brainDump', entry.id);
       });
 

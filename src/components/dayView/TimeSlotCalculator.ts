@@ -21,6 +21,10 @@ export class TimeSlotCalculator {
     this.snapInterval = snapInterval;
   }
 
+  getPlotRangeMin(): number {
+    return this.plotRangeMin;
+  }
+
   /**
    * Parse time string (HH:MM) to minutes from midnight
    */

@@ -1,4 +1,4 @@
-import type { DragData, DragOptions, DropZoneConfig, Command, UpdateGoalTimeCommand } from "./types";
+import type { DragData, DragOptions, DropZoneConfig, Command } from "./types";
 
 interface DragState {
   data: DragData;
@@ -22,7 +22,6 @@ export class DragDropManager {
 
   private longPressTimer: ReturnType<typeof setTimeout> | null = null;
   private dragThresholdPx: number;
-  private suppressClickUntil: number = 0;
 
   // Bound event handlers for cleanup
   private boundHandlers: Map<string, EventListener> = new Map();
@@ -154,7 +153,7 @@ export class DragDropManager {
   cancel(): void {
     if (!this.dragState) return;
 
-    this.endDrag(false);
+    this.endDrag();
   }
 
   /**
@@ -332,15 +331,15 @@ export class DragDropManager {
       // Valid drop
       dropZone.onDrop(this.dragState.data, e.clientX, e.clientY);
       this.options.onDragEnd?.(this.dragState.data, e.clientX, e.clientY);
-      this.endDrag(true);
+      this.endDrag();
     } else {
       // Invalid drop - cancel
       this.options.onDragCancel?.(this.dragState.data);
-      this.endDrag(false);
+      this.endDrag();
     }
   }
 
-  private endDrag(success: boolean): void {
+  private endDrag(): void {
     if (!this.dragState) return;
 
     // Remove ghost
@@ -360,9 +359,6 @@ export class DragDropManager {
 
     // Clear state
     this.dragState = null;
-
-    // Suppress clicks for a short time (prevents accidental clicks after drag)
-    this.suppressClickUntil = Date.now() + 300;
   }
 
   // --- Private Methods: Legacy (Fallback) ---
@@ -394,7 +390,7 @@ export class DragDropManager {
     });
 
     element.addEventListener("dragend", () => {
-      this.endDrag(false);
+      this.endDrag();
     });
   }
 

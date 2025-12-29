@@ -4,6 +4,8 @@ import { TimeSlotCalculator } from "./TimeSlotCalculator";
 import { CardComponent } from "./CardComponent";
 import { TimelineGrid } from "./TimelineGrid";
 import { DayViewRenderer } from "./DayViewRenderer";
+import { SimpleDayViewRenderer } from "./SimpleDayViewRenderer";
+import { PlannerDayViewRenderer } from "./PlannerDayViewRenderer";
 import { DragDropManager } from "./DragDropManager";
 
 // This will be injected from app.ts
@@ -16,13 +18,14 @@ interface AppConfig {
 export class DayViewController {
   private container: HTMLElement;
   private callbacks: DayViewCallbacks;
-  private config: AppConfig;
 
   // Core components
   private calculator: TimeSlotCalculator;
   private cardComponent: CardComponent;
   private timelineGrid: TimelineGrid;
   private renderer: DayViewRenderer;
+  private simpleRenderer: SimpleDayViewRenderer;
+  private plannerRenderer: PlannerDayViewRenderer;
   private dragDropManager: DragDropManager;
 
   // State
@@ -39,10 +42,10 @@ export class DayViewController {
   // Options
   private options: DayViewOptions;
 
-  constructor(container: HTMLElement, callbacks: DayViewCallbacks, config: AppConfig, options: Partial<DayViewOptions> = {}) {
+  constructor(container: HTMLElement, callbacks: DayViewCallbacks, _config: AppConfig, options: Partial<DayViewOptions> = {}) {
     this.container = container;
     this.callbacks = callbacks;
-    this.config = config;
+    // this.config = config;
     this.boundHandleClick = (e: Event) => this.handleClick(e);
     this.boundHandleKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
 
@@ -68,15 +71,26 @@ export class DayViewController {
       this.options.snapInterval,
     );
 
-    this.cardComponent = new CardComponent(config);
+    this.cardComponent = new CardComponent(_config);
     this.timelineGrid = new TimelineGrid(this.calculator);
 
     this.renderer = new DayViewRenderer(
       container,
       this.calculator,
       this.cardComponent,
-      this.timelineGrid,
-      callbacks,
+      this.timelineGrid
+    );
+
+    this.simpleRenderer = new SimpleDayViewRenderer(
+      container,
+      this.cardComponent
+    );
+
+    this.plannerRenderer = new PlannerDayViewRenderer(
+      container,
+      this.cardComponent,
+      this.calculator,
+      this.timelineGrid
     );
 
     this.dragDropManager = new DragDropManager({
@@ -146,12 +160,42 @@ export class DayViewController {
 
     if (!this.isMounted) {
       // Initial render
-      this.renderer.renderInitial(date, goals);
+      this.renderCurrent();
       this.setupDragAndDrop();
     } else {
       // Update render
-      this.renderer.update(date, goals);
+      this.updateCurrent();
       this.setupDragAndDrop();
+    }
+  }
+
+  /**
+   * Render using current style
+   */
+  private renderCurrent(): void {
+    if (!this.currentDate) return;
+    const style = this.callbacks.onGetPreference?.("dayViewStyle");
+    if (style === "simple") {
+      this.simpleRenderer.renderInitial(this.currentDate, this.currentGoals);
+    } else if (style === "planner") {
+      this.plannerRenderer.renderInitial(this.currentDate, this.currentGoals);
+    } else {
+      this.renderer.renderInitial(this.currentDate, this.currentGoals);
+    }
+  }
+
+  /**
+   * Update using current style
+   */
+  private updateCurrent(): void {
+    if (!this.currentDate) return;
+    const style = this.callbacks.onGetPreference?.("dayViewStyle");
+    if (style === "simple") {
+      this.simpleRenderer.update(this.currentDate, this.currentGoals);
+    } else if (style === "planner") {
+      this.plannerRenderer.update(this.currentDate, this.currentGoals);
+    } else {
+      this.renderer.update(this.currentDate, this.currentGoals);
     }
   }
 
@@ -160,7 +204,7 @@ export class DayViewController {
    */
   render(): void {
     if (!this.currentDate) return;
-    this.renderer.renderInitial(this.currentDate, this.currentGoals);
+    this.renderCurrent();
     this.setupDragAndDrop();
   }
 
@@ -168,7 +212,14 @@ export class DayViewController {
    * Update a single goal card
    */
   updateGoal(goalId: string, goal: Goal): void {
-    this.renderer.updateCard(goalId, goal);
+    const style = this.callbacks.onGetPreference?.("dayViewStyle");
+    if (style === "simple") {
+      this.simpleRenderer.updateCard(goalId, goal);
+    } else if (style === "planner") {
+      this.plannerRenderer.updateCard(goalId, goal);
+    } else {
+      this.renderer.updateCard(goalId, goal);
+    }
 
     // Update currentGoals
     const index = this.currentGoals.findIndex((g) => g.id === goalId);
@@ -205,8 +256,7 @@ export class DayViewController {
       this.container,
       this.calculator,
       this.cardComponent,
-      this.timelineGrid,
-      this.callbacks,
+      this.timelineGrid
     );
 
     this.render();
@@ -227,8 +277,8 @@ export class DayViewController {
       this.dragDropManager.enableDraggable(card, {
         goalId,
         type: "seed",
-        originalStartTime: goal.startTime,
-        originalEndTime: goal.endTime,
+        originalStartTime: goal.startTime ?? undefined,
+        originalEndTime: goal.endTime ?? undefined,
       });
     });
 
@@ -244,8 +294,8 @@ export class DayViewController {
       this.dragDropManager.enableDraggable(card, {
         goalId,
         type: "planter",
-        originalStartTime: goal.startTime,
-        originalEndTime: goal.endTime,
+        originalStartTime: goal.startTime ?? undefined,
+        originalEndTime: goal.endTime ?? undefined,
       });
     });
 
@@ -308,6 +358,42 @@ export class DayViewController {
       return;
     }
 
+    // --- Planner View Specific Actions ---
+
+    // Sidebar Add Task
+    if (target.classList.contains("btn-planner-add")) {
+      this.callbacks.onPlantSomething?.();
+      return;
+    }
+
+    // Sidebar Navigation
+    if (target.classList.contains("btn-planner-prev")) {
+      this.callbacks.onNavigate?.(-1);
+      return;
+    }
+    if (target.classList.contains("btn-planner-next")) {
+      this.callbacks.onNavigate?.(1);
+      return;
+    }
+
+    // Remove from timeline (clear startTime/endTime)
+    const removeBtn = target.closest(".btn-planner-remove") as HTMLElement;
+    if (removeBtn) {
+      e.stopPropagation();
+      const goalId = removeBtn.dataset.goalId;
+      if (goalId) {
+        const goal = this.currentGoals.find((g) => g.id === goalId);
+        if (goal) {
+          this.callbacks.onGoalUpdate(goalId, {
+            startTime: undefined,
+            endTime: undefined
+          });
+          this.callbacks.onShowToast?.("💨", "Removed from timeline");
+        }
+      }
+      return;
+    }
+
     // Note: Removed "Plant something" button - users can add tasks via the main add button
   }
 
@@ -360,12 +446,12 @@ export class DayViewController {
     document.body.classList.add(`is-dragging-${data.type}`);
   }
 
-  private handleDragEnd(data: DragData, clientX: number, clientY: number): void {
+  private handleDragEnd(data: DragData, _clientX: number, _clientY: number): void {
     // Remove body class
     document.body.classList.remove(`is-dragging-${data.type}`);
   }
 
-  private handleDrop(data: DragData, clientX: number, clientY: number): void {
+  private handleDrop(data: DragData, _clientX: number, clientY: number): void {
     if (!this.currentDate) return;
 
     const dayBed = this.container.querySelector(".day-timeline") as HTMLElement;
@@ -374,13 +460,13 @@ export class DayViewController {
     const rect = dayBed.getBoundingClientRect();
     const y = clientY - rect.top;
 
-    // Calculate new time
-    const minutes = this.calculator.yToMinutes(y, rect.height);
-    const newStartTime = this.calculator.toTimeString(minutes);
-
     // Get goal
     const goal = this.currentGoals.find((g) => g.id === data.goalId);
     if (!goal) return;
+
+    // Calculate new time
+    const newStartMin = this.calculator.yToMinutes(y, rect.height);
+    const newStartTime = this.calculator.toTimeString(newStartMin);
 
     // Calculate duration
     const prevStartMin = this.calculator.parseTimeToMinutes(goal.startTime);
@@ -389,7 +475,7 @@ export class DayViewController {
       prevStartMin !== null && prevEndMin !== null && prevEndMin > prevStartMin ? prevEndMin - prevStartMin : 60;
 
     const newEndTime = this.calculator.toTimeString(
-      Math.min(minutes + durationMin, this.options.timeWindowEnd ?? 1320),
+      Math.min(newStartMin + durationMin, this.options.timeWindowEnd ?? 1320),
     );
 
     // Create command for undo/redo
@@ -405,7 +491,7 @@ export class DayViewController {
       newDueDate: this.currentDate.toISOString(),
       newMonth: this.currentDate.getMonth(),
       newYear: this.currentDate.getFullYear(),
-      description: `Schedule goal at ${this.calculator.format12h(minutes)}`,
+      description: `Schedule goal at ${this.calculator.format12h(newStartMin)}`,
       execute: () => {
         this.callbacks.onGoalUpdate(data.goalId, {
           startTime: newStartTime,
@@ -429,7 +515,7 @@ export class DayViewController {
     this.dragDropManager.executeCommand(command);
 
     // Show toast
-    this.callbacks.onShowToast?.("🌱", `Planted at ${this.calculator.format12h(minutes)}`);
+    this.callbacks.onShowToast?.("🌱", `Planted at ${this.calculator.format12h(newStartMin)}`);
   }
 
   private isMobileViewport(): boolean {

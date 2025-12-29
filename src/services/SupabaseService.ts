@@ -117,7 +117,7 @@ export const SupabaseService = {
         return {
             goals,
             brainDump,
-            preferences,
+            preferences: preferences || undefined,
             achievements,
             weeklyReviews,
             bodyDoubleHistory
@@ -141,7 +141,7 @@ export const SupabaseService = {
         if (error) throw error;
 
         // Transform snake_case to camelCase and parse JSON fields if needed
-        const goals = data.map(g => ({
+        const goals = data.map((g: any) => ({
             ...g,
             level: g.level || 'milestone',
             createdAt: g.created_at,
@@ -260,7 +260,7 @@ export const SupabaseService = {
 
         if (error) throw error;
 
-        return data.map(b => ({
+        return data.map((b: any) => ({
             id: b.id,
             text: b.text,
             createdAt: b.created_at,
@@ -390,7 +390,7 @@ export const SupabaseService = {
         const { data, error } = await supabase.from('weekly_reviews').select('*');
         if (error) throw error;
 
-        return data.map(w => ({
+        return data.map((w: any) => ({
             id: w.id,
             weekStart: w.week_start,
             weekEnd: w.week_end,
@@ -435,7 +435,7 @@ export const SupabaseService = {
         const { data, error } = await supabase.from('body_double_sessions').select('*');
         if (error) throw error;
 
-        return data.map(s => ({
+        return data.map((s: any) => ({
             id: s.id,
             duration: s.duration,
             startedAt: s.started_at,

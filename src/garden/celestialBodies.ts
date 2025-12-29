@@ -93,12 +93,20 @@ export class CelestialBodies {
     // Progress across the sky (0 = east, 1 = west)
     const progress = hoursActive / 12;
 
-    // Horizontal position (10% to 90% of width)
-    const xPercent = 10 + (progress * 80);
+    // Horizontal position - keep to right side to avoid left-aligned content
+    // Position from 65% to 90% of width (right side of screen)
+    const xPercent = 65 + (progress * 25);
 
-    // Vertical position (create arc)
-    // Use parabolic curve: highest at midpoint
-    const yPercent = 70 - (position * 0.6); // Top of sky is 10%, bottom is 70%
+    // Vertical position - keep in upper sky to avoid content overlap
+    // Create arc: start at 25% from top, peak at 12% (zenith), end at 25%
+    // Using inverted parabola: y = a(x-h)² + k where h=0.5 (midpoint)
+    const normalizedProgress = progress; // 0 to 1
+    const arcPeak = 12; // Highest point (zenith) at 12% from top
+    const arcBase = 25; // Starting/ending point at 25% from top
+    const arcRange = arcBase - arcPeak; // 13% range
+    // Parabolic arc: y = base - (range * 4 * x * (1-x))
+    // This creates a smooth arc from base -> peak -> base
+    const yPercent = arcBase - (arcRange * 4 * normalizedProgress * (1 - normalizedProgress));
 
     const scale = 0.8 + (position / 100) * 0.4; // Scale from 0.8 to 1.2
 

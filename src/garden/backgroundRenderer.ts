@@ -106,7 +106,7 @@ export class BackgroundRenderer {
 
     // Determine which background to load
     const backgroundKey = `${season}-${timeOfDay}`;
-    const backgroundPath = `/assets/garden/backgrounds/${backgroundKey}.jpg`;
+    // const backgroundPath = `/assets/garden/backgrounds/${backgroundKey}.jpg`;
 
     // Check if we should load this background
     // For now, we'll use CSS gradients as placeholders

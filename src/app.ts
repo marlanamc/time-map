@@ -490,7 +490,6 @@ const ND_CONFIG = {
     sage: { label: "Garden Green", emoji: "🌿", color: "#5A9B8D" },
     amber: { label: "Sunlight", emoji: "☀️", color: "#F0B429" },
     clay: { label: "Warm Earth", emoji: "🧱", color: "#C06C52" },
-    violet: { label: "Bright Petal", emoji: "🌸", color: "#E59AA0" },
   },
 
   // Body doubling / coworking timer options
@@ -909,7 +908,7 @@ const State: AppState & {
         },
         // Neurodivergent accessibility preferences
         nd: {
-          accentTheme: "sage", // teal, coral, sage, amber, clay, violet
+          accentTheme: "sage", // teal, coral, sage, amber, clay
           breakReminder: "gentle", // pomodoro, gentle, hyperfocus, off
           feedbackStyle: "moderate", // subtle, moderate, celebration, minimal
           maxVisibleTasks: "normal", // overwhelmed, low_energy, normal, high_energy
@@ -941,11 +940,25 @@ const State: AppState & {
   migrateDataIfNeeded(): void {
     // Migrate old data structures if needed
     if (!this.data) return;
+    let changed = false;
+
     if (!this.data.version || this.data.version < 2) {
       this.data.weeklyReviews = this.data.weeklyReviews || [];
       this.data.analytics =
         this.data.analytics || this.getDefaultData().analytics;
       this.data.version = 2;
+      changed = true;
+    }
+
+    // Migrate violet accent theme to amber (golden hour theme)
+    // Check as string since violet is no longer in the type
+    const accentTheme = this.data.preferences?.nd?.accentTheme;
+    if (accentTheme === ("violet" as any)) {
+      this.data.preferences.nd.accentTheme = "amber";
+      changed = true;
+    }
+
+    if (changed) {
       this.save();
     }
   },
@@ -4126,7 +4139,7 @@ const UI = {
     if (this.elements.mobileGoalsByLevel) {
       const today = new Date();
       const todayGoals = Goals.getForDate(today).filter(g => g.status !== 'done');
-      
+
       // Organize by level
       const intentions = todayGoals.filter(g => g.level === 'intention');
       const focus = todayGoals.filter(g => g.level === 'focus');
@@ -4581,6 +4594,12 @@ const UI = {
           onPlantSomething: () => {
             this.showQuickAdd();
           },
+          onGetPreference: (key: string) => {
+            return (State.data?.preferences.nd as any)[key];
+          },
+          onNavigate: (direction: number) => {
+            State.navigate(direction);
+          },
         },
         CONFIG,
       );
@@ -4591,6 +4610,37 @@ const UI = {
 
     // Set goals and render
     this.dayViewController.setGoals(date, allGoals);
+
+    // Add style toggle if not present
+    this.ensureDayViewStyleToggle();
+  },
+
+  ensureDayViewStyleToggle() {
+    const header = document.querySelector(".day-view-header");
+    if (!header || header.querySelector(".day-style-toggle")) return;
+
+    const toggle = document.createElement("div");
+    toggle.className = "day-style-toggle";
+    const currentStyle = State.data?.preferences.nd.dayViewStyle || "timeline";
+
+    toggle.innerHTML = `
+      <button class="btn btn-xs ${currentStyle === "timeline" ? "active" : ""}" data-style="timeline">Timeline</button>
+      <button class="btn btn-xs ${currentStyle === "simple" ? "active" : ""}" data-style="simple">Simple</button>
+      <button class="btn btn-xs ${currentStyle === "planner" ? "active" : ""}" data-style="planner">Planner</button>
+    `;
+
+    toggle.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const style = (btn as HTMLElement).dataset.style as any;
+        if (State.data) {
+          State.data.preferences.nd.dayViewStyle = style;
+          State.save();
+          this.renderDayView();
+        }
+      });
+    });
+
+    header.appendChild(toggle);
   },
 
   // Render a single goal card for day view

@@ -5,7 +5,7 @@ export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
 export type GoalStatus = "not-started" | "in-progress" | "done" | "blocked";
 export type Priority = "low" | "medium" | "high" | "urgent";
 export type Category = "career" | "health" | "finance" | "personal" | "creative" | null;
-export type AccentTheme = "teal" | "coral" | "sage" | "amber" | "clay" | "violet";
+export type AccentTheme = "teal" | "coral" | "sage" | "amber" | "clay";
 export type BreakReminder = "pomodoro" | "gentle" | "hyperfocus" | "off";
 export type FeedbackStyle = "subtle" | "moderate" | "celebration" | "minimal";
 export type MaxVisibleTasks = "overwhelmed" | "low_energy" | "normal" | "high_energy";
@@ -174,6 +174,7 @@ export interface NDPreferences {
   taskStartReminders: boolean;
   allowPartialProgress: boolean;
   reduceEmojis: boolean;
+  dayViewStyle?: 'timeline' | 'simple' | 'planner';
 }
 
 export interface Preferences {

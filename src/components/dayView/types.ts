@@ -21,6 +21,8 @@ export interface DayViewCallbacks {
   onPlantSomething?: () => void;
   onShowToast?: (emoji: string, message: string) => void;
   onCelebrate?: (emoji: string, title: string, message: string) => void;
+  onGetPreference?: (key: string) => any;
+  onNavigate?: (direction: number) => void;
 }
 
 export interface TimedGoal {

@@ -199,7 +199,7 @@ export interface LightingValues {
   shadowLength: number;
 }
 
-export function getLightingForTimeOfDay(timeOfDay: TimeOfDay, sunPosition: number): LightingValues {
+export function getLightingForTimeOfDay(timeOfDay: TimeOfDay, _sunPosition: number): LightingValues {
   const lighting: Record<TimeOfDay, LightingValues> = {
     dawn: {
       brightness: 0.7,
@@ -245,7 +245,7 @@ export function getLightingForTimeOfDay(timeOfDay: TimeOfDay, sunPosition: numbe
  * Calculate shadow angle based on sun position
  * Returns angle in degrees (0-360)
  */
-export function getShadowAngle(hour: number, sunPosition: number): number {
+export function getShadowAngle(hour: number, _sunPosition: number): number {
   // Morning: shadows point west (270°)
   // Noon: shadows point north (0°)
   // Evening: shadows point east (90°)
