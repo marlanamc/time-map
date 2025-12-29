@@ -41,12 +41,8 @@ export const ThemeManager = {
     const isNight = theme === "night";
     const root = document.documentElement;
 
-    // Only apply if the theme is actually changing (prevents flash on page load)
-    const currentlyNight = root.classList.contains("night-garden");
-    if (currentlyNight === isNight) {
-      return; // Theme is already applied, no need to toggle
-    }
-
+    // Force toggle every time to ensure state consistency
+    document.body.classList.toggle("night-garden", isNight);
     root.classList.toggle("night-garden", isNight);
     root.style.colorScheme = isNight ? "dark" : "light";
 

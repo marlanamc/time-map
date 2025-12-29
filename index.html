@@ -37,7 +37,13 @@
             try {
                 var root = document.documentElement;
 
-                // Apply time-of-day class to html element immediately (no flash!)
+                // Check for saved preference first
+                var savedTheme = null;
+                try {
+                    savedTheme = localStorage.getItem("gardenFence.theme");
+                } catch (e) { }
+
+                // Determine time of day
                 var now = new Date();
                 var hour = now.getHours();
                 var timeOfDay = "night";
@@ -46,8 +52,12 @@
                 else if (hour >= 12 && hour < 17) timeOfDay = "afternoon";
                 else if (hour >= 17 && hour < 20) timeOfDay = "evening"; // Sunset phase ends at 8 PM
 
-                // Apply night-garden class only for actual night time
-                var isNightTime = timeOfDay === "night";
+                // Apply night-garden class - saved preference overrides time of day
+                var isNightTime;
+                if (savedTheme === "day") isNightTime = false;
+                else if (savedTheme === "night") isNightTime = true;
+                else isNightTime = (timeOfDay === "night");
+
                 // Set initial background color to transparent to allow garden-background to show
                 root.style.backgroundColor = "transparent";
                 root.classList.toggle("night-garden", isNightTime);
@@ -63,7 +73,12 @@
                         evening: "#FF8C42",
                         night: "#0A1A2E"
                     };
-                    meta.setAttribute("content", themeColors[timeOfDay] || "#E8F4F8");
+                    // Override meta color if forced day mode during night
+                    if (!isNightTime && timeOfDay === "night") {
+                        meta.setAttribute("content", "#E8F4F8");
+                    } else {
+                        meta.setAttribute("content", themeColors[timeOfDay] || "#E8F4F8");
+                    }
                 }
 
                 root.classList.remove("time-dawn", "time-morning", "time-afternoon", "time-evening", "time-night");

@@ -53,7 +53,7 @@
   /* Day land */
   .day-land {
     padding: 1.25rem 1rem;
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
   }
 
   /* Seed tray */
@@ -91,7 +91,7 @@
   .day-goal-card {
     gap: 0.75rem;
     padding: 0.875rem 1rem;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
   }
 
   .day-goal-checkbox {
@@ -300,7 +300,8 @@
   }
 
   .day-goal-desc {
-    display: none; /* Hide descriptions in landscape to save space */
+    display: none;
+    /* Hide descriptions in landscape to save space */
   }
 
   .day-goal-meta {
@@ -314,6 +315,7 @@
    ============================================ */
 
 @media (hover: none) and (pointer: coarse) {
+
   /* Larger touch targets */
   .day-goal-checkbox {
     width: 28px;
@@ -355,7 +357,8 @@
   /* Larger resize handles */
   .planter-resize-handle {
     height: 24px;
-    opacity: 1; /* Always visible on touch */
+    opacity: 1;
+    /* Always visible on touch */
   }
 
   .planter-resize-handle::before {
@@ -376,7 +379,9 @@
    HIGH DPI / RETINA DISPLAYS
    ============================================ */
 
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+
   /* Sharper borders */
   .day-goal-card {
     border-width: 0.5px;
@@ -451,6 +456,7 @@
    ============================================ */
 
 @media (prefers-color-scheme: dark) {
+
   /* Ensure night garden styles are applied in dark mode */
   body:not(.day-mode) {
     /* Styles already handled by .night-garden in other files */
@@ -481,6 +487,7 @@
    ============================================ */
 
 @media (prefers-reduced-data: reduce) {
+
   /* Disable complex backgrounds */
   .day-land::before,
   .day-bed-canvas::before,
@@ -533,6 +540,7 @@
   }
 
   @container dayview (max-width: 600px) {
+
     .seed-tray-grid,
     .compost-grid {
       grid-template-columns: 1fr;
@@ -544,6 +552,7 @@
   }
 
   @container dayview (min-width: 600px) and (max-width: 900px) {
+
     .seed-tray-grid,
     .compost-grid {
       grid-template-columns: repeat(2, 1fr);
@@ -551,6 +560,7 @@
   }
 
   @container dayview (min-width: 900px) {
+
     .seed-tray-grid,
     .compost-grid {
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

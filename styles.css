@@ -102,11 +102,11 @@
     --space-10: 40px;
     --space-12: 48px;
 
-    /* Border radius */
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 20px;
+    /* Border radius - Softened */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
     --radius-full: 9999px;
 
     /* Transitions */
@@ -117,12 +117,12 @@
     --duration-slow: 400ms;
 
     /* Shadows */
-    --shadow-xs: 0 1px 2px rgba(33, 55, 44, 0.16);
-    --shadow-sm: 0 2px 8px rgba(33, 55, 44, 0.14);
-    --shadow-md: 0 8px 18px rgba(33, 55, 44, 0.14);
-    --shadow-lg: 0 14px 30px rgba(33, 55, 44, 0.16);
-    --shadow-xl:
-        0 26px 60px rgba(33, 55, 44, 0.18);
+    /* Shadows - Softened */
+    --shadow-xs: 0 2px 4px rgba(33, 55, 44, 0.12);
+    --shadow-sm: 0 4px 12px rgba(33, 55, 44, 0.12);
+    --shadow-md: 0 12px 24px rgba(33, 55, 44, 0.12);
+    --shadow-lg: 0 20px 40px rgba(33, 55, 44, 0.14);
+    --shadow-xl: 0 32px 80px rgba(33, 55, 44, 0.16);
     --shadow-glow: 0 0 24px rgba(111, 155, 134, 0.22);
     --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.16);
 
@@ -391,11 +391,11 @@ body {
     --text-ghost: #8A9AA8;
     /* lighter void - WCAG AA compliant (was #334155) */
 
-    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.6);
-    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.7);
-    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.75);
-    --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.8);
-    --shadow-xl: 0 32px 72px rgba(0, 0, 0, 0.85);
+    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.6);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.7);
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.75);
+    --shadow-xl: 0 36px 90px rgba(0, 0, 0, 0.8);
 
     --shadow-glow: 0 0 28px rgba(240, 180, 65, 0.22);
     /* warm string light glow */
@@ -4134,7 +4134,7 @@ body.is-resizing-planter {
 
 .night-garden .modal {
     background: rgba(10, 22, 18, 0.95);
-    border-color: rgba(140, 183, 217, 0.2);
+    border-color: var(--accent-muted);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -4737,14 +4737,14 @@ body.is-resizing-planter {
     text-align: center;
     padding: var(--space-3);
     background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(180, 106, 74, 0.14);
+    border: 1px solid var(--accent-muted);
     border-radius: var(--radius-md);
     transition: all var(--duration-fast) var(--ease-out);
 }
 
 .night-garden .time-unit {
     background: rgba(7, 17, 14, 0.45);
-    border: 1px solid rgba(140, 183, 217, 0.14);
+    border: 1px solid var(--accent-muted);
 }
 
 .time-unit.highlight {
@@ -9629,9 +9629,9 @@ kbd {
 
 .modal-header {
     padding: var(--space-6);
-    border-bottom: 2px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.12);
+    border-bottom: 2px solid var(--accent-muted);
     background: linear-gradient(to bottom,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.03) 0%,
+            var(--accent-subtle) 0%,
             transparent 100%);
 }
 
@@ -9652,7 +9652,7 @@ kbd {
     left: 0;
     width: 40px;
     height: 3px;
-    background: linear-gradient(90deg, var(--seasonal-accent) 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
     border-radius: 2px;
 }
 
@@ -9660,7 +9660,7 @@ kbd {
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08);
+    background: var(--accent-muted);
     border: none;
     color: var(--text-secondary);
     font-size: 24px;
@@ -9950,7 +9950,7 @@ select:focus {
 
 .modal-title:first-letter,
 .support-panel-title:first-letter {
-    color: var(--seasonal-accent);
+    color: var(--accent);
     font-size: 1.2em;
 }
 

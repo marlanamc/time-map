@@ -11,7 +11,7 @@
   gap: 0.875rem;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(180, 106, 74, 0.15);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 1rem 1.125rem;
   cursor: pointer;
   transition:
@@ -92,8 +92,8 @@
   border-radius: 50%;
   border: 2.5px solid rgba(111, 155, 134, 0.3);
   background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(247, 243, 237, 0.7) 100%);
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(247, 243, 237, 0.7) 100%);
   cursor: pointer;
   flex-shrink: 0;
   display: flex;
@@ -112,8 +112,8 @@
   inset: -6px;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(111, 155, 134, 0.15) 0%,
-    transparent 70%);
+      rgba(111, 155, 134, 0.15) 0%,
+      transparent 70%);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -133,8 +133,8 @@
 
 .day-goal-checkbox.checked {
   background: linear-gradient(135deg,
-    var(--success, #10b981) 0%,
-    var(--sage, #6F9B86) 100%);
+      var(--success, #10b981) 0%,
+      var(--sage, #6F9B86) 100%);
   border-color: var(--success, #10b981);
   box-shadow:
     0 4px 12px rgba(16, 185, 129, 0.3),
@@ -143,8 +143,15 @@
 }
 
 @keyframes checkBounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
 }
 
 .day-goal-checkbox.checked::after {
@@ -161,8 +168,8 @@
 
 .night-garden .day-goal-checkbox {
   background: linear-gradient(135deg,
-    rgba(30, 41, 79, 0.6) 0%,
-    rgba(15, 23, 42, 0.8) 100%);
+      rgba(30, 41, 79, 0.6) 0%,
+      rgba(15, 23, 42, 0.8) 100%);
   border-color: rgba(111, 155, 134, 0.4);
 }
 
@@ -269,7 +276,7 @@
   font-weight: 600;
   padding: 0.25rem 0.5rem;
   background: rgba(111, 155, 134, 0.08);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .day-goal-priority {
@@ -279,7 +286,7 @@
   font-weight: 700;
   text-transform: capitalize;
   padding: 0.25rem 0.5rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .day-goal-priority.priority-high {
@@ -313,10 +320,10 @@
   margin-left: auto;
   border: 1px solid rgba(111, 155, 134, 0.25);
   background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(247, 243, 237, 0.5) 100%);
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(247, 243, 237, 0.5) 100%);
   color: var(--text-secondary, rgba(0, 0, 0, 0.7));
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 700;
@@ -329,8 +336,8 @@
 
 .btn-zen-focus:hover {
   background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(247, 243, 237, 0.8) 100%);
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(247, 243, 237, 0.8) 100%);
   border-color: var(--sage, #6F9B86);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(111, 155, 134, 0.2);
@@ -342,16 +349,16 @@
 
 .night-garden .btn-zen-focus {
   background: linear-gradient(135deg,
-    rgba(30, 41, 79, 0.5) 0%,
-    rgba(15, 23, 42, 0.7) 100%);
+      rgba(30, 41, 79, 0.5) 0%,
+      rgba(15, 23, 42, 0.7) 100%);
   border-color: rgba(140, 183, 217, 0.2);
   color: rgba(234, 246, 240, 0.8);
 }
 
 .night-garden .btn-zen-focus:hover {
   background: linear-gradient(135deg,
-    rgba(30, 41, 79, 0.7) 0%,
-    rgba(15, 23, 42, 0.9) 100%);
+      rgba(30, 41, 79, 0.7) 0%,
+      rgba(15, 23, 42, 0.9) 100%);
   border-color: rgba(140, 183, 217, 0.4);
 }
 
@@ -375,8 +382,8 @@
 .progress-fill-lg {
   height: 100%;
   background: linear-gradient(90deg,
-    var(--sage, #6F9B86) 0%,
-    var(--success, #10b981) 100%);
+      var(--sage, #6F9B86) 0%,
+      var(--success, #10b981) 100%);
   border-radius: 3px;
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -391,15 +398,20 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    transparent 100%);
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%);
   animation: shimmer 2s infinite;
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(200%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
 }
 
 .night-garden .progress-bar-lg {
@@ -428,9 +440,9 @@
   bottom: 0;
   width: 4px;
   background: linear-gradient(180deg,
-    rgba(111, 155, 134, 0.8) 0%,
-    rgba(111, 155, 134, 1) 50%,
-    rgba(111, 155, 134, 0.8) 100%);
+      rgba(111, 155, 134, 0.8) 0%,
+      rgba(111, 155, 134, 1) 50%,
+      rgba(111, 155, 134, 0.8) 100%);
   box-shadow: 0 0 8px rgba(111, 155, 134, 0.4);
 }
 
@@ -451,7 +463,7 @@
   width: calc(((100% - var(--time-gutter)) / var(--lanes)) - 12px);
   min-height: 96px;
   padding: 0.875rem 1rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(180, 106, 74, 0.25);
   border-top: 6px solid var(--earth, #B46A4A);
   background:
@@ -519,9 +531,9 @@
   bottom: 0;
   width: 4px;
   background: linear-gradient(180deg,
-    rgba(16, 185, 129, 0.7) 0%,
-    rgba(16, 185, 129, 1) 50%,
-    rgba(16, 185, 129, 0.7) 100%);
+      rgba(16, 185, 129, 0.7) 0%,
+      rgba(16, 185, 129, 1) 50%,
+      rgba(16, 185, 129, 0.7) 100%);
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
 }
 
@@ -594,6 +606,7 @@
    ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
+
   .day-goal-card,
   .day-goal-checkbox,
   .btn-zen-focus,

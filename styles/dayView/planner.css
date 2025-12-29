@@ -135,9 +135,10 @@
 
 .sidebar-item-time {
     margin-left: auto;
-    font-size: 0.7rem;
-    color: var(--planner-text-muted);
-    font-weight: 600;
+    font-size: 0.75rem;
+    color: #000000;
+    opacity: 0.8;
+    font-weight: 800;
 }
 
 .planner-main {
@@ -161,9 +162,36 @@
     pointer-events: none;
 }
 
+/* Improve visibility of time labels in Planner View */
+.planner-day-view .bed-hour-label {
+    color: #000000;
+    opacity: 1;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+.planner-day-view .bed-hour-line {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    opacity: 0.3;
+}
+
+.planner-day-view .current-time-line {
+    border-top: 2px solid var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+}
+
+.planner-day-view .current-time-dot {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    width: 10px;
+    height: 10px;
+    margin-top: -4px;
+}
+
 .day-goal-card.planner-timed-task {
     position: absolute;
-    left: 10px;
+    left: 70px;
     right: 10px;
     background: var(--bg-surface);
     border-radius: 12px;

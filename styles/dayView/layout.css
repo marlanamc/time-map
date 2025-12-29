@@ -61,18 +61,25 @@
   padding: 1.25rem 1.5rem;
   margin-bottom: 2rem;
   background: linear-gradient(135deg,
-    rgba(255, 193, 7, 0.12) 0%,
-    rgba(255, 152, 0, 0.08) 100%);
+      rgba(255, 193, 7, 0.12) 0%,
+      rgba(255, 152, 0, 0.08) 100%);
   border: 1px solid rgba(255, 193, 7, 0.3);
   border-left: 4px solid rgba(255, 193, 7, 0.7);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   backdrop-filter: blur(12px);
   animation: warningPulse 2s ease-in-out infinite;
 }
 
 @keyframes warningPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(255, 193, 7, 0); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 193, 7, 0);
+  }
 }
 
 .warning-icon {
@@ -82,8 +89,15 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 .warning-text {
@@ -123,7 +137,7 @@
       rgba(255, 255, 255, 0.85) 0%,
       rgba(247, 243, 237, 0.65) 100%);
   border: 1px solid rgba(180, 106, 74, 0.15);
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
   padding: clamp(1.5rem, 3vw, 2.5rem);
   position: relative;
   overflow: hidden;
@@ -176,10 +190,10 @@
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
   background: linear-gradient(135deg,
-    rgba(180, 106, 74, 0.08) 0%,
-    rgba(111, 155, 134, 0.08) 100%);
+      rgba(180, 106, 74, 0.08) 0%,
+      rgba(111, 155, 134, 0.08) 100%);
   border: 1px solid rgba(180, 106, 74, 0.2);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   backdrop-filter: blur(8px);
 }
 
@@ -206,8 +220,8 @@
 
 .night-garden .day-land-fence {
   background: linear-gradient(135deg,
-    rgba(180, 106, 74, 0.15) 0%,
-    rgba(111, 155, 134, 0.12) 100%);
+      rgba(180, 106, 74, 0.15) 0%,
+      rgba(111, 155, 134, 0.12) 100%);
   border-color: rgba(180, 106, 74, 0.25);
 }
 
@@ -222,11 +236,11 @@
 .day-plant-btn {
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg,
-    var(--sage, #6F9B86) 0%,
-    var(--earth, #B46A4A) 100%);
+      var(--sage, #6F9B86) 0%,
+      var(--earth, #B46A4A) 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-weight: 700;
   font-size: 0.9375rem;
   cursor: pointer;
@@ -241,8 +255,8 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    transparent 100%);
+      rgba(255, 255, 255, 0.2) 0%,
+      transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -276,10 +290,10 @@
 
 .day-seed-tray {
   background: linear-gradient(135deg,
-    rgba(111, 155, 134, 0.08) 0%,
-    rgba(111, 155, 134, 0.04) 100%);
+      rgba(111, 155, 134, 0.08) 0%,
+      rgba(111, 155, 134, 0.04) 100%);
   border: 1px solid rgba(111, 155, 134, 0.2);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
@@ -293,8 +307,8 @@
   right: 0;
   height: 3px;
   background: linear-gradient(90deg,
-    var(--sage, #6F9B86) 0%,
-    transparent 100%);
+      var(--sage, #6F9B86) 0%,
+      transparent 100%);
   opacity: 0.6;
 }
 
@@ -336,8 +350,8 @@
 
 .night-garden .day-seed-tray {
   background: linear-gradient(135deg,
-    rgba(111, 155, 134, 0.12) 0%,
-    rgba(111, 155, 134, 0.06) 100%);
+      rgba(111, 155, 134, 0.12) 0%,
+      rgba(111, 155, 134, 0.06) 100%);
   border-color: rgba(111, 155, 134, 0.2);
 }
 
@@ -393,7 +407,7 @@
 .day-bed-canvas {
   position: relative;
   height: clamp(540px, 64vh, 860px);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(111, 155, 134, 0.2);
   --time-gutter: 72px;
   background:
@@ -528,10 +542,10 @@
 .current-time-line {
   height: 2px;
   background: linear-gradient(90deg,
-    rgba(255, 193, 7, 0) 0%,
-    rgba(255, 193, 7, 0.9) 10%,
-    rgba(255, 193, 7, 0.9) 90%,
-    rgba(255, 193, 7, 0) 100%);
+      rgba(255, 193, 7, 0) 0%,
+      rgba(255, 193, 7, 0.9) 10%,
+      rgba(255, 193, 7, 0.9) 90%,
+      rgba(255, 193, 7, 0) 100%);
   position: relative;
   box-shadow:
     0 0 8px rgba(255, 193, 7, 0.6),
@@ -540,8 +554,15 @@
 }
 
 @keyframes timePulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .current-time-dot {
@@ -552,9 +573,9 @@
   width: 12px;
   height: 12px;
   background: radial-gradient(circle,
-    rgba(255, 193, 7, 1) 0%,
-    rgba(255, 193, 7, 0.8) 50%,
-    rgba(255, 193, 7, 0) 100%);
+      rgba(255, 193, 7, 1) 0%,
+      rgba(255, 193, 7, 0.8) 50%,
+      rgba(255, 193, 7, 0) 100%);
   border-radius: 50%;
   box-shadow:
     0 0 12px rgba(255, 193, 7, 0.8),
@@ -563,8 +584,15 @@
 }
 
 @keyframes dotPulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.2); }
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
 }
 
 /* ============================================
@@ -602,10 +630,10 @@
 
 .day-compost {
   background: linear-gradient(135deg,
-    rgba(16, 185, 129, 0.08) 0%,
-    rgba(16, 185, 129, 0.04) 100%);
+      rgba(16, 185, 129, 0.08) 0%,
+      rgba(16, 185, 129, 0.04) 100%);
   border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
@@ -619,8 +647,8 @@
   right: 0;
   height: 3px;
   background: linear-gradient(90deg,
-    var(--success, #10b981) 0%,
-    transparent 100%);
+      var(--success, #10b981) 0%,
+      transparent 100%);
   opacity: 0.6;
 }
 
@@ -653,8 +681,8 @@
 
 .night-garden .day-compost {
   background: linear-gradient(135deg,
-    rgba(16, 185, 129, 0.12) 0%,
-    rgba(16, 185, 129, 0.06) 100%);
+      rgba(16, 185, 129, 0.12) 0%,
+      rgba(16, 185, 129, 0.06) 100%);
   border-color: rgba(16, 185, 129, 0.2);
 }
 

@@ -1204,10 +1204,22 @@ const Goals = {
     State.data.analytics.goalsCreated++;
     State.save();
 
-    // Mark dirty and debounce cloud sync (instant local, deferred cloud)
-    dirtyTracker.markDirty('goal', goal.id);
-    UI.updateSyncStatus('syncing');
-    debouncedGoalSync(goal);
+    // Force sync for new goals to ensure creation persists immediately
+    // debouncedGoalSync is better for rapid edits, but creation should be atomic
+    import('./services/SupabaseService').then(async ({ SupabaseService }) => {
+      try {
+        await SupabaseService.saveGoal(goal);
+        dirtyTracker.markClean('goal', goal.id);
+        console.log(`✓ Goal "${goal.title}" created and synced`);
+        UI.updateSyncStatus('synced');
+      } catch (error) {
+        console.error('Failed to sync new goal:', error);
+        // Fallback to debounce if force fails
+        debouncedGoalSync(goal);
+      }
+    });
+
+    // UI will update to 'synced' after successful cloud sync
     // UI will update to 'synced' after successful cloud sync
     setTimeout(() => UI.updateSyncStatus('synced'), 2100); // After debounce completes
 
@@ -4567,6 +4579,12 @@ const UI = {
     const date = State.viewingDate;
     const allGoals = State.data?.goals || [];
 
+    // Force planner mode for Day View
+    if (State.data && State.data.preferences.nd.dayViewStyle !== "planner") {
+      State.data.preferences.nd.dayViewStyle = "planner";
+      State.save();
+    }
+
     // Initialize DayViewController if not already done
     if (!this.dayViewController) {
       this.dayViewController = new DayViewController(
@@ -4595,6 +4613,8 @@ const UI = {
             this.showQuickAdd();
           },
           onGetPreference: (key: string) => {
+            // Force planner style when asked
+            if (key === "dayViewStyle") return "planner";
             return (State.data?.preferences.nd as any)[key];
           },
           onNavigate: (direction: number) => {
@@ -4611,36 +4631,17 @@ const UI = {
     // Set goals and render
     this.dayViewController.setGoals(date, allGoals);
 
-    // Add style toggle if not present
+    // Remove old style toggle if present (we only use Planner mode now)
     this.ensureDayViewStyleToggle();
   },
 
   ensureDayViewStyleToggle() {
     const header = document.querySelector(".day-view-header");
-    if (!header || header.querySelector(".day-style-toggle")) return;
+    if (!header) return;
 
-    const toggle = document.createElement("div");
-    toggle.className = "day-style-toggle";
-    const currentStyle = State.data?.preferences.nd.dayViewStyle || "timeline";
-
-    toggle.innerHTML = `
-      <button class="btn btn-xs ${currentStyle === "timeline" ? "active" : ""}" data-style="timeline">Timeline</button>
-      <button class="btn btn-xs ${currentStyle === "simple" ? "active" : ""}" data-style="simple">Simple</button>
-      <button class="btn btn-xs ${currentStyle === "planner" ? "active" : ""}" data-style="planner">Planner</button>
-    `;
-
-    toggle.querySelectorAll("button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const style = (btn as HTMLElement).dataset.style as any;
-        if (State.data) {
-          State.data.preferences.nd.dayViewStyle = style;
-          State.save();
-          this.renderDayView();
-        }
-      });
-    });
-
-    header.appendChild(toggle);
+    // Remove any existing toggle
+    const existing = header.querySelector(".day-style-toggle");
+    if (existing) existing.remove();
   },
 
   // Render a single goal card for day view
@@ -5185,9 +5186,11 @@ const UI = {
     // Customize modal fields based on goal level
     const monthGroup = document.querySelector('label[for="goalMonth"]')?.parentElement as HTMLElement;
     const monthLabel = document.querySelector('label[for="goalMonth"]') as HTMLElement;
-    const monthSelect = document.getElementById("goalMonth");
+    const monthSelect = document.getElementById("goalMonth") as HTMLSelectElement;
     const categoryGroup = document.querySelector('label[for="goalCategory"]')?.parentElement as HTMLElement;
-    const timeGroup = document.querySelector('.form-row:nth-child(3)') as HTMLElement; // Time fields row
+
+    // Use a more resilient selector for the time fields row
+    const timeGroup = document.getElementById("goalStartTime")?.closest(".form-row") as HTMLElement;
     const priorityGroup = document.querySelector('label[for="goalPriority"]')?.parentElement as HTMLElement;
     const durationGroup = document.getElementById('visionDurationGroup') as HTMLElement;
     const submitBtn = document.querySelector('#goalForm button[type="submit"]') as HTMLElement;
@@ -5200,34 +5203,38 @@ const UI = {
       else if (level === "intention") submitBtn.textContent = "Set Intention";
     }
 
+    // Reset required states first
+    if (monthSelect) monthSelect.required = false;
+
     if (monthGroup && monthLabel && monthSelect) {
       if (level === "vision") {
         // Vision: yearly goals - hide time-specific fields, show duration
         monthGroup.style.display = "none";
-        if (timeGroup) timeGroup.style.display = "none";
+        this.setFieldVisibility(timeGroup, false);
         if (priorityGroup) priorityGroup.style.display = "block";
         if (categoryGroup) categoryGroup.style.display = "block";
         if (durationGroup) durationGroup.style.display = "block";
       } else if (level === "milestone") {
         // Milestone: monthly goals - show month selection, hide time/duration
         monthGroup.style.display = "block";
+        monthSelect.required = true;
         monthLabel.textContent = "Which month?";
         this.populateMonthSelect(preselectedMonth, this.goalModalYear);
-        if (timeGroup) timeGroup.style.display = "none";
+        this.setFieldVisibility(timeGroup, false);
         if (priorityGroup) priorityGroup.style.display = "block";
         if (categoryGroup) categoryGroup.style.display = "block";
         if (durationGroup) durationGroup.style.display = "none";
       } else if (level === "focus") {
         // Focus: weekly goals - hide month/time/duration, show category/priority
         monthGroup.style.display = "none";
-        if (timeGroup) timeGroup.style.display = "none";
+        this.setFieldVisibility(timeGroup, false);
         if (priorityGroup) priorityGroup.style.display = "block";
         if (categoryGroup) categoryGroup.style.display = "block";
         if (durationGroup) durationGroup.style.display = "none";
       } else if (level === "intention") {
         // Intention: daily goals - show time fields, hide month/duration
         monthGroup.style.display = "none";
-        if (timeGroup) timeGroup.style.display = "block";
+        this.setFieldVisibility(timeGroup, true);
         if (priorityGroup) priorityGroup.style.display = "none";
         if (categoryGroup) categoryGroup.style.display = "none";
         if (durationGroup) durationGroup.style.display = "none";
@@ -5282,6 +5289,11 @@ const UI = {
     this.elements.goalModal?.classList.remove("active");
     this.elements.goalForm?.reset();
     this.goalModalYear = null;
+  },
+
+  setFieldVisibility(element: HTMLElement | null, visible: boolean) {
+    if (!element) return;
+    element.style.display = visible ? "grid" : "none";
   },
 
   populateMonthSelect(

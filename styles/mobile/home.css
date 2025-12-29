@@ -43,7 +43,7 @@
 
 .mobile-card {
     background: var(--bg-surface);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: var(--space-5);
     border: 1px solid var(--glass-border);
     display: flex;
@@ -183,7 +183,7 @@
 .mobile-goal-item {
     padding: var(--space-4);
     background: var(--bg-elevated);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--glass-border);
     font-size: 15px;
     color: var(--text-primary);
