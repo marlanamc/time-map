@@ -1,0 +1,48 @@
+/* ===================================
+   Color Blind Mode Adjustments
+   =================================== */
+
+/* Use patterns/textures in addition to color */
+body.colorblind-deuteranopia,
+body.colorblind-protanopia {
+    --cat-career: #0077bb;
+    --cat-health: #33bbee;
+    --cat-finance: #ee7733;
+    --cat-personal: #cc3311;
+    --cat-creative: #009988;
+
+    --success: #009988;
+    --warning: #ee7733;
+    --danger: #cc3311;
+
+    --priority-high: #ee7733;
+    --priority-urgent: #cc3311;
+}
+
+body.colorblind-tritanopia {
+    --cat-career: #332288;
+    --cat-health: #117733;
+    --cat-finance: #ddcc77;
+    --cat-personal: #cc6677;
+    --cat-creative: #aa4499;
+
+    --success: #117733;
+    --warning: #ddcc77;
+    --danger: #cc6677;
+}
+
+/* Add visual indicators beyond color */
+body[class*="colorblind"] .goal-tag.priority-high::before {
+    content: "▲ ";
+}
+
+body[class*="colorblind"] .goal-tag.priority-urgent::before {
+    content: "⚠ ";
+}
+
+body[class*="colorblind"] .goal-checkbox.checked::after {
+    content: "✓";
+    font-size: 12px;
+    font-weight: bold;
+}
+

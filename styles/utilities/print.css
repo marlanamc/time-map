@@ -1,0 +1,199 @@
+/* ===================================
+   Print Styles
+   =================================== */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+
+    .sidebar,
+    .header,
+    .control-bar,
+    .modal-overlay,
+    .toast,
+    .confetti-container,
+    .review-prompt {
+        display: none !important;
+    }
+
+    .app {
+        display: block;
+    }
+
+    .month-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Zen Focus Overlay */
+.zen-focus-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-base);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    animation: fadeIn var(--duration-normal);
+}
+
+.zen-focus-container {
+    width: 800px;
+    max-width: 100%;
+    margin: 0 auto;
+    position: relative;
+    text-align: center;
+}
+
+.zen-close-btn {
+    position: fixed;
+    top: var(--space-8);
+    right: var(--space-8);
+    background: var(--bg-surface);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.zen-close-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.zen-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-10);
+}
+
+.zen-level-badge {
+    padding: var(--space-1) var(--space-4);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.zen-title {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: var(--space-6);
+    color: var(--text-primary);
+}
+
+.zen-desc {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto var(--space-12);
+    line-height: 1.6;
+}
+
+.zen-subtasks {
+    max-width: 500px;
+    margin: 0 auto var(--space-12);
+    text-align: left;
+}
+
+.zen-subtasks h3 {
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-4);
+}
+
+.zen-subtask-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.zen-subtask-item {
+    padding: var(--space-4);
+    background: var(--bg-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.zen-subtask-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-muted);
+}
+
+.zen-subtask-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--glass-border);
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.zen-subtask-item.done {
+    opacity: 0.5;
+}
+
+.zen-subtask-item.done .zen-subtask-checkbox {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.zen-footer {
+    padding-top: var(--space-8);
+}
+
+.zen-complete-btn {
+    padding: var(--space-4) var(--space-10);
+    background: var(--accent);
+    color: #121218;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+    transition: all var(--duration-normal);
+}
+
+.zen-complete-btn:hover {
+    transform: scale(1.05);
+    background: var(--accent-hover);
+}
+
+.zen-complete-btn.completed {
+    background: var(--success);
+}
+
+/* Extra accessibility for Astigmatism in Zen Mode */
+.zen-focus-overlay {
+    letter-spacing: 0.01em;
+}
+
+.zen-title {
+    text-rendering: optimizeLegibility;
+}
+

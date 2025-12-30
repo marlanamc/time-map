@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const CACHE_NAME = `garden-fence-${CACHE_VERSION}`;
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css",
+  "./styles.bundle.min.css",
   "./dist/app.js",
   "./manifest.webmanifest",
   "./icons/icon.svg",

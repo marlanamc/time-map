@@ -8,6 +8,8 @@ public/
 *.min.js
 *.min.css
 *.js.map
+styles.css.archive
+styles.bundle.css
 
 # OS files
 .DS_Store

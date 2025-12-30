@@ -225,7 +225,7 @@ export function getLightingForTimeOfDay(timeOfDay: TimeOfDay, _sunPosition: numb
     evening: {
       brightness: 0.9,
       saturation: 0.9,
-      hueShift: 15, // golden hour
+      hueShift: 0, // preserve theme colors during golden hour (was: 15)
       shadowOpacity: 0.35,
       shadowLength: 10
     },

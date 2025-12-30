@@ -1,0 +1,89 @@
+/* ===================================
+   Month Detail Modal
+   =================================== */
+.month-overview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+.overview-stat {
+    text-align: center;
+    padding: var(--space-3);
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+}
+
+.overview-stat .stat-value {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.overview-stat .stat-label {
+    font-size: var(--text-xs);
+    color: var(--text-ghost);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Goals by Status */
+.goals-by-status {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+.status-column {
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    min-height: 180px;
+}
+
+.status-header {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.status-goals {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* Quick Add Goal */
+.quick-add-goal {
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+}
+
+.quick-add-goal input {
+    flex: 1;
+    padding: var(--space-3);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: var(--text-sm);
+}
+
+.quick-add-goal select {
+    padding: var(--space-2) var(--space-3);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: var(--text-sm);
+}
+

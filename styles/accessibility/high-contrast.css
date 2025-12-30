@@ -1,0 +1,19 @@
+/* ===================================
+   High Contrast Focus States
+   =================================== */
+*:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--accent-muted);
+}
+

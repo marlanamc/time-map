@@ -1,0 +1,100 @@
+/* ===================================
+   Celebration Modal
+   =================================== */
+.celebration-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.celebration-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.celebration-content {
+    text-align: center;
+    transform: scale(0.8);
+    transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.celebration-overlay.active .celebration-content {
+    transform: scale(1);
+}
+
+.celebration-emoji {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    animation: bounce 0.6s ease-out;
+}
+
+.celebration-icon {
+    display: none;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-4);
+    background: var(--accent);
+    border-radius: 50%;
+    position: relative;
+}
+
+.celebration-icon::before {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--bg-base);
+}
+
+body.reduce-emojis .celebration-emoji {
+    display: none;
+}
+
+body.reduce-emojis .celebration-icon {
+    display: block;
+}
+
+.celebration-title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-2);
+    background: linear-gradient(135deg,
+            var(--accent) 0%,
+            var(--success) 50%,
+            var(--warning) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.celebration-text {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-6);
+}
+
+.night-garden .celebration-overlay {
+    background: rgba(0, 0, 0, 0.92);
+}
+
+.night-garden .celebration-title {
+    background: linear-gradient(135deg,
+            rgba(140, 183, 217, 1) 0%,
+            rgba(90, 155, 141, 1) 50%,
+            rgba(240, 180, 41, 1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+

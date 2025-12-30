@@ -1,0 +1,15 @@
+/* ===================================
+   Touch Target Sizes (WCAG 2.5.5)
+   =================================== */
+.btn,
+.category-filter,
+.zoom-btn,
+.year-nav-btn,
+.toggle-switch,
+.goal-checkbox,
+.subtask-checkbox,
+.achievement {
+    min-width: 44px;
+    min-height: 44px;
+}
+

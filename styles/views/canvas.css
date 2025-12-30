@@ -1,0 +1,272 @@
+/* ===================================
+   Canvas & Calendar
+   =================================== */
+.canvas-container {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+    border-radius: var(--radius-lg);
+    cursor: grab;
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-x pan-y pinch-zoom;
+}
+
+.canvas-container.grabbing {
+    cursor: grabbing;
+}
+
+.canvas-zoom-controls {
+    position: fixed;
+    left: calc(280px + (var(--space-4) * 2));
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    z-index: 1400;
+    width: fit-content;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--accent-muted);
+    background: var(--accent-muted);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Hide zoom controls when modal is open */
+body:has(.modal-overlay.active) .canvas-zoom-controls {
+    display: none !important;
+}
+
+body.hide-sidebar .canvas-zoom-controls {
+    left: var(--space-4);
+}
+
+@media (max-width: 900px) {
+    .canvas-zoom-controls {
+        left: var(--space-4);
+    }
+}
+
+.canvas-zoom-controls .zoom-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: white;
+    background: var(--accent);
+    border: none;
+    box-shadow: 0 4px 16px var(--accent-subtle);
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.canvas-zoom-controls .zoom-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--accent-subtle);
+}
+
+.canvas-zoom-controls .zoom-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.canvas-zoom-controls .zoom-level {
+    min-width: 28px;
+    font-size: 0.7rem;
+    color: var(--accent);
+}
+
+.canvas {
+    min-width: 100%;
+    min-height: 100%;
+    padding: var(--space-8);
+    transform-origin: top left;
+    transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 280px);
+    gap: var(--space-6);
+    justify-content: center;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* View Containers */
+.year-view-container,
+.month-view-container,
+.week-view-container,
+.day-view-container {
+    display: block;
+    width: 100%;
+    /* Don't create nested scroll containers - canvas-container handles scrolling */
+}
+
+.year-view-container {
+    position: relative;
+}
+
+.week-view-container {
+    padding: var(--space-6);
+}
+
+.year-view {
+    padding: var(--space);
+    padding-left: var(--space-8);
+    padding-right: var(--space);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.year-view-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+}
+
+.year-view-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 6vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+/* White color with dark shadow for light mode view titles */
+:root:not(.night-garden) .year-view-title,
+:root:not(.night-garden) .month-view-title,
+:root:not(.night-garden) .week-view-title,
+:root:not(.night-garden) .planner-sidebar-header h3 {
+    color: #ffffff !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 
+                 1px 1px 2px rgba(0, 0, 0, 0.7),
+                 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Force dark color for light mode day title - higher specificity */
+:root:not(.night-garden) .day-view-title {
+    color: #0A1113 !important;
+    /* Very dark fallback if gradient doesn't apply */
+}
+
+.year-view-subtitle {
+    font-size: var(--text-base);
+    color: var(--accent-hover);
+    line-height: 1.4;
+    max-width: 52ch;
+}
+
+/* Ensure subtitle is visible in light mode */
+:root:not(.night-garden) .year-view-subtitle {
+    color: var(--accent-hover);
+    opacity: 0.9;
+}
+
+/* Ensure subtitle is visible in dark mode */
+.night-garden .year-view-subtitle {
+    color: var(--accent-hover);
+    opacity: 1;
+}
+
+@supports ((-webkit-background-clip: text) and (-webkit-text-fill-color: transparent)) or (background-clip: text) {
+
+    .year-view-title,
+    .month-view-title,
+    .week-view-title,
+    .day-view-title,
+    .planner-sidebar-header h3 {
+        background: linear-gradient(110deg,
+                var(--text-primary) 0%,
+                var(--accent) 65%,
+                var(--sage) 115%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        /* Add text shadow for better readability in light mode */
+        filter: drop-shadow(0 1px 2px rgba(26, 43, 47, 0.15));
+    }
+
+    /* White with dark shadow for year, month, and week titles in light mode - override gradient */
+    :root:not(.night-garden) .year-view-title,
+    :root:not(.night-garden) .month-view-title,
+    :root:not(.night-garden) .week-view-title,
+    :root:not(.night-garden) .planner-sidebar-header h3 {
+        background: none !important;
+        -webkit-background-clip: unset !important;
+        background-clip: unset !important;
+        -webkit-text-fill-color: #ffffff !important;
+        color: #ffffff !important;
+        filter: none !important;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 
+                     1px 1px 2px rgba(0, 0, 0, 0.7),
+                     0 0 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Much darker gradient for light mode day title to improve contrast against sky background */
+    :root:not(.night-garden) .day-view-title {
+        background: linear-gradient(110deg,
+                #0A1113 0%,
+                /* Very dark for maximum contrast */
+                #0F1A1D 20%,
+                /* Even darker */
+                #1A2B2F 40%,
+                /* Dark spruce */
+                #0F1A1D 60%,
+                /* Back to very dark */
+                #0A1113 80%,
+                /* Very dark for maximum contrast */
+                #0F1A1D 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        /* Stronger text shadow for better readability */
+        filter: drop-shadow(0 2px 4px rgba(10, 17, 19, 0.5)) drop-shadow(0 1px 3px rgba(10, 17, 19, 0.4));
+    }
+}
+
+/* Enhanced title visibility during bright time periods - use backdrop instead of text-shadow */
+:root.time-morning .year-view-header,
+:root.time-afternoon .year-view-header,
+:root.time-evening .year-view-header,
+:root.time-morning .month-view-header,
+:root.time-afternoon .month-view-header,
+:root.time-evening .month-view-header,
+:root.time-morning .week-view-header,
+:root.time-afternoon .week-view-header,
+:root.time-evening .week-view-header,
+:root.time-morning .day-view-header,
+:root.time-afternoon .day-view-header,
+:root.time-evening .day-view-header {
+    /* Add subtle dark backdrop behind title for contrast */
+    background: linear-gradient(180deg,
+            rgba(10, 17, 19, 0.65) 0%,
+            rgba(10, 17, 19, 0.35) 50%,
+            transparent 100%);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+}
+
+.year-view-header::after,
+.month-view-header::after {
+    display: none !important;
+    /* Remove decorative line */
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.month-view-container .calendar-grid,
+.week-view-container .calendar-grid,
+.day-view-container .calendar-grid {
+    display: block;
+}
+

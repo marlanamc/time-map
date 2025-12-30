@@ -99,14 +99,88 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="styles.css" />
+    <!-- CSS_START -->
+    <!-- 1. Core Foundation (MUST load first) -->
+    <link rel="stylesheet" href="styles/core/variables.css" />
+    <link rel="stylesheet" href="styles/core/reset.css" />
+
+    <!-- 2. Background Layer -->
+    <link rel="stylesheet" href="styles/background/pollen.css" />
+    <link rel="stylesheet" href="styles/background/fireflies.css" />
+    <link rel="stylesheet" href="styles/background/garden.css" />
+
+    <!-- 3. Layout Foundation -->
+    <link rel="stylesheet" href="styles/layout/app.css" />
+    <link rel="stylesheet" href="styles/layout/header.css" />
+
+    <!-- 4. Components -->
+    <link rel="stylesheet" href="styles/components/interactive.css" />
+    <link rel="stylesheet" href="styles/components/buttons.css" />
+    <link rel="stylesheet" href="styles/components/sidebar.css" />
+    <link rel="stylesheet" href="styles/components/modals.css" />
+
+    <!-- 5. Views -->
+    <link rel="stylesheet" href="styles/views/main-content.css" />
+    <link rel="stylesheet" href="styles/views/canvas.css" />
+    <link rel="stylesheet" href="styles/views/month.css" />
+    <link rel="stylesheet" href="styles/views/week.css" />
+    <link rel="stylesheet" href="styles/views/day.css" />
+
+    <!-- 6. Day View Modules -->
     <link rel="stylesheet" href="styles/dayView/layout.css" />
     <link rel="stylesheet" href="styles/dayView/cards.css" />
     <link rel="stylesheet" href="styles/dayView/drag.css" />
     <link rel="stylesheet" href="styles/dayView/responsive.css" />
     <link rel="stylesheet" href="styles/dayView/simple.css" />
     <link rel="stylesheet" href="styles/dayView/planner.css" />
+
+    <!-- 7. Features -->
+    <link rel="stylesheet" href="styles/features/celebration.css" />
+    <link rel="stylesheet" href="styles/features/confetti.css" />
+    <link rel="stylesheet" href="styles/features/toast.css" />
+    <link rel="stylesheet" href="styles/features/review-prompt.css" />
+    <link rel="stylesheet" href="styles/features/month-detail.css" />
+    <link rel="stylesheet" href="styles/features/focus-mode.css" />
+    <link rel="stylesheet" href="styles/features/quick-add.css" />
+    <link rel="stylesheet" href="styles/features/support-panel.css" />
+    <link rel="stylesheet" href="styles/features/keyboard-modal.css" />
+    <link rel="stylesheet" href="styles/features/auth-modal.css" />
+    <link rel="stylesheet" href="styles/features/time-viz.css" />
+
+    <!-- 8. Themes -->
+    <link rel="stylesheet" href="styles/themes/accents.css" />
+    <link rel="stylesheet" href="styles/themes/picker.css" />
+    <link rel="stylesheet" href="styles/themes/seasonal.css" />
+
+    <!-- 9. Accessibility -->
+    <link rel="stylesheet" href="styles/accessibility/wcag.css" />
+    <link rel="stylesheet" href="styles/accessibility/dyslexia.css" />
+    <link rel="stylesheet" href="styles/accessibility/colorblind.css" />
+    <link rel="stylesheet" href="styles/accessibility/simplified.css" />
+    <link rel="stylesheet" href="styles/accessibility/high-contrast.css" />
+    <link rel="stylesheet" href="styles/accessibility/reduced-motion.css" />
+    <link rel="stylesheet" href="styles/accessibility/minimal-feedback.css" />
+    <link rel="stylesheet" href="styles/accessibility/reduced-emoji.css" />
+    <link rel="stylesheet" href="styles/accessibility/sensory.css" />
+    <link rel="stylesheet" href="styles/accessibility/touch-targets.css" />
+
+    <!-- 10. Animations -->
+    <link rel="stylesheet" href="styles/animations/keyframes.css" />
+
+    <!-- 11. Responsive -->
+    <link rel="stylesheet" href="styles/responsive/mobile.css" />
+    <link rel="stylesheet" href="styles/responsive/mobile-tabs.css" />
+
+    <!-- 12. Mobile -->
     <link rel="stylesheet" href="styles/mobile/home.css" />
+
+    <!-- 13. Utilities -->
+    <link rel="stylesheet" href="styles/utilities/print.css" />
+    <link rel="stylesheet" href="styles/utilities/sound-controls.css" />
+
+    <!-- 14. Custom -->
+    <link rel="stylesheet" href="styles/custom/garden-menu.css" />
+    <!-- CSS_END -->
 </head>
 
 <body>
@@ -117,11 +191,7 @@
         <div id="gardenMidground" class="garden-midground"></div>
     </div>
 
-    <!-- Celestial Bodies (Sun & Moon) -->
-    <div class="celestial-container" aria-hidden="true">
-        <div class="sun" id="sun" aria-label="Current time indicator">☀️</div>
-        <div class="moon" id="moon" aria-label="Night time indicator">🌙</div>
-    </div>
+    <!-- Celestial indicator moved into the Support Tools button -->
 
     <!-- Confetti Container -->
     <div class="confetti-container" id="confettiContainer" aria-hidden="true"></div>
@@ -385,28 +455,61 @@
                     </div>
                     <button class="btn btn-ghost btn-icon support-panel-toggle-btn" id="supportPanelToggleBtn"
                         type="button" aria-label="Open support tools" title="Support Tools">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-                            <path d="M4 4h6v6H4z"></path>
-                            <path d="M14 4h6v6h-6z"></path>
-                            <path d="M4 14h6v6H4z"></path>
-                            <path d="M14 14h6v6h-6z"></path>
-                        </svg>
-                    </button>
+                            <span class="support-panel-celestial support-panel-sun" aria-hidden="true">☀️</span>
+                            <span class="support-panel-celestial support-panel-moon" aria-hidden="true">🌙</span>
+                            <span class="support-panel-toggle-fallback-icon" aria-hidden="true">
+                                <svg class="support-panel-toggle-icon support-panel-toggle-icon-sun" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" width="20" height="20">
+                                    <circle cx="12" cy="12" r="4"></circle>
+                                    <path d="M12 2v2"></path>
+                                    <path d="M12 20v2"></path>
+                                    <path d="M4.93 4.93l1.41 1.41"></path>
+                                    <path d="M17.66 17.66l1.41 1.41"></path>
+                                    <path d="M2 12h2"></path>
+                                    <path d="M20 12h2"></path>
+                                    <path d="M4.93 19.07l1.41-1.41"></path>
+                                    <path d="M17.66 6.34l1.41-1.41"></path>
+                                </svg>
+                                <svg class="support-panel-toggle-icon support-panel-toggle-icon-moon" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" width="20" height="20">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+                                </svg>
+                            </span>
+                        </button>
                 </div>
             </div>
+
+            <!-- Current Level Context (Vision / Milestone / Focus / Intention) -->
+            <div class="level-context-bar" id="levelContextBar" role="region" aria-label="Current focus context"></div>
 
             <!-- Mobile Support Panel Button (shown only on mobile) -->
             <button class="header-mobile-support-btn support-panel-toggle-btn" id="supportPanelToggleBtnMobile"
                 type="button" aria-label="Open support tools" title="Support Tools" hidden>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" width="20" height="20">
-                    <path d="M4 4h6v6H4z"></path>
-                    <path d="M14 4h6v6h-6z"></path>
-                    <path d="M4 14h6v6H4z"></path>
-                    <path d="M14 14h6v6h-6z"></path>
-                </svg>
-            </button>
+                    <span class="support-panel-celestial support-panel-sun" aria-hidden="true">☀️</span>
+                    <span class="support-panel-celestial support-panel-moon" aria-hidden="true">🌙</span>
+                    <span class="support-panel-toggle-fallback-icon" aria-hidden="true">
+                        <svg class="support-panel-toggle-icon support-panel-toggle-icon-sun" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" width="20" height="20">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 2v2"></path>
+                            <path d="M12 20v2"></path>
+                            <path d="M4.93 4.93l1.41 1.41"></path>
+                            <path d="M17.66 17.66l1.41 1.41"></path>
+                            <path d="M2 12h2"></path>
+                            <path d="M20 12h2"></path>
+                            <path d="M4.93 19.07l1.41-1.41"></path>
+                            <path d="M17.66 6.34l1.41-1.41"></path>
+                        </svg>
+                        <svg class="support-panel-toggle-icon support-panel-toggle-icon-moon" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" width="20" height="20">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+                        </svg>
+                    </span>
+                </button>
 
             <!-- Zoomable Canvas -->
             <div class="canvas-container" id="canvasContainer">
@@ -446,6 +549,16 @@
                     <input type="text" id="goalTitle" placeholder="e.g., Make space for my side project" required
                         aria-required="true" />
                 </div>
+                <div class="form-row" id="goalScopeRow">
+                    <div class="form-group" id="goalYearGroup" style="display: none;">
+                        <label for="goalYear">Year</label>
+                        <input type="number" id="goalYear" min="1970" max="2100" inputmode="numeric" />
+                    </div>
+                    <div class="form-group" id="goalStartDateGroup" style="display: none;">
+                        <label for="goalStartDate">Start date</label>
+                        <input type="date" id="goalStartDate" />
+                    </div>
+                </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="goalMonth">When?</label>
@@ -460,6 +573,42 @@
                             <option value="finance">Finance</option>
                             <option value="personal">Personal</option>
                             <option value="creative">Creative</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="goalDurationRow">
+                    <div class="form-group" id="milestoneDurationGroup" style="display: none;">
+                        <label for="milestoneDurationMonths">Duration (months)</label>
+                        <select id="milestoneDurationMonths">
+                            <option value="1" selected>1 month</option>
+                            <option value="2">2 months</option>
+                            <option value="3">3 months</option>
+                            <option value="4">4 months</option>
+                            <option value="5">5 months</option>
+                            <option value="6">6 months</option>
+                            <option value="7">7 months</option>
+                            <option value="8">8 months</option>
+                            <option value="9">9 months</option>
+                            <option value="10">10 months</option>
+                            <option value="11">11 months</option>
+                            <option value="12">12 months</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="focusDurationGroup" style="display: none;">
+                        <label for="focusDurationWeeks">Duration (weeks)</label>
+                        <select id="focusDurationWeeks">
+                            <option value="1" selected>1 week</option>
+                            <option value="2">2 weeks</option>
+                            <option value="3">3 weeks</option>
+                            <option value="4">4 weeks</option>
+                            <option value="5">5 weeks</option>
+                            <option value="6">6 weeks</option>
+                            <option value="7">7 weeks</option>
+                            <option value="8">8 weeks</option>
+                            <option value="9">9 weeks</option>
+                            <option value="10">10 weeks</option>
+                            <option value="11">11 weeks</option>
+                            <option value="12">12 weeks</option>
                         </select>
                     </div>
                 </div>
@@ -482,23 +631,6 @@
                         </option>
                         <option value="high">High - Important</option>
                         <option value="urgent">Urgent - Do soon</option>
-                    </select>
-                </div>
-                <div class="form-group" id="visionDurationGroup" style="display: none;">
-                    <label for="visionDuration">Duration (months)</label>
-                    <select id="visionDuration">
-                        <option value="1">1 month</option>
-                        <option value="2">2 months</option>
-                        <option value="3">3 months</option>
-                        <option value="4" selected>4 months</option>
-                        <option value="5">5 months</option>
-                        <option value="6">6 months</option>
-                        <option value="7">7 months</option>
-                        <option value="8">8 months</option>
-                        <option value="9">9 months</option>
-                        <option value="10">10 months</option>
-                        <option value="11">11 months</option>
-                        <option value="12">12 months</option>
                     </select>
                 </div>
                 <div class="modal-actions">
@@ -539,147 +671,143 @@
     <!-- Support Tools Panel (right drawer) -->
     <div class="support-panel-overlay" id="supportPanelOverlay" hidden>
         <aside class="support-panel" id="supportPanel" role="dialog" aria-modal="true" aria-label="Support tools panel">
-            <div class="support-panel-header">
-                <h2 class="support-panel-title">Support Tools</h2>
-                <button class="btn btn-ghost btn-icon support-panel-close" id="supportPanelClose" type="button"
-                    aria-label="Close support tools">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="support-panel-body" role="menu" aria-label="Support tools">
-                <!-- User Profile Section -->
-                <div class="support-panel-profile-section" aria-label="User profile">
-                    <div class="user-profile" id="supportPanelUserProfile">
-                        <div class="user-avatar" id="supportPanelUserAvatar">U</div>
-                        <span class="user-name" id="supportPanelUserName">User</span>
-                    </div>
-                    <div class="sync-status" id="supportPanelSyncStatus" title="Cloud Sync Status">
-                        <span class="sync-icon">☁️</span>
-                        <span class="sync-text">Local Only</span>
-                    </div>
-                </div>
+	            <div class="support-panel-header">
+	                <h2 class="support-panel-title">Menu</h2>
+	                <button class="btn btn-ghost btn-icon support-panel-close" id="supportPanelClose" type="button"
+	                    aria-label="Close support tools">
+	                    <span aria-hidden="true">×</span>
+	                </button>
+	            </div>
+	            <div class="support-panel-body" role="menu" aria-label="Support tools">
+	                <!-- User Profile Section -->
+	                <div class="support-panel-profile-section enhanced" aria-label="User profile">
+	                    <div class="support-panel-avatar-wrapper">
+	                        <div class="user-avatar gradient-border" id="supportPanelUserAvatar">U</div>
+	                    </div>
+	                    <div class="support-panel-profile-info">
+	                        <div class="user-name" id="supportPanelUserName">User</div>
+	                        <div class="sync-status" id="supportPanelSyncStatus" title="Cloud Sync Status">
+	                            <span class="sync-icon">☁️</span>
+	                            <span class="sync-text">Local Only</span>
+	                        </div>
+	                    </div>
+	                </div>
 
-                <div class="support-panel-divider" role="separator" aria-hidden="true"></div>
+	                <div class="support-panel-group-label" aria-hidden="true">Preferences</div>
 
-                <!-- Settings Button -->
-                <button class="support-panel-item" type="button" role="menuitem" id="supportPanelSettingsBtn">
-                    <span class="support-panel-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
-                            <path
-                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z">
-                            </path>
-                        </svg>
-                    </span>
-                    <span class="support-panel-text">
-                        <span class="support-panel-name">Settings</span>
-                        <span class="support-panel-desc">App preferences and configuration</span>
-                    </span>
-                </button>
+	                <!-- Settings Button -->
+	                <button class="support-panel-item primary" type="button" role="menuitem" id="supportPanelSettingsBtn" data-action="settings">
+	                    <span class="support-panel-icon" aria-hidden="true">
+	                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	                            stroke-linecap="round" stroke-linejoin="round">
+	                            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+	                            <path
+	                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z">
+	                            </path>
+	                        </svg>
+	                    </span>
+	                    <span class="support-panel-text">
+	                        <span class="support-panel-name">Settings</span>
+	                        <span class="support-panel-desc">App preferences & layout</span>
+	                    </span>
+	                    <span class="support-panel-chevron" aria-hidden="true">
+	                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	                            stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+	                            <path d="m9 18 6-6-6-6"></path>
+	                        </svg>
+	                    </span>
+	                </button>
 
-                <div class="support-panel-divider" role="separator" aria-hidden="true"></div>
+	                <!-- Focus Mode Toggle -->
+	                <div class="support-panel-focus-toggle secondary">
+	                    <label for="supportPanelFocusToggle" class="support-panel-focus-label" id="support-panel-focus-label">
+	                        Focus (reduce visual noise)
+	                    </label>
+	                    <button class="toggle-switch" id="supportPanelFocusToggle" role="switch" aria-checked="false"
+	                        aria-labelledby="support-panel-focus-label" aria-describedby="support-panel-focus-desc"></button>
+	                    <span class="sr-only" id="support-panel-focus-desc">Focus reduces visual noise. It doesn't track productivity.</span>
+	                </div>
 
-                <!-- Focus Mode Toggle -->
-                <div class="support-panel-focus-toggle">
-                    <label for="supportPanelFocusToggle" class="support-panel-focus-label"
-                        id="support-panel-focus-label">
-                        Focus (reduce visual noise)
-                    </label>
-                    <button class="toggle-switch" id="supportPanelFocusToggle" role="switch" aria-checked="false"
-                        aria-labelledby="support-panel-focus-label"
-                        aria-describedby="support-panel-focus-desc"></button>
-                    <span class="sr-only" id="support-panel-focus-desc">Focus reduces visual noise. It doesn't track
-                        productivity.</span>
-                </div>
+	                <div class="support-panel-group-label" aria-hidden="true">Appearance</div>
 
-                <div class="support-panel-divider" role="separator" aria-hidden="true"></div>
+	                <div class="support-panel-focus-toggle secondary support-panel-theme-toggle">
+	                    <label for="supportPanelThemeToggle" class="support-panel-focus-label" id="support-panel-theme-label">
+	                        Dark Garden Mode
+	                    </label>
+	                    <button class="toggle-switch" id="supportPanelThemeToggle" role="switch" aria-checked="false"
+	                        aria-labelledby="support-panel-theme-label"></button>
+	                </div>
 
-                <button class="support-panel-item" type="button" role="menuitem" data-action="brainDump">
-                    <span class="support-panel-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M8 18a4 4 0 1 1 0-8"></path>
-                            <path d="M12 18a4 4 0 1 0 0-8"></path>
-                            <path d="M8 10a4 4 0 1 1 0-8"></path>
-                            <path d="M12 10a4 4 0 1 0 0-8"></path>
-                            <path d="M8 18h8"></path>
-                        </svg>
-                    </span>
-                    <span class="support-panel-text">
-                        <span class="support-panel-name">Brain Dump</span>
-                        <span class="support-panel-desc">Park intrusive thoughts</span>
-                    </span>
-                </button>
+	                <div class="support-panel-appearance-card" aria-label="Accent color">
+	                    <div class="support-panel-appearance-label">Accent color</div>
+	                    <div class="theme-picker support-panel-theme-picker" id="supportPanelThemePicker" role="radiogroup"
+	                        aria-label="Choose accent color"></div>
+	                </div>
 
-                <button class="support-panel-item" type="button" role="menuitem" data-action="bodyDouble">
-                    <span class="support-panel-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 6v6l4 2"></path>
-                        </svg>
-                    </span>
-                    <span class="support-panel-text">
-                        <span class="support-panel-name">Body Double</span>
-                        <span class="support-panel-desc">Focused work sessions</span>
-                    </span>
-                </button>
+	                <div class="support-panel-group-label" aria-hidden="true">Optional</div>
 
-                <button class="support-panel-item" type="button" role="menuitem" data-action="quickWins">
-                    <span class="support-panel-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M13 2 3 14h9l-1 8 10-12h-9z"></path>
-                        </svg>
-                    </span>
-                    <span class="support-panel-text">
-                        <span class="support-panel-name">Quick Wins</span>
-                        <span class="support-panel-desc">Low motivation tasks</span>
-                    </span>
-                </button>
+	                <!-- Optional Tools (Collapsible Section) -->
+	                <div class="support-panel-collapsible-section">
+	                    <button class="support-panel-section-header" type="button" data-toggle="optional-tools" aria-expanded="false">
+	                        <div class="section-header-icon">🧰</div>
+	                        <div class="section-header-title">Tools (optional)</div>
+	                        <div class="section-header-chevron" aria-hidden="true">
+	                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	                                stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+	                                <path d="m6 9 6 6 6-6"></path>
+	                            </svg>
+	                        </div>
+	                    </button>
 
-                <div class="support-panel-divider" role="separator" aria-hidden="true"></div>
+	                    <div class="support-panel-section-content" data-section="optional-tools">
+	                        <button class="support-panel-item compact" type="button" role="menuitem" data-action="brainDump">
+	                            <span class="support-panel-icon small" aria-hidden="true">
+	                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	                                    stroke-linecap="round" stroke-linejoin="round">
+	                                    <path d="M8 18a4 4 0 1 1 0-8"></path>
+	                                    <path d="M12 18a4 4 0 1 0 0-8"></path>
+	                                    <path d="M8 10a4 4 0 1 1 0-8"></path>
+	                                    <path d="M12 10a4 4 0 1 0 0-8"></path>
+	                                    <path d="M8 18h8"></path>
+	                                </svg>
+	                            </span>
+	                            <span class="support-panel-text">
+	                                <span class="support-panel-name">Brain Dump</span>
+	                                <span class="support-panel-desc">Park intrusive thoughts</span>
+	                            </span>
+	                        </button>
 
-                <button class="support-panel-item" type="button" role="menuitem" data-action="ndSettings">
-                    <span class="support-panel-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
-                            <path
-                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z">
-                            </path>
-                        </svg>
-                    </span>
-                    <span class="support-panel-text">
-                        <span class="support-panel-name">Accessibility &amp; Overwhelm</span>
-                        <span class="support-panel-desc">Make this calmer</span>
-                    </span>
-                </button>
+	                        <button class="support-panel-item compact" type="button" role="menuitem" data-action="bodyDouble">
+	                            <span class="support-panel-icon small" aria-hidden="true">
+	                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	                                    stroke-linecap="round" stroke-linejoin="round">
+	                                    <circle cx="12" cy="12" r="10"></circle>
+	                                    <path d="M12 6v6l4 2"></path>
+	                                </svg>
+	                            </span>
+	                            <span class="support-panel-text">
+	                                <span class="support-panel-name">Body Double</span>
+	                                <span class="support-panel-desc">Focused work sessions</span>
+	                            </span>
+	                        </button>
 
-                <button class="support-panel-item" type="button" role="menuitem" data-action="appearance">
-                    <span class="support-panel-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 3v3"></path>
-                            <path d="M18.36 5.64 16.24 7.76"></path>
-                            <path d="M21 12h-3"></path>
-                            <path d="M18.36 18.36 16.24 16.24"></path>
-                            <path d="M12 21v-3"></path>
-                            <path d="M5.64 18.36 7.76 16.24"></path>
-                            <path d="M3 12h3"></path>
-                            <path d="M5.64 5.64 7.76 7.76"></path>
-                            <circle cx="12" cy="12" r="4"></circle>
-                        </svg>
-                    </span>
-                    <span class="support-panel-text">
-                        <span class="support-panel-name">Appearance</span>
-                        <span class="support-panel-desc">Theme + colors</span>
-                    </span>
-                </button>
-            </div>
-        </aside>
-    </div>
+	                        <button class="support-panel-item compact" type="button" role="menuitem" data-action="quickWins">
+	                            <span class="support-panel-icon small" aria-hidden="true">
+	                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	                                    stroke-linecap="round" stroke-linejoin="round">
+	                                    <path d="M13 2 3 14h9l-1 8 10-12h-9z"></path>
+	                                </svg>
+	                            </span>
+	                            <span class="support-panel-text">
+	                                <span class="support-panel-name">Quick Wins</span>
+	                                <span class="support-panel-desc">Low motivation tasks</span>
+	                            </span>
+	                        </button>
+	                    </div>
+	                </div>
+	            </div>
+	        </aside>
+	    </div>
 
     <!-- Body Double Timer Display (shows when active) -->
     <div class="body-double-display" id="bodyDoubleDisplay" role="timer" aria-live="polite" hidden>

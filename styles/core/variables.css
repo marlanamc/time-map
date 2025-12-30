@@ -1,0 +1,170 @@
+/* ===================================
+   The Garden Fence - Optimistic UI
+   Focusing on Boundaries & Blooms
+   =================================== */
+
+/* CSS Variables */
+:root {
+    /* Base colors - Daylight Garden Palette */
+    --bg-base: #E8F4F8;
+    /* airy botanical sky */
+    --bg-elevated: #E1EDEE;
+    /* cool mist */
+    --bg-surface: rgba(255, 255, 255, 0.85);
+    /* morning light petal */
+    --bg-hover: #D6E9EE;
+    /* fresh spring rain */
+    --bg-active: #C5DFE6;
+    /* deep pond */
+
+    /* Glass effects - Crisp & Sunny */
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(107, 168, 169, 0.22);
+    --glass-shine: rgba(255, 255, 255, 0.8);
+
+    /* Text hierarchy - Cool Earth */
+    --text-primary: #1A2B2F;
+    /* deep spruce */
+    --text-secondary: #455C61;
+    /* stone grey */
+    --text-tertiary: #4A5F65;
+    /* darker morning mist - WCAG AA compliant (was #728B91) */
+    --text-ghost: #5A6F75;
+    /* darker silver - WCAG AA compliant (was #A4B9BE) */
+
+    /* Daylight Garden Colors (Vibrant Primary) */
+    --sage: #5A9B8D;
+    /* saturated leaf green */
+    --teal: #4A9099;
+    /* primary garden blue */
+    --clay: #C06C52;
+    /* keeping a hint of clay for contrast */
+    --terracotta: var(--clay);
+    /* legacy alias (used in gradients/themes) */
+    --earth: var(--clay);
+    /* legacy alias (used in a few components) */
+    --sky: #8CB7D9;
+    /* legacy alias (used in accent themes) */
+    --sunset: #E77D3E;
+    /* vibrant orange spice (DMC 722) */
+    --petal: #E59AA0;
+    /* bright floral pink */
+    --amber: #F4A460;
+    /* bright sunlight */
+
+    /* Brand accents */
+    --accent: var(--teal);
+    --accent-hover: #5AAAB2;
+    --accent-muted: rgba(74, 144, 153, 0.16);
+    --accent-subtle: rgba(74, 144, 153, 0.08);
+
+    /* Month card transparency */
+    --month-card-bg: rgba(255, 255, 255, 0.35);
+    --month-card-bg-hover: rgba(255, 255, 255, 0.5);
+    --month-card-past-grey: rgba(160, 160, 160, 0.15);
+    --month-card-past-grey-hover: rgba(160, 160, 160, 0.2);
+
+    /* Semantic colors */
+    --success: #5A9B8D;
+    --success-muted: rgba(90, 155, 141, 0.12);
+    --warning: var(--sunset);
+    --warning-muted: rgba(244, 162, 97, 0.12);
+    --danger: var(--clay);
+    --danger-muted: rgba(192, 108, 82, 0.12);
+    --info: #4A90E2;
+    /* primary blue */
+    --info-muted: rgba(74, 144, 226, 0.12);
+
+    /* Category colors */
+    --cat-career: #4A90E2;
+    /* Primary Blue */
+    --cat-career-muted: rgba(74, 144, 226, 0.12);
+    --cat-health: #5A9B8D;
+    /* Primary Green */
+    --cat-health-muted: rgba(90, 155, 141, 0.12);
+    --cat-finance: var(--amber);
+    /* Primary Yellow */
+    --cat-finance-muted: rgba(240, 180, 41, 0.12);
+    --cat-personal: var(--petal);
+    --cat-personal-muted: rgba(229, 154, 160, 0.12);
+    --cat-creative: #9F7AEA;
+    /* Vibrant Purple */
+    --cat-creative-muted: rgba(159, 122, 234, 0.12);
+
+    /* Priority indicators */
+    --priority-low: var(--text-tertiary);
+    --priority-medium: var(--teal);
+    --priority-high: var(--sunset);
+    --priority-urgent: var(--clay);
+
+    /* Spacing scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+
+    /* Border radius - Softened */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --radius-full: 9999px;
+
+    /* Transitions */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+
+    /* Shadows */
+    /* Shadows - Softened */
+    --shadow-xs: 0 2px 4px rgba(33, 55, 44, 0.12);
+    --shadow-sm: 0 4px 12px rgba(33, 55, 44, 0.12);
+    --shadow-md: 0 12px 24px rgba(33, 55, 44, 0.12);
+    --shadow-lg: 0 20px 40px rgba(33, 55, 44, 0.14);
+    --shadow-xl: 0 32px 80px rgba(33, 55, 44, 0.16);
+    --shadow-glow: 0 0 24px rgba(111, 155, 134, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.16);
+
+    /* Typography */
+    --font-sans:
+        "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+        sans-serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Monaco, monospace;
+    --font-display: 'Lexend', var(--font-sans);
+
+    /* Font sizes */
+    --text-xs: 0.6875rem;
+    --text-sm: 0.8125rem;
+    --text-base: 0.9375rem;
+    --text-lg: 1.0625rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 2rem;
+
+    /* Garden Engine - Dynamic Time & Season Variables */
+    --time-brightness: 1;
+    --time-saturation: 1;
+    --time-hue-shift: 0deg;
+    --shadow-opacity: 0.3;
+    --shadow-length: 4px;
+    --shadow-angle: 45deg;
+    --celestial-offset: 0px;
+    /* Offset for celestial bodies on mobile */
+
+    /* Mobile layout metrics (overridden by JS when available) */
+    --mobile-tab-bar-height: 0px;
+    --mobile-home-stats-height: 0px;
+
+    /* Seasonal colors (defaults to current) */
+    --seasonal-accent: var(--sage);
+    --seasonal-bg: var(--bg-base);
+    --seasonal-flower: var(--petal);
+    --seasonal-secondary: var(--teal);
+}

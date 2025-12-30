@@ -53,6 +53,7 @@ async function main() {
   // Core assets
   await copyFileIfExists(path.join(root, "styles.css"), path.join(publicDir, "styles.css"));
   await copyFileIfExists(path.join(root, "styles.min.css"), path.join(publicDir, "styles.min.css"));
+  await copyFileIfExists(path.join(root, "styles.bundle.min.css"), path.join(publicDir, "styles.bundle.min.css"));
   await copyFileIfExists(path.join(root, "sw.js"), path.join(publicDir, "sw.js"));
   await copyFileIfExists(path.join(root, "env.js"), path.join(publicDir, "env.js"));
   await copyFileIfExists(path.join(root, "manifest.webmanifest"), path.join(publicDir, "manifest.webmanifest"));

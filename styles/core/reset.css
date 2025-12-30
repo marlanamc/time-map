@@ -1,0 +1,67 @@
+/* Mobile viewport adjustments */
+@media (max-width: 600px) {
+    :root {
+        --celestial-offset: env(safe-area-inset-top, 0px);
+
+        /* Mobile-optimized spacing for better breathing room */
+        --mobile-space-5: 24px;
+        /* Increased from 20px */
+        --mobile-space-6: 32px;
+        /* Increased from 24px */
+        --mobile-space-8: 40px;
+        /* Increased from 32px */
+
+        /* Bottom tab bar height (includes safe area inset) */
+        --mobile-tab-bar-height: calc(64px + env(safe-area-inset-bottom, 0px));
+        /* Fallback height for fixed home stats panel */
+        --mobile-home-stats-height: 110px;
+    }
+}
+
+/* Import Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100%;
+}
+
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: transparent;
+    /* Allow garden-background to show through */
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100%;
+    min-height: 100dvh;
+    /* Proper full height on mobile */
+    overflow-x: hidden;
+    position: relative;
+    transition: background-color var(--duration-normal) var(--ease-out);
+
+    /* Text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+

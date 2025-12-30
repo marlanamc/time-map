@@ -1,0 +1,100 @@
+/* ===================================
+   Mobile Bottom Tab Bar
+   =================================== */
+.mobile-tab-bar {
+    display: none;
+    /* Hidden on desktop */
+}
+
+@media (max-width: 600px) {
+    .mobile-tab-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-around;
+        align-items: stretch;
+        height: calc(60px + env(safe-area-inset-bottom, 0px));
+        padding: 6px env(safe-area-inset-left, 0px) calc(6px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-right, 0px);
+        background: var(--bg-surface);
+        border-top: 1px solid var(--glass-border);
+        z-index: 9999;
+        isolation: isolate;
+    }
+
+    .night-garden .mobile-tab-bar {
+        background: var(--bg-surface);
+        border-top-color: var(--glass-border);
+        backdrop-filter: blur(20px);
+    }
+
+    .mobile-tab {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        background: transparent;
+        border: none;
+        padding: 8px 4px;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        transition: color 0.2s ease;
+        position: relative;
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-tab.active {
+        color: var(--accent);
+    }
+
+    .mobile-tab:active:not(.active) {
+        color: var(--text-secondary);
+    }
+
+    .mobile-tab-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-tab-icon svg {
+        width: 24px;
+        height: 24px;
+        stroke-width: 2;
+    }
+
+    .mobile-tab-label {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+    }
+
+    /* Body double timer should sit above tab bar */
+    .body-double-display {
+        bottom: calc(var(--mobile-tab-bar-height) + var(--space-6));
+        border-radius: var(--radius-lg);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Improve toast positioning on mobile */
+    .toast {
+        bottom: calc(var(--mobile-tab-bar-height) + var(--space-6));
+        left: var(--space-4);
+        right: var(--space-4);
+        transform: translateY(100px);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        max-width: none;
+    }
+
+    .toast.active {
+        transform: translateY(0);
+    }
+}
+

@@ -1,0 +1,11 @@
+/* ===================================
+   Sensory-Friendly Animations
+   =================================== */
+body.sensory-gentle * {
+    transition-duration: var(--duration-slow) !important;
+}
+
+body.sensory-gentle .confetti {
+    opacity: 0.5;
+}
+

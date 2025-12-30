@@ -1,0 +1,45 @@
+/* ===================================
+   Dyslexia-Friendly Font Styles
+   =================================== */
+body.font-dyslexia {
+    --font-sans: "Lexend", "OpenDyslexic", "Comic Sans MS", sans-serif;
+    letter-spacing: 0.05em;
+    word-spacing: 0.1em;
+}
+
+body.font-dyslexia * {
+    line-height: 1.8 !important;
+}
+
+body.font-mono {
+    --font-sans: "JetBrains Mono", "SF Mono", Monaco, monospace;
+}
+
+body.font-readable {
+    --font-sans: "Lexend", "Atkinson Hyperlegible", sans-serif;
+    font-size: 17px;
+}
+
+/* Text Spacing Classes */
+body.spacing-relaxed {
+    letter-spacing: 0.02em;
+    word-spacing: 0.05em;
+}
+
+body.spacing-relaxed p,
+body.spacing-relaxed li,
+body.spacing-relaxed label {
+    line-height: 1.8;
+}
+
+body.spacing-dyslexia {
+    letter-spacing: 0.05em;
+    word-spacing: 0.1em;
+}
+
+body.spacing-dyslexia p,
+body.spacing-dyslexia li,
+body.spacing-dyslexia label {
+    line-height: 2;
+}
+

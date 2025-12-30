@@ -1,0 +1,53 @@
+/* ===================================
+   Theme Picker Styles
+   =================================== */
+
+.theme-picker {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.theme-swatch {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--glass-border);
+    background: var(--bg-surface);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    transition: all var(--duration-fast) var(--ease-out);
+    padding: var(--space-1);
+}
+
+.theme-swatch:hover {
+    border-color: var(--swatch-color);
+    transform: scale(1.05);
+}
+
+.theme-swatch.active {
+    border-color: var(--swatch-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--swatch-color) 30%, transparent);
+}
+
+.theme-swatch:focus-visible {
+    outline: 2px solid var(--swatch-color);
+    outline-offset: 2px;
+}
+
+.swatch-color {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    background: var(--swatch-color);
+}
+
+.swatch-emoji {
+    font-size: 12px;
+    line-height: 1;
+}
+

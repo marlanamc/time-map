@@ -1,0 +1,190 @@
+/* ===================================
+   Background
+   =================================== */
+/* ============================================
+   Garden Background System
+   ============================================ */
+
+.garden-background {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: var(--seasonal-bg);
+    transition: background 2s ease-out;
+}
+
+.garden-sky {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            var(--seasonal-bg) 0%,
+            var(--bg-base) 100%);
+    transition: background 1s ease-out;
+}
+
+/* Time-based sky gradients */
+:root.time-dawn .garden-sky {
+    background: linear-gradient(to bottom,
+            #B8D4E8 0%,
+            #E8C8D8 50%,
+            #F0E8D8 100%);
+}
+
+:root.time-morning .garden-sky {
+    background: linear-gradient(to bottom,
+            #87CEEB 0%,
+            #B0E0E6 50%,
+            #E8F4F8 100%);
+}
+
+:root.time-afternoon .garden-sky {
+    background: linear-gradient(to bottom,
+            #4A90E2 0%,
+            #87CEEB 50%,
+            #E8F4F8 100%);
+}
+
+:root.time-evening .garden-sky {
+    background: linear-gradient(to bottom,
+            #FF8C42 0%,
+            #FFB347 30%,
+            #F4A989 70%,
+            #D9C8B8 100%);
+}
+
+:root.time-night .garden-sky {
+    background: linear-gradient(to bottom,
+            #0A1A2E 0%,
+            #16213E 40%,
+            #1A2332 100%);
+}
+
+.garden-backdrop {
+    position: absolute;
+    inset: 0;
+    background-position: center bottom;
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    transition: opacity 2s ease-out, transform 0.3s ease-out;
+}
+
+.garden-midground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(to top,
+            var(--seasonal-accent) 0%,
+            transparent 100%);
+    opacity: 0.08;
+    transition: opacity 2s ease-out;
+}
+
+.garden-effects {
+    display: none;
+    /* Replaced by global overlay */
+}
+
+/* Global Garden Effects Overlay (Particles, Butterflies, Petals) */
+.garden-effects-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2000;
+    /* Over everything */
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Celestial Bodies */
+.celestial-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    /* Constrain to top area only */
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 110;
+    /* Below header (200) but above main content */
+}
+
+.sun,
+.moon {
+    position: absolute;
+    font-size: 40px;
+    filter: drop-shadow(0 0 20px currentColor);
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+/* Position sun/moon higher in sky and away from center content */
+@media (max-width: 600px) {
+
+    .sun,
+    .moon {
+        font-size: 36px;
+        opacity: 0.85;
+    }
+}
+
+.sun {
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+}
+
+.moon {
+    color: #F0F0F0;
+    text-shadow: 0 0 30px rgba(240, 240, 240, 0.6);
+}
+
+/* Show sun during day */
+:root.time-dawn .sun,
+:root.time-morning .sun,
+:root.time-afternoon .sun,
+:root.time-evening .sun {
+    opacity: 1;
+}
+
+/* Show moon at night */
+:root.time-night .moon {
+    opacity: 1;
+}
+
+/* Stars and Fireflies at night */
+:root.time-night .garden-sky::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.98;
+    /* Almost full opacity */
+    background-image:
+        /* Far stars - diverse sizes for depth */
+        radial-gradient(circle at 12% 15%, rgba(255, 255, 255, 1) 0 1.5px, transparent 3px),
+        radial-gradient(circle at 35% 65%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2.5px),
+        radial-gradient(circle at 58% 25%, rgba(220, 235, 255, 1) 0 1.8px, transparent 3.5px),
+        radial-gradient(circle at 75% 82%, rgba(255, 255, 255, 0.85) 0 1.2px, transparent 2.8px),
+        /* Brighter accent stars */
+        radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 1) 0 1.4px, transparent 3px),
+        radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 1) 0 1.6px, transparent 3.5px),
+        /* Fireflies */
+        radial-gradient(circle at 15% 85%, rgba(255, 225, 120, 0.95) 0 2.5px, transparent 5px),
+        radial-gradient(circle at 48% 92%, rgba(255, 225, 120, 0.8) 0 2px, transparent 4.5px);
+    background-size: 300px 300px, 350px 350px, 400px 400px, 320px 320px, 450px 450px, 380px 380px, 500px 500px, 420px 420px;
+    filter: brightness(1.2) contrast(1.2);
+    animation: star-twinkling 12s ease-in-out infinite;
+}
+
+/* Compatibility with old styles */
+.bg-canvas,
+.bg-gradient,
+.grid-pattern {
+    display: none;
+    /* Hide old background elements */
+}
+

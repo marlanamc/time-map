@@ -1,0 +1,87 @@
+/* ===================================
+   Reduced Emoji Mode
+   =================================== */
+body.reduce-emojis .streak-fire,
+body.reduce-emojis .celebration-emoji,
+body.reduce-emojis .review-emoji,
+body.reduce-emojis .empty-state-emoji {
+    display: none !important;
+}
+
+body.reduce-emojis .streak-icon,
+body.reduce-emojis .celebration-icon {
+    display: flex !important;
+}
+
+body.reduce-emojis .category-filter::before,
+body.reduce-emojis .goal-tag::before {
+    content: "" !important;
+}
+
+/* Use colored dots instead of emojis for categories */
+body.reduce-emojis .category-filter[data-category]::before,
+body.reduce-emojis [data-category]::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: var(--space-2);
+    display: inline-block;
+}
+
+body.reduce-emojis [data-category="career"]::before {
+    background: var(--cat-career);
+}
+
+body.reduce-emojis [data-category="health"]::before {
+    background: var(--cat-health);
+}
+
+body.reduce-emojis [data-category="finance"]::before {
+    background: var(--cat-finance);
+}
+
+body.reduce-emojis [data-category="personal"]::before {
+    background: var(--cat-personal);
+}
+
+body.reduce-emojis [data-category="creative"]::before {
+    background: var(--cat-creative);
+}
+
+/* Priority indicators without emojis */
+body.reduce-emojis .goal-tag.priority-low {
+    border-left: 3px solid var(--success);
+}
+
+body.reduce-emojis .goal-tag.priority-medium {
+    border-left: 3px solid var(--info);
+}
+
+body.reduce-emojis .goal-tag.priority-high {
+    border-left: 3px solid var(--warning);
+}
+
+body.reduce-emojis .goal-tag.priority-urgent {
+    border-left: 3px solid var(--danger);
+}
+
+/* Status indicators without emojis */
+body.reduce-emojis .status-btn::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: var(--space-2);
+    background: var(--status-color, var(--text-tertiary));
+}
+
+/* Hide emoji-only elements */
+body.reduce-emojis .swatch-emoji {
+    display: none;
+}
+
+body.reduce-emojis .theme-swatch {
+    height: 40px;
+}
+

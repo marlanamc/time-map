@@ -1,0 +1,8 @@
+/* ===================================
+   Focus Mode
+   =================================== */
+body.focus-mode .month-card:not(.current) {
+    opacity: 0.25;
+    filter: blur(2px);
+}
+

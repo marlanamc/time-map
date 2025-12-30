@@ -1,0 +1,69 @@
+/* ===================================
+   Accent Color Themes
+   =================================== */
+
+/* Teal (Default) - already set in :root */
+body.theme-teal {
+    --accent: var(--sky);
+    --accent-hover: #9CC6E6;
+    --accent-muted: rgba(140, 183, 217, 0.18);
+    --accent-subtle: rgba(140, 183, 217, 0.10);
+    --shadow-glow: 0 0 24px rgba(140, 183, 217, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(140, 183, 217, 0.16);
+}
+
+/* Coral / Sunset */
+body.theme-coral {
+    --accent: var(--terracotta);
+    --accent-hover: #D97B59;
+    --accent-muted: rgba(200, 107, 74, 0.16);
+    --accent-subtle: rgba(200, 107, 74, 0.08);
+    --shadow-glow: 0 0 24px rgba(200, 107, 74, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(200, 107, 74, 0.14);
+}
+
+/* Sage / Forest */
+body.theme-sage {
+    --accent: #6F9B86;
+    --accent-hover: #7CAC96;
+    --accent-muted: rgba(111, 155, 134, 0.18);
+    --accent-subtle: rgba(111, 155, 134, 0.09);
+    --shadow-glow: 0 0 24px rgba(111, 155, 134, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.16);
+}
+
+/* Amber / Golden Hour */
+body.theme-amber {
+    --accent: var(--sunset);
+    --accent-hover: #F5954E;
+    /* brighter orange on hover */
+    --accent-muted: rgba(231, 125, 62, 0.18);
+    /* more vibrant orange muted */
+    --accent-subtle: rgba(231, 125, 62, 0.10);
+    /* subtle warm glow */
+    --shadow-glow: 0 0 28px rgba(231, 125, 62, 0.28);
+    /* stronger warm glow */
+    --shadow-glow-sm: 0 0 14px rgba(231, 125, 62, 0.18);
+    /* soft warm glow */
+}
+
+/* Clay / Terracotta */
+body.theme-clay {
+    --accent: var(--earth);
+    --accent-hover: #C57A58;
+    --accent-muted: rgba(180, 106, 74, 0.16);
+    --accent-subtle: rgba(180, 106, 74, 0.08);
+    --shadow-glow: 0 0 24px rgba(180, 106, 74, 0.20);
+    --shadow-glow-sm: 0 0 12px rgba(180, 106, 74, 0.14);
+}
+
+/* Violet */
+body.theme-violet {
+    --accent: #8B5CF6;
+    --accent-hover: #9D6DF7;
+    --accent-muted: rgba(139, 92, 246, 0.18);
+    --accent-subtle: rgba(139, 92, 246, 0.10);
+    --shadow-glow: 0 0 24px rgba(139, 92, 246, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(139, 92, 246, 0.16);
+}
+

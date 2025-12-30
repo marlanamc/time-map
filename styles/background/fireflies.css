@@ -1,0 +1,234 @@
+        radial-gradient(circle at 72% 78%, rgba(255, 255, 255, 0.58) 0 1px, transparent 3px),
+        radial-gradient(circle at 88% 40%, rgba(255, 255, 255, 0.50) 0 1px, transparent 3px);
+    background-size: 220px 220px, 260px 260px, 240px 240px, 280px 280px, 300px 300px;
+    filter: blur(0.25px);
+    animation: firefly-twinkle 7s ease-in-out infinite;
+}
+
+@keyframes grain-shift {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    25% {
+        transform: translate3d(-0.6%, 0.4%, 0);
+    }
+
+    50% {
+        transform: translate3d(0.4%, -0.6%, 0);
+    }
+
+    75% {
+        transform: translate3d(0.6%, 0.2%, 0);
+    }
+
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bg-canvas::after {
+        animation: none;
+    }
+}
+
+@keyframes pollen-drift {
+    0% {
+        transform: translate3d(-1%, -2%, 0);
+    }
+
+    50% {
+        transform: translate3d(2%, 1%, 0);
+    }
+
+    100% {
+        transform: translate3d(-1%, -2%, 0);
+    }
+}
+
+@keyframes firefly-twinkle {
+    0% {
+        opacity: 0.4;
+        transform: translate3d(0, 0, 0);
+    }
+
+    50% {
+        opacity: 1.0;
+        transform: translate3d(0.2%, -0.3%, 0);
+    }
+
+    100% {
+        opacity: 0.4;
+        transform: translate3d(-0.3%, 0.4%, 0);
+    }
+}
+
+@keyframes star-twinkling {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.95);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 0.5;
+        transform: scale(0.95);
+    }
+}
+
+/* Night Garden (dark mode) - Moonlight Theme */
+:root.night-garden {
+    --bg-base: #0A1A2E;
+    /* dark moonlight blue */
+    --bg-elevated: #16213E;
+    /* deeper moonlit shadows */
+    --bg-surface: rgba(22, 33, 62, 0.85);
+    /* moonlit glass */
+    --bg-hover: rgba(30, 45, 75, 0.85);
+    /* brighter moon glow */
+    --bg-active: rgba(40, 55, 85, 0.85);
+    /* active moonlight */
+
+    --glass-bg: rgba(16, 26, 50, 0.75);
+    --glass-border: rgba(140, 180, 220, 0.25);
+    /* moonlight border glow */
+    --glass-shine: rgba(180, 210, 240, 0.1);
+    /* soft moonlight shine */
+
+    --text-primary: #E2E8F0;
+    /* moonlit mist */
+    --text-secondary: #94A3B8;
+    /* cool silver */
+    --text-tertiary: #A8B8C8;
+    /* brighter starlight - WCAG AA compliant (was #64748B) */
+    --text-ghost: #8A9AA8;
+    /* lighter void - WCAG AA compliant (was #334155) */
+
+    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.6);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.7);
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.75);
+    --shadow-xl: 0 36px 90px rgba(0, 0, 0, 0.8);
+
+    --shadow-glow: 0 0 28px rgba(240, 180, 65, 0.22);
+    /* warm string light glow */
+    --shadow-glow-sm: 0 0 14px rgba(240, 180, 65, 0.16);
+    /* soft garden lantern */
+    --shadow-glow-blue: 0 0 24px rgba(140, 180, 220, 0.18);
+    /* blue flower luminescence */
+
+    /* Garden Party Accents */
+    --teal: #6BA3B5;
+    /* brighter blue-green */
+    --sage: #6B8E7A;
+    /* brighter garden green */
+    --sunset: #D68A52;
+    /* warm golden orange glow */
+    --petal: #B88A8F;
+    /* soft rose garden */
+    --amber: #E5A963;
+    /* golden string lights */
+    --terracotta: var(--sunset);
+    --earth: var(--sunset);
+    --sky: #8CB4D9;
+    /* vibrant blue flowers */
+    --blue-flower: #7BA8D4;
+    /* glowing blue hydrangea */
+
+    --accent: var(--amber);
+    /* warm garden lighting */
+    --accent-hover: #E5B888;
+    /* brighter golden glow */
+    --accent-muted: rgba(212, 165, 116, 0.18);
+    --accent-subtle: rgba(212, 165, 116, 0.09);
+
+    /* Month card transparency for night mode */
+    --month-card-bg: rgba(22, 33, 62, 0.35);
+    --month-card-bg-hover: rgba(30, 45, 75, 0.5);
+    --month-card-past-grey: rgba(100, 100, 120, 0.15);
+    --month-card-past-grey-hover: rgba(100, 100, 120, 0.2);
+}
+
+body.hide-affirmation .sidebar-section[data-section="affirmation"],
+body.hide-affirmation .affirmation-panel {
+    display: none;
+}
+
+body.hide-whats-next .sidebar-section[data-section="upcoming"],
+body.hide-whats-next .whats-next {
+    display: none;
+}
+
+body.hide-achievements .sidebar-section[data-section="achievements"],
+body.hide-achievements .achievements-panel {
+    display: none;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* WCAG AA: High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    :root {
+        --text-tertiary: var(--text-primary);
+        --text-ghost: var(--text-secondary);
+        --glass-border: var(--text-secondary);
+    }
+
+    :root.night-garden {
+        --text-tertiary: var(--text-primary);
+        --text-ghost: var(--text-secondary);
+    }
+
+    /* Strengthen all borders in high contrast mode */
+    input,
+    textarea,
+    select,
+    .goal-checkbox,
+    .category-filter,
+    button {
+        border-width: 2px !important;
+    }
+}
+
+::selection {
+    background: var(--accent-muted);
+    color: var(--text-primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-hover);
+    border-radius: var(--radius-full);
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bg-active);
+    background-clip: content-box;
+}
+

@@ -1,0 +1,172 @@
+/* ============================================
+   Sound Controls
+   ============================================ */
+
+.sound-controls {
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    background: var(--glass-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+}
+
+.sound-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    transition: background var(--duration-fast) var(--ease-out);
+}
+
+.sound-toggle:hover {
+    background: var(--bg-hover);
+}
+
+.sound-toggle:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.sound-icon {
+    font-size: 20px;
+}
+
+.sound-volume-container {
+    margin-top: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.sound-slider {
+    flex: 1;
+    height: 44px;
+    /* Match thumb height for easier targeting */
+    border-radius: var(--radius-full);
+    background: transparent;
+    /* Transparent, track is in ::before */
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+}
+
+/* Create visible track using pseudo-element */
+.sound-slider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--bg-hover);
+    border-radius: var(--radius-full);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.sound-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 44px;
+    /* WCAG 2.2 AA compliant touch target */
+    height: 44px;
+    border-radius: 50%;
+    background: var(--seasonal-accent);
+    cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-out);
+    /* Add visual indicator that size increased */
+    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.9);
+    /* Inner white circle */
+}
+
+.sound-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.sound-slider::-moz-range-thumb {
+    width: 44px;
+    /* WCAG 2.2 AA compliant touch target */
+    height: 44px;
+    border-radius: 50%;
+    background: var(--seasonal-accent);
+    border: none;
+    cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-out);
+    /* Add visual indicator that size increased */
+    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.9);
+    /* Inner white circle */
+}
+
+.sound-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+.volume-label {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    min-width: 35px;
+    text-align: right;
+}
+
+/* Mobile-specific garden optimizations */
+@media (max-width: 600px) {
+    .sound-controls {
+        margin-top: var(--mobile-space-5);
+        padding: var(--space-4);
+    }
+
+    .sound-toggle {
+        padding: var(--space-4);
+        gap: var(--space-3);
+        font-size: var(--text-base);
+        font-weight: 600;
+        min-height: 52px;
+    }
+
+    .sound-icon {
+        font-size: 24px;
+        /* Bigger icon */
+    }
+
+    .time-garden-plot {
+        margin-top: var(--mobile-space-5);
+        padding: var(--space-4);
+    }
+
+    .plot-label {
+        font-size: var(--text-base);
+        font-weight: 600;
+        margin-bottom: var(--space-4);
+        color: var(--text-primary);
+    }
+
+    .hour-blocks {
+        gap: var(--space-4);
+    }
+
+    /* Ensure celestial bodies are visible and don't interfere with touch */
+    .sun,
+    .moon {
+        font-size: 32px;
+        /* Bigger on mobile */
+        pointer-events: none;
+        /* Prevent touch interference */
+    }
+
+    /* Disable parallax transform on mobile (already done in JS) */
+    .garden-backdrop,
+    .garden-midground {
+        transform: none !important;
+    }
+}
+

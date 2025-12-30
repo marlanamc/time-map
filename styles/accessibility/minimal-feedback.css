@@ -1,0 +1,13 @@
+/* ===================================
+   Minimal Feedback Mode
+   =================================== */
+body.feedback-minimal .confetti-container,
+body.feedback-minimal .celebration-overlay {
+    display: none !important;
+}
+
+body.feedback-minimal .toast {
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-sm);
+}
+

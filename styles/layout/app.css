@@ -1,0 +1,18 @@
+/* ===================================
+   App Layout
+   =================================== */
+.app {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas:
+        "sidebar main";
+    height: 100vh;
+    height: 100dvh;
+    gap: var(--space-4);
+    padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+    padding-right: calc(var(--space-4) + env(safe-area-inset-right, 0px));
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    padding-left: calc(var(--space-4) + env(safe-area-inset-left, 0px));
+}
+

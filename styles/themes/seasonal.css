@@ -1,0 +1,131 @@
+/* ============================================
+   Garden Engine - Seasonal & Time Themes
+   ============================================ */
+
+/* Seasonal Color Palettes */
+:root.season-spring {
+    --seasonal-accent: #7EC8A3;
+    /* fresh green */
+    --seasonal-bg: #F0F9F4;
+    /* light spring green */
+    --seasonal-flower: #FFB7D5;
+    /* cherry blossom pink */
+    --seasonal-secondary: #A8D5BA;
+    --seasonal-accent-rgb: 126, 200, 163;
+    /* soft mint */
+}
+
+:root.season-summer {
+    --seasonal-accent-rgb: 74, 155, 141;
+    --seasonal-accent: #4A9B8D;
+    /* deep garden green */
+    --seasonal-bg: #E8F8F0;
+    /* lush green tint */
+    --seasonal-flower: #FFC940;
+    /* sunflower yellow */
+    --seasonal-secondary: #68B5A0;
+    /* seafoam */
+}
+
+:root.season-fall {
+    --seasonal-accent: #D4A574;
+    /* golden brown */
+    --seasonal-bg: #F5EDE0;
+    /* warm cream */
+    --seasonal-flower: #E87461;
+    /* autumn orange */
+    --seasonal-secondary: #C4915F;
+    /* harvest gold */
+}
+
+:root.season-winter {
+    --seasonal-accent: #8BA8B8;
+    /* cool blue-gray */
+    --seasonal-bg: #EDF4F7;
+    /* frosty white */
+    --seasonal-flower: #C9E4EC;
+    /* ice blue */
+    --seasonal-secondary: #A1B5C1;
+    /* winter sky */
+}
+
+/* Time of Day Visual Effects - Desktop only for performance */
+@media (min-width: 601px) {
+    :root.time-dawn {
+        /* Cool, dim morning light */
+        filter: brightness(var(--time-brightness)) saturate(var(--time-saturation)) hue-rotate(var(--time-hue-shift));
+    }
+
+    :root.time-morning {
+        /* Bright, vibrant daylight */
+        filter: brightness(var(--time-brightness)) saturate(var(--time-saturation)) hue-rotate(var(--time-hue-shift));
+    }
+
+    :root.time-afternoon {
+        /* Warm, peak sunshine */
+        filter: brightness(var(--time-brightness)) saturate(var(--time-saturation)) hue-rotate(var(--time-hue-shift));
+    }
+
+    :root.time-evening {
+        /* Golden hour warmth */
+        filter: brightness(var(--time-brightness)) saturate(var(--time-saturation)) hue-rotate(var(--time-hue-shift));
+    }
+
+    :root.time-night {
+        /* Moonlit blue tones - less aggressive brightness reduction to keep effects visible */
+        filter: brightness(0.9) saturate(var(--time-saturation)) hue-rotate(var(--time-hue-shift));
+    }
+}
+
+/* Mobile: no expensive filters - use background color tints only */
+@media (max-width: 600px) {
+
+    :root.time-dawn,
+    :root.time-morning,
+    :root.time-afternoon,
+    :root.time-evening,
+    :root.time-night {
+        filter: none;
+    }
+}
+
+/* Goal cards get dynamic shadows based on sun position */
+.goal-card,
+.day-planter,
+.anchor-card {
+    box-shadow:
+        var(--shadow-length) var(--shadow-length) calc(var(--shadow-length) * 2) rgba(0, 0, 0, var(--shadow-opacity)),
+        var(--shadow-sm);
+    transition: box-shadow var(--duration-slow) var(--ease-out);
+}
+
+/* Reduce animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    :root.time-dawn,
+    :root.time-morning,
+    :root.time-afternoon,
+    :root.time-evening,
+    :root.time-night {
+        filter: none;
+    }
+
+    .goal-card,
+    .day-planter,
+    .anchor-card {
+        transition: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+
+    :root.time-dawn,
+    :root.time-morning,
+    :root.time-afternoon,
+    :root.time-evening,
+    :root.time-night {
+        filter: none;
+    }
+}
+

@@ -1,0 +1,310 @@
+/* ============================================
+   Time Visualizations - ADHD Time Blindness Support
+   ============================================ */
+
+/* Time Garden Plot - Hour Blocks */
+.time-garden-plot {
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    background: var(--glass-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+}
+
+.plot-label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-3);
+}
+
+.hour-blocks,
+.hour-blocks-container {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hour-block {
+    font-size: 24px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: all var(--duration-normal) var(--ease-out);
+    cursor: help;
+}
+
+.hour-block.hour-past {
+    filter: saturate(1.2) brightness(1.1);
+    animation: bloom-complete 0.5s ease-out;
+}
+
+.hour-block.hour-current {
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 8px var(--seasonal-flower));
+    animation: bloom-pulse 2s ease-in-out infinite;
+}
+
+.hour-block.hour-future {
+    opacity: 0.5;
+    filter: saturate(0.6);
+}
+
+.hour-block:hover {
+    transform: scale(1.2);
+}
+
+/* Mobile: Larger touch targets, bigger spacing */
+@media (max-width: 600px) {
+
+    .hour-blocks,
+    .hour-blocks-container {
+        gap: var(--space-3);
+        /* Increase gap from 8px to 12px */
+    }
+
+    .hour-block {
+        width: 44px;
+        /* WCAG compliant */
+        height: 44px;
+        font-size: 28px;
+        /* Bigger emoji */
+    }
+
+    /* Reduce transform scale on mobile to prevent overflow */
+    .hour-block.hour-current {
+        transform: scale(1.15);
+        /* Was 1.3 - prevent overlapping */
+    }
+
+    .hour-block:hover {
+        transform: scale(1.1);
+        /* Was 1.2 */
+    }
+}
+
+@keyframes bloom-complete {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes bloom-pulse {
+
+    0%,
+    100% {
+        transform: scale(1.3);
+        filter: drop-shadow(0 0 8px var(--seasonal-flower));
+    }
+
+    50% {
+        transform: scale(1.4);
+        filter: drop-shadow(0 0 12px var(--seasonal-flower));
+    }
+}
+
+/* Mobile-optimized animations - disable expensive effects */
+@media (max-width: 600px),
+(pointer: coarse) {
+
+    body[data-garden-quality="low"] .hour-block.hour-current,
+    body[data-garden-quality="medium"] .hour-block.hour-current {
+        /* Remove expensive drop-shadow filter */
+        filter: none;
+        /* Use simpler transform only */
+        transform: scale(1.2);
+        /* Replace with border glow (cheaper) */
+        outline: 2px solid var(--seasonal-flower);
+        outline-offset: 2px;
+        animation: none;
+    }
+
+    /* Disable time transition animations on low-end mobile */
+    body[data-garden-quality="low"] .time-transition {
+        animation: none !important;
+        filter: none !important;
+    }
+}
+
+/* Now Beam - Hidden per user preference */
+.now-beam {
+    display: none !important;
+}
+
+/* Time Transitions */
+.time-transition {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: var(--space-6) var(--space-8);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--glass-border);
+    box-shadow: var(--shadow-xl);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    color: var(--text-primary);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
+    pointer-events: none;
+}
+
+.time-transition.transition-sun-intensifies {
+    animation: sun-intensify 3s ease-out;
+}
+
+.time-transition.transition-golden-hour {
+    animation: golden-glow 3s ease-out;
+}
+
+.time-transition.transition-moonrise {
+    animation: moon-rise 3s ease-out;
+}
+
+.time-transition.transition-dawn {
+    animation: dawn-break 3s ease-out;
+}
+
+.time-transition.transition-day-awakening {
+    animation: day-awaken 3s ease-out;
+}
+
+@keyframes sun-intensify {
+    0% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.5) saturate(1.3);
+    }
+
+    100% {
+        filter: brightness(1);
+    }
+}
+
+@keyframes golden-glow {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    50% {
+        filter: hue-rotate(30deg) saturate(1.4);
+    }
+
+    100% {
+        filter: hue-rotate(15deg);
+    }
+}
+
+@keyframes moon-rise {
+    0% {
+        transform: translate(-50%, -50%) translateY(20px);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) translateY(0);
+    }
+}
+
+@keyframes dawn-break {
+    0% {
+        filter: brightness(0.5) saturate(0.7);
+    }
+
+    100% {
+        filter: brightness(1) saturate(1);
+    }
+}
+
+@keyframes day-awaken {
+    0% {
+        filter: brightness(0.7);
+    }
+
+    100% {
+        filter: brightness(1.1) saturate(1.1);
+    }
+}
+
+/* Time Anchor Points */
+.time-anchor-now {
+    position: relative;
+    animation: time-anchor-pulse 2s ease-in-out infinite;
+}
+
+@keyframes time-anchor-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(255, 223, 128, 0.6);
+        border-color: rgba(255, 223, 128, 0.8);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(255, 223, 128, 0.8);
+        border-color: rgba(255, 223, 128, 1);
+    }
+}
+
+.time-anchor-upcoming {
+    border-left: 3px solid var(--seasonal-accent);
+}
+
+.time-anchor-past {
+    opacity: 0.6;
+    filter: saturate(0.7);
+}
+
+/* Enhanced Garden Bloom Animations */
+.petal {
+    transition: transform 0.5s var(--ease-out), opacity 0.5s var(--ease-out);
+    transform-origin: center;
+}
+
+.flower-stem {
+    transition: d 1s var(--ease-out);
+}
+
+.flower-center {
+    transition: filter 0.5s var(--ease-out);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+
+    .now-beam,
+    .time-transition,
+    .time-anchor-now,
+    .hour-block.hour-current,
+    .hour-block.hour-past {
+        animation: none !important;
+    }
+
+    .hour-block.hour-current {
+        transform: scale(1.1);
+    }
+}
+

@@ -1,0 +1,21 @@
+/* ===================================
+   Reduced Motion Enhancements
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+    .body-double-display {
+        animation: none;
+    }
+
+    .confetti {
+        display: none !important;
+    }
+
+    .celebration-emoji {
+        animation: none !important;
+    }
+
+    * {
+        scroll-behavior: auto !important;
+    }
+}
+

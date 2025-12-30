@@ -1,0 +1,442 @@
+/* ===================================
+   Quick Add (Plant Something)
+   =================================== */
+.quick-add-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    z-index: 5000;
+    background: rgba(253, 251, 247, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.night-garden .quick-add-overlay {
+    background: rgba(7, 17, 14, 0.62);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.quick-add-container {
+    width: min(560px, 100%);
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(180, 106, 74, 0.18);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-lg);
+}
+
+.night-garden .quick-add-container {
+    background: rgba(10, 22, 18, 0.72);
+    border: 1px solid rgba(140, 183, 217, 0.14);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+}
+
+.quick-add-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.quick-add-emoji {
+    font-size: 1.25rem;
+}
+
+.quick-add-label {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.quick-add-overlay input#quickAddInput {
+    width: 100%;
+    padding: var(--space-4);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: var(--text-lg);
+    outline: none;
+    box-shadow: inset 0 0 0 1px rgba(180, 106, 74, 0.08);
+}
+
+.night-garden .quick-add-overlay input#quickAddInput {
+    background: rgba(7, 17, 14, 0.45);
+    border: 1px solid rgba(140, 183, 217, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(140, 183, 217, 0.08);
+}
+
+.quick-add-overlay input#quickAddInput:focus {
+    border-color: rgba(111, 155, 134, 0.55);
+    box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+.quick-add-tip {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+
+body.focus-mode .month-card.current {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+body.focus-mode .sidebar>*:not(.now-panel) {
+    opacity: 0.4;
+}
+
+/* Focus Mode: hide chrome, hover-reveal */
+.focus-reveal-zone {
+    position: fixed;
+    z-index: 2000;
+    background: transparent;
+    pointer-events: none;
+}
+
+.focus-reveal-top {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+
+.focus-reveal-left {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 10px;
+}
+
+body.focus-mode .focus-reveal-zone {
+    pointer-events: auto;
+}
+
+body.focus-mode .focus-handle {
+    display: flex;
+}
+
+.focus-handle {
+    position: fixed;
+    top: var(--space-3);
+    left: var(--space-3);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-secondary);
+    align-items: center;
+    justify-content: center;
+    z-index: 2100;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+    opacity: 0.4;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.focus-handle::before {
+    content: "≡";
+    font-size: 16px;
+    line-height: 1;
+}
+
+.focus-handle:hover,
+.focus-handle:focus-visible {
+    opacity: 1;
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.12);
+    outline: none;
+}
+
+body.focus-mode.focus-ui-revealed .focus-handle {
+    opacity: 0.9;
+}
+
+body.focus-mode {
+    --focus-header-height: 84px;
+    --focus-controlbar-height: 56px;
+}
+
+body.focus-mode .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "main";
+}
+
+body.focus-mode .sidebar,
+body.focus-mode .header {
+    position: fixed;
+    grid-area: auto;
+    z-index: 1600;
+}
+
+body.focus-mode .header {
+    top: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
+}
+
+body.focus-mode .sidebar {
+    top: calc(var(--space-4) + var(--focus-header-height) + var(--space-4));
+    left: var(--space-4);
+    bottom: var(--space-4);
+    width: 280px;
+    max-height: calc(100vh - (var(--space-4) * 2) - var(--focus-header-height) - var(--space-4));
+}
+
+body.focus-mode .control-bar {
+    position: fixed;
+    top: calc(var(--space-4) + var(--focus-header-height) + var(--space-3));
+    left: var(--space-4);
+    right: var(--space-4);
+    z-index: 1550;
+}
+
+body.focus-mode:not(.focus-ui-revealed) .header,
+body.focus-mode:not(.focus-ui-revealed) .control-bar {
+    transform: translateY(-16px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.focus-mode:not(.focus-ui-revealed) .sidebar {
+    transform: translateX(-16px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.focus-mode .header,
+body.focus-mode .control-bar,
+body.focus-mode .sidebar {
+    transition:
+        opacity var(--duration-normal) var(--ease-out),
+        transform var(--duration-normal) var(--ease-out);
+}
+
+/* Visibility toggles */
+body.hide-header .header {
+    display: none;
+}
+
+/* Hide layout chrome by default (show on hover/focus) */
+#hideHeaderBtn,
+.sidebar-hide-btn {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-2px);
+    transition:
+        opacity var(--duration-fast) var(--ease-out),
+        transform var(--duration-fast) var(--ease-out),
+        background var(--duration-fast) var(--ease-out),
+        color var(--duration-fast) var(--ease-out),
+        border-color var(--duration-fast) var(--ease-out);
+}
+
+.header:hover #hideHeaderBtn,
+.header:focus-within #hideHeaderBtn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.header #hideHeaderBtn:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.sidebar:hover .sidebar-hide-btn,
+.sidebar:focus-within .sidebar-hide-btn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.sidebar .sidebar-hide-btn:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* Quick "show top bar" handle (when header is hidden, not Focus mode) */
+.layout-handle {
+    position: fixed;
+    top: var(--space-3);
+    right: var(--space-3);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-secondary);
+    align-items: center;
+    justify-content: center;
+    z-index: 2100;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.layout-handle::before {
+    content: "▾";
+    font-size: 16px;
+    line-height: 1;
+}
+
+.layout-handle:hover,
+.layout-handle:focus-visible {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.12);
+    outline: none;
+    transform: translateY(1px);
+}
+
+body.focus-mode .layout-handle {
+    display: none !important;
+}
+
+/* Quick "show sidebar" handle (when sidebar is hidden, not Focus mode) */
+.sidebar-handle {
+    position: fixed;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2100;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.sidebar-handle::before {
+    content: "›";
+    font-size: 18px;
+    line-height: 1;
+}
+
+.sidebar-handle:hover,
+.sidebar-handle:focus-visible {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.12);
+    outline: none;
+}
+
+body.focus-mode .sidebar-handle {
+    display: none !important;
+}
+
+body.hide-control-bar .control-bar {
+    display: none;
+}
+
+body.hide-sidebar .sidebar {
+    display: none;
+}
+
+body.hide-sidebar .app {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "header"
+        "main";
+}
+
+body.hide-now-panel .now-panel {
+    display: none;
+}
+
+body.focus-mode #hideHeaderBtn {
+    display: none;
+}
+
+.sidebar-hide-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: var(--radius-full);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    align-self: flex-end;
+    box-shadow: none;
+}
+
+.sidebar-hide-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+body.focus-mode .sidebar-hide-btn {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
+
+    /* Mobile Focus Mode: avoid hover-reveal + fixed overlays */
+    body.focus-mode .focus-reveal-zone,
+    body.focus-mode .focus-handle {
+        display: none !important;
+    }
+
+    body.focus-mode .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        grid-template-areas:
+            "header"
+            "main"
+            "sidebar";
+    }
+
+    body.focus-mode .header,
+    body.focus-mode .control-bar,
+    body.focus-mode .sidebar {
+        position: static;
+        transform: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    /* Keep focus mode calm on mobile: simplify sidebar instead of hiding */
+    body.focus-mode .sidebar {
+        display: flex !important;
+        /* Simplify sidebar in focus mode - reduce visual noise */
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    body.focus-mode .sidebar-section {
+        opacity: 0.85;
+    }
+
+    body.focus-mode .now-panel {
+        padding: var(--space-4);
+    }
+
+    /* Hide some decorative elements in focus mode */
+    body.focus-mode .garden-bloom {
+        opacity: 0.7;
+    }
+
+    body.focus-mode .time-stats {
+        opacity: 0.8;
+    }
+}
+

@@ -8,13 +8,22 @@ import { SimpleDayViewRenderer } from "./SimpleDayViewRenderer";
 import { PlannerDayViewRenderer } from "./PlannerDayViewRenderer";
 import { DragDropManager } from "./DragDropManager";
 
-// This will be injected from app.ts
+/**
+ * Application configuration interface
+ * @remarks This configuration is injected from app.ts
+ */
 interface AppConfig {
   CATEGORIES: Record<string, { emoji: string; label: string; color: string }>;
   LEVELS: Record<string, { emoji: string; label: string }>;
   PRIORITIES: Record<string, { symbol: string }>;
 }
 
+/**
+ * Main controller for the Day View component
+ * @remarks Manages the day view lifecycle, rendering, and user interactions.
+ * Supports multiple view styles (timeline, simple, planner) and handles
+ * drag-and-drop, keyboard navigation, and undo/redo operations.
+ */
 export class DayViewController {
   private container: HTMLElement;
   private callbacks: DayViewCallbacks;
@@ -42,10 +51,16 @@ export class DayViewController {
   // Options
   private options: DayViewOptions;
 
+  /**
+   * Creates a new DayViewController instance
+   * @param container - The DOM element that will contain the day view
+   * @param callbacks - Callback functions for handling user interactions
+   * @param _config - Application configuration (unused but kept for interface compatibility)
+   * @param options - Optional configuration overrides for the day view
+   */
   constructor(container: HTMLElement, callbacks: DayViewCallbacks, _config: AppConfig, options: Partial<DayViewOptions> = {}) {
     this.container = container;
     this.callbacks = callbacks;
-    // this.config = config;
     this.boundHandleClick = (e: Event) => this.handleClick(e);
     this.boundHandleKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
 
@@ -101,7 +116,9 @@ export class DayViewController {
   }
 
   /**
-   * Mount the day view (set up event listeners)
+   * Mount the day view and set up event listeners
+   * @remarks Should only be called once. Subsequent calls are ignored.
+   * Sets up resize observers, time update intervals, and DOM event delegation.
    */
   mount(): void {
     if (this.isMounted) return;
@@ -129,7 +146,10 @@ export class DayViewController {
   }
 
   /**
-   * Unmount the day view (cleanup)
+   * Unmount the day view and perform cleanup
+   * @remarks Clears intervals, disconnects observers, removes event listeners,
+   * and cleans up drag-and-drop handlers. Should be called before removing
+   * the component from the DOM.
    */
   unmount(): void {
     if (!this.isMounted) return;
@@ -152,7 +172,11 @@ export class DayViewController {
   }
 
   /**
-   * Set goals and render
+   * Set goals for a specific date and trigger rendering
+   * @param date - The date to display goals for
+   * @param goals - Array of goals to display
+   * @remarks Automatically determines whether to perform initial render or update
+   * based on mount status. Sets up drag-and-drop after rendering.
    */
   setGoals(date: Date, goals: Goal[]): void {
     this.currentDate = date;
@@ -200,7 +224,9 @@ export class DayViewController {
   }
 
   /**
-   * Full re-render
+   * Force a full re-render of the current view
+   * @remarks Uses the current date and goals. Useful when view style changes
+   * or when you need to refresh the entire display.
    */
   render(): void {
     if (!this.currentDate) return;
@@ -209,7 +235,11 @@ export class DayViewController {
   }
 
   /**
-   * Update a single goal card
+   * Update a single goal card without re-rendering the entire view
+   * @param goalId - The ID of the goal to update
+   * @param goal - The updated goal data
+   * @remarks More efficient than a full re-render when only one goal changes.
+   * Also updates the internal goals array.
    */
   updateGoal(goalId: string, goal: Goal): void {
     const style = this.callbacks.onGetPreference?.("dayViewStyle");
@@ -229,21 +259,29 @@ export class DayViewController {
   }
 
   /**
-   * Undo last action
+   * Undo the last drag-and-drop action
+   * @returns True if an action was undone, false if nothing to undo
+   * @remarks Restores the previous state of goals that were moved or scheduled
    */
   undo(): boolean {
     return this.dragDropManager.undo();
   }
 
   /**
-   * Redo last undone action
+   * Redo the last undone action
+   * @returns True if an action was redone, false if nothing to redo
+   * @remarks Re-applies a previously undone drag-and-drop operation
    */
   redo(): boolean {
     return this.dragDropManager.redo();
   }
 
   /**
-   * Set time window
+   * Set the time window for the day view
+   * @param start - Start time in minutes from midnight (e.g., 480 for 8:00 AM)
+   * @param end - End time in minutes from midnight (e.g., 1320 for 10:00 PM)
+   * @remarks Recreates the calculator and timeline grid with new bounds,
+   * then triggers a full re-render.
    */
   setTimeWindow(start: number, end: number): void {
     this.options.timeWindowStart = start;
@@ -361,17 +399,17 @@ export class DayViewController {
     // --- Planner View Specific Actions ---
 
     // Sidebar Add Task
-    if (target.classList.contains("btn-planner-add")) {
+    if (target.classList.contains("btn-planner-add") || target.closest(".btn-planner-add")) {
       this.callbacks.onPlantSomething?.();
       return;
     }
 
     // Sidebar Navigation
-    if (target.classList.contains("btn-planner-prev")) {
+    if (target.classList.contains("btn-planner-prev") || target.closest(".btn-planner-prev")) {
       this.callbacks.onNavigate?.(-1);
       return;
     }
-    if (target.classList.contains("btn-planner-next")) {
+    if (target.classList.contains("btn-planner-next") || target.closest(".btn-planner-next")) {
       this.callbacks.onNavigate?.(1);
       return;
     }

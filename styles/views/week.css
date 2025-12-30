@@ -1,0 +1,142 @@
+/* ===================================
+   Week View Styles
+   =================================== */
+.week-view {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.week-view-header {
+    text-align: center;
+    margin-bottom: var(--space-5);
+}
+
+.week-view-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 6vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.week-view-range {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-3);
+    flex: 1;
+    min-height: 0;
+}
+
+.week-day-column {
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    max-height: 600px;
+    border: 1px solid var(--glass-border);
+}
+
+.week-day-column.today {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-glow-sm);
+}
+
+.week-day-header {
+    text-align: center;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: var(--space-3);
+}
+
+.week-day-name {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.week-day-date {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.week-day-column.today .week-day-date {
+    color: var(--accent);
+}
+
+.week-day-goals {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    overflow-y: auto;
+}
+
+.week-goal-item {
+    padding: var(--space-3);
+    background: var(--bg-hover);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+    border-left: 3px solid var(--accent);
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.week-goal-item:hover {
+    background: var(--accent-subtle);
+}
+
+.week-goal-item:active {
+    transform: scale(0.98);
+    background: var(--bg-active);
+}
+
+.week-goal-item.completed {
+    opacity: 0.6;
+    border-left-color: var(--success);
+}
+
+.week-goal-title {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.week-goal-item.completed .week-goal-title {
+    text-decoration: line-through;
+}
+
+.goal-checkmark {
+    color: var(--success);
+    font-weight: bold;
+    margin-right: var(--space-1);
+}
+
+.week-goal-category {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.week-day-empty {
+    color: var(--text-ghost);
+    font-size: var(--text-sm);
+    text-align: center;
+    padding: var(--space-4);
+    font-style: italic;
+}
+
