@@ -111,9 +111,41 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch((err) => {
-        console.warn("Service worker registration failed:", err);
-      });
+      navigator.serviceWorker
+        .register("./sw.js")
+        .then((registration) => {
+          let refreshing = false;
+
+          const requestUpdate = () => registration.update().catch(() => {});
+
+          // When a new SW takes control, reload once so the latest assets are used.
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
+
+          // If an update is found, ask the waiting SW to activate immediately.
+          registration.addEventListener("updatefound", () => {
+            const installing = registration.installing;
+            if (!installing) return;
+            installing.addEventListener("statechange", () => {
+              if (installing.state !== "installed") return;
+              if (!navigator.serviceWorker.controller) return; // First install
+              registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+            });
+          });
+
+          // Proactively check for updates on launch and when returning to the app.
+          requestUpdate();
+          setInterval(requestUpdate, 60 * 60 * 1000); // hourly
+          document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") requestUpdate();
+          });
+        })
+        .catch((err) => {
+          console.warn("Service worker registration failed:", err);
+        });
     });
   }
 

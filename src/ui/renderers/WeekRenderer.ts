@@ -22,6 +22,10 @@ export const WeekRenderer = {
     const today = new Date();
     const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+    const visionGoals = Goals.getForRange(new Date(weekStart.getFullYear(), 0, 1), new Date(weekStart.getFullYear(), 11, 31))
+      .filter((g) => g.level === "vision" && g.status !== "done");
+    const primaryVision = visionGoals[0];
+
     const focusGoals = Goals.getForRange(weekStart, weekEnd)
       .filter((g) => g.level === "focus" && g.status !== "done")
       .slice(0, 2);
@@ -44,6 +48,15 @@ export const WeekRenderer = {
         <div class="week-view-header">
           <h2 class="week-view-title">Week ${weekNum}</h2>
           <p class="week-view-range">${startFormatted} - ${endFormatted}</p>
+          ${primaryVision ? `
+            <div class="week-vision-strip" aria-label="Year vision">
+              <span class="week-vision-label">✨ Vision</span>
+              <button type="button" class="week-vision-chip" data-goal-id="${primaryVision.id}" title="${escapeHtmlFn(primaryVision.title)}">
+                ${escapeHtmlFn(primaryVision.title)}
+                ${visionGoals.length > 1 ? `<span class="week-vision-more">+${visionGoals.length - 1}</span>` : ""}
+              </button>
+            </div>
+          ` : ""}
           ${focusGoals.length > 0 ? `
             <div class="week-focus-strip" aria-label="Week focus">
               <span class="week-focus-label">🔎 Focus</span>
@@ -122,6 +135,18 @@ export const WeekRenderer = {
 
     // Click handlers for focus chips
     container.querySelectorAll('.week-focus-chip[data-goal-id]').forEach((chip: Element) => {
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const goalId = (chip as HTMLElement).dataset.goalId;
+        if (goalId) {
+          const event = new CustomEvent('goal-click', { detail: { goalId } });
+          container.dispatchEvent(event);
+        }
+      });
+    });
+
+    // Click handler for vision chip
+    container.querySelectorAll('.week-vision-chip[data-goal-id]').forEach((chip: Element) => {
       chip.addEventListener('click', (e) => {
         e.stopPropagation();
         const goalId = (chip as HTMLElement).dataset.goalId;

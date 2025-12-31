@@ -19,6 +19,12 @@ export const MonthRenderer = {
     const selected = State.viewingDate ? State.viewingDate.toDateString() : "";
     const monthTitle = escapeHtmlFn(`${CONFIG.MONTHS[month]} ${year}`);
 
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year, 11, 31);
+    const visionGoals = Goals.getForRange(yearStart, yearEnd)
+      .filter(g => g.level === 'vision' && g.status !== 'done');
+    const primaryVision = visionGoals[0];
+
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
     const milestoneGoals = Goals.getForRange(monthStart, monthEnd)
@@ -43,6 +49,14 @@ export const MonthRenderer = {
     html += `
         <div class="month-view-header">
           <h2 class="month-view-title">${monthTitle}</h2>
+          ${primaryVision ? `
+            <div class="month-view-context">
+              <button type="button" class="month-vision-chip" data-goal-id="${primaryVision.id}" title="${escapeHtmlFn(primaryVision.title)}">
+                ✨ ${escapeHtmlFn(primaryVision.title)}
+                ${visionGoals.length > 1 ? `<span class="month-vision-more">+${visionGoals.length - 1}</span>` : ""}
+              </button>
+            </div>
+          ` : ""}
           ${primaryMilestone ? `
             <div class="month-view-context">
               <button type="button" class="month-milestone-chip" data-goal-id="${primaryMilestone.id}" title="${escapeHtmlFn(primaryMilestone.title)}">
@@ -128,7 +142,7 @@ export const MonthRenderer = {
     });
 
     // Add click handlers for the milestone chip
-    container.querySelectorAll<HTMLElement>('.month-milestone-chip[data-goal-id]').forEach((btn) => {
+    container.querySelectorAll<HTMLElement>('.month-view-header [data-goal-id]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const goalId = btn.dataset.goalId;

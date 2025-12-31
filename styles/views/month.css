@@ -24,6 +24,40 @@
     margin-top: var(--space-1);
 }
 
+.month-vision-chip {
+    background: rgba(139, 92, 246, 0.10);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-left: 3px solid #8b5cf6;
+    border-radius: var(--radius-full);
+    padding: 6px 12px;
+    font-size: var(--text-sm);
+    font-weight: 650;
+    color: var(--text-primary);
+    cursor: pointer;
+    max-width: 72ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all var(--duration-fast);
+}
+
+.month-vision-chip:hover {
+    background: rgba(139, 92, 246, 0.14);
+    border-color: rgba(139, 92, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.month-vision-chip:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+}
+
+.month-vision-more {
+    margin-left: 8px;
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
 .month-milestone-chip {
     background: rgba(59, 130, 246, 0.10);
     border: 1px solid rgba(59, 130, 246, 0.25);

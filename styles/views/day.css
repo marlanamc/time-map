@@ -2,20 +2,10 @@
    Day View Styles
    =================================== */
 
-/* Universal day view text styling - dark text with subtle white shadow for all themes */
-.day-view,
-.day-view *:not(.day-goal-checkbox):not(.goal-checkbox)::before,
-.day-view *:not(.day-goal-checkbox):not(.goal-checkbox)::after {
-    color: #000000 !important;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
-    font-weight: 600 !important;
-}
-
-/* Preserve checkbox checkmark colors */
-.day-view .day-goal-checkbox.checked::after,
-.day-view .goal-checkbox.checked::after {
-    color: white !important;
-    text-shadow: none !important;
+/* Day view should follow the app theme variables for readability.
+   Avoid global hard-coded colors/shadows that make dark mode look muddy. */
+.day-view {
+    color: var(--text-primary);
 }
 
 .day-view {
@@ -1133,4 +1123,3 @@ body.is-resizing-planter {
 .empty-state-text {
     font-size: var(--text-sm);
 }
-
