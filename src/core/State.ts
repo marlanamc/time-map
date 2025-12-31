@@ -7,8 +7,11 @@ import { SupabaseService } from '../services/SupabaseService';
 import { AuthComponent } from '../components/Auth';
 import { batchSaveService } from '../services/BatchSaveService';
 import { cacheService } from '../services/CacheService';
+import { warmCache } from '../services/cacheWarmup';
+import { syncQueue } from '../services/SyncQueue';
 import { throttledPreferencesSync } from '../utils/syncHelpers';
 import { eventBus } from './EventBus';
+import { isSupabaseConfigured } from '../supabaseClient';
 
 const AUTH_MODAL_DONT_SHOW_KEY = 'gardenFence.authModal.dontShow';
 
@@ -40,8 +43,8 @@ export const State: AppState & {
   viewingDate: new Date(),
 
   async init() {
-    // Check for user
-    const user = await SupabaseService.getUser();
+    // Check for user (avoid loading Supabase client if not configured)
+    const user = isSupabaseConfigured ? await SupabaseService.getUser() : null;
 
     if (!user) {
       let suppressAuthModal = false;
@@ -66,7 +69,7 @@ export const State: AppState & {
 
       // Start optimization services
       batchSaveService.start();
-      await cacheService.warmCache(user.id);
+      await warmCache(user.id);
       console.log('✓ Performance optimization services started');
     }
 
@@ -400,7 +403,6 @@ export const State: AppState & {
     batchSaveService.stop();
 
     // Destroy sync queue and cleanup its resources
-    const { syncQueue } = await import('../services/SyncQueue');
     syncQueue.destroy();
 
     // Clear cache

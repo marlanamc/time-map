@@ -1,5 +1,5 @@
 
-import { supabase } from '../supabaseClient';
+import { getSupabaseClient } from '../supabaseClient';
 import { cacheService } from './CacheService';
 import { AuthenticationError, DatabaseError } from './errors';
 import {
@@ -27,6 +27,7 @@ export const SupabaseService = {
     // --- Auth ---
     async getUser() {
         try {
+            const supabase = await getSupabaseClient();
             const { data: { user }, error } = await supabase.auth.getUser();
             // If there's an error or no user, also check session to ensure it's valid
             if (error || !user) {
@@ -43,6 +44,7 @@ export const SupabaseService = {
     },
 
     async signIn(email: string, password?: string) {
+        const supabase = await getSupabaseClient();
         if (password) {
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
@@ -62,6 +64,7 @@ export const SupabaseService = {
     },
 
     async signUp(email: string, password?: string) {
+        const supabase = await getSupabaseClient();
         if (password) {
             const { data, error } = await supabase.auth.signUp({
                 email,
@@ -75,6 +78,7 @@ export const SupabaseService = {
     },
 
     async signOut() {
+        const supabase = await getSupabaseClient();
         return await supabase.auth.signOut();
     },
 
@@ -141,6 +145,7 @@ export const SupabaseService = {
             return cached;
         }
 
+        const supabase = await getSupabaseClient();
         const { data, error } = await supabase
             .from('goals')
             .select('*');
@@ -169,6 +174,7 @@ export const SupabaseService = {
         const user = await this.getUser();
         if (!user) throw new Error('Not authenticated');
 
+        const supabase = await getSupabaseClient();
         const { error } = await supabase
             .from('goals')
             .upsert({
@@ -203,6 +209,7 @@ export const SupabaseService = {
     },
 
     async deleteGoal(goalId: string) {
+        const supabase = await getSupabaseClient();
         const { error } = await supabase
             .from('goals')
             .delete()
@@ -218,6 +225,7 @@ export const SupabaseService = {
         const user = await this.getUser();
         if (!user) throw new Error('Not authenticated');
 
+        const supabase = await getSupabaseClient();
         // Transform to snake_case for batch insert
         const goalsData = goals.map(goal => ({
             id: goal.id,
@@ -260,6 +268,7 @@ export const SupabaseService = {
 
     // --- Brain Dump ---
     async getBrainDump(): Promise<BrainDumpEntry[]> {
+        const supabase = await getSupabaseClient();
         const { data, error } = await supabase
             .from('brain_dump')
             .select('*')
@@ -284,6 +293,7 @@ export const SupabaseService = {
             throw new AuthenticationError('Cannot save brain dump: User not authenticated');
         }
 
+        const supabase = await getSupabaseClient();
         const { error } = await supabase
             .from('brain_dump')
             .upsert({
@@ -303,6 +313,7 @@ export const SupabaseService = {
     },
 
     async deleteBrainDump(id: string) {
+        const supabase = await getSupabaseClient();
         const { error } = await supabase.from('brain_dump').delete().eq('id', id);
         if (error) throw error;
     },
@@ -313,6 +324,7 @@ export const SupabaseService = {
             throw new AuthenticationError('Cannot save brain dump batch: User not authenticated');
         }
 
+        const supabase = await getSupabaseClient();
         const entriesData = entries.map(entry => ({
             id: entry.id,
             user_id: user.id,
@@ -347,6 +359,7 @@ export const SupabaseService = {
             return cached;
         }
 
+        const supabase = await getSupabaseClient();
         const { data, error } = await supabase
             .from('preferences')
             .select('data')
@@ -369,6 +382,7 @@ export const SupabaseService = {
             throw new AuthenticationError('Cannot save preferences: User not authenticated');
         }
 
+        const supabase = await getSupabaseClient();
         const { error } = await supabase
             .from('preferences')
             .upsert({
@@ -387,6 +401,7 @@ export const SupabaseService = {
 
     // --- Achievements ---
     async getAchievements(): Promise<AchievementRecord[]> {
+        const supabase = await getSupabaseClient();
         const { data, error } = await supabase.from('achievements').select('*');
         if (error) throw error;
         return data;
@@ -398,6 +413,7 @@ export const SupabaseService = {
             throw new AuthenticationError('Cannot save achievement: User not authenticated');
         }
 
+        const supabase = await getSupabaseClient();
         const { error } = await supabase.from('achievements').upsert({
             user_id: user.id,
             achievement_id: achievementId,
@@ -410,6 +426,7 @@ export const SupabaseService = {
 
     // --- Weekly Reviews ---
     async getWeeklyReviews(): Promise<WeeklyReview[]> {
+        const supabase = await getSupabaseClient();
         const { data, error } = await supabase.from('weekly_reviews').select('*');
         if (error) throw error;
 
@@ -436,6 +453,7 @@ export const SupabaseService = {
             throw new AuthenticationError('Cannot save weekly review: User not authenticated');
         }
 
+        const supabase = await getSupabaseClient();
         const { error } = await supabase.from('weekly_reviews').upsert({
             id: review.id,
             user_id: user.id,
@@ -459,6 +477,7 @@ export const SupabaseService = {
 
     // --- Body Double ---
     async getBodyDoubleHistory(): Promise<BodyDoubleSession[]> {
+        const supabase = await getSupabaseClient();
         const { data, error } = await supabase.from('body_double_sessions').select('*');
         if (error) throw error;
 
@@ -479,6 +498,7 @@ export const SupabaseService = {
             throw new AuthenticationError('Cannot save body double session: User not authenticated');
         }
 
+        const supabase = await getSupabaseClient();
         const { error } = await supabase.from('body_double_sessions').upsert({
             id: session.id,
             user_id: user.id,

@@ -15,6 +15,12 @@
     touch-action: pan-x pan-y pinch-zoom;
 }
 
+/* Softer edges when planner is active */
+.canvas-container:has(.planner-day-view) {
+    border-radius: 48px;
+    border: none;
+}
+
 .canvas-container.grabbing {
     cursor: grabbing;
 }
@@ -104,6 +110,12 @@ body.hide-sidebar .canvas-zoom-controls {
     /* Don't create nested scroll containers - canvas-container handles scrolling */
 }
 
+/* Planner style - remove sharp edges from container */
+.day-view-container.planner-style {
+    border-radius: 48px;
+    overflow: hidden;
+}
+
 .year-view-container {
     position: relative;
 }
@@ -166,10 +178,44 @@ body.hide-sidebar .canvas-zoom-controls {
     opacity: 0.9;
 }
 
+/* Light mode time themes - add dark shadow to subtitle for better visibility */
+:root.time-dawn:not(.dark-mode) .year-view-subtitle,
+:root.time-morning:not(.dark-mode) .year-view-subtitle,
+:root.time-afternoon:not(.dark-mode) .year-view-subtitle,
+:root.time-evening:not(.dark-mode) .year-view-subtitle {
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5), 0 0 8px rgba(255, 255, 255, 0.3);
+    color: #0A1113 !important;
+    opacity: 1;
+}
+
 /* Ensure subtitle is visible in dark mode */
 .dark-mode .year-view-subtitle {
     color: var(--accent-hover);
     opacity: 1;
+}
+
+/* Dark mode time themes - add dark shadow/border to titles for visibility */
+:root.dark-mode.time-dawn .year-view-title,
+:root.dark-mode.time-morning .year-view-title,
+:root.dark-mode.time-afternoon .year-view-title,
+:root.dark-mode.time-evening .year-view-title,
+:root.dark-mode.time-dawn .month-view-title,
+:root.dark-mode.time-morning .month-view-title,
+:root.dark-mode.time-afternoon .month-view-title,
+:root.dark-mode.time-evening .month-view-title,
+:root.dark-mode.time-dawn .week-view-title,
+:root.dark-mode.time-morning .week-view-title,
+:root.dark-mode.time-afternoon .week-view-title,
+:root.dark-mode.time-evening .week-view-title {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+:root.dark-mode.time-dawn .year-view-subtitle,
+:root.dark-mode.time-morning .year-view-subtitle,
+:root.dark-mode.time-afternoon .year-view-subtitle,
+:root.dark-mode.time-evening .year-view-subtitle {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 6px rgba(0, 0, 0, 0.3);
+    color: var(--text-secondary);
 }
 
 @supports ((-webkit-background-clip: text) and (-webkit-text-fill-color: transparent)) or (background-clip: text) {
@@ -229,6 +275,31 @@ body.hide-sidebar .canvas-zoom-controls {
         /* Stronger text shadow for better readability */
         filter: drop-shadow(0 2px 4px rgba(10, 17, 19, 0.5)) drop-shadow(0 1px 3px rgba(10, 17, 19, 0.4));
     }
+
+    /* Light mode time themes - force darker gradient for year/month/week titles */
+    :root.time-dawn:not(.dark-mode) .year-view-title,
+    :root.time-morning:not(.dark-mode) .year-view-title,
+    :root.time-afternoon:not(.dark-mode) .year-view-title,
+    :root.time-evening:not(.dark-mode) .year-view-title,
+    :root.time-dawn:not(.dark-mode) .month-view-title,
+    :root.time-morning:not(.dark-mode) .month-view-title,
+    :root.time-afternoon:not(.dark-mode) .month-view-title,
+    :root.time-evening:not(.dark-mode) .month-view-title,
+    :root.time-dawn:not(.dark-mode) .week-view-title,
+    :root.time-morning:not(.dark-mode) .week-view-title,
+    :root.time-afternoon:not(.dark-mode) .week-view-title,
+    :root.time-evening:not(.dark-mode) .week-view-title {
+        background: linear-gradient(110deg,
+                #0A1113 0%,
+                #1A2B2F 35%,
+                #2D4A52 70%,
+                #1A2B2F 100%) !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        color: transparent !important;
+        filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.3)) drop-shadow(0 1px 2px rgba(255, 255, 255, 0.2)) !important;
+    }
 }
 
 /* Title visibility - removed dark backdrop for cleaner appearance */
@@ -246,5 +317,11 @@ body.hide-sidebar .canvas-zoom-controls {
 .week-view-container .calendar-grid,
 .day-view-container .calendar-grid {
     display: block;
+}
+
+/* Remove sharp edges from calendar-grid in planner view */
+.day-view-container.planner-style .calendar-grid {
+    border-radius: 48px;
+    overflow: hidden;
 }
 

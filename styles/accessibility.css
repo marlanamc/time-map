@@ -1,0 +1,12 @@
+/* Consolidated: Accessibility */
+@import './accessibility/wcag.css';
+@import './accessibility/dyslexia.css';
+@import './accessibility/colorblind.css';
+@import './accessibility/simplified.css';
+@import './accessibility/high-contrast.css';
+@import './accessibility/reduced-motion.css';
+@import './accessibility/minimal-feedback.css';
+@import './accessibility/reduced-emoji.css';
+@import './accessibility/sensory.css';
+@import './accessibility/touch-targets.css';
+

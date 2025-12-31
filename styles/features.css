@@ -1,0 +1,13 @@
+/* Consolidated: Features */
+@import './features/celebration.css';
+@import './features/confetti.css';
+@import './features/toast.css';
+@import './features/review-prompt.css';
+@import './features/month-detail.css';
+@import './features/focus-mode.css';
+@import './features/quick-add.css';
+@import './features/support-panel.css';
+@import './features/keyboard-modal.css';
+@import './features/auth-modal.css';
+@import './features/time-viz.css';
+

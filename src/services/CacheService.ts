@@ -182,34 +182,6 @@ class CacheService {
   }
 
   /**
-   * Prefetch and warm cache with common queries
-   *
-   * Call this after user login to populate cache with
-   * frequently accessed data for instant subsequent access.
-   *
-   * @param userId - User ID
-   */
-  async warmCache(userId: string): Promise<void> {
-    console.log(`🔥 Warming cache for user: ${userId}`);
-
-    try {
-      const { SupabaseService } = await import('./SupabaseService');
-
-      // Prefetch common data in parallel (without cache to force fresh data)
-      const warmupPromises = [
-        SupabaseService.getGoals(),
-        SupabaseService.getPreferences(),
-        SupabaseService.getAchievements()
-      ];
-
-      await Promise.allSettled(warmupPromises);
-      console.log('✓ Cache warmed successfully');
-    } catch (error) {
-      console.warn('Cache warming failed (non-critical):', error);
-    }
-  }
-
-  /**
    * Clean up expired entries
    *
    * Runs periodically to prevent memory bloat.

@@ -27,6 +27,21 @@ export interface GoalDetailModalCallbacks {
 class GoalDetailModalManager {
   private callbacks: GoalDetailModalCallbacks | null = null;
 
+  private getLevelLabel(level: string): string {
+    switch (level) {
+      case "vision":
+        return "Vision";
+      case "milestone":
+        return "Milestone";
+      case "focus":
+        return "Focus";
+      case "intention":
+        return "Intention";
+      default:
+        return "Intention";
+    }
+  }
+
   /**
    * Set callbacks for modal interactions
    */
@@ -47,6 +62,7 @@ class GoalDetailModalManager {
     if (!goal) return;
 
     State.selectedGoal = goalId;
+    const levelLabel = this.getLevelLabel(goal.level);
     const cat = goal.category ? (CONFIG.CATEGORIES[goal.category] ?? null) : null;
     const status = CONFIG.STATUSES[goal.status];
 
@@ -169,12 +185,12 @@ class GoalDetailModalManager {
                             ${goal.completedAt ? `<span>Completed: ${callbacks.formatDate(goal.completedAt)}</span>` : ""}
                         </div>
                     </div>
-                    <div class="modal-actions">
-                        <button class="btn btn-danger" id="deleteGoalBtn">Remove Anchor</button>
-                        <button class="btn btn-primary" id="saveGoalBtn">Save Changes</button>
-                    </div>
-                </div>
-            `;
+	                    <div class="modal-actions">
+	                        <button class="btn btn-danger" id="deleteGoalBtn">Remove ${levelLabel}</button>
+	                        <button class="btn btn-primary" id="saveGoalBtn">Save Changes</button>
+	                    </div>
+	                </div>
+	            `;
 
     document.body.appendChild(modal);
     this.bindEvents(modal, goalId);
@@ -317,11 +333,14 @@ class GoalDetailModalManager {
 
     // Delete goal
     modal.querySelector("#deleteGoalBtn")?.addEventListener("click", () => {
-      if (confirm("Remove this anchor?")) {
+      const goal = Goals.getById(goalId);
+      const levelLabel = goal ? this.getLevelLabel(goal.level) : "Intention";
+      const levelLabelLower = levelLabel.toLowerCase();
+      if (confirm(`Remove this ${levelLabelLower}?`)) {
         Goals.delete(goalId);
         modal.remove();
         callbacks.onRender();
-        callbacks.onToast("🗑️", "Anchor removed");
+        callbacks.onToast("🗑️", `${levelLabel} removed`);
       }
     });
 

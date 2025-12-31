@@ -227,7 +227,7 @@ This document provides a systematic testing checklist for both desktop and mobil
 - [ ] Press "Save" adds thought to parked list
 - [ ] Parked thoughts display below input
 - [ ] Timestamp shows on each thought
-- [ ] "Make anchor" button converts thought to Milestone goal
+- [ ] "Make milestone" button converts thought to Milestone
 - [ ] ⚠️ Goal modal opens with title pre-filled (may be timing-dependent)
 - [ ] "Dismiss" button marks thought as processed
 - [ ] Dismissed thoughts removed from list
@@ -250,10 +250,10 @@ This document provides a systematic testing checklist for both desktop and mobil
 - [ ] Click "Quick Wins" in support panel opens modal
 - [ ] 8 options displayed with icons and time estimates
 - [ ] "Check off a tiny task" shows toast prompt
-- [ ] "Pick one anchor for today" shows toast
+- [ ] "Pick one intention for today" shows toast
 - [ ] "Brain dump for 5 minutes" opens Brain Dump modal
 - [ ] "Update progress on something" shows toast
-- [ ] "Add a note to any anchor" shows toast
+- [ ] "Add a note to any intention" shows toast
 - [ ] "Celebrate a past win" shows toast
 - [ ] "Let the app pick a task" triggers random goal picker
 - [ ] "Set a 15-min body double timer" starts timer

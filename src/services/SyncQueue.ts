@@ -11,6 +11,7 @@
  */
 
 import type { Goal, BrainDumpEntry } from '../types';
+import { SupabaseService } from './SupabaseService';
 
 interface QueuedOperation {
   id: string;
@@ -221,8 +222,6 @@ class SyncQueue {
    * Execute a single queued operation
    */
   private async executeOperation(op: QueuedOperation): Promise<void> {
-    const { SupabaseService } = await import('./SupabaseService');
-
     switch (op.entity) {
       case 'goal':
         if (op.type === 'create' || op.type === 'update') {

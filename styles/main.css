@@ -4,86 +4,16 @@
  * This file can be processed by esbuild or any CSS bundler.
  */
 
-/* 1. Core Foundation */
-@import './core/variables.css';
-@import './core/reset.css';
-
-/* 2. Background Layer */
-@import './background/pollen.css';
-@import './background/fireflies.css';
-@import './background/garden.css';
-
-/* 3. Layout Foundation */
-@import './layout/app.css';
-@import './layout/header.css';
-
-/* 4. Components */
-@import './components/interactive.css';
-@import './components/buttons.css';
-@import './components/sidebar.css';
-@import './components/modals.css';
-
-/* 5. Views */
-@import './views/main-content.css';
-@import './views/canvas.css';
-@import './views/month.css';
-@import './views/month-context.css';
-@import './views/year.css';
-@import './views/week.css';
-@import './views/day.css';
-
-/* 6. Day View Modules */
-@import './dayView/layout.css';
-@import './dayView/cards.css';
-@import './dayView/drag.css';
-@import './dayView/responsive.css';
-@import './dayView/simple.css';
-@import './dayView/planner.css';
-
-/* 7. Features */
-@import './features/celebration.css';
-@import './features/confetti.css';
-@import './features/toast.css';
-@import './features/review-prompt.css';
-@import './features/month-detail.css';
-@import './features/focus-mode.css';
-@import './features/quick-add.css';
-@import './features/support-panel.css';
-@import './features/keyboard-modal.css';
-@import './features/auth-modal.css';
-@import './features/time-viz.css';
-
-/* 8. Themes */
-@import './themes/accents.css';
-@import './themes/picker.css';
-@import './themes/seasonal.css';
-
-/* 9. Accessibility */
-@import './accessibility/wcag.css';
-@import './accessibility/dyslexia.css';
-@import './accessibility/colorblind.css';
-@import './accessibility/simplified.css';
-@import './accessibility/high-contrast.css';
-@import './accessibility/reduced-motion.css';
-@import './accessibility/minimal-feedback.css';
-@import './accessibility/reduced-emoji.css';
-@import './accessibility/sensory.css';
-@import './accessibility/touch-targets.css';
-
-/* 10. Animations */
-@import './animations/keyframes.css';
-
-/* 11. Responsive */
-@import './responsive/mobile.css';
-@import './responsive/mobile-tabs.css';
-
-/* 12. Mobile */
-@import './mobile/home.css';
-
-/* 13. Utilities */
-@import './utilities/print.css';
-@import './utilities/sound-controls.css';
-
-/* 14. Custom */
-@import './custom/garden-menu.css';
-
+/* Consolidated imports (keeps the same order) */
+@import './core.css';
+@import './background.css';
+@import './layout.css';
+@import './components.css';
+@import './views.css';
+@import './day-planner.css';
+@import './features.css';
+@import './themes.css';
+@import './accessibility.css';
+@import './animations.css';
+@import './responsive.css';
+@import './utilities.css';

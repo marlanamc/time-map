@@ -92,7 +92,7 @@
 /* Goal cards get dynamic shadows based on sun position */
 .goal-card,
 .day-planter,
-.anchor-card {
+.garden-card {
     box-shadow:
         var(--shadow-length) var(--shadow-length) calc(var(--shadow-length) * 2) rgba(0, 0, 0, var(--shadow-opacity)),
         var(--shadow-sm);
@@ -112,7 +112,7 @@
 
     .goal-card,
     .day-planter,
-    .anchor-card {
+    .garden-card {
         transition: none;
     }
 }
@@ -128,4 +128,3 @@
         filter: none;
     }
 }
-

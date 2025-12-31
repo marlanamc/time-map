@@ -39,6 +39,89 @@
         html.dark-mode {
             background: #0A1A2E;
         }
+
+        /* Minimal app loading skeleton (visible before CSS bundles load) */
+        .app-loading {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: rgba(232, 244, 248, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: opacity 0.35s ease;
+        }
+
+        html.dark-mode .app-loading {
+            background: rgba(10, 26, 46, 0.84);
+        }
+
+        .app-loading.loaded {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .app-loading-card {
+            width: min(520px, 92vw);
+            border-radius: 16px;
+            border: 1px solid rgba(140, 183, 217, 0.22);
+            background: rgba(255, 255, 255, 0.75);
+            padding: 18px 18px 14px;
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.08);
+        }
+
+        html.dark-mode .app-loading-card {
+            background: rgba(15, 23, 42, 0.7);
+            border-color: rgba(140, 183, 217, 0.18);
+            box-shadow: 0 12px 42px rgba(0, 0, 0, 0.35);
+        }
+
+        .app-loading-title {
+            font: 700 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+            margin-bottom: 12px;
+            color: rgba(13, 21, 23, 0.88);
+        }
+
+        html.dark-mode .app-loading-title {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .skeleton-line {
+            height: 12px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(140, 183, 217, 0.16), rgba(140, 183, 217, 0.32), rgba(140, 183, 217, 0.16));
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.15s ease-in-out infinite;
+            margin: 10px 0;
+        }
+
+        .skeleton-line.w-90 {
+            width: 90%;
+        }
+
+        .skeleton-line.w-70 {
+            width: 70%;
+        }
+
+        .skeleton-line.w-55 {
+            width: 55%;
+        }
+
+        @keyframes skeleton-shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Hide pull-to-refresh on desktop (enabled via mobile CSS) */
+        .pull-to-refresh {
+            display: none;
+        }
     </style>
     <script>
         (function () {
@@ -115,6 +198,20 @@
 </head>
 
 <body>
+    <div class="app-loading" id="appLoading" role="status" aria-live="polite" aria-label="Loading">
+        <div class="app-loading-card">
+            <div class="app-loading-title">Loading…</div>
+            <div class="skeleton-line w-90"></div>
+            <div class="skeleton-line w-70"></div>
+            <div class="skeleton-line w-55"></div>
+        </div>
+    </div>
+
+    <div class="pull-to-refresh" id="pullToRefresh" aria-hidden="true">
+        <div class="ptr-spinner" aria-hidden="true"></div>
+        <div class="ptr-label" id="pullToRefreshLabel">Pull to refresh</div>
+    </div>
+
     <!-- Garden Background -->
     <div class="garden-background" id="gardenBackground" aria-hidden="true">
         <div class="garden-sky" id="gardenSky"></div>
@@ -180,7 +277,7 @@
                 </div>
             </section>
 
-            <!-- All Goals -->
+	            <!-- All Items -->
             <section class="mobile-card goals-card">
                 <div class="card-label">Your Garden</div>
                 <div class="goals-by-level" id="mobileGoalsByLevel">
@@ -245,8 +342,7 @@
 
                 <!-- Year Progress (Relocated from Header) -->
                 <!-- The Daily Bloom (Floral Progress) -->
-                <div class="garden-bloom" id="gardenBloom" role="progressbar" aria-valuenow="0" aria-valuemin="0"
-                    aria-valuemax="100" aria-label="Daily Bloom Progress">
+                <div class="garden-bloom" id="gardenBloom" role="button" aria-label="Daily Bloom (tap to change scope)" tabindex="0">
                     <div class="flower-container">
                         <svg class="flower-svg" viewBox="0 0 100 100">
                             <!-- Stem -->
@@ -336,16 +432,14 @@
                     <span class="section-toggle-label">Coming Up</span>
                 </button>
                 <div class="section-content" id="upcomingContent">
-                    <div class="whats-next" role="region" aria-label="Upcoming anchors">
+		                    <div class="whats-next" role="region" aria-label="Upcoming intentions, focuses, milestones, and visions">
                         <div class="section-header">
                             <button class="pick-btn" id="pickOneBtn" aria-describedby="pick-hint">
                                 Surprise me
                             </button>
-                            <span id="pick-hint" class="visually-hidden">Randomly select an anchor to return to if you
-                                can't
-                                decide</span>
+		                            <span id="pick-hint" class="visually-hidden">Randomly select an intention, focus, milestone, or vision to return to if you can't decide</span>
                         </div>
-                        <div id="upcomingGoals" role="list" aria-label="Upcoming anchors list"></div>
+		                        <div id="upcomingGoals" role="list" aria-label="Upcoming intentions, focuses, milestones, and visions list"></div>
                     </div>
                 </div>
             </div>
@@ -451,7 +545,7 @@
             <!-- Zoomable Canvas -->
             <div class="canvas-container" id="canvasContainer">
                 <div class="canvas" id="canvas">
-                    <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Year calendar with anchors">
+		                    <div class="calendar-grid" id="calendarGrid" role="region" aria-label="Calendar with intentions, focuses, milestones, and visions">
                     </div>
                     <!-- Now Beam - Visual indicator for current time in day view -->
                     <div class="now-beam" id="nowBeam" aria-hidden="true" style="display: none;"></div>
@@ -469,12 +563,12 @@
         </main>
     </div>
 
-    <!-- Add Anchor Modal -->
+		    <!-- Add Item Modal -->
     <div class="modal-overlay" id="goalModal" role="dialog" aria-modal="true" aria-labelledby="goal-modal-title">
         <div class="modal">
             <div class="modal-header">
                 <h2 class="modal-title" id="goal-modal-title">
-                    Add New Anchor
+		                    Set New Intention
                 </h2>
                 <button class="modal-close" id="closeModal" aria-label="Close modal">
                     ×
@@ -575,7 +669,7 @@
                         Cancel
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        Save Anchor
+		                        Set Intention
                     </button>
                 </div>
             </form>
@@ -591,7 +685,7 @@
                 Amazing!
             </div>
             <div class="celebration-text" id="celebrationText">
-                Anchor updated.
+		                Updated.
             </div>
         </div>
     </div>
@@ -599,7 +693,7 @@
     <!-- Toast -->
     <div class="toast" id="toast" role="status" aria-live="polite">
         <span class="toast-icon" id="toastIcon" aria-hidden="true"></span>
-        <span class="toast-message" id="toastMessage">Anchor placed.</span>
+		        <span class="toast-message" id="toastMessage">Saved.</span>
     </div>
 
     <!-- Support Tools Panel (right drawer) -->
@@ -860,9 +954,9 @@
         </button>
     </div>
 
-    <button class="fab-add-anchor" id="addGoalBtn" type="button" aria-label="Add new anchor" title="Add new anchor">
-        <span class="fab-icon" aria-hidden="true"></span>
-    </button>
+		    <button class="fab-add" id="addGoalBtn" type="button" aria-label="Set new intention" title="Set new intention">
+	        <span class="fab-icon" aria-hidden="true"></span>
+	    </button>
 
     <!-- Mobile Bottom Tab Bar -->
     <nav class="mobile-tab-bar" id="mobileTabBar" role="tablist" aria-label="Main navigation">

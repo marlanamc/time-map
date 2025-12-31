@@ -177,6 +177,92 @@
     filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25)) drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
 }
 
+/* Time-based logo gradients for Now Panel - matches sky gradients (applies to both light and dark mode) */
+/* Dawn: Soft lavender pink to warm peach */
+:root.time-dawn .now-panel-logo .logo-text {
+    background: linear-gradient(110deg,
+            #B8A5D4 0%,
+            #D4A5B8 35%,
+            #E8C8B8 70%,
+            #F0D8C8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(184, 165, 212, 0.25));
+}
+
+:root.time-dawn .now-panel-logo .logo-icon {
+    filter: drop-shadow(0 0 12px rgba(232, 200, 216, 0.5)) drop-shadow(0 4px 6px rgba(184, 165, 212, 0.3));
+}
+
+/* Morning: Fresh sky blue to powder teal */
+:root.time-morning .now-panel-logo .logo-text {
+    background: linear-gradient(110deg,
+            #5BA3D0 0%,
+            #6CB8D0 35%,
+            #7DCEC0 70%,
+            #98D8C8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(91, 163, 208, 0.25));
+}
+
+:root.time-morning .now-panel-logo .logo-icon {
+    filter: drop-shadow(0 0 12px rgba(108, 184, 208, 0.5)) drop-shadow(0 4px 6px rgba(125, 206, 192, 0.3));
+}
+
+/* Afternoon: Rich blue to teal with golden accent */
+:root.time-afternoon .now-panel-logo .logo-text {
+    background: linear-gradient(110deg,
+            #4A90E2 0%,
+            #4A90E2 30%,
+            #5A9B8D 80%,
+            #F0B429 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(74, 144, 226, 0.2));
+}
+
+:root.time-afternoon .now-panel-logo .logo-icon {
+    filter: drop-shadow(0 0 12px rgba(74, 144, 226, 0.4)) drop-shadow(0 4px 6px rgba(90, 155, 141, 0.3));
+}
+
+/* Evening: Warm sunset orange to coral */
+:root.time-evening .now-panel-logo .logo-text {
+    background: linear-gradient(110deg,
+            #E87040 0%,
+            #F09050 35%,
+            #F5A860 70%,
+            #F0C070 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(232, 112, 64, 0.3));
+}
+
+:root.time-evening .now-panel-logo .logo-icon {
+    filter: drop-shadow(0 0 12px rgba(240, 144, 80, 0.5)) drop-shadow(0 4px 6px rgba(245, 168, 96, 0.4));
+}
+
+/* Night: Keep moon white/silver gradient (same as dark mode) */
+:root.time-night .now-panel-logo .logo-text {
+    background: linear-gradient(110deg,
+            #E2E8F0 0%,
+            #E2E8F0 40%,
+            #94A3B8 70%,
+            #64748B 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
+}
+
+:root.time-night .now-panel-logo .logo-icon {
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25)) drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
+}
+
 .now-label {
     font-size: var(--text-xs);
     font-weight: 600;

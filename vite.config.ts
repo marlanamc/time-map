@@ -17,6 +17,20 @@ export default defineConfig({
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@supabase/supabase-js')) return 'supabase';
+            return 'vendor';
+          }
+          if (id.includes('/src/components/dayView/')) return 'day-view';
+          if (id.includes('/src/garden/')) return 'garden';
+          if (id.includes('/src/features/NDSupport')) return 'nd-support';
+          if (id.includes('/src/features/ZenFocus')) return 'zen-focus';
+          if (id.includes('/src/features/QuickAdd')) return 'quick-add';
+          if (id.includes('/src/features/AppSettings')) return 'app-settings';
+          if (id.includes('/src/features/')) return 'features';
+          return undefined;
+        },
       },
     },
     // Generate source maps for easier debugging
@@ -59,4 +73,3 @@ export default defineConfig({
     include: ['@supabase/supabase-js', 'idb'],
   },
 });
-

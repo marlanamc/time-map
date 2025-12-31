@@ -2955,6 +2955,15 @@ body.hide-sidebar .canvas-zoom-controls {
     background: var(--accent-muted);
 }
 
+/* Dark mode time themes (dawn, morning, afternoon, evening) - lighter accent background for today.selected */
+:root.dark-mode.time-dawn .month-day.today.selected,
+:root.dark-mode.time-morning .month-day.today.selected,
+:root.dark-mode.time-afternoon .month-day.today.selected,
+:root.dark-mode.time-evening .month-day.today.selected {
+    background: rgba(140, 183, 217, 0.35);
+    box-shadow: inset 0 0 0 2px rgba(140, 183, 217, 0.60);
+}
+
 .month-day-number {
     font-size: var(--text-sm);
     font-weight: 600;

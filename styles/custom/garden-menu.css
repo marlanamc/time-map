@@ -379,6 +379,83 @@
     color: var(--seasonal-accent);
 }
 
+/* Light mode time themes - semi-transparent accent tint for modals */
+:root.time-dawn:not(.dark-mode) .modal,
+:root.time-morning:not(.dark-mode) .modal,
+:root.time-afternoon:not(.dark-mode) .modal,
+:root.time-evening:not(.dark-mode) .modal {
+    background: linear-gradient(160deg,
+            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.12) 0%,
+            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08) 50%,
+            rgba(245, 243, 240, 0.85) 100%);
+    border: 1px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.25);
+    box-shadow:
+        0 20px 60px rgba(26, 43, 47, 0.18),
+        0 0 0 1px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+:root.time-dawn:not(.dark-mode) .modal-overlay,
+:root.time-morning:not(.dark-mode) .modal-overlay,
+:root.time-afternoon:not(.dark-mode) .modal-overlay,
+:root.time-evening:not(.dark-mode) .modal-overlay {
+    background: linear-gradient(135deg,
+            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.35) 0%,
+            rgba(26, 43, 47, 0.45) 100%);
+}
+
+:root.time-dawn:not(.dark-mode) .modal-header,
+:root.time-morning:not(.dark-mode) .modal-header,
+:root.time-afternoon:not(.dark-mode) .modal-header,
+:root.time-evening:not(.dark-mode) .modal-header {
+    background: linear-gradient(to bottom,
+            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15) 0%,
+            transparent 100%);
+}
+
+/* Dark mode time themes - remove green tint, match header style */
+:root.dark-mode.time-dawn .modal,
+:root.dark-mode.time-morning .modal,
+:root.dark-mode.time-afternoon .modal,
+:root.dark-mode.time-evening .modal {
+    background: linear-gradient(160deg,
+            rgba(17, 30, 45, 0.95) 0%,
+            rgba(11, 22, 36, 0.98) 100%);
+    border: 1px solid rgba(140, 183, 217, 0.20);
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(140, 183, 217, 0.12),
+        inset 0 1px 0 rgba(140, 183, 217, 0.08);
+}
+
+:root.dark-mode.time-dawn .modal-overlay,
+:root.dark-mode.time-morning .modal-overlay,
+:root.dark-mode.time-afternoon .modal-overlay,
+:root.dark-mode.time-evening .modal-overlay {
+    background: linear-gradient(135deg,
+            rgba(11, 22, 36, 0.75) 0%,
+            rgba(17, 30, 45, 0.85) 100%);
+}
+
+:root.dark-mode.time-dawn .modal-header,
+:root.dark-mode.time-morning .modal-header,
+:root.dark-mode.time-afternoon .modal-header,
+:root.dark-mode.time-evening .modal-header {
+    background: linear-gradient(to bottom,
+            rgba(140, 183, 217, 0.12) 0%,
+            transparent 100%);
+    border-bottom-color: rgba(140, 183, 217, 0.18);
+}
+
+:root.dark-mode.time-dawn .modal::before,
+:root.dark-mode.time-morning .modal::before,
+:root.dark-mode.time-afternoon .modal::before,
+:root.dark-mode.time-evening .modal::before {
+    background: radial-gradient(circle,
+            rgba(140, 183, 217, 0.12) 0%,
+            transparent 70%);
+}
+
 /* Custom Buttons - Handcrafted Feel */
 .btn-primary {
     background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);

@@ -292,7 +292,7 @@ export const NDSupport = {
         break;
       case "clarify_why":
         callbacks.onShowToast?.(
-          "Why did you place this anchor? Reconnect with what you want from it.",
+          "Why did you set this intention? Reconnect with what you want from it.",
           "info",
         );
         break;
@@ -427,7 +427,7 @@ export const NDSupport = {
                 <div class="brain-dump-item" data-id="${item.id}">
                   <p class="thought-text">${(callbacks.onEscapeHtml ?? ((x: string) => x))(item.text)}</p>
                   <div class="thought-actions">
-                      <button class="btn btn-sm btn-ghost" data-action="convert">Make anchor</button>
+                      <button class="btn btn-sm btn-ghost" data-action="convert">Make milestone</button>
                     <button class="btn btn-sm btn-ghost" data-action="dismiss">Dismiss</button>
                   </div>
                 </div>
@@ -543,12 +543,12 @@ export const NDSupport = {
   handleDopamineChoice(index: number) {
     const actions = [
       () => callbacks.onShowToast?.("Find your easiest task and check it off!", "info"),
-      () => callbacks.onShowToast?.("Pick one anchor to return to today.", "info"),
+      () => callbacks.onShowToast?.("Pick one intention to return to today.", "info"),
       () => this.showBrainDumpModal(),
-      () => callbacks.onShowToast?.("Pick any anchor and adjust it a little.", "info"),
+      () => callbacks.onShowToast?.("Pick any intention and adjust it a little.", "info"),
       () =>
         callbacks.onShowToast?.(
-          "Add a note to any anchor — even just “thinking about this”",
+          "Add a note to any intention — even just “thinking about this”",
           "info",
         ),
       () =>
@@ -622,18 +622,18 @@ export const NDSupport = {
                 </label>
               </div>
               <div class="setting-row">
-                <label>Anchor visibility</label>
+	                <label>Intention visibility</label>
                 <select id="ndMaxTasks">
-                  <option value="overwhelmed" ${prefs.maxVisibleTasks === "overwhelmed" ? "selected" : ""}>Minimal (1 anchor)</option>
-                  <option value="low_energy" ${prefs.maxVisibleTasks === "low_energy" ? "selected" : ""}>Low energy (3 anchors)</option>
-                  <option value="normal" ${prefs.maxVisibleTasks === "normal" ? "selected" : ""}>Normal (10 anchors)</option>
+	                  <option value="overwhelmed" ${prefs.maxVisibleTasks === "overwhelmed" ? "selected" : ""}>Minimal (1 intention)</option>
+	                  <option value="low_energy" ${prefs.maxVisibleTasks === "low_energy" ? "selected" : ""}>Low energy (3 intentions)</option>
+	                  <option value="normal" ${prefs.maxVisibleTasks === "normal" ? "selected" : ""}>Normal (10 intentions)</option>
                   <option value="high_energy" ${prefs.maxVisibleTasks === "high_energy" ? "selected" : ""}>Show all</option>
                 </select>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
                   <input type="checkbox" id="ndHideCompleted" ${prefs.hideCompletedTasks ? "checked" : ""}>
-                  Hide done anchors
+	                  Hide done intentions
                 </label>
               </div>
             </div>
@@ -835,18 +835,18 @@ export const NDSupport = {
                 </label>
               </div>
               <div class="setting-row">
-                <label>Anchor visibility</label>
+	                <label>Intention visibility</label>
                 <select id="ndMaxTasks">
-                  <option value="overwhelmed" ${nd.maxVisibleTasks === "overwhelmed" ? "selected" : ""}>Minimal (1 anchor)</option>
-                  <option value="low_energy" ${nd.maxVisibleTasks === "low_energy" ? "selected" : ""}>Low energy (3 anchors)</option>
-                  <option value="normal" ${nd.maxVisibleTasks === "normal" ? "selected" : ""}>Normal (10 anchors)</option>
+	                  <option value="overwhelmed" ${nd.maxVisibleTasks === "overwhelmed" ? "selected" : ""}>Minimal (1 intention)</option>
+	                  <option value="low_energy" ${nd.maxVisibleTasks === "low_energy" ? "selected" : ""}>Low energy (3 intentions)</option>
+	                  <option value="normal" ${nd.maxVisibleTasks === "normal" ? "selected" : ""}>Normal (10 intentions)</option>
                   <option value="high_energy" ${nd.maxVisibleTasks === "high_energy" ? "selected" : ""}>Show all</option>
                 </select>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
                   <input type="checkbox" id="ndHideCompleted" ${nd.hideCompletedTasks ? "checked" : ""}>
-                  Hide done anchors
+	                  Hide done intentions
                 </label>
               </div>
             </div>

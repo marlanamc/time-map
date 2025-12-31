@@ -22,7 +22,7 @@ import {
 import { CelestialBodies } from './celestialBodies';
 import { TimeVisualizations } from './timeVisualizations';
 import { ParticleSystem, FallingPetal } from './particleSystem';
-import { ButterfliesManager, BloomInteractions, addBloomAnimationsToCSS } from './butterflies';
+import { BloomInteractions, addBloomAnimationsToCSS } from './butterflies';
 import { BackgroundRenderer } from './backgroundRenderer';
 import { SoundManager } from './soundManager';
 import { PerformanceMonitor, DeviceCapabilities } from './performanceMonitor';
@@ -194,11 +194,12 @@ export class GardenEngine {
     this.particleSystem = new ParticleSystem('gardenEffects', maxParticles);
     this.particleSystem.start();
 
+    // Butterflies disabled - removed per user request
     // Initialize butterflies
-    const maxButterflies = this.preferences.qualityLevel === 'high' ? 5 :
-      this.preferences.qualityLevel === 'medium' ? 3 : 2;
-    this.butterflies = new ButterfliesManager(this.particleSystem, maxButterflies);
-    this.butterflies.start();
+    // const maxButterflies = this.preferences.qualityLevel === 'high' ? 5 :
+    //   this.preferences.qualityLevel === 'medium' ? 3 : 2;
+    // this.butterflies = new ButterfliesManager(this.particleSystem, maxButterflies);
+    // this.butterflies.start();
 
     // Initialize bloom interactions
     addBloomAnimationsToCSS();
@@ -540,11 +541,12 @@ export class GardenEngine {
           this.particleSystem.setMaxParticles(limits.maxParticles);
         }
 
+        // Butterflies disabled - removed per user request
         // Adjust butterflies
-        if (this.butterflies) {
-          const limits = DeviceCapabilities.getRecommendedQuality();
-          this.butterflies.setMaxButterflies(limits.maxButterflies);
-        }
+        // if (this.butterflies) {
+        //   const limits = DeviceCapabilities.getRecommendedQuality();
+        //   this.butterflies.setMaxButterflies(limits.maxButterflies);
+        // }
 
         // Disable parallax if needed
         if (this.backgroundRenderer && quality === 'low') {

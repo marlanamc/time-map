@@ -9,6 +9,8 @@
   display: flex;
   align-items: flex-start;
   gap: 0.875rem;
+  --swipe-x: 0px;
+  translate: var(--swipe-x) 0;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(180, 106, 74, 0.15);
   border-radius: var(--radius-lg);
@@ -23,6 +25,34 @@
     0 2px 8px rgba(180, 106, 74, 0.06),
     0 4px 16px rgba(111, 155, 134, 0.04);
   overflow: hidden;
+}
+
+/* Mobile swipe-to-complete affordance */
+.day-goal-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.day-goal-card.is-swiping {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.day-goal-card.swipe-animating {
+  transition: translate 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.day-goal-card.swipe-ready-complete::after {
+  opacity: 0.22;
+  background: linear-gradient(90deg, rgba(90, 200, 120, 0.55), rgba(90, 200, 120, 0.0));
+}
+
+.day-goal-card.swipe-ready-undo::after {
+  opacity: 0.2;
+  background: linear-gradient(270deg, rgba(255, 170, 60, 0.55), rgba(255, 170, 60, 0.0));
 }
 
 /* Subtle grain texture */

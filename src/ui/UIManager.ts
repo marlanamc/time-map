@@ -5,25 +5,29 @@ import { State } from '../core/State';
 import { Goals } from '../core/Goals';
 import { Planning } from '../core/Planning';
 import { Streaks } from '../core/Streaks';
-import { NDSupport } from '../features/NDSupport';
-import { AppSettings } from '../features/AppSettings';
 import { CONFIG, ND_CONFIG, VIEWS } from '../config';
 import { TimeBreakdown } from '../utils/TimeBreakdown';
 import { cacheElements } from './elements/UIElements';
 import { Toast } from './feedback/Toast';
 import { Celebration } from './feedback/Celebration';
 import { MonthRenderer, WeekRenderer, MobileHereRenderer } from './renderers';
-import { DayViewController } from '../components/dayView/DayViewController';
+import type { DayViewController } from '../components/dayView/DayViewController';
 import { ThemeManager } from '../theme/ThemeManager';
 import { eventBus } from '../core/EventBus';
 import { viewportManager } from './viewport/ViewportManager';
-import { zenFocus } from '../features/ZenFocus';
 import { goalDetailModal } from './modals/GoalDetailModal';
 import { monthDetailModal } from './modals/MonthDetailModal';
-import { quickAdd } from '../features/QuickAdd';
 import { isSupabaseConfigured } from '../supabaseClient';
+import { batchSaveService } from '../services/BatchSaveService';
+import { SupabaseService } from '../services/SupabaseService';
+import { syncQueue } from '../services/SyncQueue';
 import { SwipeNavigator } from './gestures/SwipeNavigator';
-import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, Category, Priority, AccentTheme, Subtask } from '../types';
+import { haptics } from '../utils/haptics';
+import { createFeatureLoaders } from './featureLoaders';
+import type { FeatureLoaders, NDSupportApi, AppSettingsApi, ZenFocusApi, QuickAddApi } from './featureLoaders';
+import * as goalModal from './goalModal';
+import * as weeklyReview from './weeklyReview';
+import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, Priority, AccentTheme, Subtask } from '../types';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -34,6 +38,9 @@ export const UI = {
   els: {}, // Shortcut reference for elements
   elements: {} as UIElements, // Will be populated by cacheElements
   dayViewController: null as DayViewController | null, // New day view controller
+  _dayViewControllerCtor: null as (new (...args: any[]) => DayViewController) | null,
+  _dayViewControllerLoading: null as Promise<void> | null,
+  _featureLoaders: null as FeatureLoaders | null,
   _filterDocListeners: null as FilterDocListeners | null, // For managing document event listeners
   _focusRevealSetup: false, // Whether focus reveal has been initialized
   _focusRevealHideTimer: null as ReturnType<typeof setTimeout> | null, // Timer for hiding focus reveal
@@ -46,8 +53,84 @@ export const UI = {
   _deferredInstallPrompt: null as BeforeInstallPromptEvent | null,
   _rendererEventListenersSetup: false,
   _swipeNavigator: null as SwipeNavigator | null,
+  _pullToRefreshCleanup: null as (() => void) | null,
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
+
+  getFeatureLoaders(): FeatureLoaders {
+    if (this._featureLoaders) return this._featureLoaders;
+    this._featureLoaders = createFeatureLoaders({
+      toast: (iconOrMessage, messageOrType) =>
+        this.showToast(iconOrMessage, messageOrType ?? ""),
+      appSettingsCallbacks: {
+        onShowToast: (message, type) => this.showToast(message, type ?? ""),
+        onScheduleRender: () => this.scheduleRender(),
+        onShowKeyboardShortcuts: () => this.showKeyboardShortcuts(),
+        onSetFocusMode: (enabled, options) => this.setFocusMode(enabled, options),
+        onApplyLayoutVisibility: () => this.applyLayoutVisibility(),
+        onApplySidebarVisibility: () => this.applySidebarVisibility(),
+        onSyncViewButtons: () => this.syncViewButtons(),
+      },
+    });
+    return this._featureLoaders;
+  },
+
+  getLevelLabel(level: GoalLevel, opts?: { lowercase?: boolean; plural?: boolean }): string {
+    const base = (() => {
+      switch (level) {
+        case "vision":
+          return "Vision";
+        case "milestone":
+          return "Milestone";
+        case "focus":
+          return "Focus";
+        case "intention":
+          return "Intention";
+        default:
+          return "Intention";
+      }
+    })();
+
+    const plural = opts?.plural
+      ? base === "Focus"
+        ? "Focuses"
+        : `${base}s`
+      : base;
+    return opts?.lowercase ? plural.toLowerCase() : plural;
+  },
+
+  async ensureNDSupport(): Promise<NDSupportApi> {
+    return this.getFeatureLoaders().ensureNDSupport();
+  },
+
+  async ensureAppSettings(): Promise<AppSettingsApi> {
+    return this.getFeatureLoaders().ensureAppSettings();
+  },
+
+  async ensureZenFocus(): Promise<ZenFocusApi | null> {
+    return this.getFeatureLoaders().ensureZenFocus();
+  },
+
+  async ensureQuickAdd(): Promise<QuickAddApi | null> {
+    return this.getFeatureLoaders().ensureQuickAdd();
+  },
+
+  deferNDSupportInit() {
+    this.getFeatureLoaders().deferNDSupportInit();
+  },
+
+  async applyAccessibilityPreferences(): Promise<void> {
+    await this.getFeatureLoaders().applyAccessibilityPreferences();
+  },
+
+  syncAddButtonLabel() {
+    const btn = document.getElementById("addGoalBtn");
+    if (!btn) return;
+    const level = this.getCurrentLevel();
+    const label = this.getLevelLabel(level);
+    btn.setAttribute("aria-label", `Set new ${label.toLowerCase()}`);
+    btn.setAttribute("title", `Set new ${label.toLowerCase()}`);
+  },
 
   setupViewportMode() {
     // Set up callbacks for ViewportManager
@@ -59,6 +142,7 @@ export const UI = {
           void this.elements.canvasContainer.offsetHeight;
         }
         this.setupSwipeNavigation();
+        this.setupPullToRefresh();
       },
       onRenderRequired: () => {
         // Re-render current view to adjust to new dimensions
@@ -131,20 +215,23 @@ export const UI = {
     this.setupEventBusListeners(); // Set up EventBus communication
     this.setupSyncEventListeners(); // Set up sync status event listeners
     this.setupInstallPrompt(); // Set up PWA install prompt handling
-    this.setupZenFocusCallbacks(); // Set up ZenFocus feature callbacks
+    void this.setupZenFocusCallbacks(); // Set up ZenFocus feature callbacks
     this.setupGoalDetailModalCallbacks(); // Set up GoalDetailModal callbacks
-    this.setupQuickAddCallbacks(); // Set up QuickAdd callbacks
+    void this.setupQuickAddCallbacks(); // Set up QuickAdd callbacks
     this.setupMonthDetailModalCallbacks(); // Set up MonthDetailModal callbacks
     this.setupViewportMode();
     this.setupSwipeNavigation();
+    this.setupPullToRefresh();
+    this.syncAddButtonLabel();
     this.applySavedUIState();
     this.render();
+    this.hideInitialLoadingUI();
     this.updateTimeDisplay();
     this.updateYearProgress();
     this.renderAchievements();
 
-    // Initialize ND Support features
-    NDSupport.init();
+    // Initialize ND Support features after initial paint to keep first-load snappy.
+    this.deferNDSupportInit();
 
     // Set up periodic updates
     setInterval(() => this.updateTimeDisplay(), 60000);
@@ -210,6 +297,167 @@ export const UI = {
     }
 
     this._swipeNavigator.attach(el);
+  },
+
+  setupPullToRefresh() {
+    const isMobile = viewportManager.isMobileViewport();
+    const container = this.elements.canvasContainer;
+    const indicator = document.getElementById("pullToRefresh");
+    const labelEl = document.getElementById("pullToRefreshLabel");
+
+    if (!isMobile || !container || !indicator) {
+      this._pullToRefreshCleanup?.();
+      this._pullToRefreshCleanup = null;
+      return;
+    }
+
+    // Already attached
+    if (this._pullToRefreshCleanup) return;
+
+    const thresholdPx = 72;
+    const maxPullPx = 140;
+
+    let startX = 0;
+    let startY = 0;
+    let pulling = false;
+    let locked = false;
+    let pullPx = 0;
+
+    const canStart = (target: Element | null) => {
+      if (!target) return true;
+      return !(
+        target.closest("input") ||
+        target.closest("textarea") ||
+        target.closest("select") ||
+        target.closest("button") ||
+        target.closest("a") ||
+        target.closest(".modal") ||
+        target.closest(".modal-overlay") ||
+        target.closest(".support-panel") ||
+        target.closest("[data-disable-pull-to-refresh]")
+      );
+    };
+
+    const setIndicator = (opts: { active: boolean; pull?: number; ready?: boolean; loading?: boolean; label?: string }) => {
+      indicator.classList.toggle("active", !!opts.active);
+      indicator.classList.toggle("ready", !!opts.ready);
+      indicator.classList.toggle("loading", !!opts.loading);
+      if (typeof opts.pull === "number") {
+        indicator.style.setProperty("--ptr-pull", `${opts.pull}px`);
+      }
+      if (labelEl && typeof opts.label === "string") {
+        labelEl.textContent = opts.label;
+      }
+    };
+
+    const reset = () => {
+      pulling = false;
+      locked = false;
+      pullPx = 0;
+      setIndicator({ active: false, pull: 0, ready: false, loading: false, label: "Pull to refresh" });
+    };
+
+    const doRefresh = async () => {
+      if (!navigator.onLine) {
+        this.showToast("📴", "Offline — can’t refresh");
+        haptics.impact("light");
+        return;
+      }
+
+      const prevData = State.data;
+      try {
+        await State.load();
+        if (!State.data && prevData) State.data = prevData;
+        this.render();
+        this.showToast("🔄", "Refreshed");
+        haptics.impact("medium");
+      } catch (e) {
+        console.error("Pull-to-refresh failed:", e);
+        if (!State.data && prevData) State.data = prevData;
+        this.showToast("⚠️", "Refresh failed");
+        haptics.impact("light");
+      }
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (!canStart(e.target as Element | null)) return;
+      if (container.scrollTop > 0) return;
+      if (e.touches.length !== 1) return;
+
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      pulling = true;
+      locked = false;
+      pullPx = 0;
+      setIndicator({ active: true, pull: 0, ready: false, loading: false, label: "Pull to refresh" });
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!pulling) return;
+      if (container.scrollTop > 0) return reset();
+      if (e.touches.length !== 1) return reset();
+
+      const t = e.touches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      if (dy <= 0) return reset();
+
+      // Only handle if it is mostly vertical. If the user is swiping horizontally, bail.
+      if (!locked) {
+        if (Math.abs(dx) > Math.abs(dy) * 0.75) return reset();
+        locked = true;
+      }
+
+      // We are handling the gesture: prevent scroll bounce and take control.
+      e.preventDefault();
+      pullPx = Math.min(maxPullPx, dy * 0.9);
+      const ready = pullPx >= thresholdPx;
+      setIndicator({
+        active: true,
+        pull: pullPx,
+        ready,
+        loading: false,
+        label: ready ? "Release to refresh" : "Pull to refresh",
+      });
+    };
+
+    const onTouchEnd = async () => {
+      if (!pulling) return;
+      const shouldRefresh = pullPx >= thresholdPx;
+      pulling = false;
+      locked = false;
+
+      if (!shouldRefresh) return reset();
+
+      setIndicator({ active: true, pull: thresholdPx, ready: true, loading: true, label: "Refreshing…" });
+      await doRefresh();
+      window.setTimeout(reset, 450);
+    };
+
+    container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchmove", onTouchMove, { passive: false });
+    container.addEventListener("touchend", onTouchEnd, { passive: true });
+    container.addEventListener("touchcancel", reset, { passive: true });
+
+    this._pullToRefreshCleanup = () => {
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchmove", onTouchMove);
+      container.removeEventListener("touchend", onTouchEnd);
+      container.removeEventListener("touchcancel", reset);
+      reset();
+    };
+  },
+
+  hideInitialLoadingUI() {
+    const loading = document.getElementById("appLoading");
+    if (!loading) return;
+
+    // Allow initial paint of the skeleton before fading it out.
+    window.requestAnimationFrame(() => {
+      loading.classList.add("loaded");
+      window.setTimeout(() => loading.remove(), 650);
+    });
   },
 
   /**
@@ -317,8 +565,9 @@ export const UI = {
   /**
    * Set up ZenFocus feature callbacks
    */
-  setupZenFocusCallbacks() {
-    zenFocus.setCallbacks({
+  async setupZenFocusCallbacks() {
+    const zenFocus = await this.ensureZenFocus();
+    zenFocus?.setCallbacks({
       escapeHtml: this.escapeHtml.bind(this),
       onRender: () => this.render(),
       onToast: (icon, message) => Toast.show(this.elements, icon, message),
@@ -343,8 +592,9 @@ export const UI = {
   /**
    * Set up QuickAdd callbacks
    */
-  setupQuickAddCallbacks() {
-    quickAdd.setCallbacks({
+  async setupQuickAddCallbacks() {
+    const quickAdd = await this.ensureQuickAdd();
+    quickAdd?.setCallbacks({
       onRender: () => this.render(),
       onToast: (icon, message) => Toast.show(this.elements, icon, message),
       onCelebrate: (icon, title, message) => Celebration.show(this.elements, icon, title, message)
@@ -352,7 +602,7 @@ export const UI = {
   },
 
   openQuickAdd() {
-    quickAdd.show();
+    void this.ensureQuickAdd().then((qa) => qa?.show());
   },
 
   /**
@@ -369,7 +619,7 @@ export const UI = {
 
   // Update body double timer display
   updateBodyDoubleDisplay() {
-    const remaining = NDSupport.getBodyDoubleRemaining();
+    const remaining = this.getFeatureLoaders().getNDSupportIfLoaded()?.getBodyDoubleRemaining?.();
     const display = document.getElementById("bodyDoubleDisplay");
     const timer = document.getElementById("bdTimer");
 
@@ -471,19 +721,19 @@ export const UI = {
 
         switch (action) {
           case "brainDump":
-            NDSupport.showBrainDumpModal();
+            void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal());
             break;
           case "bodyDouble":
-            NDSupport.showBodyDoubleModal();
+            void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal());
             break;
           case "quickWins":
-            NDSupport.showDopamineMenu();
+            void this.ensureNDSupport().then((nd) => nd.showDopamineMenu());
             break;
           case "ndSettings":
-            NDSupport.showSettingsPanel();
+            void this.ensureNDSupport().then((nd) => nd.showSettingsPanel());
             break;
           case "settings":
-            AppSettings.showPanel();
+            void this.ensureAppSettings().then((s) => s.showPanel());
             break;
           case "syncNow":
             this.forceCloudSync();
@@ -616,7 +866,7 @@ export const UI = {
         accentTheme: selectedTheme,
       };
       State.save();
-      NDSupport.applyAccessibilityPreferences();
+      void this.applyAccessibilityPreferences();
       this.syncSupportPanelAppearanceControls();
     });
 
@@ -670,7 +920,7 @@ export const UI = {
     // Settings
     document
       .getElementById("appSettingsBtn")
-      ?.addEventListener("click", () => AppSettings.showPanel());
+      ?.addEventListener("click", () => void this.ensureAppSettings().then((s) => s.showPanel()));
 
     // Affirmation click
     document
@@ -696,19 +946,19 @@ export const UI = {
     // ND Support button bindings
     document
       .getElementById("brainDumpBtn")
-      ?.addEventListener("click", () => NDSupport.showBrainDumpModal());
+      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal()));
     document
       .getElementById("bodyDoubleBtn")
-      ?.addEventListener("click", () => NDSupport.showBodyDoubleModal());
+      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal()));
     document
       .getElementById("ndSettingsBtn")
-      ?.addEventListener("click", () => NDSupport.showSettingsPanel());
+      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showSettingsPanel()));
     document
       .getElementById("appearanceBtn")
-      ?.addEventListener("click", () => NDSupport.showAppearancePanel());
+      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showAppearancePanel()));
     document
       .getElementById("dopamineMenuBtn")
-      ?.addEventListener("click", () => NDSupport.showDopamineMenu());
+      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showDopamineMenu()));
 
     // Body double stop button
     document.getElementById("bdStop")?.addEventListener("click", () => {
@@ -716,7 +966,7 @@ export const UI = {
       const sessions = State.data.bodyDoubleHistory;
       const active = sessions[sessions.length - 1];
       if (active && !active.endedAt) {
-        NDSupport.endBodyDouble(active.id, false);
+        void this.ensureNDSupport().then((nd) => nd.endBodyDouble(active.id, false));
         document
           .getElementById("bodyDoubleDisplay")
           ?.setAttribute("hidden", "");
@@ -771,14 +1021,12 @@ export const UI = {
 
     try {
       // Force final sync of pending changes
-      const { batchSaveService } = await import('../services/BatchSaveService');
       await batchSaveService.forceSave();
 
       // Clean up resources
       await State.cleanup();
 
       // Sign out from Supabase
-      const { SupabaseService } = await import('../services/SupabaseService');
       await SupabaseService.signOut();
 
       // Emit logout event
@@ -807,8 +1055,6 @@ export const UI = {
 
     try {
       this.updateSyncStatus('syncing');
-      const { batchSaveService } = await import('../services/BatchSaveService');
-      const { syncQueue } = await import('../services/SyncQueue');
       await Promise.allSettled([batchSaveService.forceSave(), syncQueue.forceSync()]);
       this.updateSyncStatus('synced');
       Toast.show(this.elements, '☁️', 'Synced!');
@@ -980,6 +1226,7 @@ export const UI = {
     }
 
     viewportManager.updateMobileLayoutVars();
+    this.syncAddButtonLabel();
 
     if (shouldResetScroll) {
       if (this._scrollResetRaf !== null) {
@@ -1311,12 +1558,25 @@ export const UI = {
     const container = this.elements.calendarGrid;
     if (!container) return;
 
+    if (!this._dayViewControllerCtor) {
+      container.innerHTML = `
+        <div class="mobile-card" style="max-width: 520px; margin: 0 auto;">
+          <div class="card-label">Loading…</div>
+          <div style="opacity: 0.8; padding-top: 8px;">Preparing Day view</div>
+        </div>
+      `;
+      void this.ensureDayViewControllerCtor().then(() => {
+        if (State.currentView === VIEWS.DAY) this.renderDayView();
+      });
+      return;
+    }
+
     const date = State.viewingDate;
     const allGoals = State.data?.goals || [];
 
     // Initialize DayViewController if not already done
     if (!this.dayViewController) {
-      this.dayViewController = new DayViewController(
+      this.dayViewController = new this._dayViewControllerCtor(
         container,
         {
           onGoalUpdate: (goalId: string, updates: Partial<Goal>) => {
@@ -1331,7 +1591,7 @@ export const UI = {
             goalDetailModal.show(goalId);
           },
           onZenFocus: (goalId: string) => {
-            zenFocus.open(goalId);
+            void this.ensureZenFocus().then((zf) => zf?.open(goalId));
           },
           onShowToast: (emoji: string, message: string) => {
             this.showToast(emoji, message);
@@ -1340,7 +1600,7 @@ export const UI = {
             this.celebrate(emoji, title, message);
           },
           onPlantSomething: () => {
-            quickAdd.show();
+            void this.ensureQuickAdd().then((qa) => qa?.show());
           },
           onGetPreference: (key: string) => {
             return (State.data?.preferences.nd as any)?.[key];
@@ -1364,6 +1624,25 @@ export const UI = {
 
     // Add day view style toggle
     this.ensureDayViewStyleToggle();
+  },
+
+  async ensureDayViewControllerCtor(): Promise<void> {
+    if (this._dayViewControllerCtor) return;
+    if (this._dayViewControllerLoading) return this._dayViewControllerLoading;
+
+    this._dayViewControllerLoading = import("../components/dayView/DayViewController")
+      .then((mod) => {
+        this._dayViewControllerCtor = mod.DayViewController as any;
+      })
+      .catch((err) => {
+        console.error("Failed to load DayViewController:", err);
+        this.showToast("⚠️", "Couldn’t load Day view");
+      })
+      .finally(() => {
+        this._dayViewControllerLoading = null;
+      });
+
+    return this._dayViewControllerLoading;
   },
 
   ensureDayViewStyleToggle() {
@@ -1754,7 +2033,7 @@ export const UI = {
               </div>
               ${goal.progress > 0 ? `<div class="goal-progress"><div class="goal-progress-fill" style="width: ${goal.progress}%"></div></div>` : ""}
             </div>
-            <button class="btn btn-icon btn-ghost goal-edit-btn" data-goal-id="${goal.id}" type="button" aria-label="Goal options">⋮</button>
+            <button class="btn btn-icon btn-ghost goal-edit-btn" data-goal-id="${goal.id}" type="button" aria-label="Options">⋮</button>
           </div>
         `;
       })
@@ -1957,379 +2236,30 @@ export const UI = {
   // Modal Handling
   // ============================================
   openGoalModal(level: GoalLevel = "milestone", preselectedMonth: number | null = null, preselectedYear: number | null = null): void {
-    this.goalModalLevel = level;
-    this.goalModalYear =
-      preselectedYear ?? State.viewingYear ?? new Date().getFullYear();
-
-    // Update modal titles based on level
-    const title = document.getElementById("goal-modal-title");
-    const label = document.querySelector('label[for="goalTitle"]');
-
-    if (title) {
-      if (level === "vision") title.textContent = "Create New Vision";
-      else if (level === "milestone") title.textContent = "Set New Milestone";
-      else if (level === "focus") title.textContent = "Define New Focus";
-      else if (level === "intention") title.textContent = "Set New Intention";
-    }
-
-    if (label) {
-      if (level === "vision") label.textContent = "What is your vision for this year?";
-      else if (level === "milestone") label.textContent = "What is your milestone for this month?";
-      else if (level === "focus") label.textContent = "What is your focus for this week?";
-      else if (level === "intention") label.textContent = "What is your intention for today?";
-    }
-
-    // Customize modal fields based on goal level
-    const monthGroup = document.querySelector('label[for="goalMonth"]')?.parentElement as HTMLElement;
-    const monthLabel = document.querySelector('label[for="goalMonth"]') as HTMLElement;
-    const monthSelect = document.getElementById("goalMonth") as HTMLSelectElement;
-    const categoryGroup = document.querySelector('label[for="goalCategory"]')?.parentElement as HTMLElement;
-
-    // Use a more resilient selector for the time fields row
-    const timeGroup = document.getElementById("goalStartTime")?.closest(".form-row") as HTMLElement;
-    const priorityGroup = document.querySelector('label[for="goalPriority"]')?.parentElement as HTMLElement;
-    const yearGroup = document.getElementById("goalYearGroup") as HTMLElement | null;
-    const yearInput = document.getElementById("goalYear") as HTMLInputElement | null;
-    const startDateGroup = document.getElementById("goalStartDateGroup") as HTMLElement | null;
-    const startDateInput = document.getElementById("goalStartDate") as HTMLInputElement | null;
-    const startDateLabel = document.querySelector('label[for="goalStartDate"]') as HTMLElement | null;
-    const milestoneDurationGroup = document.getElementById("milestoneDurationGroup") as HTMLElement | null;
-    const milestoneDurationSelect = document.getElementById("milestoneDurationMonths") as HTMLSelectElement | null;
-    const focusDurationGroup = document.getElementById("focusDurationGroup") as HTMLElement | null;
-    const focusDurationSelect = document.getElementById("focusDurationWeeks") as HTMLSelectElement | null;
-    const submitBtn = document.querySelector('#goalForm button[type="submit"]') as HTMLElement;
-
-    // Update submit button text based on goal level
-    if (submitBtn) {
-      if (level === "vision") submitBtn.textContent = "Create Vision";
-      else if (level === "milestone") submitBtn.textContent = "Set Milestone";
-      else if (level === "focus") submitBtn.textContent = "Define Focus";
-      else if (level === "intention") submitBtn.textContent = "Set Intention";
-    }
-
-    // Reset required states first
-    if (monthSelect) monthSelect.required = false;
-    if (yearGroup) yearGroup.style.display = "none";
-    if (startDateGroup) startDateGroup.style.display = "none";
-    if (milestoneDurationGroup) milestoneDurationGroup.style.display = "none";
-    if (focusDurationGroup) focusDurationGroup.style.display = "none";
-
-    const toYmdLocal = (d: Date) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    };
-
-    if (yearInput) {
-      yearInput.value = String(this.goalModalYear);
-      yearInput.onchange = () => {
-        const raw = Number.parseInt(yearInput.value, 10);
-        if (Number.isFinite(raw)) {
-          this.goalModalYear = raw;
-          if (this.goalModalLevel === "milestone") {
-            this.populateMonthSelect(preselectedMonth, raw);
-          }
-          this.updateGoalModalTimeBreakdown();
-        }
-      };
-    }
-
-    if (monthGroup && monthLabel && monthSelect) {
-      if (level === "vision") {
-        // Vision: year-only
-        monthGroup.style.display = "none";
-        this.setFieldVisibility(timeGroup, false);
-        if (priorityGroup) priorityGroup.style.display = "block";
-        if (categoryGroup) categoryGroup.style.display = "block";
-        if (yearGroup) yearGroup.style.display = "block";
-      } else if (level === "milestone") {
-        // Milestone: month(s)
-        monthGroup.style.display = "block";
-        monthSelect.required = true;
-        monthLabel.textContent = "Start month";
-        this.populateMonthSelect(preselectedMonth, this.goalModalYear);
-        this.setFieldVisibility(timeGroup, false);
-        if (priorityGroup) priorityGroup.style.display = "block";
-        if (categoryGroup) categoryGroup.style.display = "block";
-        if (yearGroup) yearGroup.style.display = "block";
-        if (milestoneDurationGroup) milestoneDurationGroup.style.display = "block";
-        if (milestoneDurationSelect) milestoneDurationSelect.value = "1";
-      } else if (level === "focus") {
-        // Focus: week(s)
-        monthGroup.style.display = "none";
-        this.setFieldVisibility(timeGroup, false);
-        if (priorityGroup) priorityGroup.style.display = "block";
-        if (categoryGroup) categoryGroup.style.display = "block";
-        if (startDateGroup) startDateGroup.style.display = "block";
-        if (startDateLabel) startDateLabel.textContent = "Week of";
-        if (startDateInput) {
-          const weekNum = State.viewingWeek ?? State.getWeekNumber(State.viewingDate ?? new Date());
-          const weekStart = State.getWeekStart(State.viewingYear ?? new Date().getFullYear(), weekNum);
-          startDateInput.value = toYmdLocal(weekStart);
-        }
-        if (focusDurationGroup) focusDurationGroup.style.display = "block";
-        if (focusDurationSelect) focusDurationSelect.value = "1";
-      } else if (level === "intention") {
-        // Intention: single day
-        monthGroup.style.display = "none";
-        this.setFieldVisibility(timeGroup, true);
-        if (priorityGroup) priorityGroup.style.display = "none";
-        if (categoryGroup) categoryGroup.style.display = "none";
-        if (startDateGroup) startDateGroup.style.display = "block";
-        if (startDateLabel) startDateLabel.textContent = "Date";
-        if (startDateInput) startDateInput.value = toYmdLocal(State.viewingDate ?? new Date());
-      }
-    }
-
-    // Show time breakdown for all goal levels
-    setTimeout(() => this.updateGoalModalTimeBreakdown(), 0);
-
-    this.elements.goalModal?.classList.add("active");
-
-    // Scroll focused input into view on mobile when keyboard appears
-    if (viewportManager.isMobileViewport()) {
-      // Wait for modal animation to complete, then focus and scroll first input
-      setTimeout(() => {
-        const firstInput = this.elements.goalModal?.querySelector("input, select, textarea") as HTMLElement | null;
-        if (firstInput) {
-          firstInput.focus();
-          // Scroll into view with smooth behavior
-          setTimeout(() => {
-            firstInput.scrollIntoView({ behavior: "smooth", block: "center" });
-          }, 100);
-        }
-      }, 300);
-
-      // Also handle focus events on inputs to scroll them into view when keyboard appears
-      const handleInputFocus = (e: FocusEvent) => {
-        const target = e.target as HTMLElement;
-        if (target && (target.tagName === "INPUT" || target.tagName === "SELECT" || target.tagName === "TEXTAREA")) {
-          setTimeout(() => {
-            target.scrollIntoView({ behavior: "smooth", block: "center" });
-          }, 150);
-        }
-      };
-
-      // Store handler reference for cleanup
-      const modal = this.elements.goalModal;
-      if (modal) {
-        modal.addEventListener("focusin", handleInputFocus);
-        // Clean up on modal close
-        const originalClose = this.closeGoalModal.bind(this);
-        this.closeGoalModal = () => {
-          modal.removeEventListener("focusin", handleInputFocus);
-          originalClose();
-        };
-      }
-    }
-    document.getElementById("goalTitle")?.focus();
+    goalModal.openGoalModal(this, level, preselectedMonth, preselectedYear);
   },
 
   closeGoalModal() {
-    this.elements.goalModal?.classList.remove("active");
-    this.elements.goalForm?.reset();
-    this.goalModalYear = null;
+    goalModal.closeGoalModal(this);
   },
 
   setFieldVisibility(element: HTMLElement | null, visible: boolean) {
-    if (!element) return;
-    element.style.display = visible ? "grid" : "none";
+    goalModal.setFieldVisibility(element, visible);
   },
 
   populateMonthSelect(
     preselectedMonth: number | null = null,
     year: number | null = null,
   ) {
-    const select = this.elements.goalMonth;
-    if (!select) return;
-
-    const now = new Date();
-    const nowMonth = now.getMonth();
-    const nowYear = now.getFullYear();
-
-    const currentMonth = preselectedMonth ?? State.viewingMonth ?? nowMonth;
-    const currentYear = year ?? this.goalModalYear ?? State.viewingYear ?? nowYear;
-
-    select.innerHTML = CONFIG.MONTHS.map((name, idx) => {
-      const timeLeft = TimeBreakdown.getSimpleTimeLeft(idx, currentYear);
-      const isPast =
-        currentYear < nowYear || (currentYear === nowYear && idx < nowMonth);
-      return `<option value="${idx}" ${idx === currentMonth ? "selected" : ""} ${isPast ? 'class="past-month"' : ""}>${name} ${!isPast ? `(${timeLeft})` : "(past)"}</option>`;
-    }).join("");
-
-    // Ensure the select has a valid value even if HTML parsing fails.
-    select.value = String(currentMonth);
-
-    // Add listener to show time breakdown when month changes
-    select.onchange = () => this.updateGoalModalTimeBreakdown();
-
-    // Show initial time breakdown
-    setTimeout(() => this.updateGoalModalTimeBreakdown(), 0);
+    goalModal.populateMonthSelect(this, preselectedMonth, year);
   },
 
   updateGoalModalTimeBreakdown() {
-    const level = this.goalModalLevel;
-    if (!level) return;
-
-    // Find or create the time breakdown container in the modal
-    let breakdownContainer = document.getElementById("modalTimeBreakdown");
-    if (!breakdownContainer) {
-      breakdownContainer = document.createElement("div");
-      breakdownContainer.id = "modalTimeBreakdown";
-      breakdownContainer.className = "modal-time-breakdown";
-      // Insert after the first form-group (title field)
-      const firstFormGroup = this.elements.goalForm?.querySelector(".form-group");
-      if (firstFormGroup) {
-        const parent = firstFormGroup.parentNode;
-        if (parent) parent.insertBefore(breakdownContainer, firstFormGroup.nextSibling);
-      }
-    }
-
-    // Generate HTML based on goal level
-    let html = "";
-    const currentYear = this.goalModalYear ?? State.viewingYear ?? new Date().getFullYear();
-
-    if (level === "intention") {
-      // Day level - hours left in day
-      html = TimeBreakdown.generateHTML(0, currentYear, false, "intention");
-    } else if (level === "focus") {
-      // Week level - days/weekends/sessions in week
-      html = TimeBreakdown.generateHTML(0, currentYear, false, "focus");
-    } else if (level === "vision") {
-      // Year level - months/quarters/weeks/sessions in year
-      html = TimeBreakdown.generateHTML(0, currentYear, false, "vision");
-    } else if (level === "milestone") {
-      // Month level - use month selection
-      const select = this.elements.goalMonth;
-      if (!select) return;
-      const selectedMonth = Number.parseInt(select.value, 10);
-      if (!Number.isFinite(selectedMonth)) return;
-      html = TimeBreakdown.generateHTML(selectedMonth, currentYear, false, "milestone");
-    }
-
-    breakdownContainer.innerHTML = html;
+    goalModal.updateGoalModalTimeBreakdown(this);
   },
 
   handleGoalSubmit(e: Event) {
-    e.preventDefault();
-
-    const titleEl = document.getElementById("goalTitle") as HTMLInputElement | null;
-    const monthEl = document.getElementById("goalMonth") as HTMLSelectElement | null;
-    const yearEl = document.getElementById("goalYear") as HTMLInputElement | null;
-    const startDateEl = document.getElementById("goalStartDate") as HTMLInputElement | null;
-    const milestoneDurationEl = document.getElementById("milestoneDurationMonths") as HTMLSelectElement | null;
-    const focusDurationEl = document.getElementById("focusDurationWeeks") as HTMLSelectElement | null;
-    const categoryEl = document.getElementById("goalCategory") as HTMLSelectElement | null;
-    const priorityEl = document.getElementById("goalPriority") as HTMLSelectElement | null;
-    const startTimeEl = document.getElementById("goalStartTime") as HTMLInputElement | null;
-    const endTimeEl = document.getElementById("goalEndTime") as HTMLInputElement | null;
-
-    const title = titleEl?.value.trim() ?? "";
-    if (!title) return;
-
-    // Get values based on goal level - some fields may be hidden
-    let month = NaN;
-    let year =
-      this.goalModalYear ?? State.viewingYear ?? new Date().getFullYear();
-    let startDate: string | undefined;
-    let durationMonths = NaN;
-    let durationWeeks = NaN;
-    let category: Category = null;
-    let priority: Priority = "medium";
-    let startTime: string | null = null;
-    let endTime: string | null = null;
-
-    // Only get month if the field is visible (milestones)
-    if (monthEl && (monthEl.parentElement as HTMLElement)?.style.display !== "none") {
-      month = parseInt(monthEl.value, 10);
-    }
-
-    // Only get year if the field is visible (visions/milestones)
-    if (yearEl && (yearEl.parentElement as HTMLElement)?.style.display !== "none") {
-      const yearRaw = parseInt(yearEl.value, 10);
-      if (Number.isFinite(yearRaw)) year = yearRaw;
-    }
-
-    // Only get start date if visible (focus/intentions)
-    if (startDateEl && (startDateEl.parentElement as HTMLElement)?.style.display !== "none") {
-      const raw = startDateEl.value?.trim();
-      startDate = raw ? raw : undefined;
-    }
-
-    // Only get milestone duration if visible
-    if (milestoneDurationEl && (milestoneDurationEl.parentElement as HTMLElement)?.style.display !== "none") {
-      durationMonths = parseInt(milestoneDurationEl.value, 10);
-    }
-
-    // Only get focus duration if visible
-    if (focusDurationEl && (focusDurationEl.parentElement as HTMLElement)?.style.display !== "none") {
-      durationWeeks = parseInt(focusDurationEl.value, 10);
-    }
-
-    // Only get category if the field is visible
-    if (categoryEl && (categoryEl.parentElement as HTMLElement)?.style.display !== "none") {
-      const categoryRaw = categoryEl?.value;
-      category =
-        categoryRaw && categoryRaw in CONFIG.CATEGORIES
-          ? (categoryRaw as Exclude<Category, null>)
-          : null;
-    }
-
-    // Only get priority if the field is visible
-    if (priorityEl && (priorityEl.parentElement as HTMLElement)?.style.display !== "none") {
-      const priorityRaw = priorityEl?.value;
-      priority =
-        priorityRaw === "low" ||
-          priorityRaw === "medium" ||
-          priorityRaw === "high" ||
-          priorityRaw === "urgent"
-          ? (priorityRaw as Priority)
-          : "medium";
-    }
-
-    // Only get time fields if they're visible (intentions)
-    if (startTimeEl && (startTimeEl.parentElement?.parentElement as HTMLElement)?.style.display !== "none") {
-      startTime = startTimeEl?.value || null;
-      endTime = endTimeEl?.value || null;
-    }
-
-    if (!title) return;
-
-    // For levels that don't use month selection, let Goals.create handle auto-anchoring
-    const goalData: any = {
-      title,
-      level: this.goalModalLevel,
-      category,
-      priority,
-      startTime,
-      endTime,
-    };
-
-    if (this.goalModalLevel === "vision") {
-      goalData.year = year;
-    }
-
-    if (this.goalModalLevel === "milestone") {
-      if (Number.isFinite(month)) goalData.month = month;
-      if (Number.isFinite(year)) goalData.year = year;
-      if (Number.isFinite(durationMonths)) goalData.durationMonths = durationMonths;
-    }
-
-    if (this.goalModalLevel === "focus") {
-      if (startDate) goalData.startDate = startDate;
-      if (Number.isFinite(durationWeeks)) goalData.durationWeeks = durationWeeks;
-    }
-
-    if (this.goalModalLevel === "intention") {
-      if (startDate) goalData.startDate = startDate;
-    }
-
-    Goals.create(goalData);
-
-    this.closeGoalModal();
-    this.render();
-    this.showToast("✨", "Anchor placed.");
+    goalModal.handleGoalSubmit(this, e);
   },
 
   // ============================================
@@ -2342,143 +2272,11 @@ export const UI = {
   // Weekly Review
   // ============================================
   showReviewPrompt() {
-    if (sessionStorage.getItem("reviewPromptShown")) return;
-    sessionStorage.setItem("reviewPromptShown", "true");
-
-    const toast = document.createElement("div");
-    toast.className = "review-prompt";
-    toast.innerHTML = `
-                <div class="review-prompt-content">
-                    <span class="review-emoji">📝</span>
-                    <span class="review-text">Time for your weekly review!</span>
-                    <button class="btn btn-sm btn-primary" id="startReviewBtn">Start Review</button>
-                    <button class="btn btn-sm btn-ghost" id="dismissReviewBtn">Later</button>
-                </div>
-            `;
-
-    document.body.appendChild(toast);
-
-    toast.querySelector("#startReviewBtn")?.addEventListener("click", () => {
-      toast.remove();
-      this.showWeeklyReview();
-    });
-
-    toast
-      .querySelector("#dismissReviewBtn")
-      ?.addEventListener("click", () => {
-        toast.remove();
-      });
+    weeklyReview.showReviewPrompt(this);
   },
 
   showWeeklyReview() {
-    const weekGoals = Planning.getWeekGoals();
-    const completed = weekGoals.filter((g) => g.status === "done");
-
-    const modal = document.createElement("div");
-    modal.className = "modal-overlay active";
-    modal.innerHTML = `
-                <div class="modal modal-lg">
-                    <div class="modal-header">
-                        <h2 class="modal-title">📝 Weekly Review</h2>
-                        <button class="modal-close" id="closeReview">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="review-section">
-                            <h3>🎉 This Week's Wins</h3>
-                            <p class="review-hint">What felt good this week? (${completed.length} anchors marked done)</p>
-                            <textarea id="reviewWins" placeholder="List your wins this week..."></textarea>
-                        </div>
-
-                        <div class="review-section">
-                            <h3>🧗 Challenges Faced</h3>
-                            <textarea id="reviewChallenges" placeholder="What obstacles did you encounter?"></textarea>
-                        </div>
-
-                        <div class="review-section">
-                            <h3>💡 Key Learnings</h3>
-                            <textarea id="reviewLearnings" placeholder="What did you learn?"></textarea>
-                        </div>
-
-                        <div class="review-section">
-                            <h3>🎯 Next Week's Priorities</h3>
-                            <textarea id="reviewPriorities" placeholder="What will you focus on next week?"></textarea>
-                        </div>
-
-                        <div class="review-section">
-                            <h3>How are you feeling?</h3>
-                            <div class="mood-selector">
-                                <button class="mood-btn" data-mood="1">😫</button>
-                                <button class="mood-btn" data-mood="2">😕</button>
-                                <button class="mood-btn" data-mood="3">😐</button>
-                                <button class="mood-btn" data-mood="4">🙂</button>
-                                <button class="mood-btn" data-mood="5">😊</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <button class="btn btn-ghost" id="cancelReview">Skip</button>
-                        <button class="btn btn-primary" id="saveReview">Save Review ✨</button>
-                    </div>
-                </div>
-            `;
-
-    document.body.appendChild(modal);
-
-    let selectedMood = 3;
-
-    modal
-      .querySelector("#closeReview")
-      ?.addEventListener("click", () => modal.remove());
-    modal
-      .querySelector("#cancelReview")
-      ?.addEventListener("click", () => modal.remove());
-
-    modal.querySelectorAll(".mood-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        modal
-          .querySelectorAll(".mood-btn")
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        selectedMood = parseInt((btn as HTMLElement).dataset.mood ?? "3", 10);
-      });
-    });
-
-    modal.querySelector("#saveReview")?.addEventListener("click", () => {
-      const now = new Date();
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay());
-
-      Planning.createWeeklyReview({
-        weekStart: weekStart.toISOString(),
-        weekEnd: now.toISOString(),
-        wins: (
-          (modal.querySelector("#reviewWins") as HTMLTextAreaElement | null)
-            ?.value ?? ""
-        )
-          .split("\n")
-          .filter(Boolean),
-        challenges: (
-          (modal.querySelector("#reviewChallenges") as HTMLTextAreaElement | null)
-            ?.value ?? ""
-        )
-          .split("\n")
-          .filter(Boolean),
-        learnings:
-          (modal.querySelector("#reviewLearnings") as HTMLTextAreaElement | null)
-            ?.value ?? "",
-        nextWeekPriorities: (
-          (modal.querySelector("#reviewPriorities") as HTMLTextAreaElement | null)
-            ?.value ?? ""
-        )
-          .split("\n")
-          .filter(Boolean),
-        mood: selectedMood,
-      });
-
-      modal.remove();
-      this.showToast("📝", "Weekly review saved!");
-      this.render();
-    });
+    weeklyReview.showWeeklyReview(this);
   },
 
   // ============================================
@@ -2760,7 +2558,7 @@ export const UI = {
 
     this.applyLayoutVisibility();
     this.applySidebarVisibility();
-    NDSupport.applyAccessibilityPreferences();
+    void this.applyAccessibilityPreferences();
     this.syncViewButtons();
     this.syncSupportPanelAppearanceControls();
   },
@@ -3079,7 +2877,7 @@ export const UI = {
       this.showToast("", "Jumped to today");
     }
 
-    // Ctrl/Cmd + N for new anchor
+    // Ctrl/Cmd + N for new item (based on view)
     if ((e.ctrlKey || e.metaKey) && e.key === "n") {
       e.preventDefault();
       this.openGoalModal(this.getCurrentLevel(), State.viewingMonth, State.viewingYear);
@@ -3093,13 +2891,13 @@ export const UI = {
 
     // B for brain dump
     if (e.key === "b" && !e.ctrlKey && !e.metaKey) {
-      NDSupport.showBrainDumpModal();
+      void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal());
     }
 
     // I for Quick-Add Intention
     if (e.key === "i" && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      quickAdd.show();
+      void this.ensureQuickAdd().then((qa) => qa.show());
     }
 
     // ? for keyboard shortcuts help
@@ -3135,7 +2933,7 @@ export const UI = {
               </div>
               <div class="shortcut-section">
                 <h3>Actions</h3>
-                <div class="shortcut-item"><kbd>⌘/Ctrl</kbd> + <kbd>N</kbd> New anchor</div>
+                <div class="shortcut-item"><kbd>⌘/Ctrl</kbd> + <kbd>N</kbd> New intention/focus/milestone/vision</div>
                 <div class="shortcut-item"><kbd>⌘/Ctrl</kbd> + <kbd>F</kbd> Focus (calmer view)</div>
                 <div class="shortcut-item"><kbd>B</kbd> Brain dump</div>
                 <div class="shortcut-item"><kbd>Esc</kbd> Close modal</div>

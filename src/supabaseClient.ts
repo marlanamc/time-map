@@ -1,6 +1,3 @@
-
-import { createClient } from '@supabase/supabase-js';
-
 declare global {
   interface Window {
     __GARDEN_FENCE_ENV?: {
@@ -59,12 +56,19 @@ const supabaseStub = {
   },
 } as any;
 
-export const supabase = (() => {
-  try {
-    if (!isSupabaseConfigured) return supabaseStub;
-    return createClient(PROJECT_URL, SUPABASE_KEY);
-  } catch (err) {
-    console.error('Failed to initialize Supabase client:', err);
-    return supabaseStub;
+let supabaseClientPromise: Promise<any> | null = null;
+
+export async function getSupabaseClient(): Promise<any> {
+  if (!isSupabaseConfigured) return supabaseStub;
+
+  if (!supabaseClientPromise) {
+    supabaseClientPromise = import('@supabase/supabase-js')
+      .then(({ createClient }) => createClient(PROJECT_URL, SUPABASE_KEY))
+      .catch((err) => {
+        console.error('Failed to initialize Supabase client:', err);
+        return supabaseStub;
+      });
   }
-})();
+
+  return supabaseClientPromise;
+}

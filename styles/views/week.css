@@ -286,3 +286,40 @@
     padding: var(--space-4);
     font-style: italic;
 }
+
+/* Light mode time themes - more transparent day columns with darker borders */
+:root.time-dawn:not(.dark-mode) .week-day-column,
+:root.time-morning:not(.dark-mode) .week-day-column,
+:root.time-afternoon:not(.dark-mode) .week-day-column,
+:root.time-evening:not(.dark-mode) .week-day-column {
+    background: rgba(242, 240, 236, 0.45);
+    border: 1.5px solid rgba(26, 43, 47, 0.25);
+}
+
+:root.time-dawn:not(.dark-mode) .week-day-column.today,
+:root.time-morning:not(.dark-mode) .week-day-column.today,
+:root.time-afternoon:not(.dark-mode) .week-day-column.today,
+:root.time-evening:not(.dark-mode) .week-day-column.today {
+    border-color: var(--accent);
+    border-width: 2px;
+}
+
+/* Dark mode time themes - add shadow/border to week title and range */
+:root.dark-mode.time-dawn .week-view-title,
+:root.dark-mode.time-morning .week-view-title,
+:root.dark-mode.time-afternoon .week-view-title,
+:root.dark-mode.time-evening .week-view-title {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+:root.dark-mode.time-dawn .week-view-range,
+:root.dark-mode.time-morning .week-view-range,
+:root.dark-mode.time-afternoon .week-view-range,
+:root.dark-mode.time-evening .week-view-range {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.25);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    display: inline-block;
+}

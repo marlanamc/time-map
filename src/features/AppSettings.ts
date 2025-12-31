@@ -4,7 +4,6 @@
 import { State } from '../core/State';
 import { CONFIG, VIEWS } from '../config';
 import { NDSupport } from './NDSupport';
-import { UI } from '../ui/UIManager';
 import type { AppData, ViewType, Goal, WeeklyReview, BrainDumpEntry, BodyDoubleSession } from '../types';
 
 // Callback interface for UI interactions
@@ -12,6 +11,13 @@ interface AppSettingsCallbacks {
   onShowToast?: (message: string, type?: string) => void;
   onScheduleRender?: () => void;
   onShowKeyboardShortcuts?: () => void;
+  onSetFocusMode?: (
+    enabled: boolean,
+    options?: { silent?: boolean; persist?: boolean },
+  ) => void;
+  onApplyLayoutVisibility?: () => void;
+  onApplySidebarVisibility?: () => void;
+  onSyncViewButtons?: () => void;
 }
 
 let callbacks: AppSettingsCallbacks = {};
@@ -272,7 +278,7 @@ export const AppSettings = {
     modal.querySelector("#resetPrefsBtn")?.addEventListener("click", () => {
       if (
         !confirm(
-          "Reset preferences back to defaults? Your anchors and history will stay.",
+          "Reset preferences back to defaults? Your goals and history will stay.",
         )
       )
         return;
@@ -309,7 +315,12 @@ export const AppSettings = {
 
       if (State.data) {
         State.data.preferences.focusMode = startFocusMode;
-        UI.setFocusMode(startFocusMode, { silent: true });
+        if (callbacks.onSetFocusMode) {
+          callbacks.onSetFocusMode(startFocusMode, { silent: true });
+        } else {
+          State.focusMode = startFocusMode;
+          document.body.classList.toggle("focus-mode", startFocusMode);
+        }
 
         if (!isMobile) {
           State.data.preferences.layout = {
@@ -331,9 +342,9 @@ export const AppSettings = {
         State.save();
       }
       NDSupport.applyAccessibilityPreferences();
-      UI.applyLayoutVisibility?.();
-      UI.applySidebarVisibility?.();
-      UI.syncViewButtons();
+      callbacks.onApplyLayoutVisibility?.();
+      callbacks.onApplySidebarVisibility?.();
+      callbacks.onSyncViewButtons?.();
       callbacks.onScheduleRender?.();
       modal.remove();
       callbacks.onShowToast?.("✅", "Settings saved");

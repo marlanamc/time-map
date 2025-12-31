@@ -6,6 +6,9 @@
  */
 
 import type { Goal, BrainDumpEntry, Preferences } from '../types';
+import { SupabaseService } from '../services/SupabaseService';
+import { dirtyTracker } from '../services/DirtyTracker';
+import { syncQueue } from '../services/SyncQueue';
 
 type DebouncedFunction<T extends any[] = any[]> = (...args: T) => void;
 
@@ -84,9 +87,6 @@ export function throttle<T extends any[]>(
  */
 export const debouncedGoalSync = debounce(async (goal: Goal) => {
   try {
-    const { SupabaseService } = await import('../services/SupabaseService');
-    const { dirtyTracker } = await import('../services/DirtyTracker');
-
     window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
     await SupabaseService.saveGoal(goal);
     dirtyTracker.markClean('goal', goal.id);
@@ -99,7 +99,6 @@ export const debouncedGoalSync = debounce(async (goal: Goal) => {
 
     // Add to sync queue if available
     try {
-      const { syncQueue } = await import('../services/SyncQueue');
       syncQueue.enqueue({
         type: 'update',
         entity: 'goal',
@@ -121,7 +120,6 @@ export const debouncedGoalSync = debounce(async (goal: Goal) => {
  */
 export const throttledPreferencesSync = throttle(async (prefs: Preferences) => {
   try {
-    const { SupabaseService } = await import('../services/SupabaseService');
     window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
     await SupabaseService.savePreferences(prefs);
     window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'synced' } }));
@@ -142,9 +140,6 @@ export const throttledPreferencesSync = throttle(async (prefs: Preferences) => {
  */
 export const debouncedBrainDumpSync = debounce(async (entry: BrainDumpEntry) => {
   try {
-    const { SupabaseService } = await import('../services/SupabaseService');
-    const { dirtyTracker } = await import('../services/DirtyTracker');
-
     window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
     await SupabaseService.saveBrainDump(entry);
     dirtyTracker.markClean('brainDump', entry.id);
@@ -156,7 +151,6 @@ export const debouncedBrainDumpSync = debounce(async (entry: BrainDumpEntry) => 
     window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'error' } }));
 
     try {
-      const { syncQueue } = await import('../services/SyncQueue');
       syncQueue.enqueue({
         type: 'update',
         entity: 'brainDump',
@@ -188,9 +182,6 @@ export function cancelPendingSyncs(): void {
  */
 export async function forceGoalSync(goal: Goal): Promise<void> {
   try {
-    const { SupabaseService } = await import('../services/SupabaseService');
-    const { dirtyTracker } = await import('../services/DirtyTracker');
-
     await SupabaseService.saveGoal(goal);
     dirtyTracker.markClean('goal', goal.id);
 

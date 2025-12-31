@@ -961,10 +961,10 @@ container.addEventListener('touchend', () => {
 
 | Task | Effort | Files |
 |------|--------|-------|
-| [ ] Haptic feedback | 1-2h | New: `haptics.ts`, various |
-| [ ] Pull-to-refresh | 3-4h | Various views |
-| [ ] Loading skeletons | 2-3h | Various components |
-| [ ] Swipe-to-complete | 2-3h | Day view components |
+| [x] Haptic feedback | 1-2h | New: `src/utils/haptics.ts`, various |
+| [x] Pull-to-refresh | 3-4h | `src/ui/UIManager.ts`, `index.html`, `styles/responsive/mobile.css` |
+| [x] Loading skeletons | 2-3h | `index.html`, `src/ui/UIManager.ts` |
+| [x] Swipe-to-complete | 2-3h | `src/components/dayView/DayViewController.ts`, `styles/dayView/cards.css` |
 
 ---
 

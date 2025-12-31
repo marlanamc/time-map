@@ -7,11 +7,11 @@
 import '../styles/main.css';
 
 // Most types are now used by the imported modules rather than app.ts directly
-import { GardenEngine } from './garden/gardenEngine';
+import type { GardenEngine } from './garden/gardenEngine';
 import { State, Goals, Planning, Analytics } from './core';
-import { isSupabaseConfigured } from './supabaseClient';
 import { SupabaseService } from './services/SupabaseService';
 import { VIEWS } from './config';
+import { getSupabaseClient, isSupabaseConfigured } from './supabaseClient';
 
 // Removed duplicate interfaces - now imported from types.ts
 
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await State.init();
 
   // Set up auth state change listeners for session expiration and multi-tab logout
-  const { supabase } = await import('./supabaseClient');
+  const supabase = await getSupabaseClient();
   supabase.auth.onAuthStateChange(async (event: string, _session: unknown) => {
     console.log('Auth state changed:', event);
 
@@ -464,21 +464,40 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ============================================
   // Initialize Garden Engine
   // ============================================
-  const savedGardenPrefs = GardenEngine.loadPreferences();
-  const garden = new GardenEngine(savedGardenPrefs);
-  garden.initialize();
+  const initGarden = async () => {
+    try {
+      const { GardenEngine: GardenEngineCtor } = await import("./garden/gardenEngine");
+      const savedGardenPrefs = GardenEngineCtor.loadPreferences();
+      const garden = new GardenEngineCtor(savedGardenPrefs);
+      garden.initialize();
 
-  // Log garden state changes for debugging
-  garden.on('timeChanged', (state) => {
-    console.log('🌅 Time changed:', state.time.timeOfDay);
-  });
+      // Log garden state changes for debugging
+      garden.on('timeChanged', (state) => {
+        console.log('🌅 Time changed:', state.time.timeOfDay);
+      });
 
-  garden.on('seasonChanged', (state) => {
-    console.log('🍂 Season changed:', state.season.season);
-  });
+      garden.on('seasonChanged', (state) => {
+        console.log('🍂 Season changed:', state.season.season);
+      });
 
-  // Expose garden for debugging
-  window.garden = garden;
+      // Expose garden for debugging
+      window.garden = garden;
+    } catch (err) {
+      console.error("Failed to initialize GardenEngine:", err);
+    }
+  };
+
+  // Defer garden animations so first interactive paint happens sooner.
+  const scheduleGardenInit = () => {
+    const win = window as any;
+    if (typeof win.requestIdleCallback === "function") {
+      win.requestIdleCallback(() => void initGarden(), { timeout: 1500 });
+      return;
+    }
+    setTimeout(() => void initGarden(), 250);
+  };
+
+  scheduleGardenInit();
 });
 
 // Expose for debugging (optional)

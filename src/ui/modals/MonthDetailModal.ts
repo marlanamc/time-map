@@ -55,10 +55,10 @@ class MonthDetailModalManager {
                     <div class="modal-body">
                         <!-- Month Overview -->
                         <div class="month-overview">
-                            <div class="overview-stat">
-                                <div class="stat-value">${monthGoals.length}</div>
-                                <div class="stat-label">Total Anchors</div>
-                            </div>
+	                            <div class="overview-stat">
+	                                <div class="stat-value">${monthGoals.length}</div>
+	                                <div class="stat-label">Milestones & Focuses</div>
+	                            </div>
                             <div class="overview-stat">
                                 <div class="stat-value">${monthGoals.filter((g) => g.status === "done").length}</div>
                                 <div class="stat-label">Completed</div>

@@ -1,13 +1,13 @@
 # The Garden Fence (Time Map)
 
-A neurodivergent-friendly time orientation tool designed to help with time blindness, planning, and overwhelm management. The Garden Fence provides a visual calendar system with goals (“anchors”) plus ADHD-friendly support features, and works well on mobile + as a PWA.
+A neurodivergent-friendly time orientation tool designed to help with time blindness, planning, and overwhelm management. The Garden Fence provides a visual calendar system with intentions (plus Focus/Milestone/Vision context) and ADHD-friendly support features, and works well on mobile + as a PWA.
 
 ## Features
 
 ### 🗓️ Visual Time Orientation
 - **Multiple Views**: Year, Month, Week, and Day views with smooth zooming
 - **Time Blindness Support**: "You Are Here" panel showing current time context
-- **Time Breakdown**: Visual breakdown of time remaining until goals (days, weeks, weekends, work sessions)
+- **Time Breakdown**: Visual breakdown of time remaining until what you’ve set (days, weeks, weekends, work sessions)
 - **Progress Tracking**: Year progress indicator and time remaining statistics
 - **Mobile-first Navigation**: Swipe between views on mobile (Home ⇄ Day ⇄ Week ⇄ Month ⇄ Year)
 
@@ -38,15 +38,15 @@ A neurodivergent-friendly time orientation tool designed to help with time blind
 - Calming interface options
 - Neurodivergent-friendly design
 
-### 📍 Goal System
+### 📍 Planning System
 
-Time Map uses a hierarchical goal system designed to help you break down big dreams into actionable steps:
+Time Map uses a simple four-level structure designed to help you break down big dreams into actionable steps:
 
-#### Four Goal Levels
+#### Four Levels
 
 1. **Vision** (Yearly) - Your big-picture aspirations and yearly outcomes
-   - Long-term direction and major life goals
-   - Helps anchor your year with meaningful purpose
+   - Long-term direction and major life intentions
+   - Helps ground your year with meaningful purpose
 
 2. **Milestone** (Quarterly) - Concrete achievements that move you toward your visions
    - 3-month checkpoints that feel achievable
@@ -64,14 +64,14 @@ Time Map uses a hierarchical goal system designed to help you break down big dre
 
 - **Categories**: Organize by Career, Health, Finance, Personal, Creative
 - **Priority Levels**: Low, Medium, High, Urgent
-- **Time Blocks**: Schedule specific start and end times for goals in Day view
-- **Achievements**: Track completed goals with celebration
-- **Coming Up**: See upcoming goals to reduce decision paralysis
+- **Time Blocks**: Schedule specific start and end times in Day view
+- **Achievements**: Track completed items with celebration
+- **Coming Up**: See what’s next to reduce decision paralysis
 
 ### ✨ Additional Features
 - **Affirmations**: Clickable affirmations for emotional regulation
-- **Surprise Me**: Random goal selection when you can't decide
-- **Confetti Celebrations**: Visual rewards for completing goals
+- **Surprise Me**: Random selection when you can't decide
+- **Confetti Celebrations**: Visual rewards for completions
 - **Offline Support**: Data is stored locally (IndexedDB) and the UI shows an offline indicator when you lose connection
 - **Responsive Design**: Works on desktop and mobile devices
 - **Day Planner**: Advanced day view with drag-and-drop time scheduling
@@ -164,11 +164,11 @@ This project uses **Vite** for an incredibly fast development experience:
 
 ## Usage
 
-### Adding a Goal
+### Adding an Item (Intention / Focus / Milestone / Vision)
 
 1. Click the "+" button (FAB) in the bottom right
-2. Enter your goal title
-3. Select the goal level (Vision, Milestone, Focus, or Intention)
+2. Enter your title
+3. Select the level (Vision, Milestone, Focus, or Intention)
 4. Select the month and year
 5. Optionally add a category, priority, and time blocks
 6. Click "Save"
@@ -187,13 +187,13 @@ This project uses **Vite** for an incredibly fast development experience:
 - **Quick Wins**: Click "Quick Wins" for low-motivation task suggestions
 - **Settings**: Click "Accessibility & Overwhelm" to customize the interface
 
-### Managing Goals
+### Managing Items
 
-- Click a goal on the calendar to view details and edit
+- Click an item on the calendar to view details and edit
 - Click "Surprise me" in the Coming Up section for random selection
-- Filter goals by category using the Scope filters
-- Mark goals as complete to celebrate achievements
-- Drag and drop goals in Day view to schedule specific times
+- Filter by category using the Scope filters
+- Mark complete to celebrate achievements
+- Drag and drop in Day view to schedule specific times
 
 ## Technology Stack
 
@@ -228,7 +228,7 @@ src/
 │
 ├── core/                       # Core business logic
 │   ├── State.ts               # Application state management
-│   ├── Goals.ts               # Goal/anchor CRUD operations
+│   ├── Goals.ts               # Goal CRUD operations
 │   ├── Planning.ts            # Weekly reviews & planning
 │   ├── Analytics.ts           # Goal analytics and tracking
 │   ├── Streaks.ts             # Streak tracking logic
@@ -361,8 +361,6 @@ Designed specifically for neurodivergent individuals, especially those with ADHD
 ---
 
 Made with ❤️ for the neurodivergent community
-
-
 
 
 

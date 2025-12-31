@@ -78,10 +78,10 @@ export const ND_CONFIG = {
   // Dopamine menu - quick wins when motivation is low
   DOPAMINE_MENU: [
     { icon: "check", label: "Check off a tiny task", time: "2 min" },
-    { icon: "target", label: "Pick one anchor for today", time: "1 min" },
+    { icon: "target", label: "Pick one intention for today", time: "1 min" },
     { icon: "cloud", label: "Brain dump for 5 minutes", time: "5 min" },
     { icon: "refresh", label: "Update progress on something", time: "2 min" },
-    { icon: "edit", label: "Add a note to any anchor", time: "1 min" },
+    { icon: "edit", label: "Add a note to any intention", time: "1 min" },
     { icon: "award", label: "Celebrate a past win", time: "1 min" },
     { icon: "shuffle", label: "Let the app pick a task", time: "0 min" },
     {

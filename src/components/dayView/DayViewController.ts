@@ -7,6 +7,7 @@ import { TimelineDayViewRenderer } from "./TimelineDayViewRenderer";
 import { ListDayViewRenderer } from "./ListDayViewRenderer";
 import { PlannerDayViewRenderer } from "./PlannerDayViewRenderer";
 import { DragDropManager } from "./DragDropManager";
+import { haptics } from "../../utils/haptics";
 
 /**
  * Application configuration interface
@@ -48,6 +49,7 @@ export class DayViewController {
   private timeUpdateInterval: number | null = null;
   private readonly boundHandleClick: (e: Event) => void;
   private readonly boundHandleKeyDown: (e: KeyboardEvent) => void;
+  private swipeCleanup: (() => void) | null = null;
 
   // Options
   private options: DayViewOptions;
@@ -130,6 +132,7 @@ export class DayViewController {
       // Delegate event listeners
       this.container.addEventListener("click", this.boundHandleClick);
       this.container.addEventListener("keydown", this.boundHandleKeyDown);
+      this.setupSwipeToComplete();
 
       // Set up resize observer to update on viewport changes
       if (typeof ResizeObserver !== "undefined") {
@@ -163,6 +166,9 @@ export class DayViewController {
     if (!this.isMounted) return;
 
     this.isMounted = false;
+
+    this.swipeCleanup?.();
+    this.swipeCleanup = null;
 
     // Clear interval with null check
     if (this.timeUpdateInterval !== null) {
@@ -404,9 +410,10 @@ export class DayViewController {
 
       const newStatus = goal.status === "done" ? "in-progress" : "done";
       this.callbacks.onGoalUpdate(goalId, { status: newStatus });
+      haptics.impact(newStatus === "done" ? "medium" : "light");
 
       if (newStatus === "done" && this.callbacks.onCelebrate) {
-        this.callbacks.onCelebrate("🎉", "Nice work!", "You completed a task!");
+        this.callbacks.onCelebrate("🎉", "Nice work!", "Intention complete.");
       }
       return;
     }
@@ -448,6 +455,7 @@ export class DayViewController {
       if (goalId) {
         const goal = this.currentGoals.find((g) => g.id === goalId);
         if (goal) {
+          haptics.impact("light");
           this.callbacks.onGoalUpdate(goalId, {
             startTime: undefined,
             endTime: undefined
@@ -584,5 +592,150 @@ export class DayViewController {
 
   private isMobileViewport(): boolean {
     return window.innerWidth <= 600;
+  }
+
+  private setupSwipeToComplete(): void {
+    this.swipeCleanup?.();
+    this.swipeCleanup = null;
+    if (!this.isMobileViewport()) return;
+
+    const thresholdPx = 72;
+    const maxSwipePx = 160;
+
+    let activeCard: HTMLElement | null = null;
+    let activeGoalId: string | null = null;
+    let startX = 0;
+    let startY = 0;
+    let dx = 0;
+    let dy = 0;
+    let tracking = false;
+    let swiping = false;
+
+    const canStart = (target: Element | null) => {
+      if (!target) return false;
+      if (
+        target.closest(".day-goal-checkbox") ||
+        target.closest(".btn-zen-focus") ||
+        target.closest(".btn-planner-remove") ||
+        target.closest("button") ||
+        target.closest("a") ||
+        target.closest("input") ||
+        target.closest("textarea") ||
+        target.closest("select") ||
+        target.closest(".resize-handle")
+      ) {
+        return false;
+      }
+      return true;
+    };
+
+    const reset = () => {
+      if (activeCard) {
+        activeCard.classList.remove("is-swiping", "swipe-ready-complete", "swipe-ready-undo");
+        activeCard.style.removeProperty("--swipe-x");
+      }
+      activeCard = null;
+      activeGoalId = null;
+      tracking = false;
+      swiping = false;
+      dx = 0;
+      dy = 0;
+    };
+
+    const animateBack = () => {
+      if (!activeCard) return reset();
+      activeCard.classList.add("swipe-animating");
+      activeCard.style.setProperty("--swipe-x", "0px");
+      window.setTimeout(() => {
+        activeCard?.classList.remove("swipe-animating");
+        reset();
+      }, 180);
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (!this.isMobileViewport()) return;
+      if (e.touches.length !== 1) return;
+      if (!canStart(e.target as Element | null)) return;
+
+      const card = (e.target as Element | null)?.closest(".day-goal-card") as HTMLElement | null;
+      const goalId = card?.dataset.goalId ?? null;
+      if (!card || !goalId) return;
+
+      tracking = true;
+      swiping = false;
+      activeCard = card;
+      activeGoalId = goalId;
+
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      dx = 0;
+      dy = 0;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!tracking || !activeCard || !activeGoalId) return;
+      if (e.touches.length !== 1) return reset();
+      const t = e.touches[0];
+      dx = t.clientX - startX;
+      dy = t.clientY - startY;
+
+      // Only take over once we are confident it is a horizontal swipe.
+      if (!swiping) {
+        if (Math.abs(dy) > 18 && Math.abs(dy) > Math.abs(dx)) return reset();
+        if (Math.abs(dx) < 12) return;
+        if (Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        swiping = true;
+        activeCard.classList.add("is-swiping");
+      }
+
+      e.preventDefault();
+      const clamped = Math.max(-maxSwipePx, Math.min(maxSwipePx, dx));
+      activeCard.style.setProperty("--swipe-x", `${clamped}px`);
+
+      const goal = this.currentGoals.find((g) => g.id === activeGoalId);
+      const isDone = goal?.status === "done";
+      const ready = Math.abs(clamped) >= thresholdPx;
+
+      activeCard.classList.toggle("swipe-ready-complete", ready && clamped > 0 && !isDone);
+      activeCard.classList.toggle("swipe-ready-undo", ready && clamped < 0 && !!isDone);
+    };
+
+    const onTouchEnd = () => {
+      if (!tracking || !activeCard || !activeGoalId) return reset();
+      if (!swiping) return reset();
+
+      const goal = this.currentGoals.find((g) => g.id === activeGoalId);
+      const isDone = goal?.status === "done";
+
+      const shouldComplete = dx >= thresholdPx && !isDone;
+      const shouldUndo = dx <= -thresholdPx && !!isDone;
+
+      if (shouldComplete) {
+        this.callbacks.onGoalUpdate(activeGoalId, { status: "done" });
+        this.callbacks.onShowToast?.("✅", "Completed");
+        haptics.impact("medium");
+        if (this.callbacks.onCelebrate) this.callbacks.onCelebrate("🎉", "Nice work!", "Intention complete.");
+      } else if (shouldUndo) {
+        this.callbacks.onGoalUpdate(activeGoalId, { status: "in-progress" });
+        this.callbacks.onShowToast?.("↩️", "Marked active");
+        haptics.impact("light");
+      }
+
+      animateBack();
+    };
+
+    this.container.addEventListener("touchstart", onTouchStart, { passive: true });
+    this.container.addEventListener("touchmove", onTouchMove, { passive: false });
+    this.container.addEventListener("touchend", onTouchEnd, { passive: true });
+    this.container.addEventListener("touchcancel", reset, { passive: true });
+
+    this.swipeCleanup = () => {
+      this.container.removeEventListener("touchstart", onTouchStart);
+      this.container.removeEventListener("touchmove", onTouchMove);
+      this.container.removeEventListener("touchend", onTouchEnd);
+      this.container.removeEventListener("touchcancel", reset);
+      reset();
+    };
   }
 }

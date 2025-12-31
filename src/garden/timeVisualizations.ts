@@ -243,14 +243,14 @@ export class TimeVisualizations {
   }
 
   /**
-   * Add visual time anchor points (markers for "now", upcoming events)
+   * Add visual time marker points (markers for "now", upcoming events)
    */
   public static addTimeAnchor(
     element: HTMLElement,
     type: 'now' | 'upcoming' | 'past',
     label: string
   ): void {
-    element.classList.add(`time-anchor-${type}`);
+    element.classList.add(`time-marker-${type}`);
 
     // Add glow effect for "now"
     if (type === 'now') {
@@ -258,7 +258,7 @@ export class TimeVisualizations {
       element.style.borderColor = 'rgba(255, 223, 128, 0.8)';
 
       // Add pulsing animation
-      element.style.animation = 'time-anchor-pulse 2s ease-in-out infinite';
+      element.style.animation = 'time-marker-pulse 2s ease-in-out infinite';
     }
 
     // Add subtle highlight for upcoming

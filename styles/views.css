@@ -1,0 +1,9 @@
+/* Consolidated: Views */
+@import './views/main-content.css';
+@import './views/canvas.css';
+@import './views/month.css';
+@import './views/month-context.css';
+@import './views/year.css';
+@import './views/week.css';
+@import './views/day.css';
+

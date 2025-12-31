@@ -124,6 +124,58 @@
             transparent 22px);
 }
 
+/* Light mode time themes - increase transparency to show beautiful background */
+:root.time-dawn:not(.dark-mode) .day-land,
+:root.time-morning:not(.dark-mode) .day-land,
+:root.time-afternoon:not(.dark-mode) .day-land,
+:root.time-evening:not(.dark-mode) .day-land {
+    background:
+        radial-gradient(1200px 600px at 10% 0%,
+            rgba(140, 183, 217, 0.08) 0%,
+            transparent 55%),
+        radial-gradient(900px 600px at 100% 20%,
+            rgba(111, 155, 134, 0.08) 0%,
+            transparent 60%),
+        linear-gradient(180deg,
+            rgba(250, 248, 245, 0.35) 0%,
+            rgba(247, 243, 237, 0.25) 100%);
+    border: 1.5px solid rgba(26, 43, 47, 0.20);
+    box-shadow: 0 12px 40px rgba(26, 43, 47, 0.08);
+}
+
+:root.time-dawn:not(.dark-mode) .day-section,
+:root.time-morning:not(.dark-mode) .day-section,
+:root.time-afternoon:not(.dark-mode) .day-section,
+:root.time-evening:not(.dark-mode) .day-section {
+    background: rgba(250, 248, 245, 0.45);
+    border: 1px solid rgba(26, 43, 47, 0.18);
+}
+
+/* Dark mode time themes - increase transparency (less dark) to fit with theme */
+:root.dark-mode.time-dawn .day-land,
+:root.dark-mode.time-morning .day-land,
+:root.dark-mode.time-afternoon .day-land,
+:root.dark-mode.time-evening .day-land {
+    background:
+        radial-gradient(1200px 600px at 10% 0%,
+            rgba(30, 41, 79, 0.25) 0%,
+            transparent 65%),
+        radial-gradient(900px 600px at 100% 20%,
+            rgba(15, 23, 42, 0.22) 0%,
+            transparent 68%),
+        rgba(17, 30, 45, 0.45);
+    border: 1px solid rgba(140, 183, 217, 0.18);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+}
+
+:root.dark-mode.time-dawn .day-section,
+:root.dark-mode.time-morning .day-section,
+:root.dark-mode.time-afternoon .day-section,
+:root.dark-mode.time-evening .day-section {
+    background: rgba(17, 30, 45, 0.55);
+    border: 1px solid rgba(140, 183, 217, 0.14);
+}
+
 .day-land-topbar {
     position: relative;
     display: flex;
@@ -788,6 +840,110 @@ body.is-resizing-planter {
 
 /* Dark mode during daytime (dawn/morning/afternoon/evening) uses default dark text from variables.css */
 
+/* Light mode time themes - reduce month card brightness and increase passed date grey */
+:root.time-dawn:not(.dark-mode) .month-card,
+:root.time-morning:not(.dark-mode) .month-card,
+:root.time-afternoon:not(.dark-mode) .month-card,
+:root.time-evening:not(.dark-mode) .month-card {
+    background: rgba(245, 243, 240, 0.45);
+    border: 1px solid rgba(90, 140, 140, 0.25);
+}
+
+:root.time-dawn:not(.dark-mode) .month-card:hover,
+:root.time-morning:not(.dark-mode) .month-card:hover,
+:root.time-afternoon:not(.dark-mode) .month-card:hover,
+:root.time-evening:not(.dark-mode) .month-card:hover {
+    background: rgba(245, 243, 240, 0.55);
+}
+
+:root.time-dawn:not(.dark-mode) .month-card.past,
+:root.time-morning:not(.dark-mode) .month-card.past,
+:root.time-afternoon:not(.dark-mode) .month-card.past,
+:root.time-evening:not(.dark-mode) .month-card.past {
+    background: rgba(140, 140, 140, 0.18);
+    opacity: 0.70;
+}
+
+:root.time-dawn:not(.dark-mode) .month-card.past:hover,
+:root.time-morning:not(.dark-mode) .month-card.past:hover,
+:root.time-afternoon:not(.dark-mode) .month-card.past:hover,
+:root.time-evening:not(.dark-mode) .month-card.past:hover {
+    background: rgba(140, 140, 140, 0.24);
+    opacity: 0.80;
+}
+
+/* Light mode time themes - force dark text on month cards for readability */
+:root.time-dawn:not(.dark-mode) .month-card .month-name,
+:root.time-morning:not(.dark-mode) .month-card .month-name,
+:root.time-afternoon:not(.dark-mode) .month-card .month-name,
+:root.time-evening:not(.dark-mode) .month-card .month-name {
+    color: #0A1113 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+:root.time-dawn:not(.dark-mode) .month-card .month-meta,
+:root.time-morning:not(.dark-mode) .month-card .month-meta,
+:root.time-afternoon:not(.dark-mode) .month-card .month-meta,
+:root.time-evening:not(.dark-mode) .month-card .month-meta,
+:root.time-dawn:not(.dark-mode) .month-card .month-context,
+:root.time-morning:not(.dark-mode) .month-card .month-context,
+:root.time-afternoon:not(.dark-mode) .month-card .month-context,
+:root.time-evening:not(.dark-mode) .month-card .month-context,
+:root.time-dawn:not(.dark-mode) .month-card .month-progress-label,
+:root.time-morning:not(.dark-mode) .month-card .month-progress-label,
+:root.time-afternoon:not(.dark-mode) .month-card .month-progress-label,
+:root.time-evening:not(.dark-mode) .month-card .month-progress-label {
+    color: #2D3F44 !important;
+}
+
+:root.time-dawn:not(.dark-mode) .month-card .month-time-detail,
+:root.time-morning:not(.dark-mode) .month-card .month-time-detail,
+:root.time-afternoon:not(.dark-mode) .month-card .month-time-detail,
+:root.time-evening:not(.dark-mode) .month-card .month-time-detail {
+    color: #1E6FB8 !important;
+}
+
+:root.time-dawn:not(.dark-mode) .month-card .goal-title,
+:root.time-morning:not(.dark-mode) .month-card .goal-title,
+:root.time-afternoon:not(.dark-mode) .month-card .goal-title,
+:root.time-evening:not(.dark-mode) .month-card .goal-title {
+    color: #0A1113 !important;
+}
+
+:root.time-dawn:not(.dark-mode) .month-card .goal-tag,
+:root.time-morning:not(.dark-mode) .month-card .goal-tag,
+:root.time-afternoon:not(.dark-mode) .month-card .goal-tag,
+:root.time-evening:not(.dark-mode) .month-card .goal-tag {
+    color: #4A5B60 !important;
+    background: rgba(26, 43, 47, 0.15);
+}
+
+/* Light mode time themes - month card buttons need dark text */
+:root.time-dawn:not(.dark-mode) .month-actions .btn-ghost,
+:root.time-morning:not(.dark-mode) .month-actions .btn-ghost,
+:root.time-afternoon:not(.dark-mode) .month-actions .btn-ghost,
+:root.time-evening:not(.dark-mode) .month-actions .btn-ghost {
+    color: #0A1113 !important;
+    background: rgba(26, 43, 47, 0.12);
+    border: 1px solid rgba(26, 43, 47, 0.20);
+}
+
+:root.time-dawn:not(.dark-mode) .month-actions .btn-ghost:hover,
+:root.time-morning:not(.dark-mode) .month-actions .btn-ghost:hover,
+:root.time-afternoon:not(.dark-mode) .month-actions .btn-ghost:hover,
+:root.time-evening:not(.dark-mode) .month-actions .btn-ghost:hover {
+    background: rgba(26, 43, 47, 0.22);
+}
+
+/* Dark mode time themes - current day uses light accent color */
+:root.dark-mode.time-dawn .month-card.current,
+:root.dark-mode.time-morning .month-card.current,
+:root.dark-mode.time-afternoon .month-card.current,
+:root.dark-mode.time-evening .month-card.current {
+    background: rgba(140, 183, 217, 0.18);
+    border-color: rgba(140, 183, 217, 0.35);
+}
+
 /* Month Header */
 .month-header {
     display: grid;
@@ -1068,7 +1224,42 @@ body.is-resizing-planter {
     color: rgba(255, 255, 255, 1);
 }
 
-/* Dark mode during daytime uses default dark text from variables.css */
+/* Dark mode time themes (dawn, morning, afternoon, evening) - dark text for readability */
+:root.dark-mode.time-dawn .month-card .month-name,
+:root.dark-mode.time-morning .month-card .month-name,
+:root.dark-mode.time-afternoon .month-card .month-name,
+:root.dark-mode.time-evening .month-card .month-name {
+    color: #0D1517 !important;
+}
+
+:root.dark-mode.time-dawn .month-card .month-context,
+:root.dark-mode.time-morning .month-card .month-context,
+:root.dark-mode.time-afternoon .month-card .month-context,
+:root.dark-mode.time-evening .month-card .month-context,
+:root.dark-mode.time-dawn .month-card .month-progress-label,
+:root.dark-mode.time-morning .month-card .month-progress-label,
+:root.dark-mode.time-afternoon .month-card .month-progress-label,
+:root.dark-mode.time-evening .month-card .month-progress-label {
+    color: #2D3F44 !important;
+}
+
+:root.dark-mode.time-dawn .month-actions .btn-ghost,
+:root.dark-mode.time-morning .month-actions .btn-ghost,
+:root.dark-mode.time-afternoon .month-actions .btn-ghost,
+:root.dark-mode.time-evening .month-actions .btn-ghost {
+    color: #0D1517 !important;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+:root.dark-mode.time-dawn .month-actions .btn-ghost:hover,
+:root.dark-mode.time-morning .month-actions .btn-ghost:hover,
+:root.dark-mode.time-afternoon .month-actions .btn-ghost:hover,
+:root.dark-mode.time-evening .month-actions .btn-ghost:hover {
+    color: #0D1517 !important;
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.30);
+}
 
 @media (max-width: 600px) {
 

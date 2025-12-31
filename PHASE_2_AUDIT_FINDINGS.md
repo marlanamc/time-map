@@ -261,7 +261,7 @@ Complete the mode switching implementation (1-2 hours)
 - Keyboard shortcut `B` opens modal
 - Textarea for thoughts
 - Parked thoughts list with timestamps
-- "Make anchor" converts to Milestone goal
+- "Make milestone" converts to a Milestone
 - "Dismiss" marks as processed
 - Stores in State.data.brainDump[]
 

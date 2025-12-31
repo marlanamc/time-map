@@ -154,7 +154,7 @@ export const Goals = {
 
     switch (goalData.level) {
       case "vision": {
-        // Year-only: always anchor to Jan and end at Dec 31 of the chosen year.
+        // Year-only: always align to Jan and end at Dec 31 of the chosen year.
         year = inputYear;
         month = 0;
         const end = endOfDay(new Date(year, 11, 31));
@@ -188,12 +188,12 @@ export const Goals = {
       }
 
       case "intention": {
-        // Single day: anchor to a specific day (default: today).
+        // Single day: align to a specific day (default: today).
         const day = goalData.startDate ? parseYmdLocal(goalData.startDate) : null;
-        const anchor = day ?? now;
-        month = anchor.getMonth();
-        year = anchor.getFullYear();
-        const end = endOfDay(anchor);
+        const baseDate = day ?? now;
+        month = baseDate.getMonth();
+        year = baseDate.getFullYear();
+        const end = endOfDay(baseDate);
         dueDate = end.toISOString();
         break;
       }
@@ -233,7 +233,7 @@ export const Goals = {
 
     // Force sync for new goals to ensure creation persists immediately
     // debouncedGoalSync is better for rapid edits, but creation should be atomic
-    import('../services/SupabaseService').then(async ({ SupabaseService }) => {
+    (async () => {
       try {
         await SupabaseService.saveGoal(goal);
         dirtyTracker.markClean('goal', goal.id);
@@ -244,7 +244,7 @@ export const Goals = {
         // Fallback to debounce if force fails
         debouncedGoalSync(goal);
       }
-    });
+    })();
 
     // UI will update to 'synced' after successful cloud sync
     setTimeout(() => {
@@ -260,7 +260,7 @@ export const Goals = {
     const goal = this.getById(goalId);
     if (!goal) return null;
 
-    // If level is being changed, re-anchor to new level's time scope
+    // If level is being changed, re-align to new level's time scope
     if (updates.level && updates.level !== goal.level) {
       const now = new Date();
       let newMonth = goal.month;
@@ -407,7 +407,21 @@ export const Goals = {
 
     // Trigger celebration
     if (callbacks.onCelebrate) {
-      callbacks.onCelebrate("✨", "Anchor updated", `"${goal.title}" marked done.`);
+      const levelLabel = (() => {
+        switch (goal.level) {
+          case "vision":
+            return "Vision";
+          case "milestone":
+            return "Milestone";
+          case "focus":
+            return "Focus";
+          case "intention":
+            return "Intention";
+          default:
+            return "Intention";
+        }
+      })();
+      callbacks.onCelebrate("✨", `${levelLabel} updated`, `"${goal.title}" marked done.`);
     }
   },
 

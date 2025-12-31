@@ -396,8 +396,8 @@
     color: var(--accent);
 }
 
-/* Floating Add Anchor Button */
-.fab-add-anchor {
+/* Floating Add Button */
+.fab-add {
     position: fixed;
     right: calc(var(--space-8) + env(safe-area-inset-right, 0px));
     bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px));
@@ -416,28 +416,28 @@
     transition: all var(--duration-normal) var(--ease-out);
 }
 
-.fab-add-anchor:hover {
+.fab-add:hover {
     background: var(--accent-hover);
     transform: translateY(-1px);
 }
 
-.fab-add-anchor:active {
+.fab-add:active {
     transform: translateY(0) scale(0.98);
 }
 
-.fab-add-anchor:focus-visible {
+.fab-add:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
 
-.fab-add-anchor .fab-icon {
+.fab-add .fab-icon {
     position: relative;
     width: 20px;
     height: 20px;
 }
 
-.fab-add-anchor .fab-icon::before,
-.fab-add-anchor .fab-icon::after {
+.fab-add .fab-icon::before,
+.fab-add .fab-icon::after {
     content: "";
     position: absolute;
     left: 50%;
@@ -447,12 +447,12 @@
     border-radius: 2px;
 }
 
-.fab-add-anchor .fab-icon::before {
+.fab-add .fab-icon::before {
     width: 20px;
     height: 2px;
 }
 
-.fab-add-anchor .fab-icon::after {
+.fab-add .fab-icon::after {
     width: 2px;
     height: 20px;
 }
