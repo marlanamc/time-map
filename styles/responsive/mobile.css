@@ -198,15 +198,22 @@
 
     .app {
         grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr auto;
+        grid-template-rows: auto 1fr;
         grid-template-areas:
-            "main"
-            "main"
+            "header"
             "main";
         gap: 0;
         padding: 0;
         height: 100dvh;
         overflow: hidden;
+    }
+
+    /* Standard full-width mobile header */
+    .mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
     }
 
     .today-btn {
@@ -218,14 +225,29 @@
     }
 
     .header {
-        padding: var(--space-3) var(--space-4);
-        border-radius: var(--radius-lg);
-        margin: var(--space-2) var(--space-3) 0;
-        /* Simplified mobile header - less visual noise */
+        padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) var(--space-3) calc(var(--space-4) + env(safe-area-inset-left, 0px));
+        border-radius: 0;
+        margin: 0;
         background: var(--glass-bg) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border-left: 0;
+        border-right: 0;
+        border-top: 0;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    }
+
+    body.mobile-date-nav-in-header .header-mobile-nav {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    body.mobile-date-nav-in-header .header-mobile-nav .date-nav {
+        width: 100%;
+        justify-content: space-between;
+        max-width: 520px;
+        padding-right: calc(44px + var(--space-3));
     }
 
     .logo-text {
@@ -305,8 +327,11 @@
         padding: var(--space-3) var(--space-4);
         gap: var(--space-3);
         justify-content: center;
-        margin: 0 var(--space-3);
-        border-radius: var(--radius-lg);
+        margin: 0;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+        border-top: 0;
         background: var(--glass-bg);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);

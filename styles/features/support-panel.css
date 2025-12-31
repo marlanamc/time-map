@@ -691,6 +691,24 @@
     border-top: none;
 }
 
+.support-panel-sync-now {
+    margin-top: var(--space-3);
+    margin-bottom: 0;
+}
+
+.support-panel-profile-section.enhanced .support-panel-sync-now .support-panel-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.support-panel-profile-section.enhanced .support-panel-sync-now .support-panel-name {
+    font-size: var(--text-sm);
+}
+
+.support-panel-profile-section.enhanced .support-panel-sync-now .support-panel-desc {
+    font-size: var(--text-xs);
+}
+
 body.support-panel-open {
     overflow: hidden !important;
 }

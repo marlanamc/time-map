@@ -6,6 +6,8 @@
 // Most types are now used by the imported modules rather than app.ts directly
 import { GardenEngine } from './garden/gardenEngine';
 import { State, Goals, Planning, Analytics } from './core';
+import { isSupabaseConfigured } from './supabaseClient';
+import { SupabaseService } from './services/SupabaseService';
 
 // Removed duplicate interfaces - now imported from types.ts
 
@@ -97,17 +99,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (event === 'SIGNED_OUT') {
       // Clean up resources on logout
       await State.cleanup();
+      UI.updateSyncStatus?.('local');
       location.reload();
     } else if (event === 'SIGNED_IN' && !State.data) {
       // Handle sign in (e.g., from another tab or after session refresh)
       await State.init();
       UI.init();
+      UI.updateSyncStatus?.(isSupabaseConfigured ? 'synced' : 'local');
     } else if (event === 'TOKEN_REFRESHED') {
       console.log('Session token refreshed');
     }
   });
 
   UI.init();
+  // Initialize sync badge to reflect actual auth/config.
+  try {
+    const user = await SupabaseService.getUser();
+    UI.updateSyncStatus?.(user && isSupabaseConfigured ? 'synced' : 'local');
+  } catch {
+    UI.updateSyncStatus?.('local');
+  }
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {

@@ -15,6 +15,15 @@
     z-index: 200;
 }
 
+/* The app currently uses a dedicated header only on mobile. */
+.mobile-header {
+    display: none;
+}
+
+.header-mobile-nav {
+    display: none;
+}
+
 /* Light theme: sunny, grounded header (less "faded") */
 :root:not(.dark-mode) .header {
     background:

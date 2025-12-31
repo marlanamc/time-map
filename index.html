@@ -290,6 +290,10 @@
 
     <!-- Main App -->
     <div class="app">
+        <!-- Mobile Header Slot (date nav is moved here on mobile) -->
+        <header class="header mobile-header" id="mobileHeader" role="banner">
+            <div class="header-mobile-nav" id="headerMobileNav" aria-hidden="true"></div>
+        </header>
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar" role="complementary" aria-label="Planning sidebar">
             <button class="sidebar-hide-btn" id="hideSidebarBtn" type="button" aria-label="Hide sidebar"
@@ -675,6 +679,13 @@
 	                            <span class="sync-icon">☁️</span>
 	                            <span class="sync-text">Local Only</span>
 	                        </div>
+	                        <button class="support-panel-item secondary support-panel-sync-now" type="button" role="menuitem" data-action="syncNow">
+	                            <span class="support-panel-icon" aria-hidden="true">🔄</span>
+	                            <span class="support-panel-text">
+	                                <span class="support-panel-name">Sync Now</span>
+	                                <span class="support-panel-desc">Push local changes to cloud</span>
+	                            </span>
+	                        </button>
 	                    </div>
 	                </div>
 
@@ -909,7 +920,7 @@
                     <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"></path>
                 </svg>
             </span>
-            <span class="mobile-tab-label">You Are Here</span>
+            <span class="mobile-tab-label">Here</span>
         </button>
         <button class="mobile-tab" data-view="day" role="tab" aria-selected="false">
             <span class="mobile-tab-icon" aria-hidden="true">

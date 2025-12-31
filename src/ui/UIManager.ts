@@ -21,6 +21,7 @@ import { zenFocus } from '../features/ZenFocus';
 import { goalDetailModal } from './modals/GoalDetailModal';
 import { monthDetailModal } from './modals/MonthDetailModal';
 import { quickAdd } from '../features/QuickAdd';
+import { isSupabaseConfigured } from '../supabaseClient';
 import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, Category, Priority, AccentTheme, Subtask } from '../types';
 
 export const UI = {
@@ -186,6 +187,15 @@ export const UI = {
       Toast.show(this.elements, '⚠️', message);
     }) as EventListener);
 
+    // Generic sync status events (syncing/synced/error/local)
+    window.addEventListener('sync-status', ((e: CustomEvent) => {
+      const status = e.detail?.status as ('syncing' | 'synced' | 'error' | 'local' | undefined);
+      if (!status) return;
+      if (status === 'syncing' || status === 'synced' || status === 'error' || status === 'local') {
+        this.updateSyncStatus(status);
+      }
+    }) as EventListener);
+
     console.log('✓ Sync event listeners registered in UIManager');
   },
 
@@ -348,6 +358,9 @@ export const UI = {
             break;
           case "settings":
             AppSettings.showPanel();
+            break;
+          case "syncNow":
+            this.forceCloudSync();
             break;
           case "logout":
             this.handleLogout();
@@ -641,6 +654,33 @@ export const UI = {
     } catch (error) {
       console.error('Error during logout:', error);
       Toast.show(this.elements, '⚠️', 'Logout failed. Please try again.');
+    }
+  },
+
+  async forceCloudSync() {
+    if (!navigator.onLine) {
+      Toast.show(this.elements, '📡', 'You appear to be offline. Changes will sync when you’re back online.');
+      this.updateSyncStatus('local');
+      return;
+    }
+
+    if (!isSupabaseConfigured) {
+      Toast.show(this.elements, '⚙️', 'Cloud sync is disabled (missing Supabase credentials).');
+      this.updateSyncStatus('local');
+      return;
+    }
+
+    try {
+      this.updateSyncStatus('syncing');
+      const { batchSaveService } = await import('../services/BatchSaveService');
+      const { syncQueue } = await import('../services/SyncQueue');
+      await Promise.allSettled([batchSaveService.forceSave(), syncQueue.forceSync()]);
+      this.updateSyncStatus('synced');
+      Toast.show(this.elements, '☁️', 'Synced!');
+    } catch (error) {
+      console.error('Force sync failed:', error);
+      this.updateSyncStatus('error');
+      Toast.show(this.elements, '⚠️', 'Sync failed. Try again in a moment.');
     }
   },
 

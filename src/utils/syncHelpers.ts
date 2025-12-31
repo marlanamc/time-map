@@ -87,12 +87,15 @@ export const debouncedGoalSync = debounce(async (goal: Goal) => {
     const { SupabaseService } = await import('../services/SupabaseService');
     const { dirtyTracker } = await import('../services/DirtyTracker');
 
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
     await SupabaseService.saveGoal(goal);
     dirtyTracker.markClean('goal', goal.id);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'synced' } }));
 
     console.log(`✓ Goal "${goal.title}" synced to cloud`);
   } catch (error) {
     console.error('Failed to sync goal to cloud:', error);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'error' } }));
 
     // Add to sync queue if available
     try {
@@ -119,10 +122,13 @@ export const debouncedGoalSync = debounce(async (goal: Goal) => {
 export const throttledPreferencesSync = throttle(async (prefs: Preferences) => {
   try {
     const { SupabaseService } = await import('../services/SupabaseService');
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
     await SupabaseService.savePreferences(prefs);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'synced' } }));
     console.log('✓ Preferences synced to cloud');
   } catch (error) {
     console.error('Failed to sync preferences:', error);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'error' } }));
   }
 }, 5000); // Max once per 5 seconds
 
@@ -139,12 +145,15 @@ export const debouncedBrainDumpSync = debounce(async (entry: BrainDumpEntry) => 
     const { SupabaseService } = await import('../services/SupabaseService');
     const { dirtyTracker } = await import('../services/DirtyTracker');
 
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
     await SupabaseService.saveBrainDump(entry);
     dirtyTracker.markClean('brainDump', entry.id);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'synced' } }));
 
     console.log('✓ Brain dump entry synced to cloud');
   } catch (error) {
     console.error('Failed to sync brain dump:', error);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'error' } }));
 
     try {
       const { syncQueue } = await import('../services/SyncQueue');
