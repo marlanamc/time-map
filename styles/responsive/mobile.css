@@ -210,7 +210,25 @@
     }
 
     body.mobile-date-nav-in-header .header-mobile-nav {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        width: 100%;
+        flex: 1;
+        position: relative;
+    }
+
+    body.mobile-date-nav-in-header .header-mobile-nav .date-nav {
         display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-1);
+        grid-column: 2;
+        margin: 0 auto;
+    }
+
+    body.mobile-date-nav-in-header .header-mobile-nav .date-nav .date-display {
+        display: none;
     }
 
     body.mobile-date-nav-in-header .control-bar {
@@ -221,30 +239,134 @@
         display: none !important;
     }
 
+    /* Show header in mobile home view for symmetry */
     body.mobile-home-view .mobile-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    /* Hide logo when date nav is in header (day, week, month, year views) */
+    body.mobile-date-nav-in-header .header .logo {
         display: none !important;
     }
 
     body.mobile-home-view .app {
-        grid-template-rows: 1fr;
-        grid-template-areas: "main";
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "header"
+            "main";
+    }
+
+    /* Show logo in mobile header for mobile home view */
+    body.mobile-home-view .header .logo {
+        display: flex !important;
+        align-items: center !important;
+        gap: var(--space-2) !important;
+    }
+
+    body.mobile-home-view .header .logo-icon {
+        display: block !important;
+        font-size: 1.5rem !important;
+    }
+
+    /* Show logo text in header for mobile home view */
+    body.mobile-home-view .header .logo-text {
+        display: block !important;
+        font-size: var(--text-lg) !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.03em !important;
+        font-family: var(--font-display) !important;
+        background: linear-gradient(135deg,
+                var(--teal) 0%,
+                var(--sage) 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+    }
+
+    /* Apply time-based logo gradients to header logo in mobile home view */
+    :root.time-dawn body.mobile-home-view .header .logo-text {
+        background: linear-gradient(110deg,
+                #B8A5D4 0%,
+                #D4A5B8 35%,
+                #E8C8B8 70%,
+                #F0D8C8 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+    }
+
+    :root.time-morning body.mobile-home-view .header .logo-text {
+        background: linear-gradient(110deg,
+                #5BA3D0 0%,
+                #6CB8D0 35%,
+                #7DCEC0 70%,
+                #98D8C8 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+    }
+
+    :root.time-afternoon body.mobile-home-view .header .logo-text {
+        background: linear-gradient(110deg,
+                #4A90E2 0%,
+                #4A90E2 30%,
+                #5A9B8D 80%,
+                #F0B429 110%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+    }
+
+    :root.time-evening body.mobile-home-view .header .logo-text {
+        background: linear-gradient(110deg,
+                #E87040 0%,
+                #F09050 35%,
+                #F5A860 70%,
+                #F0C070 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+    }
+
+    :root.time-night body.mobile-home-view .header .logo-text {
+        background: linear-gradient(110deg,
+                #E2E8F0 0%,
+                #E2E8F0 40%,
+                #94A3B8 70%,
+                #64748B 110%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
     }
 
     body.mobile-date-nav-in-header .header-mobile-nav .date-nav {
-        gap: var(--space-2);
+        gap: var(--space-1);
     }
 
     body.mobile-date-nav-in-header .header-mobile-nav .nav-btn {
-        min-width: 44px;
-        min-height: 44px;
+        min-width: 36px;
+        min-height: 36px;
+        width: 36px;
+        height: 36px;
         border-radius: var(--radius-full);
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--text-base);
     }
 
     body.mobile-date-nav-in-header .header-mobile-nav .today-btn {
-        min-height: 44px;
+        min-height: 36px;
+        height: 36px;
         border-radius: var(--radius-full);
-        padding: 0 var(--space-4);
-        font-weight: 650;
+        padding: 0 var(--space-3);
+        font-weight: 600;
+        font-size: var(--text-sm);
+        min-width: auto;
+        width: auto;
     }
 
     #hideHeaderBtn,
@@ -302,7 +424,8 @@
     }
 
     .header {
-        padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) var(--space-3) calc(var(--space-4) + env(safe-area-inset-left, 0px));
+        padding: calc(var(--space-4) + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) var(--space-4) calc(var(--space-4) + env(safe-area-inset-left, 0px));
+        min-height: 64px;
         border-radius: 0;
         margin: 0;
         background: var(--glass-bg) !important;
@@ -314,18 +437,6 @@
         box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
     }
 
-    body.mobile-date-nav-in-header .header-mobile-nav {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
-
-    body.mobile-date-nav-in-header .header-mobile-nav .date-nav {
-        width: 100%;
-        justify-content: space-between;
-        max-width: 520px;
-        padding-right: calc(44px + var(--space-3));
-    }
 
     .logo-text {
         display: none;
@@ -448,7 +559,7 @@
         border: 1px solid var(--glass-border);
         color: var(--text-secondary);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        z-index: 300;
+        z-index: 500;
         touch-action: manipulation;
         transition: all var(--duration-fast) var(--ease-out);
     }
@@ -843,8 +954,8 @@
         padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
         padding-bottom: calc(var(--mobile-tab-bar-height) + var(--space-4));
         -webkit-overflow-scrolling: touch;
-        width: 100%;
-        max-width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box;
     }
 
@@ -859,15 +970,45 @@
         display: none;
     }
 
-    body.is-mobile .mobile-only {
-        display: block;
+    body.is-mobile .mobile-only,
+    body.mobile-home-view .mobile-only {
+        display: block !important;
+    }
+
+    /* Ensure Your Garden section is visible in mobile home view */
+    body.mobile-home-view .sidebar-section[data-section="here-garden"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 1 !important;
+        margin-bottom: var(--space-4) !important;
+    }
+
+    /* Ensure the section content is expanded and visible */
+    body.mobile-home-view .sidebar-section[data-section="here-garden"] .section-content {
+        max-height: 1000px !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        overflow: visible !important;
+    }
+
+    /* Ensure the toggle button shows expanded state */
+    body.mobile-home-view .sidebar-section[data-section="here-garden"] .section-toggle {
+        display: flex !important;
     }
 
     .mobile-here-garden {
-        display: flex;
+        display: flex !important;
         flex-direction: column;
         gap: var(--space-4);
         padding: var(--space-3) var(--space-4);
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 1 !important;
+        overflow: visible !important;
     }
 
     .mobile-here-group {
@@ -924,21 +1065,40 @@
     body.mobile-home-view .now-panel {
         padding: var(--space-5) var(--space-4) !important;
         border-radius: var(--radius-lg) !important;
-        margin: 0 0 var(--space-4) 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        margin: 0 calc(-1 * var(--space-4)) var(--space-4) calc(-1 * var(--space-4)) !important;
+        width: calc(100% + (2 * var(--space-4))) !important;
+        max-width: calc(100% + (2 * var(--space-4))) !important;
         position: relative !important;
         left: 0 !important;
         box-sizing: border-box !important;
     }
 
+    /* Ensure now-panel stretches full width in mobile sidebar */
+    body.mobile-home-view .sidebar .now-panel {
+        width: calc(100% + (2 * var(--space-4))) !important;
+        max-width: calc(100% + (2 * var(--space-4))) !important;
+        margin-left: calc(-1 * var(--space-4)) !important;
+        margin-right: calc(-1 * var(--space-4)) !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+        flex-shrink: 0 !important;
+        min-height: fit-content !important;
+    }
+
+    /* Hide logo in now-panel for mobile home view - it's moved to header */
+    body.mobile-home-view .now-panel-logo {
+        display: none !important;
+    }
+
     body.mobile-home-view .sidebar-section {
         border-radius: var(--radius-lg);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        margin-bottom: 0;
+        margin-bottom: var(--space-4);
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
+        position: relative;
+        z-index: 1;
     }
 
     body.mobile-home-view .section-toggle {
@@ -954,6 +1114,530 @@
 
     body.mobile-home-view .main-content {
         display: none;
+    }
+
+    /* Mobile Garden View - Similar to home view but focused on garden content */
+    body.mobile-garden-view .header-mobile-nav {
+        display: none !important;
+    }
+
+    /* Show header in mobile garden view for symmetry */
+    body.mobile-garden-view .mobile-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    body.mobile-garden-view .app {
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "header"
+            "main";
+    }
+
+    /* Show logo in mobile header for mobile garden view */
+    body.mobile-garden-view .header .logo {
+        display: flex !important;
+        align-items: center !important;
+        gap: var(--space-2) !important;
+    }
+
+    body.mobile-garden-view .header .logo-icon {
+        display: block !important;
+        font-size: 1.5rem !important;
+    }
+
+    body.mobile-garden-view .header .logo-text {
+        display: block !important;
+        font-size: var(--text-lg) !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.03em !important;
+        font-family: var(--font-display) !important;
+        background: linear-gradient(135deg,
+                var(--teal) 0%,
+                var(--sage) 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+    }
+
+    body.mobile-garden-view .sidebar {
+        display: none !important;
+    }
+
+    body.mobile-garden-view .main-content {
+        display: block !important;
+        grid-area: main;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: var(--space-4);
+        padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(var(--mobile-tab-bar-height) + var(--space-4));
+        -webkit-overflow-scrolling: touch;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* Garden view container styles */
+    .garden-view-container {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .garden-view-header {
+        display: none !important;
+    }
+
+    .garden-view-title {
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 900;
+        background: linear-gradient(135deg, 
+            var(--accent) 0%, 
+            var(--accent-hover) 40%,
+            #7EC8A3 60%,
+            var(--accent-hover) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 var(--space-3) 0;
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+        animation: title-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes title-glow {
+        0%, 100% { filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1)); }
+        50% { filter: drop-shadow(0 4px 16px rgba(74, 144, 226, 0.3)); }
+    }
+
+    .garden-view-subtitle {
+        font-size: clamp(0.9375rem, 2.5vw, 1.125rem);
+        color: var(--text-primary);
+        margin: 0;
+        font-weight: 600;
+        opacity: 0.85;
+        line-height: 1.6;
+        max-width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .garden-content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        padding-bottom: var(--space-4);
+    }
+
+    /* Staggered entrance animations for garden groups */
+    .garden-group {
+        animation: slide-up-fade 0.5s ease-out backwards;
+    }
+
+    .garden-group:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .garden-group:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .garden-group:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .garden-group:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes slide-up-fade {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .garden-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.25) 0%,
+            rgba(255, 255, 255, 0.15) 50%,
+            rgba(255, 255, 255, 0.20) 100%);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 24px;
+        padding: var(--space-6);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.12),
+            0 4px 16px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+
+    .garden-group::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg,
+            var(--accent) 0%,
+            var(--accent-hover) 30%,
+            #7EC8A3 60%,
+            var(--accent-hover) 100%);
+        opacity: 0.8;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+    }
+
+    .garden-group::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+    }
+
+    .garden-group:hover::after {
+        opacity: 1;
+    }
+
+    .garden-group-empty {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.18) 0%,
+            rgba(255, 255, 255, 0.12) 50%,
+            rgba(255, 255, 255, 0.15) 100%);
+        border-color: rgba(255, 255, 255, 0.25);
+        border-style: dashed;
+        animation: empty-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes empty-glow {
+        0%, 100% { 
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.08),
+                0 4px 16px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        50% { 
+            box-shadow: 
+                0 12px 40px rgba(74, 144, 226, 0.15),
+                0 6px 20px rgba(74, 144, 226, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+    }
+
+    .garden-group-has-items {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.30) 0%,
+            rgba(255, 255, 255, 0.20) 50%,
+            rgba(255, 255, 255, 0.25) 100%);
+        border-style: solid;
+    }
+
+    .garden-group-has-items:hover {
+        transform: translateY(-2px);
+        box-shadow: 
+            0 12px 40px rgba(0, 0, 0, 0.15),
+            0 6px 20px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .garden-group-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-primary);
+        padding-bottom: var(--space-4);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        z-index: 1;
+    }
+
+    .garden-group-title {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: 12px;
+        font-weight: 900;
+        opacity: 0.95;
+    }
+
+    .garden-count {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 800;
+        min-width: 32px;
+        text-align: center;
+        box-shadow: 
+            0 4px 12px rgba(74, 144, 226, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        letter-spacing: 0.02em;
+    }
+
+    .garden-goals-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    .garden-goal-item {
+        border: 1.5px solid rgba(255, 255, 255, 0.25);
+        border-radius: 16px;
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.20) 0%,
+            rgba(255, 255, 255, 0.15) 100%);
+        padding: var(--space-5) var(--space-6);
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: var(--text-base);
+        touch-action: manipulation;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .garden-goal-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, var(--accent) 0%, var(--accent-hover) 100%);
+        opacity: 0;
+        transition: opacity 0.25s ease;
+    }
+
+    .dark-mode .garden-goal-item {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.10) 100%);
+    }
+
+    .garden-goal-item:active {
+        transform: scale(0.97);
+        box-shadow: 
+            0 2px 8px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .garden-goal-item:hover,
+    .garden-goal-item:focus {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.28) 0%,
+            rgba(255, 255, 255, 0.20) 100%);
+        border-color: rgba(255, 255, 255, 0.35);
+        transform: translateY(-2px);
+        box-shadow: 
+            0 8px 20px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .garden-goal-item:hover::before,
+    .garden-goal-item:focus::before {
+        opacity: 1;
+    }
+
+    .garden-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-4) var(--space-5);
+        text-align: center;
+        gap: var(--space-3);
+        position: relative;
+        z-index: 1;
+    }
+
+    .garden-empty-icon {
+        display: none !important;
+    }
+
+    @keyframes gentle-pulse {
+        0%, 100% { 
+            transform: scale(1) rotate(0deg); 
+            opacity: 0.85; 
+        }
+        25% { 
+            transform: scale(1.08) rotate(-2deg); 
+            opacity: 0.95; 
+        }
+        50% { 
+            transform: scale(1.12) rotate(0deg); 
+            opacity: 1; 
+        }
+        75% { 
+            transform: scale(1.08) rotate(2deg); 
+            opacity: 0.95; 
+        }
+    }
+
+    .garden-empty-message {
+        display: none !important;
+    }
+
+    .garden-add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-4) var(--space-7);
+        background: linear-gradient(135deg, 
+            var(--accent) 0%, 
+            var(--accent-hover) 50%,
+            #7EC8A3 100%);
+        color: white;
+        border: none;
+        border-radius: 28px;
+        font-size: var(--text-base);
+        font-weight: 800;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 6px 20px rgba(74, 144, 226, 0.35),
+            0 3px 10px rgba(74, 144, 226, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        margin-top: 0;
+        letter-spacing: 0.02em;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .garden-add-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent);
+        transition: left 0.5s ease;
+    }
+
+    .garden-add-btn:hover::before {
+        left: 100%;
+    }
+
+    .garden-add-btn:active {
+        transform: scale(0.96);
+        box-shadow: 
+            0 3px 12px rgba(74, 144, 226, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .garden-add-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 
+            0 10px 28px rgba(74, 144, 226, 0.4),
+            0 5px 14px rgba(74, 144, 226, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    .garden-add-icon {
+        font-size: 1.5rem;
+        font-weight: 300;
+        line-height: 1;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    }
+
+    /* Dark mode enhancements */
+    .dark-mode .garden-group {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.12) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.10) 100%);
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .dark-mode .garden-group-empty {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.10) 0%,
+            rgba(255, 255, 255, 0.06) 50%,
+            rgba(255, 255, 255, 0.08) 100%);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .dark-mode .garden-group-has-items {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.14) 0%,
+            rgba(255, 255, 255, 0.10) 50%,
+            rgba(255, 255, 255, 0.12) 100%);
+    }
+
+    .dark-mode .garden-goal-item {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.12) 0%,
+            rgba(255, 255, 255, 0.08) 100%);
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .dark-mode .garden-goal-item:hover {
+        background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.18) 0%,
+            rgba(255, 255, 255, 0.14) 100%);
+        border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .dark-mode .garden-view-subtitle {
+        color: var(--text-primary);
+        opacity: 0.9;
+    }
+
+    /* Reduce motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+        .garden-view-title,
+        .garden-group::before,
+        .garden-empty-icon,
+        .garden-group-empty,
+        .garden-group {
+            animation: none;
+        }
+        
+        .garden-group:hover,
+        .garden-goal-item:hover,
+        .garden-add-btn:hover {
+            transform: none;
+        }
     }
 
     /* Add bottom padding to app for tab bar */
