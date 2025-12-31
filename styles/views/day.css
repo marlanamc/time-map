@@ -1,6 +1,23 @@
 /* ===================================
    Day View Styles
    =================================== */
+
+/* Universal day view text styling - dark text with subtle white shadow for all themes */
+.day-view,
+.day-view *:not(.day-goal-checkbox):not(.goal-checkbox)::before,
+.day-view *:not(.day-goal-checkbox):not(.goal-checkbox)::after {
+    color: #000000 !important;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+    font-weight: 600 !important;
+}
+
+/* Preserve checkbox checkmark colors */
+.day-view .day-goal-checkbox.checked::after,
+.day-view .goal-checkbox.checked::after {
+    color: white !important;
+    text-shadow: none !important;
+}
+
 .day-view {
     padding: var(--space-6);
     max-width: 1040px;
@@ -67,14 +84,14 @@
     border: 1px solid rgba(180, 106, 74, 0.25);
     background:
         radial-gradient(1200px 600px at 10% 0%,
-            rgba(140, 183, 217, 0.18) 0%,
+            rgba(140, 183, 217, 0.12) 0%,
             transparent 55%),
         radial-gradient(900px 600px at 100% 20%,
-            rgba(111, 155, 134, 0.18) 0%,
+            rgba(111, 155, 134, 0.12) 0%,
             transparent 60%),
         linear-gradient(180deg,
-            rgba(255, 255, 255, 0.72) 0%,
-            rgba(247, 243, 237, 0.55) 100%);
+            rgba(250, 248, 245, 0.65) 0%,
+            rgba(247, 243, 237, 0.50) 100%);
     box-shadow: var(--shadow-md);
     overflow: hidden;
     padding: var(--space-5);
@@ -94,7 +111,7 @@
     pointer-events: none;
 }
 
-.night-garden .day-land {
+.dark-mode .day-land {
     border: 1px solid rgba(164, 185, 217, 0.12);
     background:
         radial-gradient(1200px 600px at 10% 0%,
@@ -107,7 +124,7 @@
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
 }
 
-.night-garden .day-land::before {
+.dark-mode .day-land::before {
     opacity: 0.10;
     background-image:
         repeating-linear-gradient(45deg,
@@ -133,12 +150,12 @@
     gap: var(--space-2);
     padding: 8px 12px;
     border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(250, 248, 245, 0.60);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-xs);
 }
 
-.night-garden .day-land-fence {
+.dark-mode .day-land-fence {
     background: var(--bg-surface);
     border: 1px solid var(--glass-border);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
@@ -151,7 +168,7 @@
     letter-spacing: -0.02em;
 }
 
-.night-garden .fence-label {
+.dark-mode .fence-label {
     color: var(--sky);
 }
 
@@ -179,7 +196,7 @@
     border: 1px solid var(--glass-border);
 }
 
-.night-garden .day-section {
+.dark-mode .day-section {
     background: var(--bg-surface);
     border: 1px solid var(--glass-border);
 }
@@ -239,7 +256,7 @@
     overflow: hidden;
 }
 
-.night-garden .day-section-content.day-timeline {
+.dark-mode .day-section-content.day-timeline {
     background: rgba(10, 26, 15, 0.6);
 }
 
@@ -328,7 +345,7 @@ body.is-touch-dragging-seed .day-view-container {
     letter-spacing: 0;
 }
 
-.night-garden .bed-hour-label {
+.dark-mode .bed-hour-label {
     color: rgba(234, 246, 240, 0.6);
     background: none;
     border: none;
@@ -342,7 +359,7 @@ body.is-touch-dragging-seed .day-view-container {
     opacity: 0.4;
 }
 
-.night-garden .bed-hour-line {
+.dark-mode .bed-hour-line {
     background: rgba(234, 246, 240, 0.15);
     opacity: 0.5;
 }
@@ -450,7 +467,7 @@ body.is-touch-dragging-seed .day-view-container {
 .btn-zen-focus {
     margin-left: auto;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(250, 248, 245, 0.55);
     color: var(--text-secondary);
     border-radius: var(--radius-full);
     padding: 2px 10px;
@@ -461,19 +478,19 @@ body.is-touch-dragging-seed .day-view-container {
         transform var(--duration-fast) var(--ease-out);
 }
 
-.night-garden .btn-zen-focus {
+.dark-mode .btn-zen-focus {
     background: rgba(7, 17, 14, 0.45);
     border: 1px solid rgba(140, 183, 217, 0.14);
     color: rgba(234, 246, 240, 0.78);
 }
 
 .btn-zen-focus:hover {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(250, 248, 245, 0.75);
     border-color: rgba(180, 106, 74, 0.25);
     transform: translateY(-1px);
 }
 
-.night-garden .btn-zen-focus:hover {
+.dark-mode .btn-zen-focus:hover {
     background: rgba(140, 183, 217, 0.10);
     border-color: rgba(140, 183, 217, 0.22);
 }
@@ -497,10 +514,10 @@ body.is-touch-dragging-seed .day-view-container {
 /* Variants */
 .day-goal-variant-seed {
     border-left: 4px solid var(--sage);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(247, 243, 237, 0.8));
+    background: linear-gradient(180deg, rgba(250, 248, 245, 0.85), rgba(247, 243, 237, 0.75));
 }
 
-.night-garden .day-goal-variant-seed {
+.dark-mode .day-goal-variant-seed {
     background: rgba(10, 22, 18, 0.60);
     border: 1px solid rgba(140, 183, 217, 0.12);
     border-left: 4px solid var(--sage);
@@ -511,7 +528,7 @@ body.is-touch-dragging-seed .day-view-container {
     background: rgba(111, 155, 134, 0.12);
 }
 
-.night-garden .day-goal-variant-compost {
+.dark-mode .day-goal-variant-compost {
     background: rgba(111, 155, 134, 0.10);
     border: 1px solid rgba(140, 183, 217, 0.10);
 }
@@ -533,14 +550,14 @@ body.is-touch-dragging-seed .day-view-container {
     border-top: 7px solid var(--earth);
     background:
         linear-gradient(180deg,
-            rgba(255, 255, 255, 0.95) 0%,
-            rgba(255, 255, 255, 0.72) 60%,
+            rgba(250, 248, 245, 0.85) 0%,
+            rgba(247, 243, 237, 0.68) 60%,
             rgba(180, 106, 74, 0.08) 100%);
     box-shadow: var(--shadow-sm);
     z-index: 2;
 }
 
-.night-garden .day-goal-variant-planter {
+.dark-mode .day-goal-variant-planter {
     border: 1px solid rgba(140, 183, 217, 0.14);
     border-top-color: rgba(180, 106, 74, 0.55);
     background:
@@ -576,7 +593,7 @@ body.is-touch-dragging-seed .day-view-container {
 @media (prefers-reduced-motion: reduce) {
 
     .bg-canvas::before,
-    .night-garden .bg-canvas::after {
+    .dark-mode .bg-canvas::after {
         animation: none !important;
     }
 
@@ -677,11 +694,11 @@ body.is-resizing-planter {
     background: rgba(180, 106, 74, 0.25);
 }
 
-.night-garden .planter-resize-handle:hover {
+.dark-mode .planter-resize-handle:hover {
     background: rgba(140, 183, 217, 0.12);
 }
 
-.night-garden .planter-resize-handle:active {
+.dark-mode .planter-resize-handle:active {
     background: rgba(140, 183, 217, 0.20);
 }
 
@@ -757,6 +774,30 @@ body.is-resizing-planter {
     background: var(--month-card-bg-hover);
 }
 
+/* Dark mode text improvements for month cards - ONLY during nighttime */
+.dark-mode.time-night .month-card {
+    color: rgba(255, 255, 255, 0.98);
+}
+
+.dark-mode.time-night .month-name {
+    color: rgba(255, 255, 255, 1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode.time-night .month-meta {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.dark-mode.time-night .month-progress-label {
+    color: rgba(255, 255, 255, 0.80);
+}
+
+.dark-mode.time-night .month-context {
+    color: rgba(255, 255, 255, 0.80);
+}
+
+/* Dark mode during daytime (dawn/morning/afternoon/evening) uses default dark text from variables.css */
+
 /* Month Header */
 .month-header {
     display: grid;
@@ -772,13 +813,14 @@ body.is-resizing-planter {
     font-size: var(--text-base);
     font-weight: 600;
     letter-spacing: -0.01em;
+    color: var(--text-primary);  /* Explicit color for day mode readability */
     grid-column: 1;
     grid-row: 1 / span 2;
 }
 
 .month-meta {
     font-size: var(--text-xs);
-    color: var(--text-ghost);
+    color: var(--text-secondary);  /* Darker for better day mode contrast */
 }
 
 .month-progress {
@@ -794,7 +836,7 @@ body.is-resizing-planter {
 
 .month-progress-label {
     font-size: var(--text-xs);
-    color: var(--text-ghost);
+    color: var(--text-secondary);  /* Darker for better day mode contrast */
     letter-spacing: -0.01em;
     font-weight: 500;
 }
@@ -818,7 +860,7 @@ body.is-resizing-planter {
 /* Month Context */
 .month-context {
     font-size: var(--text-xs);
-    color: var(--text-ghost);
+    color: var(--text-secondary);  /* Darker for better day mode contrast */
     margin-top: 0;
     text-align: right;
     grid-column: 2;
@@ -1023,6 +1065,20 @@ body.is-resizing-planter {
     border-color: transparent;
     color: var(--text-primary);
 }
+
+/* Dark mode button improvements - ONLY during nighttime */
+.dark-mode.time-night .month-actions .btn-ghost {
+    background: rgba(74, 144, 153, 0.20);
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+}
+
+.dark-mode.time-night .month-actions .btn-ghost:hover {
+    background: rgba(74, 144, 153, 0.35);
+    color: rgba(255, 255, 255, 1);
+}
+
+/* Dark mode during daytime uses default dark text from variables.css */
 
 @media (max-width: 600px) {
 

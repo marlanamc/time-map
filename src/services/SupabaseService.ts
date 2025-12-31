@@ -1,6 +1,7 @@
 
 import { supabase } from '../supabaseClient';
 import { cacheService } from './CacheService';
+import { AuthenticationError, DatabaseError } from './errors';
 import {
     Goal,
     BrainDumpEntry,
@@ -9,6 +10,12 @@ import {
     AppData,
     Preferences
 } from '../types';
+import type {
+    GoalRow,
+    BrainDumpRow,
+    WeeklyReviewRow,
+    BodyDoubleSessionRow
+} from '../types/database';
 
 interface AchievementRecord {
     achievement_id: string;
@@ -141,7 +148,7 @@ export const SupabaseService = {
         if (error) throw error;
 
         // Transform snake_case to camelCase and parse JSON fields if needed
-        const goals = data.map((g: any) => ({
+        const goals = data.map((g: GoalRow) => ({
             ...g,
             level: g.level || 'milestone',
             createdAt: g.created_at,
@@ -260,7 +267,7 @@ export const SupabaseService = {
 
         if (error) throw error;
 
-        return data.map((b: any) => ({
+        return data.map((b: BrainDumpRow) => ({
             id: b.id,
             text: b.text,
             createdAt: b.created_at,
@@ -273,7 +280,9 @@ export const SupabaseService = {
 
     async saveBrainDump(entry: BrainDumpEntry) {
         const user = await this.getUser();
-        if (!user) return;
+        if (!user) {
+            throw new AuthenticationError('Cannot save brain dump: User not authenticated');
+        }
 
         const { error } = await supabase
             .from('brain_dump')
@@ -288,7 +297,9 @@ export const SupabaseService = {
                 processed_at: entry.processedAt
             });
 
-        if (error) throw error;
+        if (error) {
+            throw new DatabaseError(`Failed to save brain dump: ${error.message}`, error);
+        }
     },
 
     async deleteBrainDump(id: string) {
@@ -298,7 +309,9 @@ export const SupabaseService = {
 
     async saveBrainDumpBatch(entries: BrainDumpEntry[]) {
         const user = await this.getUser();
-        if (!user) return;
+        if (!user) {
+            throw new AuthenticationError('Cannot save brain dump batch: User not authenticated');
+        }
 
         const entriesData = entries.map(entry => ({
             id: entry.id,
@@ -315,7 +328,9 @@ export const SupabaseService = {
             .from('brain_dump')
             .upsert(entriesData);
 
-        if (error) throw error;
+        if (error) {
+            throw new DatabaseError(`Failed to save brain dump batch: ${error.message}`, error);
+        }
         console.log(`✓ Batch synced ${entries.length} brain dump entries to cloud`);
     },
 
@@ -350,7 +365,9 @@ export const SupabaseService = {
 
     async savePreferences(prefs: Preferences) {
         const user = await this.getUser();
-        if (!user) return;
+        if (!user) {
+            throw new AuthenticationError('Cannot save preferences: User not authenticated');
+        }
 
         const { error } = await supabase
             .from('preferences')
@@ -360,7 +377,9 @@ export const SupabaseService = {
                 updated_at: new Date().toISOString()
             });
 
-        if (error) throw error;
+        if (error) {
+            throw new DatabaseError(`Failed to save preferences: ${error.message}`, error);
+        }
 
         // Invalidate preferences cache after save
         cacheService.invalidate(/^preferences:/);
@@ -375,14 +394,18 @@ export const SupabaseService = {
 
     async saveAchievement(achievementId: string) {
         const user = await this.getUser();
-        if (!user) return;
+        if (!user) {
+            throw new AuthenticationError('Cannot save achievement: User not authenticated');
+        }
 
         const { error } = await supabase.from('achievements').upsert({
             user_id: user.id,
             achievement_id: achievementId,
             unlocked_at: new Date().toISOString()
         });
-        if (error) throw error;
+        if (error) {
+            throw new DatabaseError(`Failed to save achievement: ${error.message}`, error);
+        }
     },
 
     // --- Weekly Reviews ---
@@ -390,7 +413,7 @@ export const SupabaseService = {
         const { data, error } = await supabase.from('weekly_reviews').select('*');
         if (error) throw error;
 
-        return data.map((w: any) => ({
+        return data.map((w: WeeklyReviewRow) => ({
             id: w.id,
             weekStart: w.week_start,
             weekEnd: w.week_end,
@@ -409,7 +432,9 @@ export const SupabaseService = {
 
     async saveWeeklyReview(review: WeeklyReview) {
         const user = await this.getUser();
-        if (!user) return;
+        if (!user) {
+            throw new AuthenticationError('Cannot save weekly review: User not authenticated');
+        }
 
         const { error } = await supabase.from('weekly_reviews').upsert({
             id: review.id,
@@ -427,7 +452,9 @@ export const SupabaseService = {
             mood: review.mood,
             energy_avg: review.energyAvg
         });
-        if (error) throw error;
+        if (error) {
+            throw new DatabaseError(`Failed to save weekly review: ${error.message}`, error);
+        }
     },
 
     // --- Body Double ---
@@ -435,7 +462,7 @@ export const SupabaseService = {
         const { data, error } = await supabase.from('body_double_sessions').select('*');
         if (error) throw error;
 
-        return data.map((s: any) => ({
+        return data.map((s: BodyDoubleSessionRow) => ({
             id: s.id,
             duration: s.duration,
             startedAt: s.started_at,
@@ -448,7 +475,9 @@ export const SupabaseService = {
 
     async saveBodyDoubleSession(session: BodyDoubleSession) {
         const user = await this.getUser();
-        if (!user) return;
+        if (!user) {
+            throw new AuthenticationError('Cannot save body double session: User not authenticated');
+        }
 
         const { error } = await supabase.from('body_double_sessions').upsert({
             id: session.id,
@@ -459,6 +488,8 @@ export const SupabaseService = {
             goal_id: session.goalId,
             completed: session.completed
         });
-        if (error) throw error;
+        if (error) {
+            throw new DatabaseError(`Failed to save body double session: ${error.message}`, error);
+        }
     }
 };

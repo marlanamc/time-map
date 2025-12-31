@@ -30,7 +30,7 @@
     font-weight: 500;
 }
 
-.night-garden .current-date-small {
+.dark-mode .current-date-small {
     color: var(--text-tertiary);
 }
 
@@ -55,12 +55,12 @@
     background: var(--bg-hover);
 }
 
-.night-garden .mobile-card {
+.dark-mode .mobile-card {
     background: var(--bg-surface);
     border-color: var(--glass-border);
 }
 
-.night-garden .mobile-card:active {
+.dark-mode .mobile-card:active {
     background: var(--bg-hover);
 }
 
@@ -73,7 +73,7 @@
     margin-bottom: var(--space-3);
 }
 
-.night-garden .card-label {
+.dark-mode .card-label {
     color: var(--text-secondary);
 }
 
@@ -137,7 +137,7 @@
     font-weight: 500;
 }
 
-.night-garden .bloom-stats-mobile {
+.dark-mode .bloom-stats-mobile {
     color: var(--text-tertiary);
 }
 
@@ -163,7 +163,7 @@
     line-height: 1.5;
 }
 
-.night-garden .affirmation-text-mobile {
+.dark-mode .affirmation-text-mobile {
     color: var(--text-tertiary);
 }
 
@@ -202,12 +202,12 @@
     transform: scale(0.98);
 }
 
-.night-garden .mobile-goal-item {
+.dark-mode .mobile-goal-item {
     background: var(--bg-elevated);
     border-color: var(--glass-border);
 }
 
-.night-garden .mobile-goal-item:active {
+.dark-mode .mobile-goal-item:active {
     background: var(--bg-hover);
 }
 

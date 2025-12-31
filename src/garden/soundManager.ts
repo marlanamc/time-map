@@ -218,7 +218,7 @@ export class SoundManager {
     // Try to load, but don't fail if file doesn't exist yet
     try {
       await this.loadSound(name, url);
-    } catch (error) {
+    } catch (_error) {
       console.warn(`Ambience not available: ${name} (placeholder mode)`);
 
       // Create a silent audio element as fallback

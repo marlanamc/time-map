@@ -160,10 +160,12 @@ export class AuthComponent {
   }
 
   hide() {
-    this.container.style.display = 'none';
+    this.container.setAttribute('hidden', '');
+    this.container.style.setProperty('display', 'none', 'important');
   }
 
   show() {
-    this.container.style.display = 'flex';
+    this.container.removeAttribute('hidden');
+    this.container.style.setProperty('display', 'flex', 'important');
   }
 }

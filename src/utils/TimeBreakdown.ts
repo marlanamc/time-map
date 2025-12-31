@@ -70,7 +70,7 @@ export const TimeBreakdown = {
     } else if (level === "focus") {
       breakdown = this.calculateForWeek();
     } else if (level === "vision") {
-      breakdown = this.calculateForYear();
+      breakdown = this.calculateForYear(targetYear);
     } else {
       // Default to month calculation (milestone)
       breakdown = this.calculate(targetMonth, targetYear);
@@ -118,12 +118,18 @@ export const TimeBreakdown = {
       const monthsLeft = breakdown.months ?? 0;
       const quartersLeft = breakdown.quartersLeft ?? 0;
       const weeksLeft = breakdown.weeks ?? 0;
+      const daysLeft = breakdown.days ?? 0;
+      const useDays = daysLeft > 0 && daysLeft < 31;
+      const headlineValue = useDays ? daysLeft : monthsLeft;
+      const headlineUnit = useDays ? "days" : "months";
+      const primaryLabel = useDays ? "days" : "months";
+      const primaryValue = useDays ? daysLeft : monthsLeft;
       return `<div class="time-breakdown current">
-          <div class="time-breakdown-header">🔥 This is NOW - ${monthsLeft} months left this year!</div>
+          <div class="time-breakdown-header">🔥 This is NOW - ${headlineValue} ${headlineUnit} left this year!</div>
           <div class="time-breakdown-grid">
             <div class="time-unit">
-              <span class="time-value">${monthsLeft}</span>
-              <span class="time-label">months</span>
+              <span class="time-value">${primaryValue}</span>
+              <span class="time-label">${primaryLabel}</span>
             </div>
             <div class="time-unit">
               <span class="time-value">${quartersLeft}</span>
@@ -313,28 +319,55 @@ export const TimeBreakdown = {
   },
 
   // Calculate year-specific metrics
-  calculateForYear(): TimeBreakdownResult {
+  calculateForYear(targetYear?: number): TimeBreakdownResult {
     const now = new Date();
-    const currentYear = now.getFullYear();
+    const year = targetYear ?? now.getFullYear();
+    const nowYear = now.getFullYear();
     const currentMonth = now.getMonth();
-    const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
-    const diffMs = endOfYear.getTime() - now.getTime();
+    // If planning a different year, treat that year's "remaining time" within its own calendar.
+    // - past year: 0 remaining
+    // - future year: full year remaining
+    const isFutureYear = year > nowYear;
+    const isPastYear = year < nowYear;
+
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startAnchor = isFutureYear
+      ? new Date(year, 0, 1)
+      : startOfToday;
+
+    const endOfYear = new Date(year, 11, 31);
+
     const msPerDay = 1000 * 60 * 60 * 24;
-    const diffDays = Math.max(0, Math.ceil(diffMs / msPerDay));
+    const diffDays = isPastYear
+      ? 0
+      : Math.max(
+          0,
+          Math.round(
+            (endOfYear.getTime() - startAnchor.getTime()) / msPerDay,
+          ),
+        );
     const diffWeeks = Math.max(0, Math.floor(diffDays / 7));
 
-    // Calculate months left (including current month)
-    const monthsLeft = 12 - currentMonth;
+    // Calculate full months left in the year (excluding the current month).
+    // Example: Dec -> 0, Jan -> 11.
+    const monthsLeft = isPastYear
+      ? 0
+      : isFutureYear
+        ? 12
+        : Math.max(0, 11 - currentMonth);
 
     // Calculate quarters left (Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec)
-    // Include current quarter in the count
     const currentQuarter = Math.floor(currentMonth / 3) + 1;
-    const quartersLeft = 4 - currentQuarter + 1;
+    const quartersLeft = isPastYear
+      ? 0
+      : isFutureYear
+        ? 4
+        : Math.max(0, 4 - currentQuarter);
 
     // Calculate weekends
     let weekends = 0;
-    const tempDate = new Date(now);
+    const tempDate = new Date(startAnchor);
     while (tempDate <= endOfYear) {
       if (tempDate.getDay() === 0 || tempDate.getDay() === 6) {
         weekends++;
@@ -356,10 +389,10 @@ export const TimeBreakdown = {
       workSessions5x: workSessions5x,
       focusHours1hDay: diffDays,
       focusHours2hDay: diffDays * 2,
-      isPast: false,
+      isPast: isPastYear,
       isCurrentMonth: false,
       quartersLeft: quartersLeft,
-      isCurrentYear: true,
+      isCurrentYear: year === nowYear,
     };
   },
 };

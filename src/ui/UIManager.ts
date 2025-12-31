@@ -15,7 +15,13 @@ import { Celebration } from './feedback/Celebration';
 import { MonthRenderer, WeekRenderer, HomeRenderer } from './renderers';
 import { DayViewController } from '../components/dayView/DayViewController';
 import { ThemeManager } from '../theme/ThemeManager';
-import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, Category, Priority, AccentTheme, Subtask, GoalStatus } from '../types';
+import { eventBus } from '../core/EventBus';
+import { viewportManager } from './viewport/ViewportManager';
+import { zenFocus } from '../features/ZenFocus';
+import { goalDetailModal } from './modals/GoalDetailModal';
+import { monthDetailModal } from './modals/MonthDetailModal';
+import { quickAdd } from '../features/QuickAdd';
+import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, Category, Priority, AccentTheme, Subtask } from '../types';
 
 export const UI = {
   els: {}, // Shortcut reference for elements
@@ -25,136 +31,31 @@ export const UI = {
   _focusRevealSetup: false, // Whether focus reveal has been initialized
   _focusRevealHideTimer: null as ReturnType<typeof setTimeout> | null, // Timer for hiding focus reveal
   _supportPanelHideTimer: null as ReturnType<typeof setTimeout> | null,
-  _mobileMql: null as MediaQueryList | null,
-  _mobileModeSetup: false,
-  _initialMobileDefaultsApplied: false,
   _lastNavKey: null as string | null,
   _renderRaf: null as number | null,
   _pendingViewTransition: false,
   _scrollResetRaf: null as number | null,
-  _mobileLayoutRaf: null as number | null,
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
-  isMobileViewport(): boolean {
-    if (this._mobileMql) return this._mobileMql.matches;
-    return window.matchMedia("(max-width: 600px)").matches;
-  },
 
   setupViewportMode() {
-    if (this._mobileModeSetup) return;
-    this._mobileModeSetup = true;
-
-    this._mobileMql = window.matchMedia("(max-width: 600px)");
-
-    const apply = () => {
-      const isMobile = this.isMobileViewport();
-      document.body.classList.toggle("is-mobile", isMobile);
-      this.syncMobileDateNavPlacement(isMobile);
-
-      // Show/hide mobile support panel button
-      const mobileSupportBtn = document.getElementById("supportPanelToggleBtnMobile");
-      if (mobileSupportBtn) {
-        if (isMobile) {
-          mobileSupportBtn.removeAttribute("hidden");
-        } else {
-          mobileSupportBtn.setAttribute("hidden", "");
+    // Set up callbacks for ViewportManager
+    viewportManager.setCallbacks({
+      onViewportChange: () => {
+        // Recalculate canvas dimensions on orientation change
+        if (this.elements.canvasContainer) {
+          // Force a reflow to recalculate dimensions
+          void this.elements.canvasContainer.offsetHeight;
         }
-      }
-
-      // First-load defaults: mobile always starts on Home view.
-      // (We don't persist this so desktop preferences don't get overwritten.)
-      if (isMobile && !this._initialMobileDefaultsApplied) {
-        this._initialMobileDefaultsApplied = true;
-        document.body.classList.add("mobile-home-view");
-        State.currentView = VIEWS.HOME;
-      }
-
-      // Recalculate canvas dimensions on orientation change
-      if (this.elements.canvasContainer) {
-        // Force a reflow to recalculate dimensions
-        void this.elements.canvasContainer.offsetHeight;
+      },
+      onRenderRequired: () => {
         // Re-render current view to adjust to new dimensions
         this.renderCurrentView();
       }
-
-      this.updateMobileLayoutVars();
-    };
-
-    apply();
-
-    // Keep body class in sync on resize/orientation change.
-    const mql = this._mobileMql;
-    if (mql) {
-      const onChange = () => apply();
-      try {
-        mql.addEventListener("change", onChange);
-      } catch {
-        // Safari < 14
-        mql.addListener(onChange);
-      }
-    }
-
-    // Handle orientation changes explicitly
-    window.addEventListener("orientationchange", () => {
-      // Delay to allow browser to update viewport
-      setTimeout(() => {
-        apply();
-      }, 100);
     });
 
-    // Also handle resize events as fallback
-    window.addEventListener("resize", () => {
-      apply();
-    });
-  },
-
-  syncMobileDateNavPlacement(isMobile: boolean) {
-    const dateNav = document.querySelector(".date-nav") as HTMLElement | null;
-    const controlCenter = document.querySelector(".control-center") as HTMLElement | null;
-    const headerSlot = document.getElementById("headerMobileNav") as HTMLElement | null;
-
-    if (!dateNav || !controlCenter || !headerSlot) return;
-
-    document.body.classList.toggle("mobile-date-nav-in-header", isMobile);
-    headerSlot.setAttribute("aria-hidden", String(!isMobile));
-
-    if (isMobile) {
-      headerSlot.appendChild(dateNav);
-    } else {
-      controlCenter.appendChild(dateNav);
-    }
-  },
-
-  updateMobileLayoutVars() {
-    if (this._mobileLayoutRaf !== null) {
-      cancelAnimationFrame(this._mobileLayoutRaf);
-    }
-
-    this._mobileLayoutRaf = requestAnimationFrame(() => {
-      this._mobileLayoutRaf = null;
-
-      const root = document.documentElement;
-      const isMobile = this.isMobileViewport();
-
-      if (!isMobile) {
-        root.style.removeProperty("--mobile-tab-bar-height");
-        root.style.removeProperty("--mobile-home-stats-height");
-        return;
-      }
-
-      const tabBar = document.getElementById("mobileTabBar");
-      const tabBarHeight = tabBar
-        ? Math.round(tabBar.getBoundingClientRect().height)
-        : 0;
-      root.style.setProperty("--mobile-tab-bar-height", `${tabBarHeight}px`);
-
-      const isMobileHomeView = document.body.classList.contains("mobile-home-view");
-      const timeStats = document.querySelector(".time-stats") as HTMLElement | null;
-      const statsHeight = isMobileHomeView && timeStats
-        ? Math.round(timeStats.getBoundingClientRect().height)
-        : 0;
-      root.style.setProperty("--mobile-home-stats-height", `${statsHeight}px`);
-    });
+    // Initialize viewport detection and responsive behavior
+    viewportManager.setupViewportMode();
   },
   getCurrentLevel(): GoalLevel {
     switch (State.currentView) {
@@ -166,129 +67,6 @@ export const UI = {
     }
   },
 
-  showQuickAdd() {
-    const overlay = document.createElement("div");
-    overlay.className = "quick-add-overlay";
-    overlay.innerHTML = `
-      <div class="quick-add-container">
-        <div class="quick-add-header">
-          <span class="quick-add-emoji">🌱</span>
-          <span class="quick-add-label">Quick Intention</span>
-        </div>
-        <input type="text" id="quickAddInput" placeholder="What's one small thing for today?" autofocus>
-        <div class="quick-add-tip">Press Enter to save • Esc to cancel</div>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-    const input = overlay.querySelector("#quickAddInput") as HTMLInputElement;
-    input.focus();
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && input.value.trim()) {
-        this.saveQuickAdd(input.value.trim());
-        overlay.remove();
-      }
-      if (e.key === "Escape") {
-        overlay.remove();
-      }
-    });
-
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) overlay.remove();
-    });
-  },
-
-  saveQuickAdd(title: string) {
-    Goals.create({
-      title,
-      level: "intention",
-      category: "personal",
-      priority: "medium",
-      month: new Date().getMonth(),
-      year: new Date().getFullYear()
-    });
-
-    this.render();
-    this.showToast("🌱", "Intention captured. Go for it!");
-    this.celebrate("✨", "Captured!", "Focus on this one thing.");
-  },
-
-  openZenFocus(goalId: string) {
-    const goal = Goals.getById(goalId);
-    if (!goal) return;
-
-    const overlay = document.createElement("div");
-    overlay.className = "zen-focus-overlay";
-
-    const cat = goal.category ? CONFIG.CATEGORIES[goal.category] : null;
-    const levelInfo = CONFIG.LEVELS[goal.level] || CONFIG.LEVELS.intention;
-
-    overlay.innerHTML = `
-	      <div class="zen-focus-container">
-	        <button class="zen-close-btn">×</button>
-
-	        <div class="zen-header">
-	          <div class="zen-level-badge">
-	            <span class="zen-emoji">${levelInfo.emoji}</span>
-	            <span class="zen-label">${levelInfo.label}</span>
-          </div>
-          ${cat ? `<div class="zen-category" style="color: ${cat.color}">${cat.emoji} ${cat.label}</div>` : ""}
-        </div>
-
-        <h1 class="zen-title">${this.escapeHtml(goal.title)}</h1>
-        ${goal.description ? `<p class="zen-desc">${this.escapeHtml(goal.description)}</p>` : ""}
-
-        <div class="zen-subtasks">
-          ${goal.subtasks.length > 0 ? `
-            <h3>Action Steps</h3>
-            <div class="zen-subtask-list">
-              ${goal.subtasks.map((s, idx) => `
-                <div class="zen-subtask-item ${s.done ? 'done' : ''}" data-idx="${idx}">
-                  <div class="zen-subtask-checkbox ${s.done ? 'checked' : ''}"></div>
-                  <span>${this.escapeHtml(s.title)}</span>
-                </div>
-              `).join('')}
-            </div>
-          ` : `
-            <div class="zen-empty-subtasks">Focus on the big picture.</div>
-          `}
-        </div>
-
-        <div class="zen-footer">
-          <button class="zen-complete-btn ${goal.status === 'done' ? 'completed' : ''}">
-            ${goal.status === 'done' ? '✅ Completed' : '✨ Mark as Done'}
-          </button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    // Event handlers
-    overlay.querySelector(".zen-close-btn")?.addEventListener("click", () => overlay.remove());
-    overlay.querySelectorAll(".zen-subtask-item").forEach(item => {
-      item.addEventListener("click", () => {
-        const idx = parseInt((item as HTMLElement).dataset.idx || "0");
-        goal.subtasks[idx].done = !goal.subtasks[idx].done;
-        State.save();
-        this.render();
-        this.openZenFocus(goalId); // Re-render zen view
-        overlay.remove();
-        this.showToast("💎", "Step completed!");
-      });
-    });
-
-    overlay.querySelector(".zen-complete-btn")?.addEventListener("click", () => {
-      goal.status = goal.status === 'done' ? 'in-progress' : 'done';
-      State.save();
-      this.render();
-      overlay.remove();
-      if (goal.status === 'done') {
-        this.celebrate("🏆", "Level Up!", `Finished: ${goal.title}`);
-      }
-    });
-  },
 
   updateSyncStatus(status: 'syncing' | 'synced' | 'error' | 'local'): void {
     const el = document.getElementById("syncStatus");
@@ -333,6 +111,12 @@ export const UI = {
     this.cacheElements();
     this.els = this.elements; // Alias for convenience
     this.bindEvents();
+    this.setupEventBusListeners(); // Set up EventBus communication
+    this.setupSyncEventListeners(); // Set up sync status event listeners
+    this.setupZenFocusCallbacks(); // Set up ZenFocus feature callbacks
+    this.setupGoalDetailModalCallbacks(); // Set up GoalDetailModal callbacks
+    this.setupQuickAddCallbacks(); // Set up QuickAdd callbacks
+    this.setupMonthDetailModalCallbacks(); // Set up MonthDetailModal callbacks
     this.setupViewportMode();
     this.applySavedUIState();
     this.render();
@@ -353,6 +137,105 @@ export const UI = {
     if (Planning.shouldPromptReview()) {
       setTimeout(() => this.showReviewPrompt(), 3000);
     }
+  },
+
+  /**
+   * Set up EventBus listeners for decoupled communication with State
+   * This resolves the State ↔ UI circular dependency
+   */
+  setupEventBusListeners() {
+    // Listen for view changes from State
+    eventBus.on('view:changed', (data) => {
+      this.scheduleRender(data);
+    });
+
+    // Listen for view button sync requests
+    eventBus.on('view:sync-buttons', () => {
+      this.syncViewButtons?.();
+    });
+
+    // Listen for toast notifications
+    eventBus.on('ui:toast', (data) => {
+      Toast.show(this.elements, data.icon, data.message);
+    });
+
+    // Listen for celebration animations
+    eventBus.on('ui:celebrate', (data) => {
+      Celebration.show(this.elements, data.icon, data.title, data.message);
+    });
+
+    console.log('✓ EventBus listeners registered in UIManager');
+  },
+
+  /**
+   * Set up sync status event listeners
+   * Listens to SyncQueue events and updates UI accordingly
+   */
+  setupSyncEventListeners() {
+    // Listen for sync errors from SyncQueue
+    window.addEventListener('sync-error', ((e: CustomEvent) => {
+      const message = e.detail?.message || 'Sync failed';
+      this.updateSyncStatus('error');
+      Toast.show(this.elements, '⚠️', message);
+    }) as EventListener);
+
+    // Listen for sync storage errors from SyncQueue
+    window.addEventListener('sync-storage-error', ((e: CustomEvent) => {
+      const message = e.detail?.message || 'Sync queue corrupted';
+      this.updateSyncStatus('error');
+      Toast.show(this.elements, '⚠️', message);
+    }) as EventListener);
+
+    console.log('✓ Sync event listeners registered in UIManager');
+  },
+
+  /**
+   * Set up ZenFocus feature callbacks
+   */
+  setupZenFocusCallbacks() {
+    zenFocus.setCallbacks({
+      escapeHtml: this.escapeHtml.bind(this),
+      onRender: () => this.render(),
+      onToast: (icon, message) => Toast.show(this.elements, icon, message),
+      onCelebrate: (icon, title, message) => Celebration.show(this.elements, icon, title, message)
+    });
+  },
+
+  /**
+   * Set up GoalDetailModal callbacks
+   */
+  setupGoalDetailModalCallbacks() {
+    goalDetailModal.setCallbacks({
+      escapeHtml: this.escapeHtml.bind(this),
+      formatDate: this.formatDate.bind(this),
+      formatMinutes: this.formatMinutes.bind(this),
+      spawnPollenSparkles: this.spawnPollenSparkles.bind(this),
+      onRender: () => this.render(),
+      onToast: (icon, message) => Toast.show(this.elements, icon, message)
+    });
+  },
+
+  /**
+   * Set up QuickAdd callbacks
+   */
+  setupQuickAddCallbacks() {
+    quickAdd.setCallbacks({
+      onRender: () => this.render(),
+      onToast: (icon, message) => Toast.show(this.elements, icon, message),
+      onCelebrate: (icon, title, message) => Celebration.show(this.elements, icon, title, message)
+    });
+  },
+
+  /**
+   * Set up MonthDetailModal callbacks
+   */
+  setupMonthDetailModalCallbacks() {
+    monthDetailModal.setCallbacks({
+      escapeHtml: this.escapeHtml.bind(this),
+      onRender: () => this.render(),
+      onToast: (icon, message) => Toast.show(this.elements, icon, message),
+      onShowGoalDetail: (goalId) => goalDetailModal.show(goalId)
+    });
   },
 
   // Update body double timer display
@@ -392,7 +275,7 @@ export const UI = {
         const view = (tab as HTMLElement).dataset.view;
         State.setView(view as ViewType);
         this.syncViewButtons();
-        this.updateMobileLayoutVars();
+        viewportManager.updateMobileLayoutVars();
       });
     });
 
@@ -466,6 +349,9 @@ export const UI = {
           case "settings":
             AppSettings.showPanel();
             break;
+          case "logout":
+            this.handleLogout();
+            break;
         }
       });
 
@@ -531,7 +417,7 @@ export const UI = {
       const goalEl = target.closest("[data-goal-id]") as HTMLElement | null;
       const goalId = goalEl?.dataset.goalId;
       if (goalId) {
-        this.showGoalDetail(goalId);
+        goalDetailModal.show(goalId);
         return;
       }
 
@@ -590,6 +476,32 @@ export const UI = {
       State.save();
       NDSupport.applyAccessibilityPreferences();
       this.syncSupportPanelAppearanceControls();
+    });
+
+    // Time Theme Picker (Developer Tool)
+    const timeThemePicker = document.getElementById("timeThemePicker");
+    timeThemePicker?.addEventListener("click", (e) => {
+      const target = e.target as Element | null;
+      const btn = target?.closest(".time-theme-btn") as HTMLElement | null;
+      if (!btn || !timeThemePicker.contains(btn)) return;
+      const selectedTime = btn.dataset.time;
+      if (!selectedTime) return;
+
+      // Store the override in localStorage for dev purposes
+      if (selectedTime === "auto") {
+        localStorage.removeItem("gardenFence.devTimeOverride");
+      } else {
+        localStorage.setItem("gardenFence.devTimeOverride", selectedTime);
+      }
+
+      // Update all buttons
+      timeThemePicker.querySelectorAll(".time-theme-btn").forEach((b) => {
+        b.setAttribute("aria-checked", "false");
+      });
+      btn.setAttribute("aria-checked", "true");
+
+      // Apply the time of day override
+      this.applyTimeOfDayOverride(selectedTime);
     });
 
     // Layout visibility shortcuts
@@ -704,6 +616,32 @@ export const UI = {
       overlay.setAttribute("hidden", "");
       this._supportPanelHideTimer = null;
     }, 220);
+  },
+
+  async handleLogout() {
+    if (!confirm("Log out? Any unsaved changes will be synced first.")) return;
+
+    try {
+      // Force final sync of pending changes
+      const { batchSaveService } = await import('../services/BatchSaveService');
+      await batchSaveService.forceSave();
+
+      // Clean up resources
+      await State.cleanup();
+
+      // Sign out from Supabase
+      const { SupabaseService } = await import('../services/SupabaseService');
+      await SupabaseService.signOut();
+
+      // Emit logout event
+      eventBus.emit('auth:logout');
+
+      // Reload to show auth modal
+      location.reload();
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Toast.show(this.elements, '⚠️', 'Logout failed. Please try again.');
+    }
   },
 
   setupCanvasInteraction() {
@@ -829,7 +767,7 @@ export const UI = {
     // Mobile Day view should be readable at default scale; reset zoom only when navigating.
     if (
       shouldResetScroll &&
-      this.isMobileViewport() &&
+      viewportManager.isMobileViewport() &&
       State.currentView === VIEWS.DAY &&
       State.zoom !== 100
     ) {
@@ -865,7 +803,7 @@ export const UI = {
       if (mobileHomeView) mobileHomeView.setAttribute("hidden", "");
     }
 
-    this.updateMobileLayoutVars();
+    viewportManager.updateMobileLayoutVars();
 
     if (shouldResetScroll) {
       if (this._scrollResetRaf !== null) {
@@ -890,7 +828,7 @@ export const UI = {
   },
 
   updateMobileHomeView() {
-    HomeRenderer.render(this.elements, this.escapeHtml.bind(this), (goalId) => this.showGoalDetail(goalId));
+    HomeRenderer.render(this.elements, this.escapeHtml.bind(this), (goalId) => goalDetailModal.show(goalId));
   },
 
   // Render based on current view
@@ -935,7 +873,9 @@ export const UI = {
     const container = this.elements.levelContextBar;
     if (!container) return;
 
-    if (!State.data || State.currentView === VIEWS.HOME) {
+    // Context is rendered inline in each calendar view (Year/Month/Week).
+    // The old bar took too much vertical space, so keep it hidden for all views.
+    if (!State.data || State.currentView === VIEWS.HOME || State.currentView === VIEWS.DAY || State.currentView === VIEWS.YEAR || State.currentView === VIEWS.MONTH || State.currentView === VIEWS.WEEK) {
       container.innerHTML = "";
       container.setAttribute("hidden", "");
       return;
@@ -946,6 +886,7 @@ export const UI = {
     const viewingDate = State.viewingDate ?? now;
     const viewingYear = State.viewingYear ?? viewingDate.getFullYear();
     const viewingMonth = State.viewingMonth ?? viewingDate.getMonth();
+    const isCollapsed = State.data.preferences.nd.contextBarCollapsed ?? false;
 
     const visibleLevels: GoalLevel[] = (() => {
       switch (view) {
@@ -955,8 +896,6 @@ export const UI = {
           return ["vision", "milestone", "focus"];
         case VIEWS.WEEK:
           return ["vision", "milestone", "focus"];
-        case VIEWS.DAY:
-          return ["vision", "milestone", "focus", "intention"];
         default:
           return ["vision", "milestone"];
       }
@@ -979,12 +918,15 @@ export const UI = {
           weekEnd.setDate(weekEnd.getDate() + 6);
           return Goals.getForRange(weekStart, weekEnd);
         }
-        case VIEWS.DAY:
-          return Goals.getForDate(viewingDate);
         default:
           return Goals.getForDate(viewingDate);
       }
     })().filter((g) => g.status !== "done");
+
+    // Calculate total goals for badge
+    const totalGoals = visibleLevels.reduce((sum, level) => {
+      return sum + goalsInRange.filter(g => g.level === level).length;
+    }, 0);
 
     const priorityRank: Record<Priority, number> = {
       urgent: 0,
@@ -1014,11 +956,11 @@ export const UI = {
           ? `
             <div class="level-context-goals">
               ${shown
-                .map(
-                  (g) =>
-                    `<button type="button" class="level-context-goal" data-goal-id="${g.id}">${this.escapeHtml(g.title)}</button>`,
-                )
-                .join("")}
+            .map(
+              (g) =>
+                `<button type="button" class="level-context-goal" data-goal-id="${g.id}">${this.escapeHtml(g.title)}</button>`,
+            )
+            .join("")}
               ${remaining > 0 ? `<span class="level-context-goal level-context-more">+${remaining}</span>` : ""}
             </div>
           `
@@ -1038,8 +980,51 @@ export const UI = {
       `;
     };
 
-    container.innerHTML = visibleLevels.map(renderLevel).join("");
+    // Add collapsed/expanded class
+    container.className = `level-context-bar ${isCollapsed ? 'collapsed' : 'expanded'}`;
+    container.dataset.collapsed = String(isCollapsed);
+
+    // Header bar with toggle button
+    const headerHtml = `
+      <div class="level-context-header-bar">
+        <div class="level-context-title">
+          <span class="context-icon">🎯</span>
+          <span>Context</span>
+          ${totalGoals > 0 ? `<span class="context-count-badge">${totalGoals}</span>` : ''}
+        </div>
+        <button
+          class="btn-context-toggle"
+          type="button"
+          aria-label="${isCollapsed ? 'Expand context' : 'Collapse context'}"
+          aria-expanded="${!isCollapsed}"
+        >
+          <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    `;
+
+    // Collapsible content wrapper
+    const contentHtml = `
+      <div class="level-context-content">
+        ${visibleLevels.map(renderLevel).join("")}
+      </div>
+    `;
+
+    container.innerHTML = headerHtml + contentHtml;
     container.removeAttribute("hidden");
+
+    // Add toggle event listener
+    const toggleBtn = container.querySelector('.btn-context-toggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const newCollapsedState = !isCollapsed;
+        State.data!.preferences.nd.contextBarCollapsed = newCollapsedState;
+        State.save();
+        this.renderLevelContextBar(); // Re-render with new state
+      });
+    }
   },
 
   // Update the date display based on current view
@@ -1106,6 +1091,45 @@ export const UI = {
     WeekRenderer.render(this.elements, this.escapeHtml.bind(this));
   },
 
+  // Get context goals (Vision/Milestone/Focus) for a specific date
+  getContextGoalsForDate(date: Date): { vision: Goal[], milestone: Goal[], focus: Goal[] } {
+    if (!State.data) return { vision: [], milestone: [], focus: [] };
+
+    const allGoals = State.data.goals.filter(g => g.status !== 'done');
+    const viewingYear = date.getFullYear();
+    const viewingMonth = date.getMonth();
+
+    // Get week number for the date
+    const weekNum = State.getWeekNumber(date);
+    const weekStart = State.getWeekStart(viewingYear, weekNum);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    // Vision: goals for the year
+    const vision = allGoals.filter(g => {
+      if (g.level !== 'vision') return false;
+      if (!g.year) return false;
+      return g.year === viewingYear;
+    }).slice(0, 2); // Show max 2
+
+    // Milestone: goals for the month
+    const milestone = allGoals.filter(g => {
+      if (g.level !== 'milestone') return false;
+      if (g.year === undefined || g.month === undefined) return false;
+      return g.year === viewingYear && g.month === viewingMonth;
+    }).slice(0, 2); // Show max 2
+
+    // Focus: goals for the week
+    const focus = allGoals.filter(g => {
+      if (g.level !== 'focus') return false;
+      if (!g.dueDate) return false;
+      const dueDate = new Date(g.dueDate);
+      return dueDate >= weekStart && dueDate <= weekEnd;
+    }).slice(0, 2); // Show max 2
+
+    return { vision, milestone, focus };
+  },
+
   // Render Day View (New Modernized Implementation)
   renderDayView() {
     const container = this.elements.calendarGrid;
@@ -1113,12 +1137,6 @@ export const UI = {
 
     const date = State.viewingDate;
     const allGoals = State.data?.goals || [];
-
-    // Force planner mode for Day View
-    if (State.data && State.data.preferences.nd.dayViewStyle !== "planner") {
-      State.data.preferences.nd.dayViewStyle = "planner";
-      State.save();
-    }
 
     // Initialize DayViewController if not already done
     if (!this.dayViewController) {
@@ -1129,14 +1147,15 @@ export const UI = {
             Goals.update(goalId, updates);
             // Re-render to update the view
             if (this.dayViewController) {
-              this.dayViewController.setGoals(State.viewingDate, State.data?.goals || []);
+              const contextGoals = this.getContextGoalsForDate(State.viewingDate);
+              this.dayViewController.setGoals(State.viewingDate, State.data?.goals || [], contextGoals);
             }
           },
           onGoalClick: (goalId: string) => {
-            this.showGoalDetail(goalId);
+            goalDetailModal.show(goalId);
           },
           onZenFocus: (goalId: string) => {
-            this.openZenFocus(goalId);
+            zenFocus.open(goalId);
           },
           onShowToast: (emoji: string, message: string) => {
             this.showToast(emoji, message);
@@ -1145,12 +1164,10 @@ export const UI = {
             this.celebrate(emoji, title, message);
           },
           onPlantSomething: () => {
-            this.showQuickAdd();
+            quickAdd.show();
           },
           onGetPreference: (key: string) => {
-            // Force planner style when asked
-            if (key === "dayViewStyle") return "planner";
-            return (State.data?.preferences.nd as any)[key];
+            return (State.data?.preferences.nd as any)?.[key];
           },
           onNavigate: (direction: number) => {
             State.navigate(direction);
@@ -1163,10 +1180,13 @@ export const UI = {
       this.dayViewController.mount();
     }
 
-    // Set goals and render
-    this.dayViewController.setGoals(date, allGoals);
+    // Gather context goals (Vision/Milestone/Focus)
+    const contextGoals = this.getContextGoalsForDate(date);
 
-    // Remove old style toggle if present (we only use Planner mode now)
+    // Set goals and render
+    this.dayViewController.setGoals(date, allGoals, contextGoals);
+
+    // Add day view style toggle
     this.ensureDayViewStyleToggle();
   },
 
@@ -1174,9 +1194,71 @@ export const UI = {
     const header = document.querySelector(".day-view-header");
     if (!header) return;
 
-    // Remove any existing toggle
+    // Remove any existing toggle to avoid duplicates
     const existing = header.querySelector(".day-style-toggle");
     if (existing) existing.remove();
+
+    // Get current mode (default to planner)
+    const currentMode = State.data?.preferences?.nd?.dayViewStyle || "planner";
+
+    // Create mode switcher
+    const toggle = document.createElement("div");
+    toggle.className = "day-style-toggle";
+    toggle.innerHTML = `
+      <button class="day-mode-btn ${currentMode === "timeline" ? "active" : ""}" data-mode="timeline" title="Timeline View">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <span>Timeline</span>
+      </button>
+      <button class="day-mode-btn ${currentMode === "simple" ? "active" : ""}" data-mode="simple" title="Simple View">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <circle cx="4" cy="6" r="1" fill="currentColor"></circle>
+          <circle cx="4" cy="12" r="1" fill="currentColor"></circle>
+          <circle cx="4" cy="18" r="1" fill="currentColor"></circle>
+        </svg>
+        <span>Simple</span>
+      </button>
+      <button class="day-mode-btn ${currentMode === "planner" ? "active" : ""}" data-mode="planner" title="Planner View">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Planner</span>
+      </button>
+    `;
+
+    // Add click handlers
+    toggle.querySelectorAll(".day-mode-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mode = (btn as HTMLElement).dataset.mode as "timeline" | "simple" | "planner";
+
+        // Update active state
+        toggle.querySelectorAll(".day-mode-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        // Save preference
+        if (State.data && State.data.preferences && State.data.preferences.nd) {
+          State.data.preferences.nd.dayViewStyle = mode;
+          State.save();
+        }
+
+        // Trigger re-render with new mode
+        if (this.dayViewController) {
+          this.dayViewController.render();
+          Toast.show(this.elements, "✨", `Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
+        }
+      });
+    });
+
+    header.appendChild(toggle);
   },
 
   // Render a single goal card for day view
@@ -1438,11 +1520,11 @@ export const UI = {
 
     card.querySelector(".view-month-btn")?.addEventListener("click", (e) => {
       e.stopPropagation();
-      this.showMonthDetail(monthIndex, viewingYear);
+      monthDetailModal.show(monthIndex, viewingYear);
     });
 
     card.addEventListener("click", () => {
-      this.showMonthDetail(monthIndex, viewingYear);
+      monthDetailModal.show(monthIndex, viewingYear);
     });
 
     return card;
@@ -1669,7 +1751,7 @@ export const UI = {
     // Bind click events
     container.querySelectorAll(".upcoming-goal").forEach((el: Element) => {
       el.addEventListener("click", () => {
-        this.showGoalDetail((el as HTMLElement).dataset.goalId);
+        goalDetailModal.show((el as HTMLElement).dataset.goalId);
       });
     });
   },
@@ -1827,7 +1909,7 @@ export const UI = {
     this.elements.goalModal?.classList.add("active");
 
     // Scroll focused input into view on mobile when keyboard appears
-    if (this.isMobileViewport()) {
+    if (viewportManager.isMobileViewport()) {
       // Wait for modal animation to complete, then focus and scroll first input
       setTimeout(() => {
         const firstInput = this.elements.goalModal?.querySelector("input, select, textarea") as HTMLElement | null;
@@ -2074,450 +2156,9 @@ export const UI = {
   // ============================================
   // Goal Detail View
   // ============================================
-  showGoalDetail(goalId?: string) {
-    if (!goalId) return;
-    const goal = Goals.getById(goalId);
-    if (!goal) return;
-
-    State.selectedGoal = goalId;
-    const cat = goal.category ? (CONFIG.CATEGORIES[goal.category] ?? null) : null;
-    const status = CONFIG.STATUSES[goal.status];
-
-    const modal = document.createElement("div");
-    modal.className = "modal-overlay active";
-    modal.id = "goalDetailModal";
-    modal.innerHTML = `
-                <div class="modal modal-lg">
-                    <div class="modal-header">
-                        <div class="goal-detail-header">
-                            ${cat
-        ? `<span class="goal-category-badge" style="background: ${cat.color}20; color: ${cat.color}">
-                                ${cat.emoji} ${cat.label}
-                            </span>`
-        : ""
-      }
-                            <span class="goal-status-badge" style="background: ${status.color}20; color: ${status.color}">
-                                ${status.emoji} ${status.label}
-                            </span>
-                        </div>
-                        <button class="modal-close" id="closeGoalDetail">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <h2 class="goal-detail-title">${this.escapeHtml(goal.title)}</h2>
-
-                        ${goal.description ? `<p class="goal-description">${this.escapeHtml(goal.description)}</p>` : ""}
-
-                        <!-- Time Breakdown Section -->
-                        <div class="detail-section time-section">
-                            <h3>⏰ Time You Have</h3>
-                            ${TimeBreakdown.generateHTML(goal.month, goal.year, false, goal.level)}
-                        </div>
-
-                        <!-- Progress Section -->
-                        <div class="detail-section">
-                            <h3>Progress</h3>
-                            <div class="progress-control">
-                                <div class="progress-bar-lg">
-                                    <div class="progress-fill-lg" style="width: ${goal.progress}%"></div>
-                                </div>
-                                <span class="progress-value">${goal.progress}%</span>
-                            </div>
-                            <input type="range" min="0" max="100" value="${goal.progress}"
-                                   class="progress-slider" id="progressSlider">
-                        </div>
-
-                        <!-- Status Section -->
-                        <div class="detail-section">
-                            <h3>Status</h3>
-                            <div class="status-buttons">
-                                ${Object.entries(CONFIG.STATUSES)
-        .map(
-          ([id, s]) => `
-                                    <button class="status-btn ${goal.status === id ? "active" : ""}"
-                                            data-status="${id}" style="--status-color: ${s.color}">
-                                        ${s.emoji} ${s.label}
-                                    </button>
-                                `,
-        )
-        .join("")}
-                            </div>
-                        </div>
-
-                        <!-- Subtasks Section -->
-                        <div class="detail-section">
-                            <h3>Subtasks <span class="count">(${goal.subtasks.filter((s) => s.done).length}/${goal.subtasks.length})</span></h3>
-                            <div class="subtasks-list" id="subtasksList">
-                                ${goal.subtasks
-        .map(
-          (s) => `
-                                    <div class="subtask-item ${s.done ? "done" : ""}" data-subtask-id="${s.id}">
-                                        <div class="subtask-checkbox ${s.done ? "checked" : ""}"></div>
-                                        <span class="subtask-title">${this.escapeHtml(s.title)}</span>
-                                        <button class="btn btn-icon btn-ghost subtask-delete">×</button>
-                                    </div>
-                                `,
-        )
-        .join("")}
-                            </div>
-                            <div class="add-subtask">
-                                <input type="text" placeholder="Add a subtask..." id="newSubtaskInput">
-                                <button class="btn btn-sm btn-primary" id="addSubtaskBtn">Add</button>
-                            </div>
-                        </div>
-
-                        <!-- Notes Section -->
-                        <div class="detail-section">
-                            <h3>Notes & Reflections</h3>
-                            <div class="notes-list" id="notesList">
-                                ${goal.notes
-        .map(
-          (n) => `
-                                    <div class="note-item">
-                                        <p>${this.escapeHtml(n.text)}</p>
-                                        <span class="note-date">${this.formatDate(n.createdAt)}</span>
-                                    </div>
-                                `,
-        )
-        .join("")}
-                            </div>
-                            <div class="add-note">
-                                <textarea placeholder="Add a note..." id="newNoteInput"></textarea>
-                                <button class="btn btn-sm btn-primary" id="addNoteBtn">Add Note</button>
-                            </div>
-                        </div>
-
-                        <!-- Time Tracking -->
-                        <div class="detail-section">
-                            <h3>Time Spent</h3>
-                            <div class="time-summary">
-                                <span class="time-total">${this.formatMinutes(Goals.getTotalTime(goalId))}</span>
-                                <button class="btn btn-sm btn-ghost" id="logTimeBtn">+ Log Time</button>
-                            </div>
-                            ${goal.lastWorkedOn ? `<p class="last-worked">Last worked on: ${this.formatDate(goal.lastWorkedOn)}</p>` : ""}
-                        </div>
-
-                        <!-- Meta Info -->
-                        <div class="detail-meta">
-                            <span>Created: ${this.formatDate(goal.createdAt)}</span>
-                            ${goal.completedAt ? `<span>Completed: ${this.formatDate(goal.completedAt)}</span>` : ""}
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <button class="btn btn-danger" id="deleteGoalBtn">Remove Anchor</button>
-                        <button class="btn btn-primary" id="saveGoalBtn">Save Changes</button>
-                    </div>
-                </div>
-            `;
-
-    document.body.appendChild(modal);
-    this.bindGoalDetailEvents(modal, goalId);
-  },
-
-  bindGoalDetailEvents(modal: HTMLElement, goalId: string) {
-    // Close button
-    modal.querySelector("#closeGoalDetail")?.addEventListener("click", () => {
-      modal.remove();
-      State.selectedGoal = null;
-    });
-
-    // Click outside to close
-    modal.addEventListener("click", (e: MouseEvent) => {
-      if (e.target === modal) {
-        modal.remove();
-        State.selectedGoal = null;
-      }
-    });
-
-    // Progress slider: update modal UI on input, persist on change (prevents render/sync churn).
-    const progressFill = modal.querySelector(".progress-fill-lg") as HTMLElement | null;
-    const progressValue = modal.querySelector(".progress-value") as HTMLElement | null;
-    const setProgressUI = (progress: number) => {
-      if (progressFill) progressFill.style.width = `${progress}%`;
-      if (progressValue) progressValue.textContent = `${progress}%`;
-    };
-
-    modal.querySelector("#progressSlider")?.addEventListener("input", (e: Event) => {
-      const target = e.target as HTMLInputElement | null;
-      const progress = target ? parseInt(target.value, 10) : NaN;
-      if (!Number.isFinite(progress)) return;
-      setProgressUI(progress);
-    });
-
-    modal.querySelector("#progressSlider")?.addEventListener("change", (e: Event) => {
-      const target = e.target as HTMLInputElement | null;
-      const progress = target ? parseInt(target.value, 10) : NaN;
-      if (!Number.isFinite(progress)) return;
-      Goals.update(goalId, { progress });
-      setProgressUI(progress);
-    });
-
-    // Status buttons
-    modal.querySelectorAll(".status-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const status = (btn as HTMLElement).dataset.status;
-        if (!status) return;
-        Goals.update(goalId, { status: status as Goal["status"] });
-        modal
-          .querySelectorAll(".status-btn")
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        if (status === "done") {
-          Goals.complete(goalId);
-          modal.remove();
-          this.render();
-        }
-      });
-    });
-
-    // Add subtask
-    const addSubtask = () => {
-      const input = modal.querySelector("#newSubtaskInput") as HTMLInputElement | null;
-      const title = input?.value.trim() ?? "";
-      if (!title) return;
-
-      Goals.addSubtask(goalId, title);
-      if (input) input.value = "";
-      this.refreshGoalDetail(modal, goalId);
-    };
-
-    modal
-      .querySelector("#addSubtaskBtn")
-      ?.addEventListener("click", addSubtask);
-    (modal.querySelector("#newSubtaskInput") as HTMLInputElement | null)
-      ?.addEventListener("keydown", (e: KeyboardEvent) => {
-        if (e.key === "Enter") addSubtask();
-      });
-
-    // Toggle subtasks
-    modal.querySelectorAll(".subtask-checkbox").forEach((cb) => {
-      cb.addEventListener("click", (e: Event) => {
-        const mouseEvent = e as MouseEvent;
-        const subtaskItem = cb.closest(".subtask-item") as HTMLElement | null;
-        const subtaskId = subtaskItem?.dataset.subtaskId;
-        if (!subtaskId) return;
-
-        // If checking (not unchecking), spawn sparkles
-        const checkbox = cb as HTMLInputElement;
-        if (checkbox.checked) {
-          this.spawnPollenSparkles(mouseEvent.clientX, mouseEvent.clientY);
-        }
-
-        Goals.toggleSubtask(goalId, subtaskId);
-        this.refreshGoalDetail(modal, goalId);
-      });
-    });
-
-    // Delete subtasks
-    modal.querySelectorAll(".subtask-delete").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const subtaskItem = btn.closest(".subtask-item") as HTMLElement | null;
-        const subtaskId = subtaskItem?.dataset.subtaskId;
-        if (!subtaskId) return;
-        Goals.deleteSubtask(goalId, subtaskId);
-        this.refreshGoalDetail(modal, goalId);
-      });
-    });
-
-    // Add note
-    modal.querySelector("#addNoteBtn")?.addEventListener("click", () => {
-      const input = modal.querySelector("#newNoteInput") as HTMLInputElement | null;
-      const text = input?.value.trim() ?? "";
-      if (!text) return;
-
-      Goals.addNote(goalId, text);
-      if (input) input.value = "";
-      this.refreshGoalDetail(modal, goalId);
-    });
-
-    // Log time
-    modal.querySelector("#logTimeBtn")?.addEventListener("click", () => {
-      const minutesRaw = prompt("How many minutes did you work on this?");
-      const minutes = minutesRaw ? parseInt(minutesRaw, 10) : NaN;
-      if (Number.isFinite(minutes)) {
-        Goals.logTime(goalId, minutes);
-        this.refreshGoalDetail(modal, goalId);
-        this.showToast("⏱️", "Time logged!");
-      }
-    });
-
-    // Delete goal
-    modal.querySelector("#deleteGoalBtn")?.addEventListener("click", () => {
-      if (confirm("Remove this anchor?")) {
-        Goals.delete(goalId);
-        modal.remove();
-        this.render();
-        this.showToast("🗑️", "Anchor removed");
-      }
-    });
-
-    // Save changes
-    modal.querySelector("#saveGoalBtn")?.addEventListener("click", () => {
-      modal.remove();
-      State.selectedGoal = null;
-      this.render();
-      this.showToast("✅", "Changes saved");
-    });
-  },
-
-  refreshGoalDetail(modal: HTMLElement, goalId: string) {
-    modal.remove();
-    this.showGoalDetail(goalId);
-  },
-
   // ============================================
   // Month Detail View
   // ============================================
-  showMonthDetail(monthIndex: number, year: number = new Date().getFullYear()) {
-    const monthGoals = Goals.getByMonth(monthIndex, year).filter(
-      (g) => g.level !== "intention" && g.level !== "vision",
-    );
-    const monthName = CONFIG.MONTHS[monthIndex];
-
-    const modal = document.createElement("div");
-    modal.className = "modal-overlay active";
-    modal.id = "monthDetailModal";
-    modal.innerHTML = `
-                <div class="modal modal-xl">
-                    <div class="modal-header">
-                        <h2 class="modal-title">${monthName} ${year}</h2>
-                        <button class="modal-close" id="closeMonthDetail">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Month Overview -->
-                        <div class="month-overview">
-                            <div class="overview-stat">
-                                <div class="stat-value">${monthGoals.length}</div>
-                                <div class="stat-label">Total Anchors</div>
-                            </div>
-                            <div class="overview-stat">
-                                <div class="stat-value">${monthGoals.filter((g) => g.status === "done").length}</div>
-                                <div class="stat-label">Completed</div>
-                            </div>
-                            <div class="overview-stat">
-                                <div class="stat-value">${monthGoals.filter((g) => g.status === "in-progress").length}</div>
-                                <div class="stat-label">In Progress</div>
-                            </div>
-                            <div class="overview-stat">
-                                <div class="stat-value">${Math.round(monthGoals.reduce((s, g) => s + g.progress, 0) / (monthGoals.length || 1))}%</div>
-                                <div class="stat-label">Avg Progress</div>
-                            </div>
-                        </div>
-
-                        <!-- Milestones by Status -->
-                        <div class="goals-by-status">
-                            ${this.renderGoalsByStatus(monthGoals)}
-                        </div>
-
-                        <!-- Add Milestone for this month -->
-                        <div class="quick-add-goal">
-                            <input type="text" placeholder="Quick add a milestone for ${monthName}..." id="quickGoalInput">
-                            <select id="quickGoalCategory">
-                                <option value="">No category</option>
-                                ${Object.entries(CONFIG.CATEGORIES)
-        .map(
-          ([id, cat]) => `
-                                    <option value="${id}">${cat.emoji} ${cat.label}</option>
-                                `
-        )
-        .join("")}
-                            </select>
-                            <button class="btn btn-primary" id="quickAddGoalBtn">Add</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-    document.body.appendChild(modal);
-
-    // Bind events
-    modal
-      .querySelector("#closeMonthDetail")
-      ?.addEventListener("click", () => modal.remove());
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.remove();
-    });
-
-    // Quick add goal
-    modal.querySelector("#quickAddGoalBtn")?.addEventListener("click", () => {
-      const input = modal.querySelector("#quickGoalInput") as HTMLInputElement | null;
-      const categorySelect = modal.querySelector("#quickGoalCategory") as HTMLSelectElement | null;
-      const title = input?.value.trim() ?? "";
-      const categoryRaw = categorySelect?.value;
-      const category: Category =
-        categoryRaw && categoryRaw in CONFIG.CATEGORIES
-          ? (categoryRaw as Exclude<Category, null>)
-          : null;
-
-      if (!title) return;
-
-      Goals.create({
-        title,
-        level: "milestone",
-        month: monthIndex,
-        year,
-        category,
-      });
-
-      if (input) input.value = "";
-      modal.remove();
-      this.render();
-      this.showToast("✨", "Milestone placed.");
-    });
-
-    // Clicking on goal items opens detail
-    modal.querySelectorAll(".goal-item").forEach((el) => {
-      el.addEventListener("click", () => {
-        modal.remove();
-        this.showGoalDetail((el as HTMLElement).dataset.goalId);
-      });
-    });
-  },
-
-  renderGoalsByStatus(goals: Goal[]) {
-    const grouped: Record<GoalStatus, Goal[]> = {
-      "not-started": goals.filter((g) => g.status === "not-started"),
-      "in-progress": goals.filter((g) => g.status === "in-progress"),
-      blocked: goals.filter((g) => g.status === "blocked"),
-      done: goals.filter((g) => g.status === "done"),
-    };
-
-    return (Object.entries(grouped) as [GoalStatus, Goal[]][])
-      .map(([status, statusGoals]) => {
-        const statusConfig = CONFIG.STATUSES[status];
-        return `
-                    <div class="status-column">
-                        <h3 class="status-header" style="color: ${statusConfig.color}">
-                            ${statusConfig.emoji} ${statusConfig.label} (${statusGoals.length})
-                        </h3>
-                        <div class="status-goals">
-                            ${statusGoals
-            .map((goal) => {
-              const cat = goal.category ? CONFIG.CATEGORIES[goal.category] : null;
-              const level = CONFIG.LEVELS[goal.level] || CONFIG.LEVELS.milestone;
-              return `
-                                    <div class="goal-item" data-goal-id="${goal.id}">
-                                        <div class="goal-content">
-                                            <div class="goal-title">
-                                                <span class="goal-level-emoji">${level.emoji}</span>
-                                                ${this.escapeHtml(goal.title)}
-                                            </div>
-                                            <div class="goal-meta">
-                                                ${cat ? `<span style="color: ${cat.color}">${cat.emoji}</span>` : ""}
-                                                <span>${goal.progress}%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-            })
-            .join("") || ""
-          }
-                        </div>
-                    </div>
-                `;
-      })
-      .join("");
-  },
-
   // ============================================
   // Weekly Review
   // ============================================
@@ -2825,7 +2466,7 @@ export const UI = {
     const randomGoal = upcoming[Math.floor(Math.random() * upcoming.length)];
 
     // Highlight the picked goal
-    this.showGoalDetail(randomGoal.id);
+    goalDetailModal.show(randomGoal.id);
     this.showToast("", `Return to: ${randomGoal.title}`);
   },
 
@@ -2860,7 +2501,7 @@ export const UI = {
     }
 
     document.body.classList.toggle("focus-mode", State.focusMode);
-    const isMobile = this.isMobileViewport();
+    const isMobile = viewportManager.isMobileViewport();
     if (State.focusMode) {
       this.updateFocusLayoutVars();
       if (isMobile) {
@@ -2975,6 +2616,16 @@ export const UI = {
       s.classList.toggle("active", isActive);
       s.setAttribute("aria-checked", String(isActive));
     });
+
+    // Sync Time Theme Picker (Developer Tool)
+    const timeThemePicker = document.getElementById("timeThemePicker");
+    if (timeThemePicker) {
+      const devTimeOverride = localStorage.getItem("gardenFence.devTimeOverride") || "auto";
+      timeThemePicker.querySelectorAll<HTMLElement>(".time-theme-btn").forEach((btn) => {
+        const isActive = btn.dataset.time === devTimeOverride;
+        btn.setAttribute("aria-checked", String(isActive));
+      });
+    }
   },
 
   applyThemePreference() {
@@ -2986,7 +2637,7 @@ export const UI = {
     // Mobile uses a different layout system (bottom tabs + Home-as-sidebar).
     // Desktop "hide/show" chrome controls don't translate well to small screens,
     // so force the primary chrome on and hide the floating handles.
-    if (this.isMobileViewport()) {
+    if (viewportManager.isMobileViewport()) {
       document.body.classList.remove(
         "hide-header",
         "hide-control-bar",
@@ -3252,7 +2903,7 @@ export const UI = {
     // I for Quick-Add Intention
     if (e.key === "i" && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      this.showQuickAdd();
+      quickAdd.show();
     }
 
     // ? for keyboard shortcuts help
@@ -3326,5 +2977,33 @@ export const UI = {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  },
+
+  applyTimeOfDayOverride(timeOfDay: string) {
+    const root = document.documentElement;
+
+    // Remove all time classes
+    root.classList.remove("time-dawn", "time-morning", "time-afternoon", "time-evening", "time-night");
+
+    if (timeOfDay === "auto") {
+      // Determine actual time of day
+      const now = new Date();
+      const hour = now.getHours();
+      let actualTime = "night";
+      if (hour >= 5 && hour < 7) actualTime = "dawn";
+      else if (hour >= 7 && hour < 12) actualTime = "morning";
+      else if (hour >= 12 && hour < 17) actualTime = "afternoon";
+      else if (hour >= 17 && hour < 20) actualTime = "evening";
+
+      root.classList.add(`time-${actualTime}`);
+    } else {
+      // Apply the override
+      root.classList.add(`time-${timeOfDay}`);
+    }
+
+    // Trigger a garden update if available
+    if ((window as any).gardenEngine) {
+      (window as any).gardenEngine.update();
+    }
   },
 };

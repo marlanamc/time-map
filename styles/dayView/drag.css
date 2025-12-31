@@ -100,7 +100,7 @@ body.is-touch-dragging-seed .day-view-container {
   50% { opacity: 1; transform: scale(1.1); }
 }
 
-.night-garden .drag-ghost {
+.dark-mode .drag-ghost {
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.6),
     0 24px 80px rgba(140, 183, 217, 0.2),
@@ -156,7 +156,7 @@ body.is-touch-dragging-seed .day-view-container {
     0 0 40px rgba(111, 155, 134, 0.2);
 }
 
-.night-garden .day-bed-canvas.is-drop-target {
+.dark-mode .day-bed-canvas.is-drop-target {
   outline-color: rgba(111, 155, 134, 0.5);
   background:
     radial-gradient(1200px 700px at 40% -10%,
@@ -168,7 +168,7 @@ body.is-touch-dragging-seed .day-view-container {
       rgba(30, 41, 79, 0.18) 100%);
 }
 
-.night-garden .day-bed-canvas.is-drop-over {
+.dark-mode .day-bed-canvas.is-drop-over {
   outline-color: var(--sage, #6F9B86);
   background:
     radial-gradient(1200px 700px at 40% -10%,

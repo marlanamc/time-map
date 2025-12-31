@@ -66,7 +66,7 @@
   opacity: 0.85;
 }
 
-.night-garden .day-goal-card {
+.dark-mode .day-goal-card {
   background: rgba(15, 23, 42, 0.75);
   border-color: rgba(140, 183, 217, 0.15);
   box-shadow:
@@ -74,7 +74,7 @@
     0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.night-garden .day-goal-card:hover {
+.dark-mode .day-goal-card:hover {
   border-color: rgba(140, 183, 217, 0.3);
   box-shadow:
     0 6px 16px rgba(0, 0, 0, 0.3),
@@ -166,14 +166,14 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.night-garden .day-goal-checkbox {
+.dark-mode .day-goal-checkbox {
   background: linear-gradient(135deg,
       rgba(30, 41, 79, 0.6) 0%,
       rgba(15, 23, 42, 0.8) 100%);
   border-color: rgba(111, 155, 134, 0.4);
 }
 
-.night-garden .day-goal-checkbox:hover {
+.dark-mode .day-goal-checkbox:hover {
   border-color: var(--sage, #6F9B86);
 }
 
@@ -206,7 +206,7 @@
   filter: saturate(1.1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
-.night-garden .day-goal-level {
+.dark-mode .day-goal-level {
   color: rgba(234, 246, 240, 0.5);
 }
 
@@ -226,11 +226,11 @@
   color: var(--text-secondary, rgba(0, 0, 0, 0.5));
 }
 
-.night-garden .day-goal-title {
+.dark-mode .day-goal-title {
   color: rgba(234, 246, 240, 0.95);
 }
 
-.night-garden .day-goal-card.completed .day-goal-title {
+.dark-mode .day-goal-card.completed .day-goal-title {
   color: rgba(234, 246, 240, 0.5);
   text-decoration-color: rgba(111, 155, 134, 0.3);
 }
@@ -242,7 +242,7 @@
   margin: -0.125rem 0 0 0;
 }
 
-.night-garden .day-goal-desc {
+.dark-mode .day-goal-desc {
   color: rgba(234, 246, 240, 0.65);
 }
 
@@ -299,15 +299,15 @@
   color: rgb(75, 85, 99);
 }
 
-.night-garden .day-goal-time {
+.dark-mode .day-goal-time {
   color: rgba(180, 106, 74, 0.9);
 }
 
-.night-garden .day-goal-cat {
+.dark-mode .day-goal-cat {
   background: rgba(111, 155, 134, 0.15);
 }
 
-.night-garden .day-goal-priority.priority-high {
+.dark-mode .day-goal-priority.priority-high {
   background: rgba(239, 68, 68, 0.2);
   color: rgb(254, 202, 202);
 }
@@ -347,7 +347,7 @@
   transform: translateY(0);
 }
 
-.night-garden .btn-zen-focus {
+.dark-mode .btn-zen-focus {
   background: linear-gradient(135deg,
       rgba(30, 41, 79, 0.5) 0%,
       rgba(15, 23, 42, 0.7) 100%);
@@ -355,7 +355,7 @@
   color: rgba(234, 246, 240, 0.8);
 }
 
-.night-garden .btn-zen-focus:hover {
+.dark-mode .btn-zen-focus:hover {
   background: linear-gradient(135deg,
       rgba(30, 41, 79, 0.7) 0%,
       rgba(15, 23, 42, 0.9) 100%);
@@ -414,7 +414,7 @@
   }
 }
 
-.night-garden .progress-bar-lg {
+.dark-mode .progress-bar-lg {
   background: rgba(30, 41, 79, 0.6);
 }
 
@@ -446,7 +446,7 @@
   box-shadow: 0 0 8px rgba(111, 155, 134, 0.4);
 }
 
-.night-garden .day-goal-variant-seed {
+.dark-mode .day-goal-variant-seed {
   background:
     linear-gradient(135deg,
       rgba(15, 23, 42, 0.75) 0%,
@@ -499,7 +499,7 @@
   border-radius: inherit;
 }
 
-.night-garden .day-goal-variant-planter {
+.dark-mode .day-goal-variant-planter {
   border-color: rgba(140, 183, 217, 0.18);
   border-top-color: rgba(180, 106, 74, 0.7);
   background:
@@ -541,7 +541,7 @@
   display: none;
 }
 
-.night-garden .day-goal-variant-compost {
+.dark-mode .day-goal-variant-compost {
   background:
     linear-gradient(135deg,
       rgba(16, 185, 129, 0.12) 0%,
@@ -593,12 +593,109 @@
   bottom: 0;
 }
 
-.night-garden .planter-resize-handle::before {
+.dark-mode .planter-resize-handle::before {
   background: rgba(180, 106, 74, 0.6);
 }
 
-.night-garden .planter-resize-handle:hover::before {
+.dark-mode .planter-resize-handle:hover::before {
   background: rgba(180, 106, 74, 0.9);
+}
+
+/* ============================================
+   PARENT LEVEL COLOR CODING
+   ============================================ */
+
+/* Color variables */
+:root {
+  --level-vision: #8b5cf6;
+  --level-milestone: #3b82f6;
+  --level-focus: #f59e0b;
+  --level-intention: #10b981;
+}
+
+/* Apply parent color to borders */
+.day-goal-card[data-parent-level] {
+  border-left: 4px solid var(--parent-color);
+}
+
+/* Subtle background tints */
+.day-goal-card.parent-level-vision {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.day-goal-card.parent-level-milestone {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.day-goal-card.parent-level-focus {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.day-goal-card.parent-level-intention {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+/* Parent level badge */
+.parent-level-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  background: var(--parent-color);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.day-goal-card:hover .parent-level-badge {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.parent-level-icon {
+  font-size: 0.75rem;
+  filter: brightness(1.2);
+}
+
+/* Dark mode gradients */
+.dark-mode .day-goal-card.parent-level-vision {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(15, 23, 42, 0.75) 100%);
+}
+
+.dark-mode .day-goal-card.parent-level-milestone {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(15, 23, 42, 0.75) 100%);
+}
+
+.dark-mode .day-goal-card.parent-level-focus {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.75) 100%);
+}
+
+.dark-mode .day-goal-card.parent-level-intention {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.75) 100%);
+}
+
+/* Override variant borders with parent color */
+.day-goal-variant-seed[data-parent-level] {
+  border-left: 4px solid var(--parent-color);
+}
+
+.day-goal-variant-planter[data-parent-level] {
+  border-top: 4px solid var(--parent-color);
+}
+
+.day-goal-variant-compost[data-parent-level] {
+  border-left: 4px solid var(--parent-color);
+  opacity: 0.7; /* Keep completed state subtle */
+}
+
+/* Seed glow effect uses parent color */
+.day-goal-variant-seed[data-parent-level]::after {
+  box-shadow: 0 0 8px var(--parent-color);
 }
 
 /* ============================================

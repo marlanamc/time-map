@@ -65,10 +65,11 @@ export class PlannerDayViewRenderer {
    * Render the initial planner view
    * @param date - The date to display
    * @param allGoals - All goals in the system (will be filtered for this date)
+   * @param contextGoals - Optional Vision/Milestone/Focus goals to display in sidebar
    * @remarks Creates a complete planner layout with sidebar sections for
    * unscheduled tasks, ongoing tasks, and upcoming tasks, plus a timeline.
    */
-  renderInitial(date: Date, allGoals: Goal[]): void {
+  renderInitial(date: Date, allGoals: Goal[], contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     const dayGoals = allGoals
       .filter((g) => this.isGoalForDate(g, date))
       .filter((g) => g.level === "intention");
@@ -99,8 +100,8 @@ export class PlannerDayViewRenderer {
     const month = date.toLocaleDateString("en-US", { month: "long" });
     const day = date.getDate();
     const ordinal = day % 10 === 1 && day !== 11 ? "st" :
-                    day % 10 === 2 && day !== 12 ? "nd" :
-                    day % 10 === 3 && day !== 13 ? "rd" : "th";
+      day % 10 === 2 && day !== 12 ? "nd" :
+        day % 10 === 3 && day !== 13 ? "rd" : "th";
     const dayName = `${weekday}, ${month} ${day}${ordinal}`;
 
     const html = `
@@ -118,6 +119,8 @@ export class PlannerDayViewRenderer {
               ${this.icon("plus")}
             </button>
           </div>
+
+          ${contextGoals ? this.renderContextSection(contextGoals) : ''}
 
           <div class="planner-sidebar-section">
             <div class="section-title">Task cloud</div>
@@ -163,10 +166,11 @@ export class PlannerDayViewRenderer {
    * Update the planner view with new data
    * @param date - The date to display
    * @param allGoals - All goals in the system
+   * @param contextGoals - Optional Vision/Milestone/Focus goals to display in sidebar
    * @remarks Currently performs a full re-render for simplicity
    */
-  update(date: Date, allGoals: Goal[]): void {
-    this.renderInitial(date, allGoals);
+  update(date: Date, allGoals: Goal[], contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
+    this.renderInitial(date, allGoals, contextGoals);
   }
 
   /**
@@ -244,6 +248,67 @@ export class PlannerDayViewRenderer {
       return dueDate.toDateString() === date.toDateString();
     }
     return false;
+  }
+
+  /**
+   * Render the context section showing Vision/Milestone/Focus goals
+   * @param contextGoals - Object containing vision, milestone, and focus goals
+   * @returns HTML string for the context section
+   * @private
+   */
+  private renderContextSection(contextGoals: { vision: Goal[], milestone: Goal[], focus: Goal[] }): string {
+    const renderContextLevel = (level: 'vision' | 'milestone' | 'focus', emoji: string, label: string, goals: Goal[]) => {
+      if (goals.length === 0) return '';
+
+      const shown = goals.slice(0, 2);
+      const remaining = Math.max(0, goals.length - shown.length);
+
+      return `
+        <div class="context-level">
+          <div class="context-level-header">
+            <span class="context-emoji">${emoji}</span>
+            <span class="context-label">${label}</span>
+          </div>
+          <div class="context-goals">
+            ${shown.map(g => `
+              <button type="button" class="context-goal" data-goal-id="${g.id}" data-level="${level}">
+                ${this.escapeHtml(g.title)}
+              </button>
+            `).join('')}
+            ${remaining > 0 ? `<span class="context-more">+${remaining}</span>` : ''}
+          </div>
+        </div>
+      `;
+    };
+
+    const visionHtml = renderContextLevel('vision', '✨', 'Vision', contextGoals.vision);
+    const milestoneHtml = renderContextLevel('milestone', '🎯', 'Milestone', contextGoals.milestone);
+    const focusHtml = renderContextLevel('focus', '🔥', 'Focus', contextGoals.focus);
+
+    if (!visionHtml && !milestoneHtml && !focusHtml) return '';
+
+    return `
+      <div class="planner-sidebar-section planner-context-section">
+        <div class="section-title">Context</div>
+        <div class="context-levels">
+          ${visionHtml}
+          ${milestoneHtml}
+          ${focusHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Escape HTML special characters
+   * @param text - Text to escape
+   * @returns Escaped text
+   * @private
+   */
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   /**

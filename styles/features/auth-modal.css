@@ -16,6 +16,10 @@
     -webkit-overflow-scrolling: touch;
 }
 
+#auth-modal[hidden] {
+    display: none !important;
+}
+
 #auth-modal>div {
     background: var(--bg-surface, var(--glass-bg)) !important;
     padding: var(--space-6) !important;
@@ -64,4 +68,3 @@
         font-size: var(--text-sm) !important;
     }
 }
-

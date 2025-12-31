@@ -1,10 +1,81 @@
 /* ===================================
    Accent Color Themes
+
+   Each theme now has separate colors for day and night modes:
+   - Day mode: Higher contrast for readability on light backgrounds
+   - Night mode: Softer colors optimized for dark backgrounds
+
+   Day colors defined in body.theme-{name}
+   Night colors override in :root.dark-mode body.theme-{name}
    =================================== */
 
-/* Teal (Default) - already set in :root */
+/* ============= DAY MODE COLORS (High Contrast) ============= */
+
+/* Teal - Day Mode */
 body.theme-teal {
-    --accent: var(--sky);
+    --accent: #1E6FB8;  /* Deep ocean blue for day readability */
+    --accent-hover: #2563B8;
+    --accent-muted: rgba(30, 111, 184, 0.18);
+    --accent-subtle: rgba(30, 111, 184, 0.10);
+    --shadow-glow: 0 0 24px rgba(30, 111, 184, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(30, 111, 184, 0.16);
+}
+
+/* Coral - Day Mode */
+body.theme-coral {
+    --accent: #B8472F;  /* Deep terracotta for day readability */
+    --accent-hover: #C85539;
+    --accent-muted: rgba(184, 71, 47, 0.16);
+    --accent-subtle: rgba(184, 71, 47, 0.08);
+    --shadow-glow: 0 0 24px rgba(184, 71, 47, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(184, 71, 47, 0.14);
+}
+
+/* Sage - Day Mode */
+body.theme-sage {
+    --accent: #3B7057;  /* Deep forest green for day readability */
+    --accent-hover: #488062;
+    --accent-muted: rgba(59, 112, 87, 0.18);
+    --accent-subtle: rgba(59, 112, 87, 0.09);
+    --shadow-glow: 0 0 24px rgba(59, 112, 87, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(59, 112, 87, 0.16);
+}
+
+/* Amber - Day Mode */
+body.theme-amber {
+    --accent: #D96320;  /* Deep amber for day readability */
+    --accent-hover: #E87430;
+    --accent-muted: rgba(217, 99, 32, 0.18);
+    --accent-subtle: rgba(217, 99, 32, 0.10);
+    --shadow-glow: 0 0 28px rgba(217, 99, 32, 0.28);
+    --shadow-glow-sm: 0 0 14px rgba(217, 99, 32, 0.18);
+}
+
+/* Clay - Day Mode */
+body.theme-clay {
+    --accent: #9B4C2E;  /* Deep clay for day readability */
+    --accent-hover: #B35838;
+    --accent-muted: rgba(155, 76, 46, 0.16);
+    --accent-subtle: rgba(155, 76, 46, 0.08);
+    --shadow-glow: 0 0 24px rgba(155, 76, 46, 0.20);
+    --shadow-glow-sm: 0 0 12px rgba(155, 76, 46, 0.14);
+}
+
+/* Violet - Day Mode */
+body.theme-violet {
+    --accent: #6D28D9;  /* Deep purple for day readability */
+    --accent-hover: #7C3AED;
+    --accent-muted: rgba(109, 40, 217, 0.18);
+    --accent-subtle: rgba(109, 40, 217, 0.10);
+    --shadow-glow: 0 0 24px rgba(109, 40, 217, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(109, 40, 217, 0.16);
+}
+
+/* ============= NIGHT MODE COLORS (Beautiful Soft) ============= */
+
+/* Teal - Night Mode */
+:root.dark-mode body.theme-teal {
+    --accent: #8CB7D9;  /* Soft sky blue for night beauty */
     --accent-hover: #9CC6E6;
     --accent-muted: rgba(140, 183, 217, 0.18);
     --accent-subtle: rgba(140, 183, 217, 0.10);
@@ -12,9 +83,9 @@ body.theme-teal {
     --shadow-glow-sm: 0 0 12px rgba(140, 183, 217, 0.16);
 }
 
-/* Coral / Sunset */
-body.theme-coral {
-    --accent: var(--terracotta);
+/* Coral - Night Mode */
+:root.dark-mode body.theme-coral {
+    --accent: #C06C52;  /* Warm terracotta */
     --accent-hover: #D97B59;
     --accent-muted: rgba(200, 107, 74, 0.16);
     --accent-subtle: rgba(200, 107, 74, 0.08);
@@ -22,9 +93,9 @@ body.theme-coral {
     --shadow-glow-sm: 0 0 12px rgba(200, 107, 74, 0.14);
 }
 
-/* Sage / Forest */
-body.theme-sage {
-    --accent: #6F9B86;
+/* Sage - Night Mode */
+:root.dark-mode body.theme-sage {
+    --accent: #6F9B86;  /* Soft forest green */
     --accent-hover: #7CAC96;
     --accent-muted: rgba(111, 155, 134, 0.18);
     --accent-subtle: rgba(111, 155, 134, 0.09);
@@ -32,24 +103,19 @@ body.theme-sage {
     --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.16);
 }
 
-/* Amber / Golden Hour */
-body.theme-amber {
-    --accent: var(--sunset);
+/* Amber - Night Mode */
+:root.dark-mode body.theme-amber {
+    --accent: #E77D3E;  /* Vibrant sunset orange */
     --accent-hover: #F5954E;
-    /* brighter orange on hover */
     --accent-muted: rgba(231, 125, 62, 0.18);
-    /* more vibrant orange muted */
     --accent-subtle: rgba(231, 125, 62, 0.10);
-    /* subtle warm glow */
     --shadow-glow: 0 0 28px rgba(231, 125, 62, 0.28);
-    /* stronger warm glow */
     --shadow-glow-sm: 0 0 14px rgba(231, 125, 62, 0.18);
-    /* soft warm glow */
 }
 
-/* Clay / Terracotta */
-body.theme-clay {
-    --accent: var(--earth);
+/* Clay - Night Mode */
+:root.dark-mode body.theme-clay {
+    --accent: #B46A4A;  /* Warm earth */
     --accent-hover: #C57A58;
     --accent-muted: rgba(180, 106, 74, 0.16);
     --accent-subtle: rgba(180, 106, 74, 0.08);
@@ -57,9 +123,9 @@ body.theme-clay {
     --shadow-glow-sm: 0 0 12px rgba(180, 106, 74, 0.14);
 }
 
-/* Violet */
-body.theme-violet {
-    --accent: #8B5CF6;
+/* Violet - Night Mode */
+:root.dark-mode body.theme-violet {
+    --accent: #8B5CF6;  /* Soft purple */
     --accent-hover: #9D6DF7;
     --accent-muted: rgba(139, 92, 246, 0.18);
     --accent-subtle: rgba(139, 92, 246, 0.10);

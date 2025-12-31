@@ -279,13 +279,13 @@
     animation: overlay-bloom 0.3s ease-out;
 }
 
-:root:not(.night-garden) .modal-overlay {
+:root:not(.dark-mode) .modal-overlay {
     background: linear-gradient(135deg,
             rgba(140, 183, 217, 0.45) 0%,
             rgba(232, 244, 248, 0.88) 100%);
 }
 
-.night-garden .modal-overlay {
+.dark-mode .modal-overlay {
     background: linear-gradient(135deg,
             rgba(10, 26, 15, 0.6) 0%,
             rgba(26, 54, 31, 0.8) 100%);

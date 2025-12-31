@@ -14,7 +14,7 @@
     -webkit-backdrop-filter: blur(10px);
 }
 
-.night-garden .quick-add-overlay {
+.dark-mode .quick-add-overlay {
     background: rgba(7, 17, 14, 0.62);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -29,7 +29,7 @@
     box-shadow: var(--shadow-lg);
 }
 
-.night-garden .quick-add-container {
+.dark-mode .quick-add-container {
     background: rgba(10, 22, 18, 0.72);
     border: 1px solid rgba(140, 183, 217, 0.14);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
@@ -65,7 +65,7 @@
     box-shadow: inset 0 0 0 1px rgba(180, 106, 74, 0.08);
 }
 
-.night-garden .quick-add-overlay input#quickAddInput {
+.dark-mode .quick-add-overlay input#quickAddInput {
     background: rgba(7, 17, 14, 0.45);
     border: 1px solid rgba(140, 183, 217, 0.16);
     box-shadow: inset 0 0 0 1px rgba(140, 183, 217, 0.08);

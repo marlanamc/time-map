@@ -88,6 +88,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   await State.init();
+
+  // Set up auth state change listeners for session expiration and multi-tab logout
+  const { supabase } = await import('./supabaseClient');
+  supabase.auth.onAuthStateChange(async (event: string, _session: unknown) => {
+    console.log('Auth state changed:', event);
+
+    if (event === 'SIGNED_OUT') {
+      // Clean up resources on logout
+      await State.cleanup();
+      location.reload();
+    } else if (event === 'SIGNED_IN' && !State.data) {
+      // Handle sign in (e.g., from another tab or after session refresh)
+      await State.init();
+      UI.init();
+    } else if (event === 'TOKEN_REFRESHED') {
+      console.log('Session token refreshed');
+    }
+  });
+
   UI.init();
 
   if ("serviceWorker" in navigator) {

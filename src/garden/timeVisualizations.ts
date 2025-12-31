@@ -3,7 +3,38 @@
  * Helps with ADHD time blindness by showing time in concrete, spatial ways
  */
 
+interface TimeRangePreferences {
+  startHour: number;
+  endHour: number;
+}
+
 export class TimeVisualizations {
+  /**
+   * Get time range preferences from localStorage
+   */
+  private static getTimeRangePreferences(): TimeRangePreferences {
+    try {
+      const saved = localStorage.getItem('time-range-preferences');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.warn('Failed to load time range preferences', e);
+    }
+    return { startHour: 8, endHour: 22 }; // Default: 8 AM to 10 PM
+  }
+
+  /**
+   * Save time range preferences to localStorage
+   */
+  public static saveTimeRangePreferences(startHour: number, endHour: number): void {
+    try {
+      localStorage.setItem('time-range-preferences', JSON.stringify({ startHour, endHour }));
+    } catch (e) {
+      console.warn('Failed to save time range preferences', e);
+    }
+  }
+
   /**
    * Create hour blocks visualization for time remaining today
    * Each hour is represented as a plant/flower
@@ -16,8 +47,9 @@ export class TimeVisualizations {
 
     const now = new Date();
     const currentHour = now.getHours();
-    const endOfDay = 22; // 10 PM
-    const startOfDay = 8; // 8 AM
+    const prefs = this.getTimeRangePreferences();
+    const endOfDay = prefs.endHour;
+    const startOfDay = prefs.startHour;
 
     // If before start of day, show full day
     const displayStart = currentHour < startOfDay ? startOfDay : currentHour;
@@ -59,6 +91,7 @@ export class TimeVisualizations {
   public static updateHourBlocks(container: HTMLElement): void {
     const now = new Date();
     const currentHour = now.getHours();
+    const prefs = this.getTimeRangePreferences();
 
     const blocks = container.querySelectorAll<HTMLElement>('.hour-block');
     blocks.forEach(block => {
@@ -84,9 +117,8 @@ export class TimeVisualizations {
     });
 
     // Update aria-valuenow
-    const endOfDay = 22;
-    const displayStart = currentHour < 8 ? 8 : currentHour;
-    const hoursRemaining = Math.max(0, endOfDay - displayStart);
+    const displayStart = currentHour < prefs.startHour ? prefs.startHour : currentHour;
+    const hoursRemaining = Math.max(0, prefs.endHour - displayStart);
     container.setAttribute('aria-valuenow', hoursRemaining.toString());
   }
 
@@ -111,9 +143,10 @@ export class TimeVisualizations {
     const hour = now.getHours();
     const minute = now.getMinutes();
 
-    // Day view typically shows 8 AM to 10 PM (14 hours)
-    const dayViewStart = 8;
-    const dayViewEnd = 22;
+    // Use configured time range
+    const prefs = this.getTimeRangePreferences();
+    const dayViewStart = prefs.startHour;
+    const dayViewEnd = prefs.endHour;
 
     // If outside day view hours, hide beam
     if (hour < dayViewStart || hour >= dayViewEnd) {

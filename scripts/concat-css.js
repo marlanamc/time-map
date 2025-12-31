@@ -26,6 +26,8 @@ const CSS_FILES = [
   'styles/views/main-content.css',
   'styles/views/canvas.css',
   'styles/views/month.css',
+  'styles/views/month-context.css',
+  'styles/views/year.css',
   'styles/views/week.css',
   'styles/views/day.css',
 

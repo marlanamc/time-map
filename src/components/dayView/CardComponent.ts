@@ -5,7 +5,7 @@ import type { GoalVariant, RenderCardOptions } from "./types";
 // For now, we'll pass it as a dependency
 interface CardConfig {
   CATEGORIES: Record<string, { emoji: string; label: string; color: string }>;
-  LEVELS: Record<string, { emoji: string; label: string }>;
+  LEVELS: Record<string, { emoji: string; label: string; color: string }>;
   PRIORITIES: Record<string, { symbol: string }>;
 }
 
@@ -34,18 +34,31 @@ export class CardComponent {
     const levelInfo = this.config.LEVELS[goal.level] || this.config.LEVELS.intention;
     const variant = opts.variant ?? "seed";
 
+    // Determine parent level color
+    const parentLevel = goal.parentLevel ?? goal.level;
+    const parentColor = this.config.LEVELS[parentLevel]?.color || this.config.LEVELS.intention.color;
+
     const variantClass = this.getVariantClass(variant);
-    const styleAttr = opts.style ? ` style="${opts.style}"` : "";
+    const parentLevelClass = ` parent-level-${parentLevel}`;
+    const styleAttr = opts.style
+      ? ` style="${opts.style}; --parent-color: ${parentColor};"`
+      : ` style="--parent-color: ${parentColor};"`;
     const classAttr = opts.className ? ` ${opts.className}` : "";
     const dragAttrs = this.getDragAttributes(variant, isCompleted);
     const resizeHandles = this.getResizeHandles(variant, isCompleted);
 
     return `
-      <div class="day-goal-card ${variantClass}${classAttr} ${isCompleted ? "completed" : ""}"
+      <div class="day-goal-card ${variantClass}${classAttr}${parentLevelClass} ${isCompleted ? "completed" : ""}"
            data-goal-id="${goal.id}"
+           data-parent-level="${parentLevel}"
            role="button"
            tabindex="0"${styleAttr}${dragAttrs}>
         ${resizeHandles}
+        ${goal.parentLevel && goal.parentLevel !== goal.level ? `
+          <div class="parent-level-badge" title="Part of ${this.config.LEVELS[goal.parentLevel].label}">
+            <span class="parent-level-icon">${this.config.LEVELS[goal.parentLevel].emoji}</span>
+          </div>
+        ` : ''}
         <div class="day-goal-checkbox ${isCompleted ? "checked" : ""}"></div>
         <div class="day-goal-content">
           <div class="day-goal-level">
@@ -114,11 +127,11 @@ export class CardComponent {
         if (meta) {
           const timeEl = document.createElement("span");
           timeEl.className = "day-goal-time";
-          timeEl.innerHTML = `🕒 ${goal.startTime}${goal.endTime ? ` - ${goal.endTime}` : ""}`;
+          timeEl.textContent = `🕒 ${goal.startTime}${goal.endTime ? ` - ${goal.endTime}` : ""}`;
           meta.prepend(timeEl);
         }
       } else {
-        timeMeta.innerHTML = `🕒 ${goal.startTime}${goal.endTime ? ` - ${goal.endTime}` : ""}`;
+        timeMeta.textContent = `🕒 ${goal.startTime}${goal.endTime ? ` - ${goal.endTime}` : ""}`;
       }
     } else if (timeMeta) {
       timeMeta.remove();
@@ -128,14 +141,14 @@ export class CardComponent {
     const catMeta = element.querySelector(".day-goal-cat");
     if (cat && catMeta) {
       (catMeta as HTMLElement).style.color = cat.color;
-      catMeta.innerHTML = `${cat.emoji} ${cat.label}`;
+      catMeta.textContent = `${cat.emoji} ${cat.label}`;
     }
 
     // Update priority
     const priorityMeta = element.querySelector(".day-goal-priority");
     if (goal.priority !== "medium" && priorityMeta) {
       const symbol = this.config.PRIORITIES[goal.priority]?.symbol || "";
-      priorityMeta.innerHTML = `${symbol} ${goal.priority}`;
+      priorityMeta.textContent = `${symbol} ${goal.priority}`;
       priorityMeta.className = `day-goal-priority priority-${goal.priority}`;
     } else if (goal.priority === "medium" && priorityMeta) {
       priorityMeta.remove();

@@ -122,11 +122,14 @@ export class GardenEngine {
     // Initialize time visualizations
     this.initializeTimeVisualizations();
 
+    // Initialize time range controls
+    this.initializeTimeRangeControls();
+
     // Initialize interactive elements
     this.initializeInteractiveElements();
 
-    // Initialize sound controls
-    this.initializeSoundControls();
+    // Initialize sound controls (disabled - feature removed)
+    // this.initializeSoundControls();
 
     // Start performance monitoring
     this.initializePerformanceMonitoring();
@@ -552,53 +555,46 @@ export class GardenEngine {
   }
 
   /**
-   * Initialize sound controls UI
+   * Initialize time range controls UI
    */
-  private initializeSoundControls(): void {
-    const soundToggle = document.getElementById('soundToggle');
-    const soundVolume = document.getElementById('soundVolume') as HTMLInputElement;
-    const soundIcon = document.getElementById('soundIcon');
-    const soundVolumeContainer = document.getElementById('soundVolumeContainer');
-    const volumeLabel = document.getElementById('volumeLabel');
+  private initializeTimeRangeControls(): void {
+    const startSelect = document.getElementById('timeRangeStart') as HTMLSelectElement;
+    const endSelect = document.getElementById('timeRangeEnd') as HTMLSelectElement;
 
-    if (!soundToggle || !soundVolume) return;
+    if (!startSelect || !endSelect) return;
 
-    // Set initial state
-    const prefs = this.soundManager.getPreferences();
-    if (prefs.enabled) {
-      soundIcon && (soundIcon.textContent = '🔊');
-      soundVolumeContainer && (soundVolumeContainer.style.display = 'flex');
-    }
+    // Load saved preferences
+    const prefs = TimeVisualizations['getTimeRangePreferences']();
+    startSelect.value = prefs.startHour.toString();
+    endSelect.value = prefs.endHour.toString();
 
-    soundVolume.value = (prefs.volume * 100).toString();
-    volumeLabel && (volumeLabel.textContent = `${Math.round(prefs.volume * 100)}%`);
+    // Handle changes
+    const handleChange = () => {
+      const startHour = parseInt(startSelect.value);
+      const endHour = parseInt(endSelect.value);
 
-    // Toggle sound on/off
-    soundToggle.addEventListener('click', () => {
-      const isEnabled = this.soundManager.getPreferences().enabled;
-      this.soundManager.setEnabled(!isEnabled);
-
-      if (!isEnabled) {
-        soundIcon && (soundIcon.textContent = '🔊');
-        soundVolumeContainer && (soundVolumeContainer.style.display = 'flex');
-
-        // Start playing ambience
-        this.soundManager.playAmbienceForTime(
-          this.state.time.timeOfDay,
-          this.state.season.season
-        );
-      } else {
-        soundIcon && (soundIcon.textContent = '🔇');
-        soundVolumeContainer && (soundVolumeContainer.style.display = 'none');
+      // Validate that end is after start
+      if (endHour <= startHour) {
+        alert('End time must be after start time');
+        startSelect.value = prefs.startHour.toString();
+        endSelect.value = prefs.endHour.toString();
+        return;
       }
-    });
 
-    // Volume control
-    soundVolume.addEventListener('input', () => {
-      const volume = parseInt(soundVolume.value) / 100;
-      this.soundManager.setVolume(volume);
-      volumeLabel && (volumeLabel.textContent = `${soundVolume.value}%`);
-    });
+      // Save preferences
+      TimeVisualizations.saveTimeRangePreferences(startHour, endHour);
+
+      // Re-render hour blocks
+      const hourBlocksContainer = document.getElementById('hourBlocks');
+      if (hourBlocksContainer) {
+        hourBlocksContainer.innerHTML = '';
+        const hourBlocks = TimeVisualizations.createHourBlocks();
+        hourBlocksContainer.appendChild(hourBlocks);
+      }
+    };
+
+    startSelect.addEventListener('change', handleChange);
+    endSelect.addEventListener('change', handleChange);
   }
 
   /**

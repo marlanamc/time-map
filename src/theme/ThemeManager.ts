@@ -42,8 +42,10 @@ export const ThemeManager = {
     const root = document.documentElement;
 
     // Force toggle every time to ensure state consistency
-    document.body.classList.toggle("night-garden", isNight);
-    root.classList.toggle("night-garden", isNight);
+    document.body.classList.toggle("light-mode", !isNight);
+    document.body.classList.toggle("dark-mode", isNight);
+    root.classList.toggle("light-mode", !isNight);
+    root.classList.toggle("dark-mode", isNight);
     root.style.colorScheme = isNight ? "dark" : "light";
 
     // Match the app's primary surfaces (helps mobile browser chrome).

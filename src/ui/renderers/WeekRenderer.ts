@@ -14,14 +14,48 @@ export const WeekRenderer = {
     container.className = "week-view-container";
 
     const weekNum = State.viewingWeek ?? 1;
-    const weekStart = State.getWeekStart(State.viewingYear, weekNum);
+    // Use ISO week year, not calendar year (important for late Dec/early Jan)
+    const viewingDate = State.viewingDate || new Date();
+    const weekYear = State.getWeekYear(viewingDate);
+    const weekStart = State.getWeekStart(weekYear, weekNum);
+    const weekEnd = new Date(weekStart.getTime() + 6 * 86400000);
     const today = new Date();
     const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    const focusGoals = Goals.getForRange(weekStart, weekEnd)
+      .filter((g) => g.level === "focus" && g.status !== "done")
+      .slice(0, 2);
+
+    // Format date range with years if they differ
+    const startYear = weekStart.getFullYear();
+    const endYear = weekEnd.getFullYear();
+    const startFormatted = weekStart.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: startYear !== endYear ? "numeric" : undefined
+    });
+    const endFormatted = weekEnd.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric"
+    });
 
     let html = `<div class="week-view">
         <div class="week-view-header">
           <h2 class="week-view-title">Week ${weekNum}</h2>
-          <p class="week-view-range">${weekStart.toLocaleDateString("en-US", { month: "long", day: "numeric" })} - ${new Date(weekStart.getTime() + 6 * 86400000).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+          <p class="week-view-range">${startFormatted} - ${endFormatted}</p>
+          ${focusGoals.length > 0 ? `
+            <div class="week-focus-strip" aria-label="Week focus">
+              <span class="week-focus-label">🔎 Focus</span>
+              <div class="week-focus-chips">
+                ${focusGoals.map((g) => `
+                  <button type="button" class="week-focus-chip" data-goal-id="${g.id}" title="${escapeHtmlFn(g.title)}">
+                    ${escapeHtmlFn(g.title)}
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+          ` : ""}
         </div>
         <div class="week-grid">
       `;
@@ -80,6 +114,18 @@ export const WeekRenderer = {
         const goalId = (card as HTMLElement).dataset.goalId;
         if (goalId) {
           // Trigger goal detail (callback needed)
+          const event = new CustomEvent('goal-click', { detail: { goalId } });
+          container.dispatchEvent(event);
+        }
+      });
+    });
+
+    // Click handlers for focus chips
+    container.querySelectorAll('.week-focus-chip[data-goal-id]').forEach((chip: Element) => {
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const goalId = (chip as HTMLElement).dataset.goalId;
+        if (goalId) {
           const event = new CustomEvent('goal-click', { detail: { goalId } });
           container.dispatchEvent(event);
         }

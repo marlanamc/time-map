@@ -1,6 +1,10 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 
+function hasFlag(flag) {
+  return process.argv.includes(flag);
+}
+
 function parseDotenv(contents) {
   const env = {};
   const lines = contents.split(/\r?\n/);
@@ -32,8 +36,11 @@ async function main() {
   const root = process.cwd();
   const fileEnv = await readEnvFile(path.join(root, ".env.local"));
 
-  const supabaseUrl = process.env.SUPABASE_URL || fileEnv.SUPABASE_URL || "";
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || fileEnv.SUPABASE_ANON_KEY || "";
+  const forceEmpty = hasFlag("--force-empty") || hasFlag("--empty");
+  const supabaseUrl = forceEmpty ? "" : process.env.SUPABASE_URL || fileEnv.SUPABASE_URL || "";
+  const supabaseAnonKey = forceEmpty
+    ? ""
+    : process.env.SUPABASE_ANON_KEY || fileEnv.SUPABASE_ANON_KEY || "";
 
   const payload = {
     SUPABASE_URL: supabaseUrl,
@@ -51,4 +58,3 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
-

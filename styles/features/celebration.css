@@ -84,11 +84,11 @@ body.reduce-emojis .celebration-icon {
     margin-bottom: var(--space-6);
 }
 
-.night-garden .celebration-overlay {
+.dark-mode .celebration-overlay {
     background: rgba(0, 0, 0, 0.92);
 }
 
-.night-garden .celebration-title {
+.dark-mode .celebration-title {
     background: linear-gradient(135deg,
             rgba(140, 183, 217, 1) 0%,
             rgba(90, 155, 141, 1) 50%,
@@ -98,3 +98,11 @@ body.reduce-emojis .celebration-icon {
     background-clip: text;
 }
 
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}

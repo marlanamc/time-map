@@ -108,7 +108,9 @@ The app will open in your browser at `http://127.0.0.1:8080`
 - `npm run minify-js` - Minify JavaScript
 - `npm run minify-css` - Minify CSS
 - `npm run optimize-html` - Optimize HTML
-- `npm test` - Run tests
+- `npm test` / `npm run test:unit` - Run unit tests (Jest)
+- `npm run test:e2e` - Run end-to-end tests (Playwright)
+- `npm run test:all` - Run unit + end-to-end tests
 - `npm run lint` - Run ESLint
 - `npm run backup` - Backup data
 - `npm run deploy` - Build and backup
@@ -289,6 +291,7 @@ Designed specifically for neurodivergent individuals, especially those with ADHD
 ---
 
 Made with ❤️ for the neurodivergent community
+
 
 
 

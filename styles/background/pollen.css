@@ -19,7 +19,7 @@
     mix-blend-mode: overlay;
 }
 
-.night-garden .bg-canvas::before {
+.dark-mode .bg-canvas::before {
     display: none;
 }
 
@@ -42,7 +42,7 @@
     animation: grain-shift 12s steps(4, end) infinite;
 }
 
-.night-garden .bg-canvas::after {
+.dark-mode .bg-canvas::after {
     opacity: 0.38;
     background-image:
         radial-gradient(circle at 10% 18%, rgba(255, 255, 255, 0.72) 0 1px, transparent 3px),

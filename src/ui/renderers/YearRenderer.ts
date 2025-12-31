@@ -15,12 +15,42 @@ export const YearRenderer = {
     const year = State.viewingYear;
     const now = new Date();
 
-    let html = '<div class="year-view"><div class="year-grid">';
+    // Get Vision goals for this year
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year, 11, 31);
+    const visionGoals = Goals.getForRange(yearStart, yearEnd)
+      .filter(g => g.level === 'vision' && g.status !== 'done');
+
+    let html = '<div class="year-view">';
+    html += '<div class="year-view-layout">';
+
+    // Vision section stays in the upper-left (compact column)
+    if (visionGoals.length > 0) {
+      html += `
+        <aside class="year-vision-section year-vision-section--corner" aria-label="Vision goals">
+          <div class="year-vision-header">
+            <span class="vision-icon" aria-hidden="true">✨</span>
+            <h3>Vision</h3>
+          </div>
+          <div class="year-vision-goals">
+            ${visionGoals.slice(0, 3).map(g => `
+              <button type="button" class="vision-card" data-goal-id="${g.id}">
+                <div class="vision-card-title">${escapeHtmlFn(g.title)}</div>
+                ${g.description ? `<div class="vision-card-desc">${escapeHtmlFn(g.description)}</div>` : ''}
+              </button>
+            `).join('')}
+          </div>
+        </aside>
+      `;
+    }
+
+    html += '<div class="year-grid">';
 
     for (let month = 0; month < 12; month++) {
       const monthGoals = Goals.getByMonth(month, year);
+      const milestones = monthGoals.filter(g => g.level === 'milestone' && g.status !== 'done');
       const isCurrentMonth = month === now.getMonth() && year === now.getFullYear();
-      // const breakdown = TimeBreakdown.calculate(month, year); // Unused for now
+      const primaryMilestone = milestones[0];
 
       html += `
         <div class="year-month ${isCurrentMonth ? 'is-current' : ''}" data-month="${month}" data-year="${year}">
@@ -28,6 +58,16 @@ export const YearRenderer = {
             <h3 class="year-month-name">${CONFIG.MONTHS[month]}</h3>
             <span class="year-month-count">${monthGoals.length}</span>
           </div>
+
+          ${primaryMilestone ? `
+            <button
+              type="button"
+              class="year-month-milestone"
+              data-goal-id="${primaryMilestone.id}"
+              title="${escapeHtmlFn(primaryMilestone.title)}"
+            >🎯 ${escapeHtmlFn(primaryMilestone.title)}${milestones.length > 1 ? ` <span class="year-month-milestone-more">+${milestones.length - 1}</span>` : ''}</button>
+          ` : ''}
+
           <div class="year-month-goals">
 `;
       if (monthGoals.length > 0) {
@@ -46,17 +86,32 @@ export const YearRenderer = {
       `;
     }
 
-    html += '</div></div>';
+    html += '</div></div></div>';
     container.innerHTML = html;
 
-    // Add click handlers
+    // Add click handlers for month cards
     container.querySelectorAll('.year-month').forEach((monthEl: Element) => {
-      monthEl.addEventListener('click', () => {
+      monthEl.addEventListener('click', (e) => {
+        // Don't navigate if clicking on milestone badge
+        if ((e.target as HTMLElement).closest('.milestone-badge')) return;
+
         const month = parseInt((monthEl as HTMLElement).dataset.month || '0');
         const year = parseInt((monthEl as HTMLElement).dataset.year || new Date().getFullYear().toString());
         State.setView('month');
         State.viewingMonth = month;
         State.viewingYear = year;
+      });
+    });
+
+    // Add click handlers for vision cards and milestone badges
+    container.querySelectorAll('[data-goal-id]').forEach((el: Element) => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const goalId = (el as HTMLElement).dataset.goalId;
+        if (goalId) {
+          const event = new CustomEvent('goal-click', { detail: { goalId } });
+          container.dispatchEvent(event);
+        }
       });
     });
   }

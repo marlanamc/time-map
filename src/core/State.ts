@@ -8,11 +8,12 @@ import { AuthComponent } from '../components/Auth';
 import { batchSaveService } from '../services/BatchSaveService';
 import { cacheService } from '../services/CacheService';
 import { throttledPreferencesSync } from '../utils/syncHelpers';
-import { UI } from '../ui/UIManager';
+import { eventBus } from './EventBus';
 
 export const State: AppState & {
   init: () => void;
   getWeekNumber: (date: Date) => number;
+  getWeekYear: (date: Date) => number;
   getWeekStart: (year: number, weekNum: number) => Date;
   setView: (view: ViewType) => void;
   goToDate: (date: Date | string) => void;
@@ -22,6 +23,7 @@ export const State: AppState & {
   ensureDataShape: () => boolean;
   load: () => void;
   save: () => void;
+  cleanup: () => Promise<void>;
 } = {
   data: null,
   currentView: VIEWS.YEAR as ViewType,
@@ -90,20 +92,36 @@ export const State: AppState & {
     return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
   },
 
-  // Get the start date of a week
+  // Get ISO week year (might differ from calendar year for dates in late Dec/early Jan)
+  getWeekYear(date: Date): number {
+    const d = new Date(
+      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+    );
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum); // Thursday of the week
+    return d.getUTCFullYear(); // The year containing that Thursday
+  },
+
+  // Get the start date of a week (ISO week date system)
   getWeekStart(year: number, weekNum: number): Date {
-    const jan1 = new Date(year, 0, 1);
-    const days = (weekNum - 1) * 7;
-    const weekStart = new Date(jan1);
-    weekStart.setDate(jan1.getDate() + days - jan1.getDay() + 1);
-    return weekStart;
+    // ISO week 1 is the week containing the first Thursday of the year
+    const jan4 = new Date(year, 0, 4); // Jan 4 is always in week 1
+    const jan4Day = jan4.getDay() || 7; // Sunday = 7 in ISO
+    const week1Start = new Date(jan4);
+    week1Start.setDate(jan4.getDate() - (jan4Day - 1)); // Monday of week 1
+
+    // Add weeks to get to the target week
+    const targetWeekStart = new Date(week1Start);
+    targetWeekStart.setDate(week1Start.getDate() + (weekNum - 1) * 7);
+
+    return targetWeekStart;
   },
 
   // Navigate views
   setView(view: ViewType) {
     this.currentView = view;
-    UI.scheduleRender({ transition: true });
-    UI.syncViewButtons?.();
+    eventBus.emit('view:changed', { view, transition: true });
+    eventBus.emit('view:sync-buttons');
   },
 
   // Navigate to specific date
@@ -134,7 +152,7 @@ export const State: AppState & {
         this.goToDate(d);
         break;
     }
-    UI.scheduleRender({ transition: true });
+    eventBus.emit('view:changed', { transition: true });
   },
 
   getDefaultData(): AppData {
@@ -187,6 +205,8 @@ export const State: AppState & {
           taskStartReminders: true, // "Ready to start?" prompts
           allowPartialProgress: true, // Can mark tasks as 10%, 20%, etc.
           reduceEmojis: false, // Minimize emoji usage for less visual noise
+          dayViewStyle: "planner" as const, // timeline, simple, planner
+          contextBarCollapsed: false, // Level context bar expanded by default
         },
       },
       analytics: {
@@ -356,5 +376,25 @@ export const State: AppState & {
     } catch (e) {
       console.error("Failed to save data:", e);
     }
+  },
+
+  /**
+   * Cleanup resources on logout or app shutdown
+   * Should be called before signing out to properly cleanup services
+   */
+  async cleanup(): Promise<void> {
+    console.log('Cleaning up State resources...');
+
+    // Stop batch save service
+    batchSaveService.stop();
+
+    // Destroy sync queue and cleanup its resources
+    const { syncQueue } = await import('../services/SyncQueue');
+    syncQueue.destroy();
+
+    // Clear cache
+    cacheService.clear();
+
+    console.log('✓ State resources cleaned up');
   },
 };

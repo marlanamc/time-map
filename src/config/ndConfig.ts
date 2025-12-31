@@ -2,14 +2,14 @@
 // Neurodivergent Accessibility Config
 // ===================================
 export const ND_CONFIG = {
-  // Accent color themes
+  // Accent color themes - Using day mode colors for picker preview
   ACCENT_THEMES: {
-    teal: { label: "Daylight Blue", emoji: "☀️", color: "#4A90E2" },
-    coral: { label: "Clay Red", emoji: "🏺", color: "#C06C52" },
-    sage: { label: "Garden Green", emoji: "🌿", color: "#5A9B8D" },
-    amber: { label: "Sunlight", emoji: "☀️", color: "#F0B429" },
-    clay: { label: "Warm Earth", emoji: "🧱", color: "#C06C52" },
-    violet: { label: "Violet", emoji: "💜", color: "#8B5CF6" },
+    teal: { label: "Daylight Blue", emoji: "☀️", color: "#1E6FB8" },
+    coral: { label: "Clay Red", emoji: "🏺", color: "#B8472F" },
+    sage: { label: "Garden Green", emoji: "🌿", color: "#3B7057" },
+    amber: { label: "Sunlight", emoji: "☀️", color: "#D96320" },
+    clay: { label: "Warm Earth", emoji: "🧱", color: "#9B4C2E" },
+    violet: { label: "Violet", emoji: "💜", color: "#6D28D9" },
   },
 
   // Body doubling / coworking timer options

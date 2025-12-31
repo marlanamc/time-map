@@ -81,8 +81,8 @@
     }
 }
 
-/* Night Garden (dark mode) - Moonlight Theme */
-:root.night-garden {
+/* Night Garden (dark mode) - Moonlight Theme - ONLY during nighttime (8 PM - 5 AM) */
+:root.dark-mode.time-night {
     --bg-base: #0A1A2E;
     /* dark moonlight blue */
     --bg-elevated: #16213E;
@@ -189,7 +189,7 @@ body.hide-achievements .achievements-panel {
         --glass-border: var(--text-secondary);
     }
 
-    :root.night-garden {
+    :root.dark-mode.time-night {
         --text-tertiary: var(--text-primary);
         --text-ghost: var(--text-secondary);
     }

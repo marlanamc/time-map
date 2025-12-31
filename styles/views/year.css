@@ -1,0 +1,162 @@
+/* ===================================
+   YEAR VIEW - VISION & MILESTONE INTEGRATION
+   =================================== */
+
+.year-view {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Layout: keep Vision in upper-left without using vertical space */
+.year-view-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.year-vision-section--corner {
+  position: sticky;
+  top: calc(var(--space-3) + 72px);
+  max-height: calc(100dvh - 140px);
+  overflow: auto;
+}
+
+/* Vision Section */
+.year-vision-section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.year-vision-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.vision-icon {
+  font-size: 1.5rem;
+}
+
+.year-vision-header h3 {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.year-vision-goals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.vision-card {
+  background: rgba(139, 92, 246, 0.08); /* Purple tint for vision */
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-left: 4px solid #8b5cf6; /* Vision color */
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vision-card:hover {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+}
+
+.vision-card:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+.vision-card-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.vision-card-desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Make Vision cards compact in the corner column */
+.year-vision-section--corner .vision-card {
+  padding: var(--space-2) var(--space-3);
+}
+
+.year-vision-section--corner .vision-card-desc {
+  display: none;
+}
+
+/* Month Grid Enhancements */
+.year-month-milestone {
+  width: 100%;
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-2);
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-left: 3px solid #3b82f6;
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  font-size: var(--text-sm);
+  font-weight: 650;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.2s ease;
+}
+
+.year-month-milestone:hover {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.year-month-milestone-more {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-left: 6px;
+}
+
+/* Dark mode */
+.dark-mode .vision-card {
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.dark-mode .year-month-milestone {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .year-view-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .year-vision-section--corner {
+    position: static;
+    max-height: none;
+  }
+
+  .year-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}

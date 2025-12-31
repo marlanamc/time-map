@@ -35,6 +35,12 @@ const supabaseStub = {
     async getSession() {
       return { data: { session: null }, error: missingEnvError() };
     },
+    onAuthStateChange() {
+      return {
+        data: { subscription: { unsubscribe() {} } },
+        error: missingEnvError(),
+      };
+    },
     async signInWithPassword() {
       return { data: null, error: missingEnvError() };
     },

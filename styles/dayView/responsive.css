@@ -437,7 +437,7 @@
   }
 
   /* Simplify colors */
-  :root.night-garden body {
+  :root.dark-mode body {
     background: white !important;
     color: black !important;
   }
@@ -459,7 +459,7 @@
 
   /* Ensure night garden styles are applied in dark mode */
   body:not(.day-mode) {
-    /* Styles already handled by .night-garden in other files */
+    /* Styles already handled by .dark-mode in other files */
   }
 }
 

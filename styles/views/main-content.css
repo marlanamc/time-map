@@ -91,8 +91,8 @@
     cursor: pointer;
 }
 
-.night-garden .level-context-goal,
-.night-garden .level-context-action {
+.dark-mode .level-context-goal,
+.dark-mode .level-context-action {
     background: rgba(255, 255, 255, 0.06);
 }
 
@@ -128,7 +128,144 @@
     opacity: 0.8;
 }
 
-.night-garden .control-bar {
+/* ===================================
+   Collapsible Context Bar
+   =================================== */
+
+.level-context-bar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.level-context-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    margin-bottom: var(--space-3);
+    cursor: pointer;
+    user-select: none;
+}
+
+.level-context-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.context-icon {
+    font-size: 1.2rem;
+}
+
+.context-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 700;
+}
+
+.btn-context-toggle {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.btn-context-toggle:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    transform: scale(1.05);
+}
+
+.btn-context-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.btn-context-toggle .chevron-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--text-secondary);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Collapsed state */
+.level-context-bar.collapsed {
+    max-height: 64px;
+    padding: var(--space-3) var(--space-4);
+}
+
+.level-context-bar.collapsed .level-context-header-bar {
+    margin-bottom: 0;
+}
+
+.level-context-bar.collapsed .level-context-content {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
+    margin-top: 0;
+}
+
+.level-context-bar.collapsed .chevron-icon {
+    transform: rotate(-90deg);
+}
+
+/* Expanded state */
+.level-context-bar.expanded {
+    max-height: 500px;
+}
+
+.level-context-bar.expanded .level-context-content {
+    opacity: 1;
+    max-height: 450px;
+    transition: opacity 0.3s ease, max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: stretch;
+}
+
+.level-context-bar.expanded .chevron-icon {
+    transform: rotate(0deg);
+}
+
+/* Dark mode adjustments */
+.dark-mode .btn-context-toggle {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .level-context-bar,
+    .btn-context-toggle .chevron-icon,
+    .level-context-content {
+        transition: none;
+    }
+}
+
+.dark-mode .control-bar {
     background: rgba(10, 22, 18, 0.85);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }
@@ -303,9 +440,32 @@
     gap: 2px;
 }
 
-.night-garden .view-switcher {
+.dark-mode .view-switcher {
     background: rgba(10, 22, 18, 0.68);
     border: 1px solid rgba(140, 183, 217, 0.16);
+}
+
+/* Dark mode base state (non-time-specific) - for pure dark mode */
+.dark-mode:not(.time-dawn):not(.time-morning):not(.time-afternoon):not(.time-evening):not(.time-night) .view-switcher {
+    background: rgba(10, 22, 18, 0.75);
+    border: 1px solid rgba(140, 183, 217, 0.20);
+}
+
+.dark-mode:not(.time-dawn):not(.time-morning):not(.time-afternoon):not(.time-evening):not(.time-night) .view-btn {
+    color: rgba(226, 232, 240, 0.72);
+}
+
+.dark-mode:not(.time-dawn):not(.time-morning):not(.time-afternoon):not(.time-evening):not(.time-night) .view-btn:hover {
+    background: rgba(140, 183, 217, 0.10);
+    color: rgba(226, 232, 240, 0.95);
+}
+
+.dark-mode:not(.time-dawn):not(.time-morning):not(.time-afternoon):not(.time-evening):not(.time-night) .view-btn.active {
+    background: rgba(140, 183, 217, 0.16);
+    border: 1px solid rgba(140, 183, 217, 0.22);
+    color: rgba(226, 232, 240, 1);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4),
+                0 0 16px rgba(140, 183, 217, 0.15);
 }
 
 .view-btn {
@@ -322,7 +482,8 @@
     min-width: 56px;
 }
 
-.night-garden .view-btn {
+/* Dark mode nighttime - light text on dark backgrounds */
+.dark-mode.time-night .view-btn {
     color: rgba(234, 246, 240, 0.72);
 }
 
@@ -331,7 +492,7 @@
     background: var(--bg-hover);
 }
 
-.night-garden .view-btn:hover {
+.dark-mode.time-night .view-btn:hover {
     background: rgba(140, 183, 217, 0.08);
     color: rgba(234, 246, 240, 0.92);
 }
@@ -344,12 +505,14 @@
     border: 1px solid rgba(111, 155, 134, 0.35);
 }
 
-.night-garden .view-btn.active {
+.dark-mode.time-night .view-btn.active {
     background: rgba(140, 183, 217, 0.14);
     border: 1px solid rgba(140, 183, 217, 0.18);
     color: var(--text-primary);
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
 }
+
+/* Dark mode daytime uses default dark text from variables.css */
 
 .view-btn:focus-visible {
     outline: 2px solid var(--accent);
@@ -396,12 +559,37 @@
     transform: scale(0.95);
 }
 
+.dark-mode .nav-btn {
+    background: rgba(10, 22, 18, 0.6);
+    border-color: rgba(140, 183, 217, 0.18);
+    color: rgba(226, 232, 240, 0.75);
+}
+
+.dark-mode .nav-btn:hover {
+    background: rgba(140, 183, 217, 0.12);
+    color: rgba(226, 232, 240, 0.95);
+    border-color: rgba(140, 183, 217, 0.30);
+    box-shadow: 0 4px 12px rgba(140, 183, 217, 0.10);
+}
+
 .today-btn {
     padding: 0 var(--space-3);
     background: var(--accent-subtle);
     border-color: transparent;
     color: var(--text-primary);
     font-weight: 600;
+}
+
+.dark-mode .today-btn {
+    background: rgba(140, 183, 217, 0.16);
+    border-color: rgba(140, 183, 217, 0.25);
+    color: rgba(226, 232, 240, 1);
+}
+
+.dark-mode .today-btn:hover {
+    background: rgba(140, 183, 217, 0.22);
+    border-color: rgba(140, 183, 217, 0.35);
+    box-shadow: 0 4px 12px rgba(140, 183, 217, 0.15);
 }
 
 .date-display {
@@ -427,6 +615,17 @@
 
 .date-display.is-today {
     color: var(--accent);
+}
+
+.dark-mode .date-display {
+    background: rgba(10, 22, 18, 0.75);
+    border-color: rgba(140, 183, 217, 0.20);
+    color: rgba(226, 232, 240, 0.95);
+}
+
+.dark-mode .date-display.is-today {
+    color: #8CB7D9;
+    text-shadow: 0 0 12px rgba(140, 183, 217, 0.25);
 }
 
 /* Legacy support */
@@ -612,6 +811,44 @@
 .category-filter[data-category="creative"].active {
     background: var(--cat-creative-muted);
     color: var(--cat-creative);
+}
+
+.dark-mode .filter-label {
+    color: rgba(226, 232, 240, 0.65);
+}
+
+.dark-mode .filter-trigger {
+    background: rgba(10, 22, 18, 0.6);
+    border-color: rgba(140, 183, 217, 0.18);
+    color: rgba(226, 232, 240, 0.75);
+}
+
+.dark-mode .filter-trigger:hover {
+    background: rgba(140, 183, 217, 0.12);
+    border-color: rgba(140, 183, 217, 0.25);
+    color: rgba(226, 232, 240, 0.95);
+}
+
+.dark-mode .filter-menu {
+    background: rgba(10, 22, 18, 0.95);
+    border-color: rgba(140, 183, 217, 0.25);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(140, 183, 217, 0.08);
+}
+
+.dark-mode .category-filter {
+    color: rgba(226, 232, 240, 0.70);
+}
+
+.dark-mode .category-filter:hover {
+    color: rgba(226, 232, 240, 0.90);
+    background: rgba(140, 183, 217, 0.08);
+}
+
+.dark-mode .category-filter.active {
+    color: rgba(226, 232, 240, 1);
+    background: rgba(140, 183, 217, 0.14);
+    border-color: rgba(140, 183, 217, 0.30);
 }
 
 /* Toggle */

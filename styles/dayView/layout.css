@@ -46,7 +46,7 @@
   letter-spacing: 0.02em;
 }
 
-.night-garden .day-view-subtitle {
+.dark-mode .day-view-subtitle {
   color: rgba(234, 246, 240, 0.65);
 }
 
@@ -119,11 +119,11 @@
   line-height: 1.5;
 }
 
-.night-garden .warning-text strong {
+.dark-mode .warning-text strong {
   color: rgba(255, 224, 130, 0.95);
 }
 
-.night-garden .warning-text span {
+.dark-mode .warning-text span {
   color: rgba(255, 224, 130, 0.75);
 }
 
@@ -159,7 +159,7 @@
   opacity: 0.6;
 }
 
-.night-garden .day-land {
+.dark-mode .day-land {
   background:
     linear-gradient(180deg,
       rgba(15, 23, 42, 0.75) 0%,
@@ -218,18 +218,18 @@
   font-weight: 500;
 }
 
-.night-garden .day-land-fence {
+.dark-mode .day-land-fence {
   background: linear-gradient(135deg,
       rgba(180, 106, 74, 0.15) 0%,
       rgba(111, 155, 134, 0.12) 100%);
   border-color: rgba(180, 106, 74, 0.25);
 }
 
-.night-garden .fence-value {
+.dark-mode .fence-value {
   color: rgba(234, 246, 240, 0.95);
 }
 
-.night-garden .fence-hint {
+.dark-mode .fence-hint {
   color: rgba(234, 246, 240, 0.5);
 }
 
@@ -348,18 +348,18 @@
   font-weight: 500;
 }
 
-.night-garden .day-seed-tray {
+.dark-mode .day-seed-tray {
   background: linear-gradient(135deg,
       rgba(111, 155, 134, 0.12) 0%,
       rgba(111, 155, 134, 0.06) 100%);
   border-color: rgba(111, 155, 134, 0.2);
 }
 
-.night-garden .seed-tray-title {
+.dark-mode .seed-tray-title {
   color: rgba(234, 246, 240, 0.95);
 }
 
-.night-garden .seed-tray-subtitle {
+.dark-mode .seed-tray-subtitle {
   color: rgba(234, 246, 240, 0.5);
 }
 
@@ -392,11 +392,11 @@
   font-weight: 500;
 }
 
-.night-garden .day-bed-title {
+.dark-mode .day-bed-title {
   color: rgba(234, 246, 240, 0.95);
 }
 
-.night-garden .day-bed-subtitle {
+.dark-mode .day-bed-subtitle {
   color: rgba(234, 246, 240, 0.5);
 }
 
@@ -439,7 +439,7 @@
   mix-blend-mode: overlay;
 }
 
-.night-garden .day-bed-canvas {
+.dark-mode .day-bed-canvas {
   border: 1px solid rgba(140, 183, 217, 0.12);
   background:
     radial-gradient(1200px 700px at 40% -10%,
@@ -454,7 +454,7 @@
     inset 0 -2px 12px rgba(30, 41, 79, 0.2);
 }
 
-.night-garden .day-bed-canvas::before {
+.dark-mode .day-bed-canvas::before {
   background-image:
     radial-gradient(circle at 15% 15%,
       rgba(140, 183, 217, 0.12) 0%,
@@ -516,11 +516,11 @@
   opacity: 0.3;
 }
 
-.night-garden .bed-hour-label {
+.dark-mode .bed-hour-label {
   color: rgba(234, 246, 240, 0.6);
 }
 
-.night-garden .bed-hour-line {
+.dark-mode .bed-hour-line {
   background: rgba(234, 246, 240, 0.15);
   opacity: 0.5;
 }
@@ -618,7 +618,7 @@
   backdrop-filter: blur(8px);
 }
 
-.night-garden .bed-empty {
+.dark-mode .bed-empty {
   color: rgba(234, 246, 240, 0.4);
   background: rgba(15, 23, 42, 0.4);
   border-color: rgba(140, 183, 217, 0.2);
@@ -679,13 +679,13 @@
   gap: 1rem;
 }
 
-.night-garden .day-compost {
+.dark-mode .day-compost {
   background: linear-gradient(135deg,
       rgba(16, 185, 129, 0.12) 0%,
       rgba(16, 185, 129, 0.06) 100%);
   border-color: rgba(16, 185, 129, 0.2);
 }
 
-.night-garden .compost-title {
+.dark-mode .compost-title {
   color: rgba(234, 246, 240, 0.95);
 }

@@ -3,8 +3,8 @@ import type { DayViewOptions, DayViewCallbacks, DragData, UpdateGoalTimeCommand 
 import { TimeSlotCalculator } from "./TimeSlotCalculator";
 import { CardComponent } from "./CardComponent";
 import { TimelineGrid } from "./TimelineGrid";
-import { DayViewRenderer } from "./DayViewRenderer";
-import { SimpleDayViewRenderer } from "./SimpleDayViewRenderer";
+import { TimelineDayViewRenderer } from "./TimelineDayViewRenderer";
+import { ListDayViewRenderer } from "./ListDayViewRenderer";
 import { PlannerDayViewRenderer } from "./PlannerDayViewRenderer";
 import { DragDropManager } from "./DragDropManager";
 
@@ -14,7 +14,7 @@ import { DragDropManager } from "./DragDropManager";
  */
 interface AppConfig {
   CATEGORIES: Record<string, { emoji: string; label: string; color: string }>;
-  LEVELS: Record<string, { emoji: string; label: string }>;
+  LEVELS: Record<string, { emoji: string; label: string; color: string }>;
   PRIORITIES: Record<string, { symbol: string }>;
 }
 
@@ -32,8 +32,8 @@ export class DayViewController {
   private calculator: TimeSlotCalculator;
   private cardComponent: CardComponent;
   private timelineGrid: TimelineGrid;
-  private renderer: DayViewRenderer;
-  private simpleRenderer: SimpleDayViewRenderer;
+  private renderer: TimelineDayViewRenderer;
+  private simpleRenderer: ListDayViewRenderer;
   private plannerRenderer: PlannerDayViewRenderer;
   private dragDropManager: DragDropManager;
 
@@ -89,14 +89,14 @@ export class DayViewController {
     this.cardComponent = new CardComponent(_config);
     this.timelineGrid = new TimelineGrid(this.calculator);
 
-    this.renderer = new DayViewRenderer(
+    this.renderer = new TimelineDayViewRenderer(
       container,
       this.calculator,
       this.cardComponent,
       this.timelineGrid
     );
 
-    this.simpleRenderer = new SimpleDayViewRenderer(
+    this.simpleRenderer = new ListDayViewRenderer(
       container,
       this.cardComponent
     );
@@ -123,26 +123,33 @@ export class DayViewController {
   mount(): void {
     if (this.isMounted) return;
 
-    this.isMounted = true;
+    try {
+      this.isMounted = true;
 
-    // Delegate event listeners
-    this.container.addEventListener("click", this.boundHandleClick);
-    this.container.addEventListener("keydown", this.boundHandleKeyDown);
+      // Delegate event listeners
+      this.container.addEventListener("click", this.boundHandleClick);
+      this.container.addEventListener("keydown", this.boundHandleKeyDown);
 
-    // Set up resize observer to update on viewport changes
-    if (typeof ResizeObserver !== "undefined") {
-      this.resizeObserver = new ResizeObserver(() => {
-        this.handleResize();
-      });
-      this.resizeObserver.observe(this.container);
-    }
-
-    // Update current time indicator every minute
-    this.timeUpdateInterval = window.setInterval(() => {
-      if (this.currentDate) {
-        this.renderer.update(this.currentDate, this.currentGoals);
+      // Set up resize observer to update on viewport changes
+      if (typeof ResizeObserver !== "undefined") {
+        this.resizeObserver = new ResizeObserver(() => {
+          this.handleResize();
+        });
+        this.resizeObserver.observe(this.container);
       }
-    }, 60000);
+
+      // Update current time indicator every minute
+      this.timeUpdateInterval = window.setInterval(() => {
+        if (this.currentDate) {
+          this.renderer.update(this.currentDate, this.currentGoals);
+        }
+      }, 60000);
+    } catch (error) {
+      // If mount fails, cleanup what we started
+      console.error('Failed to mount DayViewController:', error);
+      this.unmount();
+      throw error;
+    }
   }
 
   /**
@@ -155,40 +162,51 @@ export class DayViewController {
     if (!this.isMounted) return;
 
     this.isMounted = false;
+
+    // Clear interval with null check
     if (this.timeUpdateInterval !== null) {
       clearInterval(this.timeUpdateInterval);
       this.timeUpdateInterval = null;
     }
+
+    // Disconnect observer with null check
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+
+    // Cleanup drag-drop manager
     this.dragDropManager.destroy();
     this.renderer.clearCaches();
 
-    // Remove event listeners
-    this.container.removeEventListener("click", this.boundHandleClick);
-    this.container.removeEventListener("keydown", this.boundHandleKeyDown);
+    // Remove event listeners with defensive null checks
+    if (this.boundHandleClick) {
+      this.container.removeEventListener("click", this.boundHandleClick);
+    }
+    if (this.boundHandleKeyDown) {
+      this.container.removeEventListener("keydown", this.boundHandleKeyDown);
+    }
   }
 
   /**
    * Set goals for a specific date and trigger rendering
    * @param date - The date to display goals for
    * @param goals - Array of goals to display
+   * @param contextGoals - Optional Vision/Milestone/Focus goals for sidebar context
    * @remarks Automatically determines whether to perform initial render or update
    * based on mount status. Sets up drag-and-drop after rendering.
    */
-  setGoals(date: Date, goals: Goal[]): void {
+  setGoals(date: Date, goals: Goal[], contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     this.currentDate = date;
     this.currentGoals = goals;
 
     if (!this.isMounted) {
       // Initial render
-      this.renderCurrent();
+      this.renderCurrent(contextGoals);
       this.setupDragAndDrop();
     } else {
       // Update render
-      this.updateCurrent();
+      this.updateCurrent(contextGoals);
       this.setupDragAndDrop();
     }
   }
@@ -196,13 +214,13 @@ export class DayViewController {
   /**
    * Render using current style
    */
-  private renderCurrent(): void {
+  private renderCurrent(contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     if (!this.currentDate) return;
     const style = this.callbacks.onGetPreference?.("dayViewStyle");
     if (style === "simple") {
       this.simpleRenderer.renderInitial(this.currentDate, this.currentGoals);
     } else if (style === "planner") {
-      this.plannerRenderer.renderInitial(this.currentDate, this.currentGoals);
+      this.plannerRenderer.renderInitial(this.currentDate, this.currentGoals, contextGoals);
     } else {
       this.renderer.renderInitial(this.currentDate, this.currentGoals);
     }
@@ -211,13 +229,13 @@ export class DayViewController {
   /**
    * Update using current style
    */
-  private updateCurrent(): void {
+  private updateCurrent(contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     if (!this.currentDate) return;
     const style = this.callbacks.onGetPreference?.("dayViewStyle");
     if (style === "simple") {
       this.simpleRenderer.update(this.currentDate, this.currentGoals);
     } else if (style === "planner") {
-      this.plannerRenderer.update(this.currentDate, this.currentGoals);
+      this.plannerRenderer.update(this.currentDate, this.currentGoals, contextGoals);
     } else {
       this.renderer.update(this.currentDate, this.currentGoals);
     }
@@ -290,7 +308,7 @@ export class DayViewController {
     this.calculator = new TimeSlotCalculator(start, end, this.options.maxLanes, this.options.snapInterval);
     this.timelineGrid = new TimelineGrid(this.calculator);
 
-    this.renderer = new DayViewRenderer(
+    this.renderer = new TimelineDayViewRenderer(
       this.container,
       this.calculator,
       this.cardComponent,

@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Build outputs
 dist/
@@ -10,6 +9,10 @@ public/
 *.js.map
 styles.css.archive
 styles.bundle.css
+
+# Test artifacts
+test-results/
+playwright-report/
 
 # OS files
 .DS_Store

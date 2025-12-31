@@ -102,7 +102,7 @@
     box-shadow: var(--shadow-sm);
 }
 
-.night-garden .now-panel {
+.dark-mode .now-panel {
     background:
         radial-gradient(800px 240px at 50% 0%,
             rgba(140, 183, 217, 0.16) 0%,
@@ -150,7 +150,7 @@
     filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.08));
 }
 
-:root:not(.night-garden) .now-panel-logo .logo-text {
+:root:not(.dark-mode) .now-panel-logo .logo-text {
     background: linear-gradient(110deg,
             #4A90E2 0%,
             #4A90E2 30%,
@@ -161,7 +161,7 @@
     -webkit-text-fill-color: transparent;
 }
 
-.night-garden .now-panel-logo .logo-text {
+.dark-mode .now-panel-logo .logo-text {
     background: linear-gradient(110deg,
             #E2E8F0 0%,
             #E2E8F0 40%,
@@ -173,7 +173,7 @@
     filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
 }
 
-.night-garden .now-panel-logo .logo-icon {
+.dark-mode .now-panel-logo .logo-icon {
     filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25)) drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
 }
 
@@ -251,7 +251,7 @@
     /* avoid descender clipping with overflow/gradient text */
 }
 
-.night-garden .time-stat-value {
+.dark-mode .time-stat-value {
     background: linear-gradient(90deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.72) 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -300,9 +300,9 @@
     box-shadow: var(--shadow-xs);
 }
 
-.night-garden .affirmation-panel,
-.night-garden .whats-next,
-.night-garden .achievements-panel {
+.dark-mode .affirmation-panel,
+.dark-mode .whats-next,
+.dark-mode .achievements-panel {
     background: rgba(10, 22, 18, 0.62);
     border: 1px solid rgba(140, 183, 217, 0.12);
 }

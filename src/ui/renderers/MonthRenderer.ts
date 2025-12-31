@@ -2,6 +2,7 @@
 // Month View Renderer
 // ===================================
 import { State } from '../../core/State';
+import { Goals } from '../../core/Goals';
 import { CONFIG, VIEWS } from '../../config';
 import type { UIElements } from '../../types';
 
@@ -18,6 +19,12 @@ export const MonthRenderer = {
     const selected = State.viewingDate ? State.viewingDate.toDateString() : "";
     const monthTitle = escapeHtmlFn(`${CONFIG.MONTHS[month]} ${year}`);
 
+    const monthStart = new Date(year, month, 1);
+    const monthEnd = new Date(year, month + 1, 0);
+    const milestoneGoals = Goals.getForRange(monthStart, monthEnd)
+      .filter(g => g.level === 'milestone' && g.status !== 'done');
+    const primaryMilestone = milestoneGoals[0];
+
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
@@ -31,10 +38,19 @@ export const MonthRenderer = {
       return `${y}-${m}-${day}`;
     };
 
-    let html = `
-      <div class="month-view">
+    let html = `<div class="month-view">`;
+
+    html += `
         <div class="month-view-header">
           <h2 class="month-view-title">${monthTitle}</h2>
+          ${primaryMilestone ? `
+            <div class="month-view-context">
+              <button type="button" class="month-milestone-chip" data-goal-id="${primaryMilestone.id}" title="${escapeHtmlFn(primaryMilestone.title)}">
+                🎯 ${escapeHtmlFn(primaryMilestone.title)}
+                ${milestoneGoals.length > 1 ? `<span class="month-milestone-more">+${milestoneGoals.length - 1}</span>` : ""}
+              </button>
+            </div>
+          ` : ""}
         </div>
         <div class="month-calendar" role="grid" aria-label="Month calendar">
           ${dayNames
@@ -96,6 +112,7 @@ export const MonthRenderer = {
 
     container.innerHTML = html;
 
+    // Add click handlers for day cells
     container.querySelectorAll<HTMLElement>(".month-day[data-date]").forEach((cell) => {
       cell.addEventListener("click", () => {
         const iso = cell.dataset.date;
@@ -107,6 +124,18 @@ export const MonthRenderer = {
         const d = Number(match[3]);
         State.goToDate(new Date(y, m, d));
         State.setView(VIEWS.DAY);
+      });
+    });
+
+    // Add click handlers for the milestone chip
+    container.querySelectorAll<HTMLElement>('.month-milestone-chip[data-goal-id]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const goalId = btn.dataset.goalId;
+        if (goalId) {
+          const event = new CustomEvent('goal-click', { detail: { goalId } });
+          container.dispatchEvent(event);
+        }
       });
     });
   }

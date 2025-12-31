@@ -121,6 +121,10 @@ export interface Goal {
   startTime?: string | null;
   endTime?: string | null;
   tags: string[];
+  /** ID of parent goal (for visual hierarchy) */
+  parentId?: string | null;
+  /** Cached parent level for quick color access */
+  parentLevel?: GoalLevel | null;
 }
 
 /**
@@ -272,6 +276,8 @@ export interface NDPreferences {
   reduceEmojis: boolean;
   /** Preferred day view layout style */
   dayViewStyle?: 'timeline' | 'simple' | 'planner';
+  /** Whether the level context bar is collapsed */
+  contextBarCollapsed?: boolean;
 }
 
 /**

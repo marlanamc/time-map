@@ -16,6 +16,48 @@
     margin-bottom: var(--space-5);
 }
 
+.month-view-context {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+}
+
+.month-milestone-chip {
+    background: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-left: 3px solid #3b82f6;
+    border-radius: var(--radius-full);
+    padding: 6px 12px;
+    font-size: var(--text-sm);
+    font-weight: 650;
+    color: var(--text-primary);
+    cursor: pointer;
+    max-width: 72ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all var(--duration-fast);
+}
+
+.month-milestone-chip:hover {
+    background: rgba(59, 130, 246, 0.14);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.month-milestone-chip:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.month-milestone-more {
+    margin-left: 8px;
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
 .month-view-title {
     font-family: var(--font-display);
     font-size: clamp(1.9rem, 6vw, 2.75rem);
@@ -124,4 +166,3 @@
     color: var(--text-primary);
     margin-bottom: var(--space-4);
 }
-

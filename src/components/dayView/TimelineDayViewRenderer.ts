@@ -10,7 +10,7 @@ interface CachedCard {
   hash: string; // Hash of goal properties to detect changes
 }
 
-export class DayViewRenderer {
+export class TimelineDayViewRenderer {
   private container: HTMLElement;
   private calculator: TimeSlotCalculator;
   private cardComponent: CardComponent;

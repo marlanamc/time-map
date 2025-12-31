@@ -1,7 +1,7 @@
 import type { Goal } from "../../types";
 import { CardComponent } from "./CardComponent";
 
-export class SimpleDayViewRenderer {
+export class ListDayViewRenderer {
   private container: HTMLElement;
   private cardComponent: CardComponent;
   private currentDate: Date | null = null;

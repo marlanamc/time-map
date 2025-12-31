@@ -27,6 +27,11 @@ class SyncQueue {
   private readonly MAX_RETRIES = 3;
   private readonly STORAGE_KEY = 'sync_queue';
 
+  // Resource tracking for cleanup
+  private autoSyncInterval: number | null = null;
+  private boundOnlineHandler: (() => void) | null = null;
+  private boundOfflineHandler: (() => void) | null = null;
+
   constructor() {
     this.loadQueue();
     this.startAutoSync();
@@ -39,13 +44,60 @@ class SyncQueue {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        this.queue = JSON.parse(stored);
-        console.log(`✓ Loaded ${this.queue.length} queued operations from storage`);
+        const parsed = JSON.parse(stored);
+
+        // Validate structure - must be an array
+        if (Array.isArray(parsed)) {
+          // Validate each operation has required fields
+          const isValid = parsed.every(op =>
+            op && typeof op === 'object' &&
+            typeof op.id === 'string' &&
+            typeof op.type === 'string' &&
+            typeof op.entity === 'string' &&
+            typeof op.timestamp === 'number' &&
+            typeof op.retries === 'number'
+          );
+
+          if (isValid) {
+            this.queue = parsed;
+            console.log(`✓ Loaded ${this.queue.length} queued operations from storage`);
+          } else {
+            throw new Error('Invalid queue structure: operations missing required fields');
+          }
+        } else {
+          throw new Error('Invalid queue format: expected array');
+        }
       }
     } catch (error) {
       console.error('Failed to load sync queue:', error);
+
+      // Clear corrupted data from localStorage
+      try {
+        localStorage.removeItem(this.STORAGE_KEY);
+        console.warn('✓ Cleared corrupted sync queue from storage');
+      } catch (removeError) {
+        console.error('Failed to clear corrupted sync queue:', removeError);
+      }
+
+      // Reset to empty queue
       this.queue = [];
+
+      // Notify user about corrupted data
+      this.emitStorageError();
     }
+  }
+
+  /**
+   * Emit storage error event for user notification
+   */
+  private emitStorageError(): void {
+    const event = new CustomEvent('sync-storage-error', {
+      detail: {
+        message: 'Sync queue was corrupted and has been reset. Recent offline changes may be lost.'
+      }
+    });
+
+    window.dispatchEvent(event);
   }
 
   /**
@@ -87,23 +139,33 @@ class SyncQueue {
    * Start automatic sync on interval and when coming online
    */
   private startAutoSync(): void {
+    // Clear existing interval if any
+    if (this.autoSyncInterval !== null) {
+      clearInterval(this.autoSyncInterval);
+    }
+
     // Process queue every 30 seconds if online
-    setInterval(() => {
+    this.autoSyncInterval = window.setInterval(() => {
       if (navigator.onLine && this.queue.length > 0) {
         this.processQueue();
       }
     }, 30000);
 
-    // Process when coming back online
-    window.addEventListener('online', () => {
+    // Create bound handlers for proper cleanup
+    this.boundOnlineHandler = () => {
       console.log('🌐 Back online! Processing sync queue...');
       this.processQueue();
-    });
+    };
+
+    this.boundOfflineHandler = () => {
+      console.log('📡 Offline - Operations will be queued');
+    };
+
+    // Process when coming back online
+    window.addEventListener('online', this.boundOnlineHandler);
 
     // Log when going offline
-    window.addEventListener('offline', () => {
-      console.log('📡 Offline - Operations will be queued');
-    });
+    window.addEventListener('offline', this.boundOfflineHandler);
 
     console.log('✓ SyncQueue auto-sync started');
   }
@@ -255,8 +317,40 @@ class SyncQueue {
       'Operations': status.operations
     });
   }
+
+  /**
+   * Stop auto-sync and cleanup resources
+   * Should be called on logout or app cleanup
+   */
+  destroy(): void {
+    // Clear interval
+    if (this.autoSyncInterval !== null) {
+      clearInterval(this.autoSyncInterval);
+      this.autoSyncInterval = null;
+    }
+
+    // Remove event listeners
+    if (this.boundOnlineHandler) {
+      window.removeEventListener('online', this.boundOnlineHandler);
+      this.boundOnlineHandler = null;
+    }
+
+    if (this.boundOfflineHandler) {
+      window.removeEventListener('offline', this.boundOfflineHandler);
+      this.boundOfflineHandler = null;
+    }
+
+    console.log('✓ SyncQueue destroyed and cleaned up');
+  }
 }
 
 // Export singleton instance
 export const syncQueue = new SyncQueue();
 export default syncQueue;
+
+// Add cleanup on window unload
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    syncQueue.destroy();
+  });
+}

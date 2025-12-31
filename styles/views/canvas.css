@@ -138,19 +138,17 @@ body.hide-sidebar .canvas-zoom-controls {
     color: var(--text-primary);
 }
 
-/* White color with dark shadow for light mode view titles */
-:root:not(.night-garden) .year-view-title,
-:root:not(.night-garden) .month-view-title,
-:root:not(.night-garden) .week-view-title,
-:root:not(.night-garden) .planner-sidebar-header h3 {
-    color: #ffffff !important;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 
-                 1px 1px 2px rgba(0, 0, 0, 0.7),
-                 0 0 8px rgba(0, 0, 0, 0.3);
+/* Dark color for light mode view titles - better for soft background */
+:root:not(.dark-mode) .year-view-title,
+:root:not(.dark-mode) .month-view-title,
+:root:not(.dark-mode) .week-view-title,
+:root:not(.dark-mode) .planner-sidebar-header h3 {
+    color: var(--text-primary) !important;
+    text-shadow: none;
 }
 
 /* Force dark color for light mode day title - higher specificity */
-:root:not(.night-garden) .day-view-title {
+:root:not(.dark-mode) .day-view-title {
     color: #0A1113 !important;
     /* Very dark fallback if gradient doesn't apply */
 }
@@ -163,13 +161,13 @@ body.hide-sidebar .canvas-zoom-controls {
 }
 
 /* Ensure subtitle is visible in light mode */
-:root:not(.night-garden) .year-view-subtitle {
+:root:not(.dark-mode) .year-view-subtitle {
     color: var(--accent-hover);
     opacity: 0.9;
 }
 
 /* Ensure subtitle is visible in dark mode */
-.night-garden .year-view-subtitle {
+.dark-mode .year-view-subtitle {
     color: var(--accent-hover);
     opacity: 1;
 }
@@ -193,24 +191,25 @@ body.hide-sidebar .canvas-zoom-controls {
         filter: drop-shadow(0 1px 2px rgba(26, 43, 47, 0.15));
     }
 
-    /* White with dark shadow for year, month, and week titles in light mode - override gradient */
-    :root:not(.night-garden) .year-view-title,
-    :root:not(.night-garden) .month-view-title,
-    :root:not(.night-garden) .week-view-title,
-    :root:not(.night-garden) .planner-sidebar-header h3 {
-        background: none !important;
-        -webkit-background-clip: unset !important;
-        background-clip: unset !important;
-        -webkit-text-fill-color: #ffffff !important;
-        color: #ffffff !important;
-        filter: none !important;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 
-                     1px 1px 2px rgba(0, 0, 0, 0.7),
-                     0 0 8px rgba(0, 0, 0, 0.3);
+    /* Use gradient for year, month, and week titles in light mode */
+    :root:not(.dark-mode) .year-view-title,
+    :root:not(.dark-mode) .month-view-title,
+    :root:not(.dark-mode) .week-view-title,
+    :root:not(.dark-mode) .planner-sidebar-header h3 {
+        background: linear-gradient(110deg,
+                var(--text-primary) 0%,
+                var(--accent) 65%,
+                var(--sage) 115%) !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        color: transparent !important;
+        filter: drop-shadow(0 1px 2px rgba(26, 43, 47, 0.08)) !important;
+        text-shadow: none;
     }
 
     /* Much darker gradient for light mode day title to improve contrast against sky background */
-    :root:not(.night-garden) .day-view-title {
+    :root:not(.dark-mode) .day-view-title {
         background: linear-gradient(110deg,
                 #0A1113 0%,
                 /* Very dark for maximum contrast */
@@ -232,28 +231,7 @@ body.hide-sidebar .canvas-zoom-controls {
     }
 }
 
-/* Enhanced title visibility during bright time periods - use backdrop instead of text-shadow */
-:root.time-morning .year-view-header,
-:root.time-afternoon .year-view-header,
-:root.time-evening .year-view-header,
-:root.time-morning .month-view-header,
-:root.time-afternoon .month-view-header,
-:root.time-evening .month-view-header,
-:root.time-morning .week-view-header,
-:root.time-afternoon .week-view-header,
-:root.time-evening .week-view-header,
-:root.time-morning .day-view-header,
-:root.time-afternoon .day-view-header,
-:root.time-evening .day-view-header {
-    /* Add subtle dark backdrop behind title for contrast */
-    background: linear-gradient(180deg,
-            rgba(10, 17, 19, 0.65) 0%,
-            rgba(10, 17, 19, 0.35) 50%,
-            transparent 100%);
-    padding: var(--space-4) var(--space-5);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--space-4);
-}
+/* Title visibility - removed dark backdrop for cleaner appearance */
 
 .year-view-header::after,
 .month-view-header::after {

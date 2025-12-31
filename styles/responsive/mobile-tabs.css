@@ -23,7 +23,7 @@
         isolation: isolate;
     }
 
-    .night-garden .mobile-tab-bar {
+    .dark-mode .mobile-tab-bar {
         background: var(--bg-surface);
         border-top-color: var(--glass-border);
         backdrop-filter: blur(20px);
