@@ -26,9 +26,13 @@
     "noEmit": false,
     "declaration": false,
     "sourceMap": true,
-    "removeComments": false
+    "removeComments": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@styles/*": ["styles/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.min.js"]
 }
-

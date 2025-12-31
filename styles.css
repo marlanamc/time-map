@@ -6663,11 +6663,17 @@ body.focus-mode .sidebar-hide-btn {
     }
 
     body.mobile-home-view .now-panel {
-        padding: var(--space-6) var(--space-5);
-        border-radius: var(--radius-xl);
-        margin-bottom: var(--space-5);
-        flex: 1;
-        min-height: 0;
+        padding: var(--space-6) var(--space-5) !important;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
+        margin-bottom: var(--space-5) !important;
+        margin-left: calc(-1 * var(--space-5)) !important;
+        margin-right: calc(-1 * var(--space-5)) !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        position: relative !important;
+        left: calc(-1 * var(--space-5)) !important;
+        flex: 1 !important;
+        min-height: 0 !important;
     }
 
     body.mobile-home-view .sidebar-section {
@@ -6770,19 +6776,19 @@ body.focus-mode .sidebar-hide-btn {
 
 @media (max-width: 600px) {
     .mobile-tab-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        display: flex;
-        justify-content: space-around;
-        align-items: stretch;
-        height: calc(60px + env(safe-area-inset-bottom, 0px));
-        padding: 6px env(safe-area-inset-left, 0px) calc(6px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-right, 0px);
-        background: var(--bg-surface);
-        border-top: 1px solid var(--glass-border);
-        z-index: 9999;
-        isolation: isolate;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        display: flex !important;
+        justify-content: space-around !important;
+        align-items: stretch !important;
+        height: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+        padding: 4px env(safe-area-inset-left, 0px) calc(16px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-right, 0px) !important;
+        background: var(--bg-surface) !important;
+        border-top: 1px solid var(--glass-border) !important;
+        z-index: 9999 !important;
+        isolation: isolate !important;
     }
 
     .dark-mode .mobile-tab-bar {
@@ -6792,21 +6798,21 @@ body.focus-mode .sidebar-hide-btn {
     }
 
     .mobile-tab {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        background: transparent;
-        border: none;
-        padding: 8px 4px;
-        color: var(--text-tertiary);
-        cursor: pointer;
-        transition: color 0.2s ease;
-        position: relative;
-        min-height: 44px;
-        -webkit-tap-highlight-color: transparent;
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 4px !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 8px 4px 14px !important;
+        color: var(--text-tertiary) !important;
+        cursor: pointer !important;
+        transition: color 0.2s ease !important;
+        position: relative !important;
+        min-height: 44px !important;
+        -webkit-tap-highlight-color: transparent !important;
     }
 
     .mobile-tab.active {

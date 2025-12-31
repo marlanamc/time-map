@@ -59,11 +59,10 @@ This document provides a systematic testing checklist for both desktop and mobil
 - [ ] "Today" button returns to current date
 
 **Day View Mode Switching (KNOWN ISSUE):**
-- [ ] ⚠️ Timeline/Simple/Planner buttons visible but **don't switch modes**
-- [ ] Mode always displays as "Planner" regardless of selection
-- [ ] Toast message shows "Timeline mode (in development)" when clicked
-- [ ] **Expected:** Should switch between 3 rendering modes
-- [ ] **Bug Location:** UIManager.ts line 1260 (TODO comment)
+**Day View Mode Switching:**
+- [x] Timeline/Simple/Planner buttons switch modes
+- [x] Selected mode persists (preferences)
+- [x] Switching mode triggers re-render
 
 #### Canvas View (if exists)
 - [ ] Canvas view renders

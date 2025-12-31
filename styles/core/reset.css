@@ -12,14 +12,13 @@
         /* Increased from 32px */
 
         /* Bottom tab bar height (includes safe area inset) */
-        --mobile-tab-bar-height: calc(64px + env(safe-area-inset-bottom, 0px));
+        --mobile-tab-bar-height: calc(68px + env(safe-area-inset-bottom, 0px));
         /* Fallback height for fixed home stats panel */
         --mobile-home-stats-height: 110px;
     }
 }
 
-/* Import Google Fonts */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+/* Google Fonts imported via link tag in index.html */
 
 /* Reset & Base */
 *,

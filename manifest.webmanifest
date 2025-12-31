@@ -7,6 +7,22 @@
   "display": "standalone",
   "background_color": "#FDFBF7",
   "theme_color": "#6F9B86",
+  "shortcuts": [
+    {
+      "name": "New intention",
+      "short_name": "New",
+      "description": "Quick-add an intention for today",
+      "url": "./?action=new-task",
+      "icons": [{ "src": "icons/ios/192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Today",
+      "short_name": "Today",
+      "description": "Go to today’s schedule",
+      "url": "./?view=day",
+      "icons": [{ "src": "icons/ios/192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
   "icons": [
     {
       "src": "icons/ios/192.png",

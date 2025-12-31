@@ -495,7 +495,7 @@ body.is-mobile .support-panel-appearance-card[aria-label="Time of day theme"] {
     padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-lg);
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.65);
+    background: var(--glass-bg);
     color: var(--text-primary);
 }
 

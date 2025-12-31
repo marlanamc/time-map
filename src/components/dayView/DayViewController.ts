@@ -40,6 +40,7 @@ export class DayViewController {
   // State
   private currentDate: Date | null = null;
   private currentGoals: Goal[] = [];
+  private currentContextGoals: { vision: Goal[], milestone: Goal[], focus: Goal[] } | undefined = undefined;
   private isMounted: boolean = false;
 
   // Lifecycle resources
@@ -199,6 +200,7 @@ export class DayViewController {
   setGoals(date: Date, goals: Goal[], contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     this.currentDate = date;
     this.currentGoals = goals;
+    this.currentContextGoals = contextGoals;
 
     if (!this.isMounted) {
       // Initial render
@@ -216,13 +218,15 @@ export class DayViewController {
    */
   private renderCurrent(contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     if (!this.currentDate) return;
-    const style = this.callbacks.onGetPreference?.("dayViewStyle");
+    const style = (this.callbacks.onGetPreference?.("dayViewStyle") as string | undefined) || "planner";
     if (style === "simple") {
       this.simpleRenderer.renderInitial(this.currentDate, this.currentGoals);
     } else if (style === "planner") {
       this.plannerRenderer.renderInitial(this.currentDate, this.currentGoals, contextGoals);
-    } else {
+    } else if (style === "timeline") {
       this.renderer.renderInitial(this.currentDate, this.currentGoals);
+    } else {
+      this.plannerRenderer.renderInitial(this.currentDate, this.currentGoals, contextGoals);
     }
   }
 
@@ -231,13 +235,15 @@ export class DayViewController {
    */
   private updateCurrent(contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     if (!this.currentDate) return;
-    const style = this.callbacks.onGetPreference?.("dayViewStyle");
+    const style = (this.callbacks.onGetPreference?.("dayViewStyle") as string | undefined) || "planner";
     if (style === "simple") {
       this.simpleRenderer.update(this.currentDate, this.currentGoals);
     } else if (style === "planner") {
       this.plannerRenderer.update(this.currentDate, this.currentGoals, contextGoals);
-    } else {
+    } else if (style === "timeline") {
       this.renderer.update(this.currentDate, this.currentGoals);
+    } else {
+      this.plannerRenderer.update(this.currentDate, this.currentGoals, contextGoals);
     }
   }
 
@@ -248,7 +254,7 @@ export class DayViewController {
    */
   render(): void {
     if (!this.currentDate) return;
-    this.renderCurrent();
+    this.renderCurrent(this.currentContextGoals);
     this.setupDragAndDrop();
   }
 
@@ -260,13 +266,15 @@ export class DayViewController {
    * Also updates the internal goals array.
    */
   updateGoal(goalId: string, goal: Goal): void {
-    const style = this.callbacks.onGetPreference?.("dayViewStyle");
+    const style = (this.callbacks.onGetPreference?.("dayViewStyle") as string | undefined) || "planner";
     if (style === "simple") {
       this.simpleRenderer.updateCard(goalId, goal);
     } else if (style === "planner") {
       this.plannerRenderer.updateCard(goalId, goal);
-    } else {
+    } else if (style === "timeline") {
       this.renderer.updateCard(goalId, goal);
+    } else {
+      this.plannerRenderer.updateCard(goalId, goal);
     }
 
     // Update currentGoals

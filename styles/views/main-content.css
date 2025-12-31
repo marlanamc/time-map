@@ -294,6 +294,34 @@
     gap: var(--space-3);
 }
 
+.connection-status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 6px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(239, 68, 68, 0.14);
+    color: #dc2626;
+    font-size: var(--text-xs);
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    user-select: none;
+}
+
+.connection-status .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+}
+
+.dark-mode .connection-status {
+    background: rgba(239, 68, 68, 0.16);
+    color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
 /* Header focus toggle */
 .header-actions .header-focus-toggle .toggle-label {
     display: none;

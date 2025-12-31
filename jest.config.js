@@ -9,4 +9,12 @@ module.exports = {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
   },
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  collectCoverageFrom: [
+    '<rootDir>/src/**/*.ts',
+    '!<rootDir>/src/**/*.d.ts',
+    '!<rootDir>/src/**/__tests__/**',
+    '!<rootDir>/src/**/index.ts',
+  ],
+  coverageDirectory: '<rootDir>/test-results/coverage',
+  coverageReporters: ['text', 'html', 'lcov'],
 };

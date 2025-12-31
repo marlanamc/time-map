@@ -3,11 +3,15 @@
 // ADHD-Friendly Focus & Boundary Setting
 // ============================================
 
+// Import all styles (Vite bundles these automatically)
+import '../styles/main.css';
+
 // Most types are now used by the imported modules rather than app.ts directly
 import { GardenEngine } from './garden/gardenEngine';
 import { State, Goals, Planning, Analytics } from './core';
 import { isSupabaseConfigured } from './supabaseClient';
 import { SupabaseService } from './services/SupabaseService';
+import { VIEWS } from './config';
 
 // Removed duplicate interfaces - now imported from types.ts
 
@@ -120,8 +124,167 @@ document.addEventListener("DOMContentLoaded", async () => {
     UI.updateSyncStatus?.('local');
   }
 
+  // Support PWA shortcut URLs (e.g. /?view=day or /?action=new-task)
+  {
+    const params = new URLSearchParams(location.search);
+    const view = params.get("view");
+    const action = params.get("action");
+    let didHandleAction = false;
+
+    const viewMap: Record<string, typeof VIEWS[keyof typeof VIEWS]> = {
+      home: VIEWS.HOME,
+      day: VIEWS.DAY,
+      week: VIEWS.WEEK,
+      month: VIEWS.MONTH,
+      year: VIEWS.YEAR,
+    };
+
+    if (view && viewMap[view]) {
+      State.setView(viewMap[view]);
+      didHandleAction = true;
+    }
+
+    if (action === "new-task") {
+      State.setView(VIEWS.DAY);
+      UI.openQuickAdd?.();
+      didHandleAction = true;
+    }
+
+    if (didHandleAction && (view || action)) {
+      const url = new URL(location.href);
+      url.searchParams.delete("view");
+      url.searchParams.delete("action");
+      history.replaceState(null, "", url.toString());
+    }
+  }
+
+  // Offline indicator + sync badge behavior
+  {
+    const connectionStatusEl = document.getElementById("connectionStatus");
+    let lastOnline = navigator.onLine;
+
+    const refreshSyncBadgeFromAuth = async () => {
+      try {
+        const user = await SupabaseService.getUser();
+        UI.updateSyncStatus?.(user && isSupabaseConfigured ? "synced" : "local");
+      } catch {
+        UI.updateSyncStatus?.("local");
+      }
+    };
+
+    const applyConnectionState = async (opts?: { toast?: boolean }) => {
+      const online = navigator.onLine;
+
+      if (!online) {
+        connectionStatusEl?.removeAttribute("hidden");
+        UI.updateSyncStatus?.("offline");
+        if (opts?.toast) UI.showToast?.("📴", "Offline");
+      } else {
+        connectionStatusEl?.setAttribute("hidden", "");
+        await refreshSyncBadgeFromAuth();
+        if (opts?.toast && !lastOnline) UI.showToast?.("📶", "Back online");
+      }
+
+      lastOnline = online;
+    };
+
+    window.addEventListener("online", () => void applyConnectionState({ toast: true }));
+    window.addEventListener("offline", () => void applyConnectionState({ toast: true }));
+    void applyConnectionState({ toast: !navigator.onLine });
+  }
+
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
+      const toastEl = document.getElementById("toast");
+      const toastIconEl = document.getElementById("toastIcon");
+      const toastMessageEl = document.getElementById("toastMessage");
+      let toastHideTimer: number | null = null;
+
+      const hideToast = () => {
+        if (!toastEl) return;
+        toastEl.classList.remove("active");
+        toastEl.removeAttribute("data-toast-type");
+        if (toastHideTimer) window.clearTimeout(toastHideTimer);
+        toastHideTimer = null;
+      };
+
+      const showToast = (icon: string, message: string, opts?: { timeoutMs?: number; type?: string }) => {
+        if (!toastEl || !toastIconEl || !toastMessageEl) return;
+        if (toastHideTimer) window.clearTimeout(toastHideTimer);
+        toastHideTimer = null;
+
+        toastIconEl.textContent = icon || "";
+        toastMessageEl.textContent = message;
+        if (opts?.type) toastEl.setAttribute("data-toast-type", opts.type);
+        toastEl.classList.add("active");
+
+        if (typeof opts?.timeoutMs === "number" && opts.timeoutMs > 0) {
+          toastHideTimer = window.setTimeout(hideToast, opts.timeoutMs);
+        }
+      };
+
+      const storeSwVersion = (version: string) => {
+        try {
+          localStorage.setItem("gardenFence.swVersion", version);
+        } catch {
+          // ignore storage errors
+        }
+      };
+
+      const showUpdatePrompt = (registration: ServiceWorkerRegistration) => {
+        if (!toastEl || !toastIconEl || !toastMessageEl) return;
+        if (!navigator.serviceWorker.controller) return; // First install.
+        if (!registration.waiting) return;
+
+        const actionsClass = "toast-actions";
+        let actions = toastEl.querySelector(`.${actionsClass}`) as HTMLDivElement | null;
+        if (!actions) {
+          actions = document.createElement("div");
+          actions.className = actionsClass;
+          toastEl.appendChild(actions);
+        }
+
+        actions.innerHTML = `
+          <button type="button" class="toast-action" data-sw-action="reload">Reload</button>
+          <button type="button" class="toast-action secondary" data-sw-action="later">Later</button>
+        `;
+
+        actions.addEventListener(
+          "click",
+          (e) => {
+            const target = e.target as Element | null;
+            const btn = target?.closest("[data-sw-action]") as HTMLElement | null;
+            const action = btn?.dataset.swAction;
+            if (!action) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (action === "reload") {
+              registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+              hideToast();
+            } else {
+              hideToast();
+            }
+          },
+          { once: true },
+        );
+
+        showToast("⬆️", "New version available.", { type: "sw-update" });
+      };
+
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        const type = event?.data?.type;
+        if (type === "SW_VERSION" && typeof event.data.version === "string") {
+          storeSwVersion(event.data.version);
+        }
+        if (type === "CACHES_CLEARED") {
+          showToast("🧹", "Cache cleared.", { timeoutMs: 2500, type: "sw-cache" });
+        }
+        if (type === "CACHES_CLEAR_FAILED") {
+          showToast("⚠️", "Couldn’t clear cache.", { timeoutMs: 3500, type: "sw-cache" });
+        }
+      });
+
       navigator.serviceWorker
         .register("./sw.js")
         .then((registration) => {
@@ -136,16 +299,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.location.reload();
           });
 
-          // If an update is found, ask the waiting SW to activate immediately.
+          // If an update is found, prompt the user to reload.
           registration.addEventListener("updatefound", () => {
             const installing = registration.installing;
             if (!installing) return;
             installing.addEventListener("statechange", () => {
               if (installing.state !== "installed") return;
-              if (!navigator.serviceWorker.controller) return; // First install
-              registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+              showUpdatePrompt(registration);
             });
           });
+
+          // Handle refresh if an update is already waiting (e.g., opened in a new tab).
+          showUpdatePrompt(registration);
+
+          // Ask the active SW for its current version.
+          registration.active?.postMessage({ type: "GET_VERSION" });
 
           // Proactively check for updates on launch and when returning to the app.
           requestUpdate();

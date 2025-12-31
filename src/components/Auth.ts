@@ -1,6 +1,8 @@
 
 import { SupabaseService } from '../services/SupabaseService';
 
+const AUTH_MODAL_DONT_SHOW_KEY = 'gardenFence.authModal.dontShow';
+
 export class AuthComponent {
   private container: HTMLElement;
 
@@ -33,7 +35,8 @@ export class AuthComponent {
 
     if (!isConfigured) {
       this.container.innerHTML = `
-        <div style="background: var(--bg-surface, var(--glass-bg, rgba(255, 255, 255, 0.9))); padding: var(--space-6, 24px); border-radius: var(--radius-xl, 16px); max-width: 520px; width: 100%; text-align: left; border: 1px solid var(--glass-border, rgba(107, 168, 169, 0.22)); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); margin: auto;">
+        <div style="position: relative; background: var(--bg-surface, var(--glass-bg, rgba(255, 255, 255, 0.9))); padding: var(--space-6, 24px); border-radius: var(--radius-xl, 16px); max-width: 520px; width: 100%; text-align: left; border: 1px solid var(--glass-border, rgba(107, 168, 169, 0.22)); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); margin: auto;">
+          <button id="auth-modal-close" type="button" class="auth-modal-close" aria-label="Close">×</button>
           <h2 style="color: var(--text-primary, #1A2B2F); margin-bottom: var(--space-3, 12px); font-size: var(--text-2xl, 1.5rem); font-weight: 700;">Setup needed</h2>
           <p style="color: var(--text-secondary, #455C61); margin-bottom: var(--space-4, 16px); font-size: var(--text-base, 1rem); line-height: 1.5;">
             This deployment is missing Supabase credentials, so the login screen can’t load.
@@ -60,6 +63,10 @@ export class AuthComponent {
         .querySelector("#auth-close")
         ?.addEventListener("click", () => this.hide());
 
+      this.container
+        .querySelector("#auth-modal-close")
+        ?.addEventListener("click", () => this.hide());
+
       return;
     }
 
@@ -77,7 +84,8 @@ export class AuthComponent {
     };
 
     this.container.innerHTML = `
-      <div style="background: var(--bg-surface, var(--glass-bg, rgba(255, 255, 255, 0.9))); padding: var(--space-6, 24px); border-radius: var(--radius-xl, 16px); max-width: 400px; width: 100%; text-align: center; border: 1px solid var(--glass-border, rgba(107, 168, 169, 0.22)); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); margin: auto;">
+      <div style="position: relative; background: var(--bg-surface, var(--glass-bg, rgba(255, 255, 255, 0.9))); padding: var(--space-6, 24px); border-radius: var(--radius-xl, 16px); max-width: 400px; width: 100%; text-align: center; border: 1px solid var(--glass-border, rgba(107, 168, 169, 0.22)); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); margin: auto;">
+        <button id="auth-modal-close" type="button" class="auth-modal-close" aria-label="Close">×</button>
         <h2 style="color: var(--text-primary, #1A2B2F); margin-bottom: var(--space-3, 12px); font-size: var(--text-2xl, 1.5rem); font-weight: 700;">Welcome Back</h2>
         <p style="color: var(--text-secondary, #455C61); margin-bottom: var(--space-5, 20px); font-size: var(--text-base, 1rem);">Sign in to save your progress across devices.</p>
         
@@ -99,16 +107,41 @@ export class AuthComponent {
         </button>
         
         <div id="auth-status" style="margin-top: var(--space-4, 16px); color: var(--accent, var(--teal, #4A9099)); font-size: var(--text-sm, 0.875rem); min-height: 20px;"></div>
+
+        <div class="auth-modal-secondary">
+          <button id="auth-guest" type="button" class="auth-modal-secondary-btn">
+            Continue as guest
+          </button>
+          <label class="auth-modal-dontshow">
+            <input type="checkbox" id="auth-dont-show" />
+            Don’t show again
+          </label>
+        </div>
       </div>
     `;
 
     const form = this.container.querySelector('#auth-form') as HTMLFormElement;
     const toggleBtn = this.container.querySelector('#toggle-auth-mode') as HTMLButtonElement;
+    const closeBtn = this.container.querySelector('#auth-modal-close') as HTMLButtonElement | null;
+    const guestBtn = this.container.querySelector('#auth-guest') as HTMLButtonElement | null;
+    const dontShowEl = this.container.querySelector('#auth-dont-show') as HTMLInputElement | null;
+
+    const dismiss = () => {
+      try {
+        if (dontShowEl?.checked) localStorage.setItem(AUTH_MODAL_DONT_SHOW_KEY, '1');
+      } catch {
+        // ignore storage errors
+      }
+      this.hide();
+    };
 
     toggleBtn.addEventListener('click', () => {
       isSignUp = !isSignUp;
       updateUI();
     });
+
+    closeBtn?.addEventListener('click', dismiss);
+    guestBtn?.addEventListener('click', dismiss);
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

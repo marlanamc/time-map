@@ -3,7 +3,7 @@
 // ===================================
 import { State } from '../../core/State';
 import { Goals } from '../../core/Goals';
-import { CONFIG } from '../../config';
+import { CONFIG, VIEWS } from '../../config';
 import type { UIElements } from '../../types';
 
 export const WeekRenderer = {
@@ -21,6 +21,12 @@ export const WeekRenderer = {
     const weekEnd = new Date(weekStart.getTime() + 6 * 86400000);
     const today = new Date();
     const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const formatYmd = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    };
 
     const visionGoals = Goals.getForRange(new Date(weekStart.getFullYear(), 0, 1), new Date(weekStart.getFullYear(), 11, 31))
       .filter((g) => g.level === "vision" && g.status !== "done");
@@ -77,6 +83,7 @@ export const WeekRenderer = {
       const date = new Date(weekStart);
       date.setDate(date.getDate() + i);
       const isToday = date.toDateString() === today.toDateString();
+      const ymd = formatYmd(date);
       const dayGoals = Goals.getForDate(date)
         .filter((g) => g.level === "intention")
         .slice()
@@ -85,8 +92,11 @@ export const WeekRenderer = {
       html += `
           <div class="week-day-column ${isToday ? 'today' : ''}">
             <div class="week-day-header">
-              <div class="week-day-name">${dayNames[i]}</div>
-              <div class="week-day-date">${date.getDate()}</div>
+              <button type="button" class="week-day-jump" data-date="${ymd}" aria-label="Open ${date.toDateString()}">
+                <span class="week-day-name">${dayNames[i]}</span>
+                <span class="week-day-date">${date.getDate()}</span>
+              </button>
+              ${dayGoals.length > 0 ? `<div class="week-day-badge" aria-label="${dayGoals.length} intentions">${dayGoals.length}</div>` : ""}
             </div>
             <div class="week-day-goals">
       `;
@@ -120,6 +130,23 @@ export const WeekRenderer = {
       </div>`;
 
     container.innerHTML = html;
+
+    // Navigate to the day view when tapping a day header.
+    container.querySelectorAll<HTMLElement>('.week-day-jump[data-date]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const iso = btn.dataset.date;
+        if (!iso) return;
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+        if (!match) return;
+        const y = Number(match[1]);
+        const m = Number(match[2]) - 1;
+        const d = Number(match[3]);
+        State.goToDate(new Date(y, m, d));
+        State.setView(VIEWS.DAY);
+      });
+    });
 
     // Add click handlers for goal items
     container.querySelectorAll('.week-goal-item[data-goal-id]').forEach((card: Element) => {

@@ -130,6 +130,24 @@ export const AppSettings = {
             <div class="settings-section">
               <h3>Data</h3>
               <div class="setting-row">
+                <div class="setting-label">
+                  <label>Version</label>
+                  <div class="setting-description">Offline cache (service worker)</div>
+                </div>
+                <div class="setting-control">
+                  <div id="settingsSwVersion" style="font-size: var(--text-sm); font-weight: 650; color: var(--text-secondary);">—</div>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <label>Offline cache</label>
+                  <div class="setting-description">Clear stored files and reload</div>
+                </div>
+                <div class="setting-control">
+                  <button class="btn btn-ghost" id="clearCacheBtn" type="button">Clear cache</button>
+                </div>
+              </div>
+              <div class="setting-row">
                 <label>Backup</label>
                 <button class="btn btn-ghost" id="downloadBackupBtn">Download JSON</button>
               </div>
@@ -153,6 +171,68 @@ export const AppSettings = {
       `;
 
     document.body.appendChild(modal);
+
+    const swVersionEl = modal.querySelector("#settingsSwVersion") as HTMLElement | null;
+    if (swVersionEl) {
+      try {
+        swVersionEl.textContent = localStorage.getItem("gardenFence.swVersion") || "—";
+      } catch {
+        swVersionEl.textContent = "—";
+      }
+    }
+
+    const clearCacheBtn = modal.querySelector("#clearCacheBtn") as HTMLButtonElement | null;
+    clearCacheBtn?.addEventListener("click", async () => {
+      if (!confirm("Clear offline cache and reload?")) return;
+      if (clearCacheBtn) {
+        clearCacheBtn.disabled = true;
+        clearCacheBtn.textContent = "Clearing...";
+      }
+
+      const clearViaWindow = async () => {
+        if (!("caches" in window)) throw new Error("Cache storage not available");
+        const keys = await caches.keys();
+        await Promise.all(
+          keys.filter((k) => k.startsWith("garden-fence-")).map((k) => caches.delete(k)),
+        );
+      };
+
+      try {
+        if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+          const controller = navigator.serviceWorker.controller;
+          const result = await new Promise<"ok" | "fail" | "timeout">((resolve) => {
+            let timeoutId: number | null = null;
+            const onMessage = (event: MessageEvent) => {
+              const type = event?.data?.type;
+              if (type === "CACHES_CLEARED") finish("ok");
+              if (type === "CACHES_CLEAR_FAILED") finish("fail");
+            };
+            const finish = (value: "ok" | "fail" | "timeout") => {
+              if (timeoutId) window.clearTimeout(timeoutId);
+              timeoutId = null;
+              navigator.serviceWorker.removeEventListener("message", onMessage);
+              resolve(value);
+            };
+            timeoutId = window.setTimeout(() => finish("timeout"), 4000);
+            navigator.serviceWorker.addEventListener("message", onMessage);
+            controller.postMessage({ type: "CLEAR_CACHES" });
+          });
+
+          if (result !== "ok") await clearViaWindow();
+        } else {
+          await clearViaWindow();
+        }
+
+        window.location.reload();
+      } catch (e) {
+        console.error(e);
+        alert("Couldn’t clear cache.");
+        if (clearCacheBtn) {
+          clearCacheBtn.disabled = false;
+          clearCacheBtn.textContent = "Clear cache";
+        }
+      }
+    });
 
     modal
       .querySelector("#settingsShortcutsBtn")

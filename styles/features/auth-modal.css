@@ -28,6 +28,57 @@
     width: 100% !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
     border: 1px solid var(--glass-border) !important;
+    position: relative;
+}
+
+.auth-modal-close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.65);
+    color: var(--text-primary);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dark-mode .auth-modal-close {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.auth-modal-secondary {
+    margin-top: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.auth-modal-secondary-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    padding: var(--space-2);
+    min-height: 44px;
+}
+
+.auth-modal-dontshow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
 }
 
 #auth-modal input[type="email"],

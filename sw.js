@@ -1,12 +1,10 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v6";
 const CACHE_NAME = `garden-fence-${CACHE_VERSION}`;
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.bundle.min.css",
-  "./dist/app.js",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/maskable-icon.svg",
@@ -20,7 +18,7 @@ async function precacheShell() {
   await Promise.all(
     APP_SHELL.map(async (url) => {
       try {
-        const res = await fetch(url, { cache: "reload" });
+        const res = await fetch(url, { cache: "no-store" });
         if (res.ok) await cache.put(url, res);
       } catch {
         // Ignore precache failures (offline / transient).
@@ -38,9 +36,30 @@ async function fetchAndCache(request) {
   return response;
 }
 
+async function clearGardenFenceCaches() {
+  const keys = await caches.keys();
+  await Promise.all(
+    keys
+      .filter((key) => key.startsWith("garden-fence-"))
+      .map((key) => {
+        console.log(`[SW] Clearing cache: ${key}`);
+        return caches.delete(key);
+      }),
+  );
+  await precacheShell();
+}
+
+async function broadcastToClients(message) {
+  const clients = await self.clients.matchAll({
+    type: "window",
+    includeUncontrolled: true,
+  });
+  clients.forEach((client) => client.postMessage(message));
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    precacheShell().then(() => self.skipWaiting())
+    precacheShell()
   );
 });
 
@@ -52,15 +71,37 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           keys
             .filter((key) => key.startsWith("garden-fence-") && key !== CACHE_NAME)
-            .map((key) => caches.delete(key))
+            .map((key) => {
+              console.log(`[SW] Deleting old cache: ${key}`);
+              return caches.delete(key);
+            })
         )
       )
-      .then(() => self.clients.claim())
+      .then(() => {
+        console.log(`[SW] Activated with cache: ${CACHE_NAME}`);
+        return self.clients.claim();
+      })
+      .then(() => broadcastToClients({ type: "SW_VERSION", version: CACHE_VERSION }))
   );
 });
 
 self.addEventListener("message", (event) => {
-  if (event?.data?.type === "SKIP_WAITING") self.skipWaiting();
+  const type = event?.data?.type;
+  if (type === "SKIP_WAITING") {
+    self.skipWaiting();
+    return;
+  }
+  if (type === "GET_VERSION") {
+    event.source?.postMessage({ type: "SW_VERSION", version: CACHE_VERSION });
+    return;
+  }
+  if (type === "CLEAR_CACHES") {
+    event.waitUntil(
+      clearGardenFenceCaches()
+        .then(() => event.source?.postMessage({ type: "CACHES_CLEARED" }))
+        .catch(() => event.source?.postMessage({ type: "CACHES_CLEAR_FAILED" })),
+    );
+  }
 });
 
 self.addEventListener("fetch", (event) => {
@@ -73,17 +114,16 @@ self.addEventListener("fetch", (event) => {
   const accept = request.headers.get("accept") || "";
   const isNavigation = request.mode === "navigate" || accept.includes("text/html");
   const isEnv = url.pathname.endsWith("/env.js") || url.pathname === "/env.js";
-  const isCriticalAsset =
-    url.pathname === "/dist/app.js" ||
-    url.pathname === "/styles.bundle.min.css" ||
-    url.pathname === "/manifest.webmanifest" ||
-    url.pathname === "/styles.css" ||
-    url.pathname === "/app.min.js" ||
-    url.pathname === "/app.js";
+  
+  // CSS and JS files that change frequently - always fetch from network first
+  const isCSS = url.pathname.endsWith(".css") || accept.includes("text/css");
+  const isJS = url.pathname.endsWith(".js") && !url.pathname.includes("node_modules");
+  const isCriticalAsset = isCSS || isJS;
 
   if (isNavigation) {
+    // Network first for HTML to get latest version
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: "no-store" })
         .then((response) => {
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy)).catch(() => {});
@@ -95,26 +135,49 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (isEnv) {
+    // Network first for env.js
     event.respondWith(
-      fetchAndCache(request)
+      fetch(request, { cache: "no-store" })
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+          }
+          return response;
+        })
         .catch(() => caches.match(request))
     );
     return;
   }
 
-  // JS/CSS are updated frequently but have stable URLs. Prefer fresh network responses so
-  // users don't need to reinstall the PWA to pick up changes.
+  // Network-first strategy for CSS and JS - always try network first, fallback to cache
   if (isCriticalAsset) {
     event.respondWith(
-      fetchAndCache(request).catch(() => caches.match(request)),
+      fetch(request, { cache: "no-store" })
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }
 
+  // Cache-first for static assets (icons, etc.)
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
-      return fetchAndCache(request)
+      return fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+          }
+          return response;
+        })
         .catch(() => undefined);
     })
   );

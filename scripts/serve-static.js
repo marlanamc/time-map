@@ -43,9 +43,39 @@ function safeResolve(rootDir, urlPathname) {
   return resolved;
 }
 
+// Inject script to disable service worker in dev mode
+const DEV_SW_DISABLE_SCRIPT = `
+<script>
+  // DEV MODE: Unregister service worker for instant CSS/JS updates
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(r => r.unregister());
+    });
+    // Clear all caches
+    if ('caches' in window) {
+      caches.keys().then(names => names.forEach(name => caches.delete(name)));
+    }
+    console.log('[DEV] Service worker disabled, caches cleared');
+  }
+</script>
+`;
+
+// Legacy/static mode asset injection (used by `npm run test:serve` and `npm run dev:legacy`).
+// Replaces the Vite dev entrypoint with the precompiled esbuild outputs in /dist.
+const LEGACY_ASSET_INJECTION = `
+<link rel="stylesheet" href="/dist/app.css" />
+<script src="/dist/app.js"></script>
+`;
+
 async function main() {
   const { port } = parseArgs(process.argv);
   const rootDir = process.cwd();
+
+  console.log('\n🌱 Garden Fence Dev Server');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('✓ Service worker disabled for instant updates');
+  console.log('✓ All caches cleared on page load');
+  console.log('✓ No-store headers on all responses\n');
 
   const server = http.createServer(async (req, res) => {
     try {
@@ -59,12 +89,30 @@ async function main() {
         return;
       }
 
-      const data = await fs.readFile(filePath);
+      let data = await fs.readFile(filePath);
       const ext = path.extname(filePath).toLowerCase();
       const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+      // Inject SW disable script into HTML
+      if (ext === '.html') {
+        let html = data.toString('utf-8');
+        // Insert right after <head> tag
+        html = html.replace(/<head>/i, `<head>${DEV_SW_DISABLE_SCRIPT}`);
+        // Swap Vite entrypoint for compiled assets when serving statically.
+        html = html.replace(
+          /<script\s+type=["']module["']\s+src=["']\/src\/app\.ts["']\s*><\/script>/i,
+          LEGACY_ASSET_INJECTION,
+        );
+        data = Buffer.from(html, 'utf-8');
+      }
+
+      // Aggressive no-cache headers
       res.writeHead(200, {
         'content-type': contentType,
-        'cache-control': 'no-store',
+        'cache-control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'pragma': 'no-cache',
+        'expires': '0',
+        'surrogate-control': 'no-store',
       });
       res.end(data);
     } catch (error) {
@@ -80,7 +128,8 @@ async function main() {
   });
 
   server.listen(port, '127.0.0.1', () => {
-    console.log(`Static server running at http://127.0.0.1:${port}`);
+    console.log(`🚀 Server: http://127.0.0.1:${port}`);
+    console.log('\n💡 Tip: Just refresh the page to see CSS/JS changes!\n');
   });
 
   const shutdown = () => {
@@ -95,4 +144,3 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
-

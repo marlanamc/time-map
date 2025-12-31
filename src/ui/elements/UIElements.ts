@@ -60,7 +60,6 @@ export function cacheElements(): UIElements {
     mobileSurpriseBtn: document.getElementById("mobileSurpriseBtn") as HTMLButtonElement | null,
     mobileTabHome: document.querySelector('.mobile-tab[data-view="home"]') as HTMLElement | null,
     mobileGoalsByLevel: document.getElementById("mobileGoalsByLevel") as HTMLElement | null,
-    mobileHereContext: document.getElementById("mobileHereContext") as HTMLElement | null,
     mobileHereGarden: document.getElementById("mobileHereGarden") as HTMLElement | null,
 
     // ND Support elements (may not exist yet)

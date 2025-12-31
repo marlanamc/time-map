@@ -6,30 +6,30 @@
 /* CSS Variables */
 :root {
     /* Base colors - Soft Natural Palette */
-    --bg-base: #EBE8E1;
+    --bg-base: #E2DFD8;
     /* soft warm linen */
-    --bg-elevated: #E5E2DB;
+    --bg-elevated: #DBD8D1;
     /* warm stone */
-    --bg-surface: rgba(250, 248, 245, 0.75);
+    --bg-surface: rgba(242, 240, 236, 0.80);
     /* gentle cream */
-    --bg-hover: #DDD9D2;
+    --bg-hover: #D5D1CA;
     /* light taupe */
-    --bg-active: #D0CBC2;
+    --bg-active: #CAC5BC;
     /* soft sand */
 
     /* Glass effects - Soft & Gentle */
-    --glass-bg: rgba(250, 248, 245, 0.55);
-    --glass-border: rgba(107, 168, 169, 0.18);
-    --glass-shine: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(245, 243, 240, 0.75);
+    --glass-border: rgba(90, 140, 140, 0.20);
+    --glass-shine: rgba(255, 255, 255, 0.4);
 
     /* Text hierarchy - Optimized for day mode (dark text on light backgrounds) */
     --text-primary: #0D1517;
     /* near black for maximum readability */
-    --text-secondary: #2C3E42;
+    --text-secondary: #3D4F54;
     /* dark gray for secondary content */
-    --text-tertiary: #3A4A4E;
+    --text-tertiary: #5A6B70;
     /* medium gray for tertiary content */
-    --text-ghost: #4A5A60;
+    --text-ghost: #7A8B90;
     /* subtle gray for hints/metadata */
 
     /* Daylight Garden Colors (Vibrant Primary) */
@@ -59,8 +59,8 @@
     --accent-subtle: rgba(74, 144, 153, 0.08);
 
     /* Month card transparency */
-    --month-card-bg: rgba(250, 248, 245, 0.30);
-    --month-card-bg-hover: rgba(250, 248, 245, 0.45);
+    --month-card-bg: rgba(245, 243, 240, 0.34);
+    --month-card-bg-hover: rgba(245, 243, 240, 0.48);
     --month-card-past-grey: rgba(160, 160, 160, 0.12);
     --month-card-past-grey-hover: rgba(160, 160, 160, 0.18);
 
@@ -148,6 +148,43 @@
     --text-2xl: 1.5rem;
     --text-3xl: 2rem;
 
+    /* ===========================================
+       Common Pattern Utilities
+       =========================================== */
+    
+    /* Card styles */
+    --card-bg: var(--glass-bg);
+    --card-border: 1px solid var(--glass-border);
+    --card-radius: var(--radius-lg);
+    --card-shadow: var(--shadow-sm);
+    --card-padding: var(--space-4);
+    
+    /* Interactive element states */
+    --focus-ring: 0 0 0 2px var(--accent-muted);
+    --focus-ring-offset: 0 0 0 4px var(--bg-base);
+    
+    /* Section spacing */
+    --section-gap: var(--space-6);
+    --item-gap: var(--space-3);
+    
+    /* Input styles */
+    --input-bg: var(--bg-surface);
+    --input-border: 1px solid var(--glass-border);
+    --input-radius: var(--radius-md);
+    --input-padding: var(--space-3) var(--space-4);
+    
+    /* Button common properties */
+    --btn-radius: var(--radius-md);
+    --btn-padding: var(--space-3) var(--space-5);
+    --btn-font-weight: 500;
+    
+    /* Common transitions */
+    --transition-colors: color var(--duration-fast) var(--ease-out), 
+                         background-color var(--duration-fast) var(--ease-out),
+                         border-color var(--duration-fast) var(--ease-out);
+    --transition-transform: transform var(--duration-fast) var(--ease-out);
+    --transition-all: all var(--duration-normal) var(--ease-out);
+
     /* Garden Engine - Dynamic Time & Season Variables */
     --time-brightness: 1;
     --time-saturation: 1;
@@ -173,34 +210,119 @@
    Dark Mode Text Colors
 
    Strategy: Adapt text color based on background brightness
-   - During golden hour/daylight with light backgrounds → dark text
-   - During nighttime with dark backgrounds → white text
-   - Base dark mode (no time theme) → white text
+   - Dark mode → dark UI with light text (consistent)
+   - Light mode + time-night → light text (dark sky)
    =================================== */
 
-/* Light mode during nighttime → white text for dark backgrounds */
-:root.time-night {
-    --text-primary: rgba(255, 255, 255, 0.95);
-    --text-secondary: rgba(255, 255, 255, 0.80);
-    --text-tertiary: rgba(255, 255, 255, 0.65);
-    --text-ghost: rgba(255, 255, 255, 0.50);
-}
-
-/* Dark mode base → white text for dark backgrounds */
+/* Dark mode base → dark UI with light text */
 :root.dark-mode {
+    --bg-base: #0B1624;
+    --bg-elevated: #111E2D;
+    --bg-surface: rgba(17, 30, 45, 0.82);
+    --bg-hover: rgba(24, 40, 58, 0.86);
+    --bg-active: rgba(32, 52, 74, 0.90);
+
+    --glass-bg: rgba(12, 22, 36, 0.72);
+    --glass-border: rgba(140, 183, 217, 0.18);
+    --glass-shine: rgba(180, 210, 240, 0.10);
+
     --text-primary: rgba(255, 255, 255, 0.95);
-    --text-secondary: rgba(255, 255, 255, 0.80);
-    --text-tertiary: rgba(255, 255, 255, 0.65);
-    --text-ghost: rgba(255, 255, 255, 0.50);
+    --text-secondary: rgba(255, 255, 255, 0.75);
+    --text-tertiary: rgba(255, 255, 255, 0.60);
+    --text-ghost: rgba(255, 255, 255, 0.45);
+
+    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.55);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.62);
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.68);
+    --shadow-xl: 0 36px 90px rgba(0, 0, 0, 0.74);
+
+    --month-card-bg: rgba(17, 30, 45, 0.30);
+    --month-card-bg-hover: rgba(24, 40, 58, 0.42);
+    --month-card-past-grey: rgba(120, 140, 160, 0.12);
+    --month-card-past-grey-hover: rgba(120, 140, 160, 0.18);
 }
 
-/* Dark mode during daylight hours with light backgrounds → dark text */
-:root.dark-mode.time-dawn,
-:root.dark-mode.time-morning,
-:root.dark-mode.time-afternoon,
+/* Time-of-day UI tuning (light mode): soften glass + shadows for transition periods */
+:root.time-dawn {
+    --bg-surface: rgba(248, 240, 244, 0.80);
+    --glass-bg: rgba(250, 242, 246, 0.75);
+    --glass-border: rgba(184, 140, 160, 0.20);
+    --shadow-sm: 0 4px 12px rgba(33, 55, 44, 0.10);
+    --shadow-md: 0 12px 24px rgba(33, 55, 44, 0.10);
+    --shadow-glow: 0 0 24px rgba(232, 200, 216, 0.15);
+}
+
+:root.time-morning {
+    --bg-surface: rgba(238, 246, 250, 0.80);
+    --glass-bg: rgba(242, 250, 255, 0.74);
+    --glass-border: rgba(135, 206, 235, 0.18);
+    --shadow-sm: 0 4px 12px rgba(33, 55, 44, 0.10);
+    --shadow-md: 0 12px 24px rgba(33, 55, 44, 0.10);
+}
+
+:root.time-afternoon {
+    --bg-surface: rgba(236, 244, 252, 0.80);
+    --glass-bg: rgba(238, 248, 255, 0.72);
+    --glass-border: rgba(74, 144, 226, 0.16);
+    --shadow-sm: 0 4px 12px rgba(33, 55, 44, 0.12);
+    --shadow-md: 0 12px 24px rgba(33, 55, 44, 0.12);
+}
+
+:root.time-evening {
+    --bg-surface: rgba(252, 246, 238, 0.80);
+    --glass-bg: rgba(255, 250, 242, 0.75);
+    --glass-border: rgba(255, 140, 66, 0.18);
+    --shadow-sm: 0 4px 12px rgba(70, 40, 20, 0.14);
+    --shadow-md: 0 12px 24px rgba(70, 40, 20, 0.14);
+    --shadow-glow: 0 0 20px rgba(255, 179, 71, 0.15);
+}
+
+/* Time-of-day palettes (dark mode): keep UI dark, shift undertones */
+:root.dark-mode.time-dawn {
+    --bg-base: #0E1322;
+    --bg-elevated: #161B2F;
+    --bg-surface: rgba(22, 27, 47, 0.86);
+    --bg-hover: rgba(30, 36, 58, 0.88);
+    --bg-active: rgba(38, 46, 72, 0.90);
+
+    --glass-bg: rgba(14, 18, 34, 0.76);
+    --glass-border: rgba(217, 140, 183, 0.18);
+    --glass-shine: rgba(255, 220, 245, 0.06);
+}
+
+:root.dark-mode.time-morning {
+    --bg-base: #0B1828;
+    --bg-elevated: #10233A;
+    --bg-surface: rgba(16, 35, 58, 0.86);
+    --bg-hover: rgba(22, 46, 74, 0.88);
+    --bg-active: rgba(30, 60, 92, 0.90);
+
+    --glass-bg: rgba(11, 24, 40, 0.76);
+    --glass-border: rgba(140, 183, 217, 0.18);
+    --glass-shine: rgba(180, 210, 240, 0.08);
+}
+
+:root.dark-mode.time-afternoon {
+    --bg-base: #081727;
+    --bg-elevated: #0D2238;
+    --bg-surface: rgba(13, 34, 56, 0.88);
+    --bg-hover: rgba(18, 44, 70, 0.90);
+    --bg-active: rgba(26, 60, 92, 0.92);
+
+    --glass-bg: rgba(9, 20, 36, 0.78);
+    --glass-border: rgba(140, 183, 217, 0.20);
+    --glass-shine: rgba(180, 210, 240, 0.06);
+}
+
 :root.dark-mode.time-evening {
-    --text-primary: #0D1517;
-    --text-secondary: #2C3E42;
-    --text-tertiary: #3A4A4E;
-    --text-ghost: #4A5A60;
+    --bg-base: #190F0D;
+    --bg-elevated: #241610;
+    --bg-surface: rgba(36, 22, 16, 0.86);
+    --bg-hover: rgba(48, 30, 22, 0.88);
+    --bg-active: rgba(62, 40, 28, 0.90);
+
+    --glass-bg: rgba(22, 14, 10, 0.76);
+    --glass-border: rgba(231, 125, 62, 0.18);
+    --glass-shine: rgba(255, 210, 180, 0.06);
 }

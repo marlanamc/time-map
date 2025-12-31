@@ -10,6 +10,8 @@ import { cacheService } from '../services/CacheService';
 import { throttledPreferencesSync } from '../utils/syncHelpers';
 import { eventBus } from './EventBus';
 
+const AUTH_MODAL_DONT_SHOW_KEY = 'gardenFence.authModal.dontShow';
+
 export const State: AppState & {
   init: () => void;
   getWeekNumber: (date: Date) => number;
@@ -42,12 +44,21 @@ export const State: AppState & {
     const user = await SupabaseService.getUser();
 
     if (!user) {
-      // Show Auth Modal if not logged in
-      console.log('No user found, showing auth modal...');
-      const auth = new AuthComponent();
-      auth.render();
-      // Ensure modal is visible
-      auth.show();
+      let suppressAuthModal = false;
+      try {
+        suppressAuthModal = localStorage.getItem(AUTH_MODAL_DONT_SHOW_KEY) === '1';
+      } catch {
+        suppressAuthModal = false;
+      }
+
+      if (!suppressAuthModal) {
+        // Show Auth Modal if not logged in
+        console.log('No user found, showing auth modal...');
+        const auth = new AuthComponent();
+        auth.render();
+        // Ensure modal is visible
+        auth.show();
+      }
     } else {
       // Load cloud data
       console.log('User logged in, loading cloud data...');

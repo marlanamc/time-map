@@ -22,7 +22,13 @@ import { goalDetailModal } from './modals/GoalDetailModal';
 import { monthDetailModal } from './modals/MonthDetailModal';
 import { quickAdd } from '../features/QuickAdd';
 import { isSupabaseConfigured } from '../supabaseClient';
+import { SwipeNavigator } from './gestures/SwipeNavigator';
 import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, Category, Priority, AccentTheme, Subtask } from '../types';
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
 
 export const UI = {
   els: {}, // Shortcut reference for elements
@@ -37,6 +43,9 @@ export const UI = {
   _pendingViewTransition: false,
   _scrollResetRaf: null as number | null,
   _homeProgressScopeIndex: 3 as number, // 0=day,1=week,2=month,3=year
+  _deferredInstallPrompt: null as BeforeInstallPromptEvent | null,
+  _rendererEventListenersSetup: false,
+  _swipeNavigator: null as SwipeNavigator | null,
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
 
@@ -49,6 +58,7 @@ export const UI = {
           // Force a reflow to recalculate dimensions
           void this.elements.canvasContainer.offsetHeight;
         }
+        this.setupSwipeNavigation();
       },
       onRenderRequired: () => {
         // Re-render current view to adjust to new dimensions
@@ -70,7 +80,7 @@ export const UI = {
   },
 
 
-  updateSyncStatus(status: 'syncing' | 'synced' | 'error' | 'local'): void {
+  updateSyncStatus(status: 'syncing' | 'synced' | 'error' | 'local' | 'offline'): void {
     const el = document.getElementById("syncStatus");
     const supportPanelEl = document.getElementById("supportPanelSyncStatus");
 
@@ -79,7 +89,7 @@ export const UI = {
       const icon = element.querySelector(".sync-icon");
       const text = element.querySelector(".sync-text");
 
-      element.classList.remove("syncing", "synced", "error");
+      element.classList.remove("syncing", "synced", "error", "offline");
 
       if (status === 'syncing') {
         element.classList.add("syncing");
@@ -98,6 +108,10 @@ export const UI = {
         element.classList.add("error");
         if (icon) icon.textContent = "❌";
         if (text) text.textContent = "Sync Error";
+      } else if (status === 'offline') {
+        element.classList.add("offline");
+        if (icon) icon.textContent = "📴";
+        if (text) text.textContent = "Offline";
       } else {
         if (icon) icon.textContent = "☁️";
         if (text) text.textContent = "Local Only";
@@ -112,14 +126,17 @@ export const UI = {
   init() {
     this.cacheElements();
     this.els = this.elements; // Alias for convenience
+    this.setupRendererEventListeners();
     this.bindEvents();
     this.setupEventBusListeners(); // Set up EventBus communication
     this.setupSyncEventListeners(); // Set up sync status event listeners
+    this.setupInstallPrompt(); // Set up PWA install prompt handling
     this.setupZenFocusCallbacks(); // Set up ZenFocus feature callbacks
     this.setupGoalDetailModalCallbacks(); // Set up GoalDetailModal callbacks
     this.setupQuickAddCallbacks(); // Set up QuickAdd callbacks
     this.setupMonthDetailModalCallbacks(); // Set up MonthDetailModal callbacks
     this.setupViewportMode();
+    this.setupSwipeNavigation();
     this.applySavedUIState();
     this.render();
     this.updateTimeDisplay();
@@ -139,6 +156,60 @@ export const UI = {
     if (Planning.shouldPromptReview()) {
       setTimeout(() => this.showReviewPrompt(), 3000);
     }
+  },
+
+  setupRendererEventListeners() {
+    if (this._rendererEventListenersSetup) return;
+    this._rendererEventListenersSetup = true;
+
+    this.elements.calendarGrid?.addEventListener("goal-click", (e) => {
+      const ev = e as CustomEvent<{ goalId?: string }>;
+      const goalId = ev.detail?.goalId;
+      if (goalId) goalDetailModal.show(goalId);
+    });
+  },
+
+  setupSwipeNavigation() {
+    const isMobile = viewportManager.isMobileViewport();
+    const el = this.elements.canvasContainer;
+    if (!isMobile || !el) {
+      this._swipeNavigator?.detach();
+      this._swipeNavigator = null;
+      return;
+    }
+
+    if (!this._swipeNavigator) {
+      const shouldHandleStart = (target: Element | null) => {
+        if (!target) return true;
+        return !(
+          target.closest("input") ||
+          target.closest("textarea") ||
+          target.closest("select") ||
+          target.closest("button") ||
+          target.closest("a") ||
+          target.closest(".modal") ||
+          target.closest(".modal-overlay") ||
+          target.closest(".support-panel") ||
+          target.closest("[data-disable-swipe]")
+        );
+      };
+
+      const viewOrder: ViewType[] = [VIEWS.HOME, VIEWS.DAY, VIEWS.WEEK, VIEWS.MONTH, VIEWS.YEAR];
+      const navigate = (dir: "left" | "right") => {
+        const idx = viewOrder.indexOf(State.currentView);
+        if (idx === -1) return;
+        const nextIdx = dir === "left" ? idx + 1 : idx - 1;
+        if (nextIdx < 0 || nextIdx >= viewOrder.length) return;
+        State.setView(viewOrder[nextIdx]);
+      };
+
+      this._swipeNavigator = new SwipeNavigator({
+        onSwipe: (direction) => navigate(direction),
+        shouldHandleStart,
+      });
+    }
+
+    this._swipeNavigator.attach(el);
   },
 
   /**
@@ -178,26 +249,69 @@ export const UI = {
     window.addEventListener('sync-error', ((e: CustomEvent) => {
       const message = e.detail?.message || 'Sync failed';
       this.updateSyncStatus('error');
-      Toast.show(this.elements, '⚠️', message);
+      Toast.show(this.elements, '⚠️', `Sync failed: ${message}`);
     }) as EventListener);
 
     // Listen for sync storage errors from SyncQueue
     window.addEventListener('sync-storage-error', ((e: CustomEvent) => {
       const message = e.detail?.message || 'Sync queue corrupted';
       this.updateSyncStatus('error');
-      Toast.show(this.elements, '⚠️', message);
+      Toast.show(this.elements, '⚠️', `Sync error: ${message}`);
     }) as EventListener);
 
     // Generic sync status events (syncing/synced/error/local)
     window.addEventListener('sync-status', ((e: CustomEvent) => {
-      const status = e.detail?.status as ('syncing' | 'synced' | 'error' | 'local' | undefined);
+      const status = e.detail?.status as ('syncing' | 'synced' | 'error' | 'local' | 'offline' | undefined);
       if (!status) return;
-      if (status === 'syncing' || status === 'synced' || status === 'error' || status === 'local') {
+      if (status === 'syncing' || status === 'synced' || status === 'error' || status === 'local' || status === 'offline') {
         this.updateSyncStatus(status);
       }
     }) as EventListener);
 
     console.log('✓ Sync event listeners registered in UIManager');
+  },
+
+  setupInstallPrompt() {
+    const installBtn = document.getElementById("installAppBtn");
+    if (!installBtn) return;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      this._deferredInstallPrompt = e as BeforeInstallPromptEvent;
+      installBtn.removeAttribute("hidden");
+      Toast.show(this.elements, "📲", "Install is available in Support Tools.");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      this._deferredInstallPrompt = null;
+      installBtn.setAttribute("hidden", "");
+      Toast.show(this.elements, "✅", "App installed.");
+    });
+  },
+
+  async promptInstall() {
+    const installBtn = document.getElementById("installAppBtn");
+    const deferred = this._deferredInstallPrompt;
+    if (!deferred) {
+      Toast.show(this.elements, "ℹ️", "Install isn’t available right now.");
+      return;
+    }
+
+    try {
+      await deferred.prompt();
+      const choice = await deferred.userChoice.catch(() => null);
+      if (choice?.outcome === "accepted") {
+        Toast.show(this.elements, "✅", "Installing…");
+      } else if (choice?.outcome === "dismissed") {
+        Toast.show(this.elements, "👍", "Not now.");
+      }
+    } catch (error) {
+      console.error("Install prompt failed:", error);
+      Toast.show(this.elements, "⚠️", "Install failed.");
+    } finally {
+      this._deferredInstallPrompt = null;
+      installBtn?.setAttribute("hidden", "");
+    }
   },
 
   /**
@@ -235,6 +349,10 @@ export const UI = {
       onToast: (icon, message) => Toast.show(this.elements, icon, message),
       onCelebrate: (icon, title, message) => Celebration.show(this.elements, icon, title, message)
     });
+  },
+
+  openQuickAdd() {
+    quickAdd.show();
   },
 
   /**
@@ -369,6 +487,9 @@ export const UI = {
             break;
           case "syncNow":
             this.forceCloudSync();
+            break;
+          case "install":
+            void this.promptInstall();
             break;
           case "logout":
             this.handleLogout();
@@ -1300,8 +1421,11 @@ export const UI = {
         btn.classList.add("active");
 
         // Save preference
-        if (State.data && State.data.preferences && State.data.preferences.nd) {
-          State.data.preferences.nd.dayViewStyle = mode;
+        if (State.data) {
+          State.data.preferences.nd = {
+            ...(State.data.preferences.nd || {}),
+            dayViewStyle: mode,
+          };
           State.save();
         }
 

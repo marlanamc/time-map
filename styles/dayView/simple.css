@@ -12,16 +12,17 @@
 }
 
 .simple-day-section {
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--glass-bg);
     border-radius: 1rem;
     padding: 1rem;
-    border: 1px solid rgba(var(--sage-rgb), 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--duration-normal) var(--ease-out);
 }
 
 .simple-day-section:hover {
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-md);
 }
 
 .simple-section-header {
@@ -30,7 +31,7 @@
     gap: 0.75rem;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .simple-section-icon {
@@ -39,7 +40,7 @@
 
 .simple-section-title {
     font-weight: 600;
-    color: var(--text-main);
+    color: var(--text-primary);
     font-size: 1.1rem;
     flex: 1;
 }
@@ -63,10 +64,10 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: 1.5rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-style: italic;
     font-size: 0.9rem;
-    background: rgba(0, 0, 0, 0.02);
+    background: color-mix(in srgb, var(--bg-hover) 60%, transparent);
     border-radius: 0.5rem;
 }
 
@@ -74,7 +75,7 @@
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
-    background: rgba(0, 0, 0, 0.05);
+    background: color-mix(in srgb, var(--bg-hover) 70%, transparent);
     padding: 0.25rem;
     border-radius: 2rem;
     width: fit-content;
@@ -91,9 +92,9 @@
 }
 
 .day-style-toggle button.active {
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: var(--sage);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-xs);
+    color: var(--accent);
     font-weight: 600;
 }
 
@@ -111,7 +112,7 @@
 }
 
 .simple-day-section.completed .simple-section-count {
-    background: var(--text-muted);
+    background: var(--text-tertiary);
 }
 
 @media (max-width: 600px) {

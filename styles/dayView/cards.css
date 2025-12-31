@@ -106,6 +106,14 @@
     0 2px 4px rgba(111, 155, 134, 0.1);
 }
 
+.day-goal-checkbox::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  background: transparent;
+}
+
 .day-goal-checkbox::after {
   content: "";
   position: absolute;
