@@ -4,12 +4,53 @@
       <stop offset="0" stop-color="#FDFBF7"/>
       <stop offset="1" stop-color="#F7F3ED"/>
     </linearGradient>
+    <linearGradient id="fenceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8BB5A3"/>
+      <stop offset="100%" stop-color="#6F9B86"/>
+    </linearGradient>
+    <linearGradient id="fenceGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9FC4B2"/>
+      <stop offset="100%" stop-color="#7BA896"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <circle cx="256" cy="256" r="168" fill="#6F9B86" opacity="0.18"/>
-  <path d="M256 360c0-70 10-120 40-162" fill="none" stroke="#6F9B86" stroke-width="22" stroke-linecap="round"/>
-  <path d="M256 360c0-70-10-120-40-162" fill="none" stroke="#6F9B86" stroke-width="22" stroke-linecap="round"/>
-  <path d="M292 188c56 0 86 28 86 72-54 0-86-26-86-72Z" fill="#6F9B86"/>
-  <path d="M220 188c-56 0-86 28-86 72 54 0 86-26 86-72Z" fill="#6F9B86"/>
-  <circle cx="256" cy="360" r="22" fill="#E09A60"/>
+  <circle cx="256" cy="256" r="168" fill="#6F9B86" opacity="0.12"/>
+  
+  <!-- Modern fence design with clean geometric shapes -->
+  <!-- Left fence post -->
+  <rect x="180" y="200" width="20" height="180" rx="10" fill="url(#fenceGrad)" filter="url(#shadow)"/>
+  <rect x="184" y="200" width="12" height="180" rx="6" fill="#A8C9B8" opacity="0.4"/>
+  
+  <!-- Right fence post -->
+  <rect x="312" y="200" width="20" height="180" rx="10" fill="url(#fenceGrad2)" filter="url(#shadow)"/>
+  <rect x="316" y="200" width="12" height="180" rx="6" fill="#B8D5C5" opacity="0.4"/>
+  
+  <!-- Center fence post -->
+  <rect x="246" y="200" width="20" height="180" rx="10" fill="url(#fenceGrad)" filter="url(#shadow)"/>
+  <rect x="250" y="200" width="12" height="180" rx="6" fill="#A8C9B8" opacity="0.4"/>
+  
+  <!-- Horizontal rails -->
+  <rect x="180" y="240" width="152" height="8" rx="4" fill="url(#fenceGrad)" filter="url(#shadow)"/>
+  <rect x="180" y="300" width="152" height="8" rx="4" fill="url(#fenceGrad)" filter="url(#shadow)"/>
+  <rect x="180" y="340" width="152" height="8" rx="4" fill="url(#fenceGrad)" filter="url(#shadow)"/>
+  
+  <!-- Decorative top accents -->
+  <path d="M190 200 L190 180 L200 190 Z" fill="#6F9B86" opacity="0.6"/>
+  <path d="M256 200 L256 180 L266 190 Z" fill="#6F9B86" opacity="0.6"/>
+  <path d="M322 200 L322 180 L332 190 Z" fill="#6F9B86" opacity="0.6"/>
+  
+  <!-- Subtle bloom/flower accent -->
+  <circle cx="256" cy="360" r="16" fill="#E09A60" opacity="0.9" filter="url(#shadow)"/>
+  <circle cx="256" cy="360" r="10" fill="#F4C99F"/>
 </svg>

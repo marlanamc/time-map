@@ -1,9 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="The Garden Fence (maskable)">
+  <defs>
+    <linearGradient id="maskableFenceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#B8D5C5"/>
+      <stop offset="100%" stop-color="#8BB5A3"/>
+    </linearGradient>
+    <linearGradient id="maskableFenceGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#C4DDCE"/>
+      <stop offset="100%" stop-color="#9FC4B2"/>
+    </linearGradient>
+    <filter id="maskableShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.4"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
   <rect width="512" height="512" fill="#6F9B86"/>
-  <circle cx="256" cy="256" r="196" fill="#FDFBF7" opacity="0.16"/>
-  <path d="M256 384c0-82 12-140 48-189" fill="none" stroke="#FDFBF7" stroke-width="24" stroke-linecap="round"/>
-  <path d="M256 384c0-82-12-140-48-189" fill="none" stroke="#FDFBF7" stroke-width="24" stroke-linecap="round"/>
-  <path d="M300 190c66 0 104 32 104 86-64 0-104-30-104-86Z" fill="#FDFBF7"/>
-  <path d="M212 190c-66 0-104 32-104 86 64 0 104-30 104-86Z" fill="#FDFBF7"/>
-  <circle cx="256" cy="384" r="24" fill="#E09A60"/>
+  <circle cx="256" cy="256" r="196" fill="#FDFBF7" opacity="0.12"/>
+  
+  <!-- Modern fence design with clean geometric shapes -->
+  <!-- Left fence post -->
+  <rect x="180" y="200" width="24" height="200" rx="12" fill="url(#maskableFenceGrad)" filter="url(#maskableShadow)"/>
+  <rect x="186" y="200" width="12" height="200" rx="6" fill="#D4E6DB" opacity="0.5"/>
+  
+  <!-- Right fence post -->
+  <rect x="308" y="200" width="24" height="200" rx="12" fill="url(#maskableFenceGrad2)" filter="url(#maskableShadow)"/>
+  <rect x="314" y="200" width="12" height="200" rx="6" fill="#DCE8E1" opacity="0.5"/>
+  
+  <!-- Center fence post -->
+  <rect x="244" y="200" width="24" height="200" rx="12" fill="url(#maskableFenceGrad)" filter="url(#maskableShadow)"/>
+  <rect x="250" y="200" width="12" height="200" rx="6" fill="#D4E6DB" opacity="0.5"/>
+  
+  <!-- Horizontal rails -->
+  <rect x="180" y="240" width="152" height="10" rx="5" fill="url(#maskableFenceGrad)" filter="url(#maskableShadow)"/>
+  <rect x="180" y="300" width="152" height="10" rx="5" fill="url(#maskableFenceGrad)" filter="url(#maskableShadow)"/>
+  <rect x="180" y="340" width="152" height="10" rx="5" fill="url(#maskableFenceGrad)" filter="url(#maskableShadow)"/>
+  
+  <!-- Decorative top accents -->
+  <path d="M192 200 L192 175 L204 190 Z" fill="#FDFBF7" opacity="0.7"/>
+  <path d="M256 200 L256 175 L268 190 Z" fill="#FDFBF7" opacity="0.7"/>
+  <path d="M320 200 L320 175 L332 190 Z" fill="#FDFBF7" opacity="0.7"/>
+  
+  <!-- Subtle bloom/flower accent -->
+  <circle cx="256" cy="380" r="20" fill="#E09A60" opacity="0.95" filter="url(#maskableShadow)"/>
+  <circle cx="256" cy="380" r="12" fill="#F4C99F"/>
 </svg>
