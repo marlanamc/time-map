@@ -148,7 +148,7 @@
     font-weight: 600;
     box-shadow: var(--shadow-lg), var(--shadow-glow);
     z-index: 1000;
-    animation: pulse-glow 2s ease-in-out infinite;
+    will-change: transform, opacity;
 }
 
 .body-double-display[hidden] {
@@ -192,21 +192,30 @@
     background: rgba(0, 0, 0, 0.3);
 }
 
-@keyframes pulse-glow {
+.body-double-display::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(0, 193, 167, 0.26) 0%, transparent 70%);
+    pointer-events: none;
+    opacity: 0.15;
+    transform: scale(0.98);
+    will-change: transform, opacity;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
 
+@keyframes pulse-glow {
     0%,
     100% {
-        box-shadow: var(--shadow-lg), 0 0 16px rgba(0, 193, 167, 0.2);
+        opacity: 0.15;
+        transform: scale(0.98);
     }
 
     50% {
-        box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 193, 167, 0.3);
+        opacity: 0.32;
+        transform: scale(1.05);
     }
-}
-
-/* Slow down body double timer pulse */
-.body-double-display {
-    animation: pulse-glow 3s ease-in-out infinite;
 }
 
 /* Brain Dump Modal Styles */
@@ -802,4 +811,3 @@ input:checked+.toggle-slider:before {
         margin-top: var(--space-4);
     }
 }
-

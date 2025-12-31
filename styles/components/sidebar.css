@@ -98,8 +98,10 @@
     border-radius: var(--radius-xl);
     text-align: center;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+    min-height: fit-content;
 }
 
 .dark-mode .now-panel {
@@ -296,18 +298,50 @@
 
 /* Mobile-specific typography improvements for now-panel */
 @media (max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
+    .now-panel {
+        padding: var(--space-4) var(--space-3) !important;
+    }
+
     .now-panel-logo {
-        margin-bottom: var(--mobile-space-6);
-        padding-bottom: var(--mobile-space-5);
+        margin-bottom: var(--space-3) !important;
+        padding-bottom: 0 !important;
     }
 
     .now-label {
-        font-size: var(--text-sm);
+        font-size: var(--text-xs);
         font-weight: 700;
         letter-spacing: 0.1em;
         opacity: 1;
         color: var(--text-secondary);
-        margin-bottom: var(--space-4);
+        margin-bottom: var(--space-2) !important;
+    }
+
+    .now-date {
+        font-size: var(--text-xl) !important;
+        margin-bottom: var(--space-3) !important;
+    }
+
+    .garden-bloom {
+        margin: var(--space-2) 0 !important;
+        transform: scale(0.85);
+    }
+
+    .time-stats {
+        margin: var(--space-2) 0 !important;
+        gap: var(--space-3) !important;
+    }
+
+    .time-stat {
+        padding: var(--space-1) !important;
+    }
+
+    .time-garden-plot {
+        margin-top: var(--space-2) !important;
+    }
+
+    .plot-label {
+        font-size: var(--text-xs) !important;
+        margin-bottom: var(--space-1) !important;
     }
 }
 
@@ -355,21 +389,21 @@
 /* Mobile-specific time stats improvements */
 @media (max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
     .time-stats {
-        gap: var(--mobile-space-5);
-        padding-top: var(--mobile-space-5);
+        gap: var(--space-3) !important;
+        padding-top: var(--space-2) !important;
     }
 
     .time-stat-label {
-        font-size: var(--text-sm);
+        font-size: var(--text-xs) !important;
         font-weight: 600;
         opacity: 1;
         color: var(--text-secondary);
-        margin-top: var(--space-2);
+        margin-top: var(--space-1) !important;
     }
 
     .time-stat-value {
-        font-size: clamp(2rem, 8vw, 2.5rem);
-        font-weight: 800;
+        font-size: var(--text-xl) !important;
+        font-weight: 700;
     }
 }
 

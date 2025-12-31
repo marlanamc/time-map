@@ -61,7 +61,6 @@ export class GardenEngine {
   private celestialBodies: CelestialBodies;
   private lastTimeOfDay?: string;
   private particleSystem?: ParticleSystem;
-  private butterflies?: ButterfliesManager;
   private backgroundRenderer?: BackgroundRenderer;
   private soundManager: SoundManager;
   private performanceMonitor?: PerformanceMonitor;
@@ -633,10 +632,6 @@ export class GardenEngine {
 
     if (this.particleSystem) {
       this.particleSystem.stop();
-    }
-
-    if (this.butterflies) {
-      this.butterflies.stop();
     }
 
     if (this.performanceMonitor) {

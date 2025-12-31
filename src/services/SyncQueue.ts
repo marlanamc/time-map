@@ -24,9 +24,11 @@ interface QueuedOperation {
 
 class SyncQueue {
   private queue: QueuedOperation[] = [];
+  private failures: QueuedOperation[] = [];
   private processing = false;
   private readonly MAX_RETRIES = 3;
   private readonly STORAGE_KEY = 'sync_queue';
+  private readonly FAILURES_KEY = 'sync_queue_failures';
 
   // Resource tracking for cleanup
   private autoSyncInterval: number | null = null;
@@ -35,7 +37,12 @@ class SyncQueue {
 
   constructor() {
     this.loadQueue();
-    this.startAutoSync();
+    this.loadFailures();
+    const isTestEnv =
+      typeof process !== "undefined" && process.env?.NODE_ENV === "test";
+    if (!isTestEnv) {
+      this.startAutoSync();
+    }
   }
 
   /**
@@ -88,6 +95,25 @@ class SyncQueue {
     }
   }
 
+  private loadFailures(): void {
+    try {
+      const stored = localStorage.getItem(this.FAILURES_KEY);
+      if (!stored) return;
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        this.failures = parsed as QueuedOperation[];
+      }
+    } catch (error) {
+      console.warn("Failed to load sync failures:", error);
+      this.failures = [];
+      try {
+        localStorage.removeItem(this.FAILURES_KEY);
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   /**
    * Emit storage error event for user notification
    */
@@ -112,6 +138,29 @@ class SyncQueue {
     }
   }
 
+  private saveFailures(): void {
+    try {
+      localStorage.setItem(this.FAILURES_KEY, JSON.stringify(this.failures));
+    } catch (error) {
+      console.error("Failed to save sync failures:", error);
+    }
+  }
+
+  private registerBackgroundSync(): void {
+    try {
+      const nav: any = navigator;
+      if (!nav?.serviceWorker?.ready) return;
+      // SyncManager is not universally supported; best-effort only.
+      nav.serviceWorker.ready
+        .then((reg: any) => reg?.sync?.register?.("garden-fence-sync"))
+        .catch(() => {
+          // ignore
+        });
+    } catch {
+      // ignore
+    }
+  }
+
   /**
    * Add operation to queue
    *
@@ -127,6 +176,7 @@ class SyncQueue {
 
     this.queue.push(queuedOp);
     this.saveQueue();
+    this.registerBackgroundSync();
 
     console.log(`📥 Queued ${operation.type} operation for ${operation.entity}`);
 
@@ -180,7 +230,7 @@ class SyncQueue {
     this.processing = true;
 
     const operations = [...this.queue];
-    const failed: QueuedOperation[] = [];
+    const retryable: QueuedOperation[] = [];
 
     console.log(`🔄 Processing ${operations.length} queued operations...`);
 
@@ -196,21 +246,22 @@ class SyncQueue {
 
         op.retries++;
         if (op.retries < this.MAX_RETRIES) {
-          failed.push(op);
+          retryable.push(op);
           console.log(`  ⏳ Will retry (attempt ${op.retries}/${this.MAX_RETRIES})`);
         } else {
           console.error(`  ❌ Operation failed after ${this.MAX_RETRIES} retries:`, op);
-          // Could emit event for user notification here
+          this.failures.push(op);
+          this.saveFailures();
           this.emitSyncError(op);
         }
       }
     }
 
     // Keep failed operations in queue
-    this.queue = failed;
+    this.queue = retryable;
     this.saveQueue();
 
-    const succeeded = operations.length - failed.length;
+    const succeeded = operations.length - retryable.length;
     if (succeeded > 0) {
       console.log(`✓ Successfully synced ${succeeded}/${operations.length} operations`);
     }
@@ -263,11 +314,41 @@ class SyncQueue {
     const event = new CustomEvent('sync-error', {
       detail: {
         operation: op,
-        message: `Failed to sync ${op.entity} after ${this.MAX_RETRIES} attempts`
+        message: `Failed to sync ${op.entity} after ${this.MAX_RETRIES} attempts`,
+        needsAttention: true,
       }
     });
 
     window.dispatchEvent(event);
+  }
+
+  getFailures() {
+    return [...this.failures];
+  }
+
+  clearFailures(): void {
+    this.failures = [];
+    this.saveFailures();
+  }
+
+  discardFailure(id: string): void {
+    this.failures = this.failures.filter((f) => f.id !== id);
+    this.saveFailures();
+  }
+
+  retryFailure(id: string): void {
+    const found = this.failures.find((f) => f.id === id);
+    if (!found) return;
+    this.failures = this.failures.filter((f) => f.id !== id);
+    found.retries = 0;
+    found.timestamp = Date.now();
+    this.queue.push(found);
+    this.saveFailures();
+    this.saveQueue();
+    this.registerBackgroundSync();
+    if (navigator.onLine) {
+      void this.processQueue();
+    }
   }
 
   /**
@@ -276,6 +357,7 @@ class SyncQueue {
   getStatus() {
     return {
       pending: this.queue.length,
+      failures: this.failures.length,
       processing: this.processing,
       online: navigator.onLine,
       operations: this.queue.map(op => ({
@@ -348,7 +430,9 @@ export const syncQueue = new SyncQueue();
 export default syncQueue;
 
 // Add cleanup on window unload
-if (typeof window !== 'undefined') {
+const isTestEnv =
+  typeof process !== "undefined" && process.env?.NODE_ENV === "test";
+if (typeof window !== 'undefined' && !isTestEnv) {
   window.addEventListener('beforeunload', () => {
     syncQueue.destroy();
   });

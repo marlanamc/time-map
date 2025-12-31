@@ -24,7 +24,7 @@ interface CacheStats {
   hitRate: number;
 }
 
-class CacheService {
+export class CacheService {
   private cache = new Map<string, CacheEntry<unknown>>();
   private stats: CacheStats = {
     hits: 0,
@@ -294,7 +294,12 @@ class CacheService {
 // Export singleton instance
 export const cacheService = new CacheService();
 
-// Start auto-cleanup on module load
-cacheService.startAutoCleanup();
+const isTestEnv =
+  typeof process !== "undefined" && process.env?.NODE_ENV === "test";
+
+// Start auto-cleanup on module load (skip in Jest to avoid timers/side effects)
+if (!isTestEnv) {
+  cacheService.startAutoCleanup();
+}
 
 export default cacheService;

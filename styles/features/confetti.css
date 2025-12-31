@@ -15,6 +15,7 @@
     height: 10px;
     top: -20px;
     animation: confettiFall 4s ease-out forwards;
+    will-change: transform, opacity;
 }
 
 @keyframes confettiFall {
@@ -28,4 +29,3 @@
         opacity: 0;
     }
 }
-

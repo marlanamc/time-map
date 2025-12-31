@@ -62,11 +62,15 @@ export const NDSupport = {
     if (prefs.accentTheme) {
       // Remove all theme classes first
       document.body.classList.remove(
-        "theme-teal",
+        "theme-rose",
         "theme-coral",
-        "theme-sage",
         "theme-amber",
         "theme-clay",
+        "theme-mint",
+        "theme-sage",
+        "theme-sky",
+        "theme-teal",
+        "theme-indigo",
         "theme-violet",
       );
       document.body.classList.add(`theme-${prefs.accentTheme}`);

@@ -21,14 +21,24 @@ body.theme-teal {
     --shadow-glow-sm: 0 0 12px rgba(30, 111, 184, 0.16);
 }
 
-/* Coral - Day Mode */
-body.theme-coral {
-    --accent: #B8472F;  /* Deep terracotta for day readability */
-    --accent-hover: #C85539;
-    --accent-muted: rgba(184, 71, 47, 0.16);
-    --accent-subtle: rgba(184, 71, 47, 0.08);
-    --shadow-glow: 0 0 24px rgba(184, 71, 47, 0.22);
-    --shadow-glow-sm: 0 0 12px rgba(184, 71, 47, 0.14);
+/* Sky - Day Mode */
+body.theme-sky {
+    --accent: #0EA5E9;  /* Bright sky blue for day readability */
+    --accent-hover: #0284C7;
+    --accent-muted: rgba(14, 165, 233, 0.18);
+    --accent-subtle: rgba(14, 165, 233, 0.10);
+    --shadow-glow: 0 0 24px rgba(14, 165, 233, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(14, 165, 233, 0.16);
+}
+
+/* Mint - Day Mode */
+body.theme-mint {
+    --accent: #10B981;  /* Fresh mint green for day readability */
+    --accent-hover: #059669;
+    --accent-muted: rgba(16, 185, 129, 0.18);
+    --accent-subtle: rgba(16, 185, 129, 0.10);
+    --shadow-glow: 0 0 24px rgba(16, 185, 129, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(16, 185, 129, 0.16);
 }
 
 /* Sage - Day Mode */
@@ -51,6 +61,26 @@ body.theme-amber {
     --shadow-glow-sm: 0 0 14px rgba(217, 99, 32, 0.18);
 }
 
+/* Coral - Day Mode */
+body.theme-coral {
+    --accent: #B8472F;  /* Deep terracotta for day readability */
+    --accent-hover: #C85539;
+    --accent-muted: rgba(184, 71, 47, 0.16);
+    --accent-subtle: rgba(184, 71, 47, 0.08);
+    --shadow-glow: 0 0 24px rgba(184, 71, 47, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(184, 71, 47, 0.14);
+}
+
+/* Rose - Day Mode */
+body.theme-rose {
+    --accent: #E11D48;  /* Deep rose for day readability */
+    --accent-hover: #F43F5E;
+    --accent-muted: rgba(225, 29, 72, 0.18);
+    --accent-subtle: rgba(225, 29, 72, 0.10);
+    --shadow-glow: 0 0 24px rgba(225, 29, 72, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(225, 29, 72, 0.16);
+}
+
 /* Clay - Day Mode */
 body.theme-clay {
     --accent: #9B4C2E;  /* Deep clay for day readability */
@@ -71,6 +101,16 @@ body.theme-violet {
     --shadow-glow-sm: 0 0 12px rgba(109, 40, 217, 0.16);
 }
 
+/* Indigo - Day Mode */
+body.theme-indigo {
+    --accent: #4F46E5;  /* Deep indigo for day readability */
+    --accent-hover: #6366F1;
+    --accent-muted: rgba(79, 70, 229, 0.18);
+    --accent-subtle: rgba(79, 70, 229, 0.10);
+    --shadow-glow: 0 0 24px rgba(79, 70, 229, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(79, 70, 229, 0.16);
+}
+
 /* ============= NIGHT MODE COLORS (Beautiful Soft) ============= */
 
 /* Teal - Night Mode */
@@ -83,14 +123,24 @@ body.theme-violet {
     --shadow-glow-sm: 0 0 12px rgba(140, 183, 217, 0.16);
 }
 
-/* Coral - Night Mode */
-:root.dark-mode body.theme-coral {
-    --accent: #C06C52;  /* Warm terracotta */
-    --accent-hover: #D97B59;
-    --accent-muted: rgba(200, 107, 74, 0.16);
-    --accent-subtle: rgba(200, 107, 74, 0.08);
-    --shadow-glow: 0 0 24px rgba(200, 107, 74, 0.22);
-    --shadow-glow-sm: 0 0 12px rgba(200, 107, 74, 0.14);
+/* Sky - Night Mode */
+:root.dark-mode body.theme-sky {
+    --accent: #7DD3FC;  /* Soft sky blue */
+    --accent-hover: #93C5FD;
+    --accent-muted: rgba(125, 211, 252, 0.18);
+    --accent-subtle: rgba(125, 211, 252, 0.10);
+    --shadow-glow: 0 0 24px rgba(125, 211, 252, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(125, 211, 252, 0.16);
+}
+
+/* Mint - Night Mode */
+:root.dark-mode body.theme-mint {
+    --accent: #6EE7B7;  /* Soft mint green */
+    --accent-hover: #86EFAC;
+    --accent-muted: rgba(110, 231, 183, 0.18);
+    --accent-subtle: rgba(110, 231, 183, 0.10);
+    --shadow-glow: 0 0 24px rgba(110, 231, 183, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(110, 231, 183, 0.16);
 }
 
 /* Sage - Night Mode */
@@ -113,6 +163,26 @@ body.theme-violet {
     --shadow-glow-sm: 0 0 14px rgba(231, 125, 62, 0.18);
 }
 
+/* Coral - Night Mode */
+:root.dark-mode body.theme-coral {
+    --accent: #C06C52;  /* Warm terracotta */
+    --accent-hover: #D97B59;
+    --accent-muted: rgba(200, 107, 74, 0.16);
+    --accent-subtle: rgba(200, 107, 74, 0.08);
+    --shadow-glow: 0 0 24px rgba(200, 107, 74, 0.22);
+    --shadow-glow-sm: 0 0 12px rgba(200, 107, 74, 0.14);
+}
+
+/* Rose - Night Mode */
+:root.dark-mode body.theme-rose {
+    --accent: #FB7185;  /* Soft rose pink */
+    --accent-hover: #FCA5A5;
+    --accent-muted: rgba(251, 113, 133, 0.18);
+    --accent-subtle: rgba(251, 113, 133, 0.10);
+    --shadow-glow: 0 0 24px rgba(251, 113, 133, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(251, 113, 133, 0.16);
+}
+
 /* Clay - Night Mode */
 :root.dark-mode body.theme-clay {
     --accent: #B46A4A;  /* Warm earth */
@@ -131,5 +201,15 @@ body.theme-violet {
     --accent-subtle: rgba(139, 92, 246, 0.10);
     --shadow-glow: 0 0 24px rgba(139, 92, 246, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(139, 92, 246, 0.16);
+}
+
+/* Indigo - Night Mode */
+:root.dark-mode body.theme-indigo {
+    --accent: #818CF8;  /* Soft indigo */
+    --accent-hover: #A5B4FC;
+    --accent-muted: rgba(129, 140, 248, 0.18);
+    --accent-subtle: rgba(129, 140, 248, 0.10);
+    --shadow-glow: 0 0 24px rgba(129, 140, 248, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(129, 140, 248, 0.16);
 }
 

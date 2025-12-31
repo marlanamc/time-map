@@ -4,7 +4,7 @@
  */
 
 /** Available view types in the application */
-export type ViewType = 'year' | 'month' | 'week' | 'day' | 'home';
+export type ViewType = 'year' | 'month' | 'week' | 'day' | 'home' | 'garden';
 
 /** Goal hierarchy levels from highest to lowest */
 export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
@@ -18,7 +18,7 @@ export type Priority = "low" | "medium" | "high" | "urgent";
 /** Main category types for organizing goals */
 export type Category = "career" | "health" | "finance" | "personal" | "creative" | null;
 /** Available accent theme colors for the UI */
-export type AccentTheme = "teal" | "coral" | "sage" | "amber" | "clay" | "violet";
+export type AccentTheme = "rose" | "coral" | "amber" | "clay" | "mint" | "sage" | "sky" | "teal" | "indigo" | "violet";
 
 /** Break reminder frequency options for ADHD support */
 export type BreakReminder = "pomodoro" | "gentle" | "hyperfocus" | "off";

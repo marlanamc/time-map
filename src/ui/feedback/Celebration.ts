@@ -36,6 +36,12 @@ export const Celebration = {
   },
 
   spawnConfetti(elements: UIElements) {
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    } catch {
+      // ignore
+    }
+
     const { confettiContainer } = elements;
     if (!confettiContainer) return;
 

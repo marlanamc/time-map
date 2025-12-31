@@ -48,3 +48,46 @@ describe('TimeBreakdown.calculate (month)', () => {
     expect(breakdown.days).toBe(1);
   });
 });
+
+describe('TimeBreakdown.generateHTML', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('renders intention variant with hours left', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2025-06-15T12:00:00'));
+    const html = TimeBreakdown.generateHTML(0, 2025, false, 'intention');
+    expect(html).toContain('hours left today');
+  });
+
+  it('renders focus variant with days left this week', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2025-06-15T12:00:00'));
+    const html = TimeBreakdown.generateHTML(0, 2025, false, 'focus');
+    expect(html).toContain('days left this week');
+  });
+
+  it('renders vision variant for current year', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2025-06-15T12:00:00'));
+    const html = TimeBreakdown.generateHTML(0, 2025, false, 'vision');
+    expect(html).toContain('this year');
+  });
+
+  it('renders compact milestone variant', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2025-01-15T12:00:00'));
+    const html = TimeBreakdown.generateHTML(2, 2025, true, 'milestone');
+    expect(html).toContain('days');
+    expect(html).toContain('weeks');
+    expect(html).toContain('months');
+  });
+});
+
+describe('TimeBreakdown.getSimpleTimeLeft', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('returns "In the past" for past dates', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2025-01-15T12:00:00'));
+    expect(TimeBreakdown.getSimpleTimeLeft(0, 2020)).toBe('In the past');
+  });
+});

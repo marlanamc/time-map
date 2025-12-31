@@ -199,6 +199,24 @@ body.is-mobile .support-panel-appearance-card[aria-label="Time of day theme"] {
     box-sizing: border-box;
 }
 
+.support-panel-item.install-available {
+    border-color: rgba(74, 144, 153, 0.55);
+    box-shadow: 0 6px 20px rgba(74, 144, 153, 0.14), 0 2px 8px rgba(0, 0, 0, 0.04);
+    position: relative;
+}
+
+.support-panel-item.install-available::after {
+    content: "";
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+
 .support-panel-item:last-child {
     margin-bottom: 0;
 }

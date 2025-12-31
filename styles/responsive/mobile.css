@@ -1205,12 +1205,6 @@
         letter-spacing: -0.04em;
         line-height: 1.1;
         filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
-        animation: title-glow 4s ease-in-out infinite;
-    }
-
-    @keyframes title-glow {
-        0%, 100% { filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1)); }
-        50% { filter: drop-shadow(0 4px 16px rgba(74, 144, 226, 0.3)); }
     }
 
     .garden-view-subtitle {
@@ -1331,21 +1325,23 @@
             rgba(255, 255, 255, 0.15) 100%);
         border-color: rgba(255, 255, 255, 0.25);
         border-style: dashed;
+    }
+
+    .garden-group-empty::after {
+        opacity: 0.18;
+        transform: scale(1);
         animation: empty-glow 3s ease-in-out infinite;
+        will-change: transform, opacity;
     }
 
     @keyframes empty-glow {
-        0%, 100% { 
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.08),
-                0 4px 16px rgba(0, 0, 0, 0.04),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        0%, 100% {
+            opacity: 0.18;
+            transform: scale(1);
         }
-        50% { 
-            box-shadow: 
-                0 12px 40px rgba(74, 144, 226, 0.15),
-                0 6px 20px rgba(74, 144, 226, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        50% {
+            opacity: 0.35;
+            transform: scale(1.04);
         }
     }
 

@@ -10,7 +10,7 @@ import { TimeBreakdown } from '../utils/TimeBreakdown';
 import { cacheElements } from './elements/UIElements';
 import { Toast } from './feedback/Toast';
 import { Celebration } from './feedback/Celebration';
-import { MonthRenderer, WeekRenderer, MobileHereRenderer } from './renderers';
+import { MonthRenderer, WeekRenderer, MobileHereRenderer, GardenRenderer } from './renderers';
 import type { DayViewController } from '../components/dayView/DayViewController';
 import { ThemeManager } from '../theme/ThemeManager';
 import { eventBus } from '../core/EventBus';
@@ -27,7 +27,10 @@ import { createFeatureLoaders } from './featureLoaders';
 import type { FeatureLoaders, NDSupportApi, AppSettingsApi, ZenFocusApi, QuickAddApi } from './featureLoaders';
 import * as goalModal from './goalModal';
 import * as weeklyReview from './weeklyReview';
-import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, Priority, AccentTheme, Subtask } from '../types';
+import * as focusMode from './focusMode';
+import * as keyboardShortcuts from './keyboardShortcuts';
+import * as syncIssues from './syncIssues';
+import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, AccentTheme, Subtask } from '../types';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -497,7 +500,8 @@ export const UI = {
     window.addEventListener('sync-error', ((e: CustomEvent) => {
       const message = e.detail?.message || 'Sync failed';
       this.updateSyncStatus('error');
-      Toast.show(this.elements, '⚠️', `Sync failed: ${message}`);
+      Toast.show(this.elements, '⚠️', `Sync needs attention: ${message}`);
+      this.syncSyncIssuesBadge();
     }) as EventListener);
 
     // Listen for sync storage errors from SyncQueue
@@ -519,22 +523,87 @@ export const UI = {
     console.log('✓ Sync event listeners registered in UIManager');
   },
 
+  syncSyncIssuesBadge() {
+    const btn = document.getElementById("syncIssuesBtn");
+    if (!btn) return;
+    const count = syncIssues.getFailureCount();
+    btn.classList.toggle("install-available", count > 0);
+    if (count > 0) {
+      btn.removeAttribute("hidden");
+      const desc = btn.querySelector(".support-panel-desc");
+      if (desc) desc.textContent = `${count} change${count === 1 ? "" : "s"} need review`;
+    } else {
+      btn.setAttribute("hidden", "");
+      const desc = btn.querySelector(".support-panel-desc");
+      if (desc) desc.textContent = "Resolve failed sync changes";
+    }
+  },
+
   setupInstallPrompt() {
     const installBtn = document.getElementById("installAppBtn");
     if (!installBtn) return;
 
+    const supportPanelToggleBtn = document.getElementById("supportPanelToggleBtn");
+    const supportPanelToggleBtnMobile = document.getElementById("supportPanelToggleBtnMobile");
+    const supportPanelBtn = document.getElementById("supportPanelBtn");
+    const toggleBtns = [supportPanelToggleBtn, supportPanelToggleBtnMobile, supportPanelBtn].filter(
+      Boolean,
+    ) as HTMLElement[];
+
+    const INSTALL_TOAST_LAST_SHOWN_KEY = "gardenFence.install.toastShownAt";
+    const INSTALL_PROMPT_DISMISSED_AT_KEY = "gardenFence.install.dismissedAt";
+    const INSTALL_TOAST_COOLDOWN_MS = 1000 * 60 * 60 * 24; // 24h
+
+    const readNumber = (key: string) => {
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? Number.parseInt(raw, 10) : NaN;
+        return Number.isFinite(parsed) ? parsed : 0;
+      } catch {
+        return 0;
+      }
+    };
+
+    const writeNow = (key: string) => {
+      try {
+        localStorage.setItem(key, String(Date.now()));
+      } catch {
+        // ignore
+      }
+    };
+
+    const setInstallAvailable = (available: boolean) => {
+      installBtn.classList.toggle("install-available", available);
+      toggleBtns.forEach((btn) => btn.classList.toggle("install-available", available));
+
+      if (available) installBtn.removeAttribute("hidden");
+      else installBtn.setAttribute("hidden", "");
+    };
+
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       this._deferredInstallPrompt = e as BeforeInstallPromptEvent;
-      installBtn.removeAttribute("hidden");
+      setInstallAvailable(true);
+
+      const lastToastAt = readNumber(INSTALL_TOAST_LAST_SHOWN_KEY);
+      const dismissedAt = readNumber(INSTALL_PROMPT_DISMISSED_AT_KEY);
+      const now = Date.now();
+      const canToast =
+        now - lastToastAt > INSTALL_TOAST_COOLDOWN_MS &&
+        now - dismissedAt > INSTALL_TOAST_COOLDOWN_MS;
+      if (canToast) {
       Toast.show(this.elements, "📲", "Install is available in Support Tools.");
+        writeNow(INSTALL_TOAST_LAST_SHOWN_KEY);
+      }
     });
 
     window.addEventListener("appinstalled", () => {
       this._deferredInstallPrompt = null;
-      installBtn.setAttribute("hidden", "");
+      setInstallAvailable(false);
       Toast.show(this.elements, "✅", "App installed.");
     });
+
+    this.syncSyncIssuesBadge();
   },
 
   async promptInstall() {
@@ -551,6 +620,14 @@ export const UI = {
       if (choice?.outcome === "accepted") {
         Toast.show(this.elements, "✅", "Installing…");
       } else if (choice?.outcome === "dismissed") {
+        try {
+          localStorage.setItem(
+            "gardenFence.install.dismissedAt",
+            String(Date.now()),
+          );
+        } catch {
+          // ignore
+        }
         Toast.show(this.elements, "👍", "Not now.");
       }
     } catch (error) {
@@ -740,6 +817,14 @@ export const UI = {
             break;
           case "install":
             void this.promptInstall();
+            break;
+          case "syncIssues":
+            syncIssues.showSyncIssuesModal({
+              showToast: (iconOrMessage, messageOrType) =>
+                this.showToast(iconOrMessage, messageOrType ?? ""),
+              updateSyncStatus: (status) => this.updateSyncStatus(status),
+            });
+            this.syncSyncIssuesBadge();
             break;
           case "logout":
             this.handleLogout();
@@ -988,6 +1073,7 @@ export const UI = {
     // Day → Week → Month → Year
     this._homeProgressScopeIndex = (this._homeProgressScopeIndex + 1) % 4;
     this.updateYearProgress();
+    this.updateTimeDisplay(); // Update stats when scope changes
   },
 
   openSupportPanel() {
@@ -1214,9 +1300,12 @@ export const UI = {
     this.updateStreakDisplay();
 
     // Mobile Home ("Here") uses the desktop sidebar layout.
+    // Garden view also uses sidebar-like layout on mobile
     const isMobile = viewportManager.isMobileViewport();
     const isMobileHome = isMobile && State.currentView === VIEWS.HOME;
+    const isMobileGarden = isMobile && State.currentView === VIEWS.GARDEN;
     document.body.classList.toggle("mobile-home-view", isMobileHome);
+    document.body.classList.toggle("mobile-garden-view", isMobileGarden);
     if (this.elements.mobileHomeView) {
       // Legacy overlay is no longer used.
       this.elements.mobileHomeView.setAttribute("hidden", "");
@@ -1287,6 +1376,14 @@ export const UI = {
       case VIEWS.HOME:
         // Do nothing for main grid, overlay is handled in render()
         break;
+      case VIEWS.GARDEN:
+        GardenRenderer.render(
+          this.elements,
+          this.escapeHtml.bind(this),
+          (goalId) => goalDetailModal.show(goalId),
+          (level) => this.openGoalModal(level, State.viewingMonth, State.viewingYear),
+        );
+        break;
       default:
         this.renderCalendar();
     }
@@ -1296,158 +1393,11 @@ export const UI = {
     const container = this.elements.levelContextBar;
     if (!container) return;
 
-    // Context is rendered inline in each calendar view (Year/Month/Week).
-    // The old bar took too much vertical space, so keep it hidden for all views.
-    if (!State.data || State.currentView === VIEWS.HOME || State.currentView === VIEWS.DAY || State.currentView === VIEWS.YEAR || State.currentView === VIEWS.MONTH || State.currentView === VIEWS.WEEK) {
-      container.innerHTML = "";
-      container.setAttribute("hidden", "");
-      return;
-    }
-
-    const view = State.currentView;
-    const now = new Date();
-    const viewingDate = State.viewingDate ?? now;
-    const viewingYear = State.viewingYear ?? viewingDate.getFullYear();
-    const viewingMonth = State.viewingMonth ?? viewingDate.getMonth();
-    const isCollapsed = State.data.preferences.nd.contextBarCollapsed ?? false;
-
-    const visibleLevels: GoalLevel[] = (() => {
-      switch (view) {
-        case VIEWS.YEAR:
-          return ["vision", "milestone"];
-        case VIEWS.MONTH:
-          return ["vision", "milestone", "focus"];
-        case VIEWS.WEEK:
-          return ["vision", "milestone", "focus"];
-        default:
-          return ["vision", "milestone"];
-      }
-    })();
-
-    const goalsInRange = (() => {
-      switch (view) {
-        case VIEWS.YEAR: {
-          const start = new Date(viewingYear, 0, 1);
-          const end = new Date(viewingYear, 11, 31);
-          return Goals.getForRange(start, end);
-        }
-        case VIEWS.MONTH:
-          return Goals.getByMonth(viewingMonth, viewingYear);
-        case VIEWS.WEEK: {
-          const weekNum =
-            State.viewingWeek ?? State.getWeekNumber(viewingDate);
-          const weekStart = State.getWeekStart(viewingYear, weekNum);
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekEnd.getDate() + 6);
-          return Goals.getForRange(weekStart, weekEnd);
-        }
-        default:
-          return Goals.getForDate(viewingDate);
-      }
-    })().filter((g) => g.status !== "done");
-
-    // Calculate total goals for badge
-    const totalGoals = visibleLevels.reduce((sum, level) => {
-      return sum + goalsInRange.filter(g => g.level === level).length;
-    }, 0);
-
-    const priorityRank: Record<Priority, number> = {
-      urgent: 0,
-      high: 1,
-      medium: 2,
-      low: 3,
-    };
-
-    const renderLevel = (level: GoalLevel) => {
-      const levelCfg = CONFIG.LEVELS[level];
-      const goals = goalsInRange
-        .filter((g) => g.level === level)
-        .slice()
-        .sort((a, b) => {
-          const pr = priorityRank[a.priority] - priorityRank[b.priority];
-          if (pr !== 0) return pr;
-          const upd = (b.updatedAt || "").localeCompare(a.updatedAt || "");
-          if (upd !== 0) return upd;
-          return a.title.localeCompare(b.title);
-        });
-
-      const shown = goals.slice(0, 2);
-      const remaining = Math.max(0, goals.length - shown.length);
-
-      const goalsHtml =
-        shown.length > 0
-          ? `
-            <div class="level-context-goals">
-              ${shown
-            .map(
-              (g) =>
-                `<button type="button" class="level-context-goal" data-goal-id="${g.id}">${this.escapeHtml(g.title)}</button>`,
-            )
-            .join("")}
-              ${remaining > 0 ? `<span class="level-context-goal level-context-more">+${remaining}</span>` : ""}
-            </div>
-          `
-          : `<div class="level-context-empty">No ${levelCfg.label.toLowerCase()} set</div>`;
-
-      return `
-        <div class="level-context-item" data-level="${level}">
-          <div class="level-context-header">
-            <div class="level-context-label">
-              <span aria-hidden="true">${levelCfg.emoji}</span>
-              <span>${levelCfg.label}</span>
-            </div>
-            <button type="button" class="level-context-action" data-action="add-level" data-level="${level}">+ Add</button>
-          </div>
-          ${goalsHtml}
-        </div>
-      `;
-    };
-
-    // Add collapsed/expanded class
-    container.className = `level-context-bar ${isCollapsed ? 'collapsed' : 'expanded'}`;
-    container.dataset.collapsed = String(isCollapsed);
-
-    // Header bar with toggle button
-    const headerHtml = `
-      <div class="level-context-header-bar">
-        <div class="level-context-title">
-          <span class="context-icon">🎯</span>
-          <span>Context</span>
-          ${totalGoals > 0 ? `<span class="context-count-badge">${totalGoals}</span>` : ''}
-        </div>
-        <button
-          class="btn-context-toggle"
-          type="button"
-          aria-label="${isCollapsed ? 'Expand context' : 'Collapse context'}"
-          aria-expanded="${!isCollapsed}"
-        >
-          <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </button>
-      </div>
-    `;
-
-    // Collapsible content wrapper
-    const contentHtml = `
-      <div class="level-context-content">
-        ${visibleLevels.map(renderLevel).join("")}
-      </div>
-    `;
-
-    container.innerHTML = headerHtml + contentHtml;
-    container.removeAttribute("hidden");
-
-    // Add toggle event listener
-    const toggleBtn = container.querySelector('.btn-context-toggle');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        const newCollapsedState = !isCollapsed;
-        State.data!.preferences.nd.contextBarCollapsed = newCollapsedState;
-        State.save();
-        this.renderLevelContextBar(); // Re-render with new state
-      });
-    }
+    // Level context bar is no longer needed - always hide it
+    container.innerHTML = "";
+    container.setAttribute("hidden", "");
+    container.style.display = "none";
+    return;
   },
 
   // Update the date display based on current view
@@ -2296,11 +2246,64 @@ export const UI = {
       this.elements.nowContext.textContent = dayOfWeek;
     }
 
-    // Days and weeks left in year
-    // Use conservative calculation (floor) for time blindness - only count full weeks
-    const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
-    const daysLeft = Math.ceil((endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    const weeksLeft = Math.floor(daysLeft / 7);
+    // Days and weeks left - based on current scope (day, week, month, year) when in home view
+    // Otherwise, default to year stats
+    const homeScopeViews: ViewType[] = [VIEWS.DAY, VIEWS.WEEK, VIEWS.MONTH, VIEWS.YEAR];
+    const effectiveView: ViewType =
+      State.currentView === VIEWS.HOME
+        ? homeScopeViews[this._homeProgressScopeIndex] ?? VIEWS.YEAR
+        : VIEWS.YEAR; // Default to year stats when not in home view
+
+    const isHome = State.currentView === VIEWS.HOME;
+    const scopeYear = isHome ? now.getFullYear() : State.viewingYear;
+    const scopeMonth = isHome ? now.getMonth() : State.viewingMonth;
+    const scopeDate = isHome ? now : State.viewingDate;
+
+    let end: Date;
+    let daysLeft: number;
+    let weeksLeft: number;
+
+    switch (effectiveView) {
+      case VIEWS.DAY: {
+        // Days/hours left in current day
+        end = new Date(scopeDate);
+        end.setHours(23, 59, 59, 999);
+        const hoursLeft = Math.max(0, (end.getTime() - now.getTime()) / (1000 * 60 * 60));
+        daysLeft = hoursLeft > 0 ? 1 : 0; // Show 1 if any time left, 0 if day is over
+        weeksLeft = 0;
+        break;
+      }
+      case VIEWS.WEEK: {
+        // Days left in current week
+        if (isHome) {
+          const wy = State.getWeekYear(now);
+          const wn = State.getWeekNumber(now);
+          end = State.getWeekStart(wy, wn);
+          end.setDate(end.getDate() + 7);
+        } else {
+          end = State.getWeekStart(State.viewingYear, State.viewingWeek ?? 1);
+          end.setDate(end.getDate() + 7);
+        }
+        daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        weeksLeft = 0;
+        break;
+      }
+      case VIEWS.MONTH: {
+        // Days/weeks left in current month
+        end = new Date(scopeYear, scopeMonth + 1, 1);
+        daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        weeksLeft = Math.floor(daysLeft / 7);
+        break;
+      }
+      case VIEWS.YEAR:
+      default: {
+        // Days/weeks left in year
+        end = new Date(scopeYear, 11, 31, 23, 59, 59, 999);
+        daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        weeksLeft = Math.floor(daysLeft / 7);
+        break;
+      }
+    }
 
     if (this.elements.daysLeft) {
       this.elements.daysLeft.textContent = String(daysLeft);
@@ -2475,92 +2478,18 @@ export const UI = {
   },
 
   toggleFocusMode() {
-    const previousView = State.currentView;
-    this.setFocusMode(!State.focusMode);
-    if (State.currentView !== previousView) {
-      State.setView(previousView);
-    }
+    focusMode.toggleFocusMode(this);
   },
 
   setFocusMode(
     enabled: boolean,
     options: { silent?: boolean; persist?: boolean } = {},
   ) {
-    const { silent = false, persist = true } = options;
-
-    State.focusMode = !!enabled;
-    if (persist && State.data) {
-      State.data.preferences.focusMode = State.focusMode;
-      State.save();
-    }
-
-    document.body.classList.toggle("focus-mode", State.focusMode);
-    const isMobile = viewportManager.isMobileViewport();
-    if (State.focusMode) {
-      this.updateFocusLayoutVars();
-      if (isMobile) {
-        // Mobile has no hover; keep controls accessible without the reveal system.
-        document.body.classList.add("focus-ui-revealed");
-        document.getElementById("focusHandle")?.setAttribute("hidden", "");
-      } else {
-        this.setupFocusHoverReveal();
-        document.getElementById("focusHandle")?.removeAttribute("hidden");
-      }
-    } else {
-      document.body.classList.remove("focus-ui-revealed");
-      document.getElementById("focusHandle")?.setAttribute("hidden", "");
-    }
-
-    const focusToggle = document.getElementById("focusToggle");
-    const focusModeBtn = document.getElementById("focusModeBtn");
-    const supportPanelFocusToggle = document.getElementById("supportPanelFocusToggle");
-
-    if (focusToggle) {
-      focusToggle.classList.toggle("active", State.focusMode);
-      focusToggle.setAttribute("aria-checked", String(State.focusMode));
-    }
-    if (focusModeBtn) {
-      focusModeBtn.classList.toggle("active", State.focusMode);
-      focusModeBtn.setAttribute("aria-pressed", String(State.focusMode));
-    }
-    if (supportPanelFocusToggle) {
-      supportPanelFocusToggle.classList.toggle("active", State.focusMode);
-      supportPanelFocusToggle.setAttribute("aria-checked", String(State.focusMode));
-    }
-
-    if (!silent) {
-      this.showToast(
-        "",
-        State.focusMode ? "Focus on (calmer view)" : "Focus off",
-      );
-    }
+    focusMode.setFocusMode(this, enabled, options);
   },
 
   applySavedUIState() {
-    this.setFocusMode(State.focusMode, { silent: true, persist: false });
-
-    const focusToggle = document.getElementById("focusToggle");
-    const focusModeBtn = document.getElementById("focusModeBtn");
-    const supportPanelFocusToggle = document.getElementById("supportPanelFocusToggle");
-
-    if (focusToggle) {
-      focusToggle.classList.toggle("active", State.focusMode);
-      focusToggle.setAttribute("aria-checked", String(State.focusMode));
-    }
-    if (supportPanelFocusToggle) {
-      supportPanelFocusToggle.classList.toggle("active", State.focusMode);
-      supportPanelFocusToggle.setAttribute("aria-checked", String(State.focusMode));
-    }
-    if (focusModeBtn) {
-      focusModeBtn.classList.toggle("active", State.focusMode);
-      focusModeBtn.setAttribute("aria-pressed", String(State.focusMode));
-    }
-
-    this.applyLayoutVisibility();
-    this.applySidebarVisibility();
-    void this.applyAccessibilityPreferences();
-    this.syncViewButtons();
-    this.syncSupportPanelAppearanceControls();
+    focusMode.applySavedUIState(this);
   },
 
   syncSupportPanelAppearanceControls() {
@@ -2697,87 +2626,11 @@ export const UI = {
   },
 
   updateFocusLayoutVars() {
-    const header = document.querySelector(".header") as HTMLElement | null;
-    const controlBar = document.querySelector(".control-bar") as HTMLElement | null;
-    const root = document.documentElement;
-
-    if (header) {
-      root.style.setProperty(
-        "--focus-header-height",
-        `${Math.max(56, header.offsetHeight)}px`,
-      );
-    }
-    if (controlBar) {
-      root.style.setProperty(
-        "--focus-controlbar-height",
-        `${Math.max(48, controlBar.offsetHeight)}px`,
-      );
-    }
+    focusMode.updateFocusLayoutVars();
   },
 
   setupFocusHoverReveal() {
-    if (this._focusRevealSetup) return;
-    this._focusRevealSetup = true;
-
-    const revealTop = document.getElementById("focusRevealTop");
-    const revealLeft = document.getElementById("focusRevealLeft");
-    const focusHandle = document.getElementById("focusHandle");
-    const header = document.querySelector(".header");
-    const sidebar = document.querySelector(".sidebar");
-    const controlBar = document.querySelector(".control-bar");
-
-    const setHandleHidden = (hidden: boolean) => {
-      if (!focusHandle) return;
-      if (hidden) focusHandle.setAttribute("hidden", "");
-      else focusHandle.removeAttribute("hidden");
-    };
-
-    const reveal = () => {
-      if (!State.focusMode) return;
-      document.body.classList.add("focus-ui-revealed");
-      if (this._focusRevealHideTimer) clearTimeout(this._focusRevealHideTimer);
-    };
-
-    const scheduleHide = () => {
-      if (this._focusRevealHideTimer) clearTimeout(this._focusRevealHideTimer);
-      this._focusRevealHideTimer = setTimeout(() => {
-        if (!State.focusMode) return;
-        document.body.classList.remove("focus-ui-revealed");
-      }, 500);
-    };
-
-    const toggleReveal = () => {
-      if (!State.focusMode) return;
-      const isRevealed = document.body.classList.contains("focus-ui-revealed");
-      if (isRevealed) {
-        document.body.classList.remove("focus-ui-revealed");
-      } else {
-        reveal();
-      }
-    };
-
-    // Keep an always-available control for touch devices (no hover)
-    setHandleHidden(!State.focusMode);
-
-    [revealTop, revealLeft, header, sidebar, controlBar].forEach((el) => {
-      if (!el) return;
-      el.addEventListener("mouseenter", reveal);
-      el.addEventListener("mouseleave", scheduleHide);
-      el.addEventListener("focusin", reveal);
-      el.addEventListener("focusout", scheduleHide);
-    });
-
-    [revealTop, revealLeft, focusHandle].forEach((el) => {
-      if (!el) return;
-      el.addEventListener("click", toggleReveal);
-      el.addEventListener(
-        "touchstart",
-        () => {
-          toggleReveal();
-        },
-        { passive: true },
-      );
-    });
+    focusMode.setupFocusHoverReveal(this);
   },
 
   syncViewButtons() {
@@ -2790,13 +2643,16 @@ export const UI = {
 
     // Sync mobile tab bar
     const isMobileHomeView = document.body.classList.contains("mobile-home-view");
+    const isMobileGardenView = document.body.classList.contains("mobile-garden-view");
     document.querySelectorAll(".mobile-tab").forEach((tab) => {
       const tabView = (tab as HTMLElement).dataset.view;
       let isActive = false;
       if (tabView === "home") {
         isActive = isMobileHomeView;
+      } else if (tabView === "garden") {
+        isActive = isMobileGardenView;
       } else {
-        isActive = !isMobileHomeView && tabView === State.currentView;
+        isActive = !isMobileHomeView && !isMobileGardenView && tabView === State.currentView;
       }
       tab.classList.toggle("active", isActive);
       tab.setAttribute("aria-selected", String(isActive));
@@ -2897,7 +2753,7 @@ export const UI = {
     // I for Quick-Add Intention
     if (e.key === "i" && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      void this.ensureQuickAdd().then((qa) => qa.show());
+      void this.ensureQuickAdd().then((qa) => qa?.show());
     }
 
     // ? for keyboard shortcuts help
@@ -2908,44 +2764,7 @@ export const UI = {
 
   // Show keyboard shortcuts help
   showKeyboardShortcuts() {
-    const modal = document.createElement("div");
-    modal.className = "modal-overlay active";
-    modal.innerHTML = `
-        <div class="modal">
-          <div class="modal-header">
-            <h2 class="modal-title">⌨️ Keyboard Shortcuts</h2>
-            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
-          </div>
-          <div class="modal-body">
-            <div class="shortcuts-grid">
-              <div class="shortcut-section">
-                <h3>Views</h3>
-                <div class="shortcut-item"><kbd>1</kbd> Year view</div>
-                <div class="shortcut-item"><kbd>2</kbd> Month view</div>
-                <div class="shortcut-item"><kbd>3</kbd> Week view</div>
-                <div class="shortcut-item"><kbd>4</kbd> Day view</div>
-              </div>
-              <div class="shortcut-section">
-                <h3>Navigation</h3>
-                <div class="shortcut-item"><kbd>←</kbd> Previous</div>
-                <div class="shortcut-item"><kbd>→</kbd> Next</div>
-                <div class="shortcut-item"><kbd>T</kbd> Go to today</div>
-              </div>
-              <div class="shortcut-section">
-                <h3>Actions</h3>
-                <div class="shortcut-item"><kbd>⌘/Ctrl</kbd> + <kbd>N</kbd> New intention/focus/milestone/vision</div>
-                <div class="shortcut-item"><kbd>⌘/Ctrl</kbd> + <kbd>F</kbd> Focus (calmer view)</div>
-                <div class="shortcut-item"><kbd>B</kbd> Brain dump</div>
-                <div class="shortcut-item"><kbd>Esc</kbd> Close modal</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    document.body.appendChild(modal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.remove();
-    });
+    keyboardShortcuts.showKeyboardShortcuts();
   },
 
   // ============================================

@@ -128,12 +128,32 @@ body.is-touch-dragging-seed .day-view-container {
       rgba(111, 155, 134, 0.14) 0%,
       rgba(255, 255, 255, 0.25) 50%,
       rgba(180, 106, 74, 0.10) 100%);
+}
+
+.day-bed-canvas.is-drop-target::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: var(--radius-lg);
+  border: 2px dashed rgba(111, 155, 134, 0.45);
+  pointer-events: none;
+  opacity: 0.2;
+  transform: scale(0.99);
+  will-change: transform, opacity;
   animation: dropZonePulse 2s ease-in-out infinite;
 }
 
 @keyframes dropZonePulse {
-  0%, 100% { outline-color: rgba(111, 155, 134, 0.4); }
-  50% { outline-color: rgba(111, 155, 134, 0.6); }
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.99);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(1.02);
+  }
 }
 
 /* Drop zone when hovering over it */
@@ -406,24 +426,25 @@ body.is-resizing * {
 /* Ripple effect on drag start (touch devices) */
 .drag-ripple {
   position: absolute;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: radial-gradient(circle,
     rgba(111, 155, 134, 0.4) 0%,
     transparent 70%);
   pointer-events: none;
   animation: ripple 0.6s ease-out;
+  will-change: transform, opacity;
 }
 
 @keyframes ripple {
   0% {
-    width: 0;
-    height: 0;
     opacity: 1;
+    transform: scale(0);
   }
   100% {
-    width: 100px;
-    height: 100px;
     opacity: 0;
+    transform: scale(1);
   }
 }
 

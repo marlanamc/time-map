@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_VERSION = "v6";
+const CACHE_VERSION = "v7";
 const CACHE_NAME = `garden-fence-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -56,6 +56,13 @@ async function broadcastToClients(message) {
   });
   clients.forEach((client) => client.postMessage(message));
 }
+
+self.addEventListener("sync", (event) => {
+  if (event.tag !== "garden-fence-sync") return;
+  event.waitUntil(
+    broadcastToClients({ type: "PROCESS_SYNC_QUEUE" }).catch(() => {}),
+  );
+});
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

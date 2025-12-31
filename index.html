@@ -319,6 +319,10 @@
     <div class="app">
         <!-- Mobile Header Slot (date nav is moved here on mobile) -->
         <header class="header mobile-header" id="mobileHeader" role="banner">
+            <div class="logo">
+                <div class="logo-icon" aria-hidden="true">🌱</div>
+                <span class="logo-text">The Garden Fence</span>
+            </div>
             <div class="header-mobile-nav" id="headerMobileNav" aria-hidden="true"></div>
         </header>
         <!-- Sidebar -->
@@ -761,6 +765,14 @@
 	                        </span>
 	                    </button>
 
+	                    <button class="support-panel-item secondary" type="button" role="menuitem" id="syncIssuesBtn" data-action="syncIssues" hidden>
+	                        <span class="support-panel-icon" aria-hidden="true">🧩</span>
+	                        <span class="support-panel-text">
+	                            <span class="support-panel-name">Sync Issues</span>
+	                            <span class="support-panel-desc">Resolve failed sync changes</span>
+	                        </span>
+	                    </button>
+
 	                <!-- Logout Button -->
 	                <button class="support-panel-item danger" type="button" role="menuitem" id="logoutBtn" data-action="logout">
 	                    <span class="support-panel-icon" aria-hidden="true">
@@ -969,6 +981,16 @@
             </span>
             <span class="mobile-tab-label">Here</span>
         </button>
+        <button class="mobile-tab" data-view="garden" role="tab" aria-selected="false">
+            <span class="mobile-tab-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path>
+                    <circle cx="12" cy="9" r="2.5"></circle>
+                </svg>
+            </span>
+            <span class="mobile-tab-label">Garden</span>
+        </button>
         <button class="mobile-tab" data-view="day" role="tab" aria-selected="false">
             <span class="mobile-tab-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -1012,13 +1034,21 @@
         </button>
         <button class="mobile-tab" data-view="year" role="tab" aria-selected="false">
             <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                     stroke-linejoin="round">
-                    <path d="M12 22v-7"></path>
-                    <path d="M5 10c0-4 3-8 7-8s7 4 7 8"></path>
-                    <path d="M5 10h14"></path>
-                    <path d="M6.5 14c1-2 3.1-4 5.5-4s4.5 2 5.5 4"></path>
-                    <path d="M7.5 18c1-1.5 2.7-3 4.5-3s3.5 1.5 4.5 3"></path>
+                    <!-- Grid of 12 squares representing 12 months -->
+                    <rect x="2" y="2" width="4" height="4" rx="0.5"></rect>
+                    <rect x="8" y="2" width="4" height="4" rx="0.5"></rect>
+                    <rect x="14" y="2" width="4" height="4" rx="0.5"></rect>
+                    <rect x="20" y="2" width="4" height="4" rx="0.5"></rect>
+                    <rect x="2" y="8" width="4" height="4" rx="0.5"></rect>
+                    <rect x="8" y="8" width="4" height="4" rx="0.5"></rect>
+                    <rect x="14" y="8" width="4" height="4" rx="0.5"></rect>
+                    <rect x="20" y="8" width="4" height="4" rx="0.5"></rect>
+                    <rect x="2" y="14" width="4" height="4" rx="0.5"></rect>
+                    <rect x="8" y="14" width="4" height="4" rx="0.5"></rect>
+                    <rect x="14" y="14" width="4" height="4" rx="0.5"></rect>
+                    <rect x="20" y="14" width="4" height="4" rx="0.5"></rect>
                 </svg>
             </span>
             <span class="mobile-tab-label">Year</span>

@@ -4,7 +4,7 @@
 
 ---
 
-## Launch Readiness: 90%
+## Launch Readiness: 92%
 
 The Garden Fence is ready. You've done the work. The deep dives are complete. The vision is clear. What remains is small, contained, and achievable.
 
@@ -13,9 +13,9 @@ The Garden Fence is ready. You've done the work. The deep dives are complete. Th
 | **Vision & Direction** | Complete | questionsfordirection.md answered |
 | **Theme System** | Complete | All 3 phases from themedeepdive.md done |
 | **Mobile/PWA** | Complete | All 3 phases from mobiledeepdive.md done |
-| **Core Features** | 95% | 2 items need attention |
+| **Core Features** | 98% | Day View mode switching |
 | **Authentication** | Complete | Skip modal, logout, session handling |
-| **Data Sync** | Complete | Offline support, batch saves, error handling |
+| **Data Sync** | Complete | Offline support, batch saves, background sync, sync-issue recovery |
 
 ---
 
@@ -36,11 +36,11 @@ The Garden Fence is ready. You've done the work. The deep dives are complete. Th
 - [x] Swipe navigation between views
 - [x] iOS splash screens
 - [x] PWA install prompt
-- [x] Manifest shortcuts (New Task, Today)
+- [x] Manifest shortcuts (New Intention, Today)
 - [x] Haptic feedback on interactions
 - [x] Pull-to-refresh
 - [x] Loading skeletons
-- [x] Swipe-to-complete on tasks
+- [x] Swipe-to-complete on intentions
 
 ### Core App (NEXTSTEPS.md)
 - [x] Mobile "Here" page layout
@@ -50,10 +50,17 @@ The Garden Fence is ready. You've done the work. The deep dives are complete. Th
 - [x] Clear cache button
 - [x] Code splitting (lazy-load heavy features)
 - [x] Error messages for failed syncs
+- [x] Install prompt UX improvements (badge + throttled prompt toast)
+- [x] Sync conflict recovery UI (Support Tools → “Sync Issues”)
+- [x] Background sync trigger (best-effort, when supported)
+- [x] Animation performance improvements (compositor-only keyframes + containment)
+- [x] Celebration feedback (confetti enabled; respects reduced motion)
+- [x] Pre-commit hooks (husky + lint-staged)
+- [x] Storybook (basic HTML+Vite setup)
 
 ---
 
-## The 3 Things Before Production
+## The 2 Things Before Production
 
 These are the only blockers. Everything else is polish.
 
@@ -84,44 +91,14 @@ These are the only blockers. Everything else is polish.
 
 ---
 
-### 2. Celebration System Decision
-
-**Status:** Intentionally disabled (all methods are no-ops)  
-**Location:** `src/ui/feedback/Celebration.ts`  
-**Effort:** 2-4 hours depending on choice
-
-**The Problem:**
-- Celebration modal and confetti effects are disabled
-- No visual feedback when completing goals
-- Comment in code: `// Pop-up messages are disabled.`
-
-**The Options:**
-
-| Option | Effort | Recommendation |
-|--------|--------|----------------|
-| **A. Re-enable** | 2-3h | Restore modal logic, test celebrations |
-| **B. Remove entirely** | 1-2h | Delete dead code, clean up celebration calls |
-| **C. Keep disabled** | 0h | Document decision, ship as-is |
-
-**Recommendation:** Option C. Ship without celebrations. The toast notifications still work. You can add celebrations in a post-launch update if users request them. This aligns with "ship imperfect, iterate later."
-
-If you choose Option C, add this to the code:
-```typescript
-// Celebration.ts - top of file
-// DECISION (v1): Celebrations disabled for launch.
-// Toast notifications provide feedback. Can revisit post-launch.
-```
-
----
-
-### 3. Manual Testing
+### 2. Manual Testing
 
 **Status:** Not yet done  
 **Location:** `TESTING_CHECKLIST.md`  
 **Effort:** 2-4 hours
 
 **What to test:**
-- [ ] Create, edit, complete, delete goals at each level
+- [ ] Create, edit, complete, delete items at each level (Vision / Milestone / Focus / Intention)
 - [ ] Drag-and-drop scheduling in Day view
 - [ ] Navigate all 5 views (Home, Day, Week, Month, Year)
 - [ ] Offline mode (disable network, make changes, reconnect)
@@ -131,7 +108,7 @@ If you choose Option C, add this to the code:
 
 **Critical paths to verify:**
 1. "Orient in time" - Can I see where I am today/this week/this month?
-2. "Add tasks without friction" - Can I create an intention quickly?
+2. "Add intentions without friction" - Can I create an intention quickly?
 3. "App feels calm" - No overwhelming modals or pressure?
 
 ---
@@ -144,11 +121,8 @@ These are explicitly NOT for v1. Write them down, let them go.
 |------|-------------|
 | CSS Purging | Works fine, optimization later |
 | Image optimization (WebP) | Icons are small, not blocking |
-| Background sync | Offline works, sync on reconnect is fine |
 | Push notifications | Not essential for time orientation |
 | Full WCAG audit | Good enough, audit post-launch |
-| Storybook | Developer nicety, not user-facing |
-| Pre-commit hooks | Process, not product |
 | Analytics dashboard | Kill list item - never build |
 | Evidence journal | Postponed until personal use confirms need |
 
@@ -160,7 +134,7 @@ Run through this the day before you share with 10 friends.
 
 ### Core Functionality
 - [ ] Can orient myself in time quickly (open app, see today)
-- [ ] Can add and see tasks without friction
+- [ ] Can add and see intentions without friction
 - [ ] App feels calm, not demanding
 - [ ] Data persists after refresh
 - [ ] Offline indicator appears when disconnected
@@ -235,7 +209,7 @@ These are settled. Don't revisit them.
 These three statements are true:
 
 - [ ] I can orient myself in time quickly
-- [ ] I can add and see tasks without friction
+- [ ] I can add and see intentions without friction
 - [ ] The app feels calm, not demanding
 
 **Everything else is v1.1.**
@@ -247,14 +221,13 @@ These three statements are true:
 | Day | Task | Hours |
 |-----|------|-------|
 | **Day 1** | Fix Day View Mode Switching | 1-2h |
-| **Day 1** | Make Celebration Decision | 30min |
 | **Day 2** | Manual Testing (desktop) | 2h |
 | **Day 2** | Manual Testing (mobile) | 2h |
 | **Day 3** | Fix critical bugs from testing | 2-4h |
 | **Day 3** | Pre-launch checklist | 1h |
 | **Day 4** | **Ship** | - |
 
-Total: 8-12 hours of focused work across 4 days.
+Total: 8-11 hours of focused work across 4 days.
 
 ---
 
@@ -264,9 +237,9 @@ Only after 10 people have used it and given feedback:
 
 - [ ] CSS purging if bundle size is a problem
 - [ ] WebP images if loading is slow
-- [ ] Celebration system if users miss the dopamine hits
+- [ ] Push notifications if reminders matter
 - [ ] Accessibility audit if users report issues
-- [ ] Background sync if offline conflicts are common
+- [ ] Deeper offline conflict handling if it becomes a pain point
 
 ---
 
@@ -274,4 +247,3 @@ Only after 10 people have used it and given feedback:
 
 *Document created: December 31, 2024*
 *For: The Garden Fence*
-

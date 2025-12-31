@@ -88,6 +88,7 @@ body.hide-sidebar .canvas-zoom-controls {
     padding: var(--space-8);
     transform-origin: top left;
     transition: transform var(--duration-normal) var(--ease-out);
+    contain: layout paint;
 }
 
 .calendar-grid {
@@ -98,6 +99,7 @@ body.hide-sidebar .canvas-zoom-controls {
     width: fit-content;
     max-width: 100%;
     margin: 0 auto;
+    contain: layout paint;
 }
 
 /* View Containers */
@@ -167,30 +169,32 @@ body.hide-sidebar .canvas-zoom-controls {
 
 .year-view-subtitle {
     font-size: var(--text-base);
-    color: var(--accent-hover);
+    color: var(--text-secondary);
     line-height: 1.4;
     max-width: 52ch;
+    font-weight: 500;
 }
 
-/* Ensure subtitle is visible in light mode */
+/* Light mode - use darker color for better readability */
 :root:not(.dark-mode) .year-view-subtitle {
-    color: var(--accent-hover);
-    opacity: 0.9;
+    color: #2D3F44 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    opacity: 1;
 }
 
-/* Light mode time themes - add dark shadow to subtitle for better visibility */
+/* Light mode time themes - ensure dark readable color */
 :root.time-dawn:not(.dark-mode) .year-view-subtitle,
 :root.time-morning:not(.dark-mode) .year-view-subtitle,
 :root.time-afternoon:not(.dark-mode) .year-view-subtitle,
 :root.time-evening:not(.dark-mode) .year-view-subtitle {
-    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5), 0 0 8px rgba(255, 255, 255, 0.3);
-    color: #0A1113 !important;
+    color: #2D3F44 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
     opacity: 1;
 }
 
-/* Ensure subtitle is visible in dark mode */
+/* Dark mode - use lighter color for readability */
 .dark-mode .year-view-subtitle {
-    color: var(--accent-hover);
+    color: var(--text-secondary);
     opacity: 1;
 }
 
@@ -324,4 +328,3 @@ body.hide-sidebar .canvas-zoom-controls {
     border-radius: 48px;
     overflow: hidden;
 }
-

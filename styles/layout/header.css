@@ -12,7 +12,7 @@
     border-bottom: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     position: relative;
-    z-index: 200;
+    z-index: 400;
 }
 
 /* The app currently uses a dedicated header only on mobile. */
@@ -420,17 +420,20 @@
 /* Animations for Blooming */
 @keyframes petal-glow {
     0% {
-        filter: drop-shadow(0 0 2px var(--petal));
+        opacity: 0.85;
+        transform: scale(1);
     }
 
     100% {
-        filter: drop-shadow(0 0 10px var(--petal));
+        opacity: 1;
+        transform: scale(1.05);
     }
 }
 
 .garden-bloom.full-bloom .petal {
     opacity: 1;
     animation: petal-glow 2s infinite alternate;
+    will-change: transform, opacity;
 }
 
 /* Pollen Sparkle Particles */

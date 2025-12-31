@@ -167,14 +167,18 @@
   // Neurodivergent Accessibility Config
   // ===================================
   const ND_CONFIG = {
-    // Accent color themes
+    // Accent color themes - Ordered in rainbow spectrum
     ACCENT_THEMES: {
-      teal: { label: "Ocean Teal", emoji: "🌊", color: "#2a9d8f" },
-      coral: { label: "Warm Coral", emoji: "🌅", color: "#e07a5f" },
-      sage: { label: "Forest Sage", emoji: "🌿", color: "#87a878" },
-      amber: { label: "Golden Amber", emoji: "✨", color: "#d4a03e" },
-      clay: { label: "Soft Clay", emoji: "🏺", color: "#c08b6e" },
-      violet: { label: "Violet", emoji: "💜", color: "#a78bfa" },
+      rose: { label: "Rose Petal", emoji: "🌹", color: "#E11D48" },
+      coral: { label: "Warm Coral", emoji: "🏺", color: "#B8472F" },
+      amber: { label: "Golden Amber", emoji: "☀️", color: "#D96320" },
+      clay: { label: "Soft Clay", emoji: "🧱", color: "#9B4C2E" },
+      mint: { label: "Mint Fresh", emoji: "🌱", color: "#10B981" },
+      sage: { label: "Forest Sage", emoji: "🌿", color: "#3B7057" },
+      sky: { label: "Sky Blue", emoji: "☁️", color: "#0EA5E9" },
+      teal: { label: "Ocean Teal", emoji: "🌊", color: "#1E6FB8" },
+      indigo: { label: "Deep Indigo", emoji: "🌌", color: "#4F46E5" },
+      violet: { label: "Violet", emoji: "💜", color: "#6D28D9" },
     },
 
     // Body doubling / coworking timer options
@@ -413,6 +417,8 @@
     MONTH: "month",
     WEEK: "week",
     DAY: "day",
+    HOME: "home",
+    GARDEN: "garden",
   };
 
   const State = {
@@ -2737,6 +2743,10 @@
           break;
         case VIEWS.DAY:
           this.renderDayView();
+          break;
+        case VIEWS.GARDEN:
+        case VIEWS.HOME:
+          // Handled by TypeScript UIManager
           break;
         default:
           this.renderCalendar();

@@ -33,17 +33,12 @@
    Level Context Bar (Vision/Milestone/Focus/Intention)
    =================================== */
 .level-context-bar {
-    margin: var(--space-3) var(--space-2) var(--space-3);
-    padding: var(--space-4);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-    align-items: stretch;
+    display: none !important;
+    visibility: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
 .level-context-bar[hidden] {
@@ -390,10 +385,23 @@
 
 .support-panel-toggle-btn {
     color: var(--text-primary);
+    position: relative;
 }
 
 .support-panel-toggle-btn:hover {
     color: var(--accent);
+}
+
+.support-panel-toggle-btn.install-available::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
 }
 
 /* Floating Add Button */

@@ -283,6 +283,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (type === "CACHES_CLEAR_FAILED") {
           showToast("⚠️", "Couldn’t clear cache.", { timeoutMs: 3500, type: "sw-cache" });
         }
+        if (type === "PROCESS_SYNC_QUEUE") {
+          import("./services/SyncQueue")
+            .then((mod) => mod.syncQueue.forceSync())
+            .catch(() => {});
+        }
       });
 
       navigator.serviceWorker
