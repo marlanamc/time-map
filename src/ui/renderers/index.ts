@@ -6,3 +6,4 @@ export { MonthRenderer } from './MonthRenderer';
 export { WeekRenderer } from './WeekRenderer';
 export { DayRenderer } from './DayRenderer';
 export { HomeRenderer } from './HomeRenderer';
+export { MobileHereRenderer } from './MobileHereRenderer';

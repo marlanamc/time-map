@@ -12,8 +12,8 @@ export const TimeBreakdown = {
 
     // For current month, calculate to end of month. For future months, calculate to start of month.
     const target = isCurrentMonth
-      ? new Date(targetYear, targetMonth + 1, 0) // Last day of current month
-      : new Date(targetYear, targetMonth, 1); // First day of future month
+      ? new Date(targetYear, targetMonth + 1, 0, 23, 59, 59, 999) // End of current month (inclusive)
+      : new Date(targetYear, targetMonth, 1); // Start of future month
 
     const msPerDay = 1000 * 60 * 60 * 24;
 
@@ -36,9 +36,14 @@ export const TimeBreakdown = {
     const workSessions3x = diffWeeks * 3;
     const workSessions5x = diffWeeks * 5;
 
-    // Calculate months
-    let months = (targetYear - now.getFullYear()) * 12;
-    months += targetMonth - now.getMonth();
+    // Calculate whole months remaining (don't count partial months).
+    // Example: Dec 31 → Jan 1 = 0 months (but 1 day).
+    const nowY = now.getFullYear();
+    const nowM = now.getMonth();
+    const nowD = now.getDate();
+    const targetD = target.getDate();
+    let months = (targetYear - nowY) * 12 + (targetMonth - nowM);
+    if (targetD < nowD) months -= 1;
     months = Math.max(0, months);
 
     // Hours available (rough estimates)
@@ -158,7 +163,7 @@ export const TimeBreakdown = {
 
     if (breakdown.isPast) {
       return `<div class="time-breakdown past">
-          <div class="time-breakdown-header">⏰ This anchor is in the past</div>
+          <div class="time-breakdown-header">⏰ This milestone is in the past</div>
         </div>`;
     }
 
@@ -227,7 +232,7 @@ export const TimeBreakdown = {
           </div>
         </div>
         <div class="time-breakdown-tip">
-          💡 <em>Break this anchor into ${Math.max(1, Math.ceil(breakdown.weeks / 2))} small steps — one every ~2 weeks</em>
+          💡 <em>Break this milestone into ${Math.max(1, Math.ceil(breakdown.weeks / 2))} small steps — one every ~2 weeks</em>
         </div>
       </div>`;
   },

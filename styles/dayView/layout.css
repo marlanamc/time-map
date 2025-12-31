@@ -10,6 +10,17 @@
   position: relative;
 }
 
+.dark-mode .day-view-container {
+  background:
+    radial-gradient(1200px 600px at 20% 10%,
+      rgba(30, 41, 79, 0.45) 0%,
+      transparent 65%),
+    radial-gradient(1000px 700px at 90% 30%,
+      rgba(15, 23, 42, 0.45) 0%,
+      transparent 68%),
+    rgba(8, 12, 26, 0.55);
+}
+
 .day-view {
   width: 100%;
   max-width: 1400px;

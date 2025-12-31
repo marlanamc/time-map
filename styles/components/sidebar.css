@@ -209,7 +209,7 @@
 }
 
 /* Mobile-specific typography improvements for now-panel */
-@media (max-width: 600px) {
+@media (max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
     .now-panel-logo {
         margin-bottom: var(--mobile-space-6);
         padding-bottom: var(--mobile-space-5);
@@ -267,7 +267,7 @@
 }
 
 /* Mobile-specific time stats improvements */
-@media (max-width: 600px) {
+@media (max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
     .time-stats {
         gap: var(--mobile-space-5);
         padding-top: var(--mobile-space-5);
@@ -465,4 +465,3 @@
     box-shadow: var(--shadow-md);
     z-index: 100;
 }
-

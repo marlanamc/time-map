@@ -7,6 +7,15 @@
     --planner-accent: var(--accent);
 }
 
+.dark-mode {
+    --planner-bg:
+        linear-gradient(180deg,
+            rgba(15, 23, 42, 0.78) 0%,
+            rgba(8, 12, 26, 0.88) 100%);
+    --planner-sidebar-bg: rgba(10, 22, 18, 0.62);
+    --planner-border: rgba(140, 183, 217, 0.16);
+}
+
 .planner-day-view {
     display: grid;
     grid-template-columns: 320px 1fr;

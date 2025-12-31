@@ -271,7 +271,7 @@
 }
 
 /* Mobile-specific bloom improvements */
-@media (max-width: 600px) {
+@media (max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
     .garden-bloom {
         gap: var(--mobile-space-5);
         padding: var(--mobile-space-8);

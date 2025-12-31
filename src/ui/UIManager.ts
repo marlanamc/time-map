@@ -12,7 +12,7 @@ import { TimeBreakdown } from '../utils/TimeBreakdown';
 import { cacheElements } from './elements/UIElements';
 import { Toast } from './feedback/Toast';
 import { Celebration } from './feedback/Celebration';
-import { MonthRenderer, WeekRenderer, HomeRenderer } from './renderers';
+import { MonthRenderer, WeekRenderer, MobileHereRenderer } from './renderers';
 import { DayViewController } from '../components/dayView/DayViewController';
 import { ThemeManager } from '../theme/ThemeManager';
 import { eventBus } from '../core/EventBus';
@@ -36,6 +36,7 @@ export const UI = {
   _renderRaf: null as number | null,
   _pendingViewTransition: false,
   _scrollResetRaf: null as number | null,
+  _homeProgressScopeIndex: 3 as number, // 0=day,1=week,2=month,3=year
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
 
@@ -299,6 +300,13 @@ export const UI = {
     document.getElementById("navToday")?.addEventListener("click", () => {
       State.goToDate(new Date());
       this.render();
+    });
+
+    // Mobile Home: cycle time position scope when tapping the flower.
+    this.elements.gardenBloom?.addEventListener("click", () => {
+      if (!viewportManager.isMobileViewport()) return;
+      if (State.currentView !== VIEWS.HOME) return;
+      this.cycleHomeProgressScope();
     });
 
     // Support tools side panel (drawer)
@@ -605,6 +613,12 @@ export const UI = {
       });
   },
 
+  cycleHomeProgressScope() {
+    // Day → Week → Month → Year
+    this._homeProgressScopeIndex = (this._homeProgressScopeIndex + 1) % 4;
+    this.updateYearProgress();
+  },
+
   openSupportPanel() {
     const overlay = document.getElementById("supportPanelOverlay");
     if (!overlay) return;
@@ -832,15 +846,16 @@ export const UI = {
     Streaks.check();
     this.updateStreakDisplay();
 
-    // Mobile Home View Logic
-    const mobileHomeView = document.getElementById("mobileHomeView");
-    if (State.currentView === VIEWS.HOME) {
-      document.body.classList.add("mobile-home-view");
-      if (mobileHomeView) mobileHomeView.removeAttribute("hidden");
+    // Mobile Home ("Here") uses the desktop sidebar layout.
+    const isMobile = viewportManager.isMobileViewport();
+    const isMobileHome = isMobile && State.currentView === VIEWS.HOME;
+    document.body.classList.toggle("mobile-home-view", isMobileHome);
+    if (this.elements.mobileHomeView) {
+      // Legacy overlay is no longer used.
+      this.elements.mobileHomeView.setAttribute("hidden", "");
+    }
+    if (isMobileHome) {
       this.updateMobileHomeView();
-    } else {
-      document.body.classList.remove("mobile-home-view");
-      if (mobileHomeView) mobileHomeView.setAttribute("hidden", "");
     }
 
     viewportManager.updateMobileLayoutVars();
@@ -868,7 +883,7 @@ export const UI = {
   },
 
   updateMobileHomeView() {
-    HomeRenderer.render(this.elements, this.escapeHtml.bind(this), (goalId) => goalDetailModal.show(goalId));
+    MobileHereRenderer.render(this.elements, this.escapeHtml.bind(this), (goalId) => goalDetailModal.show(goalId));
   },
 
   // Render based on current view
@@ -2383,23 +2398,40 @@ export const UI = {
     let end: Date;
     let label = "Progress";
 
-    switch (State.currentView) {
+    const homeScopeViews: ViewType[] = [VIEWS.DAY, VIEWS.WEEK, VIEWS.MONTH, VIEWS.YEAR];
+    const effectiveView: ViewType =
+      State.currentView === VIEWS.HOME
+        ? homeScopeViews[this._homeProgressScopeIndex] ?? VIEWS.YEAR
+        : State.currentView;
+
+    const isHome = State.currentView === VIEWS.HOME;
+    const scopeYear = isHome ? now.getFullYear() : State.viewingYear;
+    const scopeMonth = isHome ? now.getMonth() : State.viewingMonth;
+    const scopeDate = isHome ? now : State.viewingDate;
+
+    switch (effectiveView) {
       case VIEWS.MONTH: {
         label = "Month position";
-        start = new Date(State.viewingYear, State.viewingMonth, 1);
-        end = new Date(State.viewingYear, State.viewingMonth + 1, 1);
+        start = new Date(scopeYear, scopeMonth, 1);
+        end = new Date(scopeYear, scopeMonth + 1, 1);
         break;
       }
       case VIEWS.WEEK: {
         label = "Week position";
-        start = State.getWeekStart(State.viewingYear, State.viewingWeek ?? 1);
+        if (isHome) {
+          const wy = State.getWeekYear(now);
+          const wn = State.getWeekNumber(now);
+          start = State.getWeekStart(wy, wn);
+        } else {
+          start = State.getWeekStart(State.viewingYear, State.viewingWeek ?? 1);
+        }
         end = new Date(start);
         end.setDate(end.getDate() + 7);
         break;
       }
       case VIEWS.DAY: {
         label = "Day position";
-        start = new Date(State.viewingDate);
+        start = new Date(scopeDate);
         start.setHours(0, 0, 0, 0);
         end = new Date(start);
         end.setDate(end.getDate() + 1);
@@ -2408,8 +2440,8 @@ export const UI = {
       case VIEWS.YEAR:
       default: {
         label = "Year position";
-        start = new Date(State.viewingYear, 0, 1);
-        end = new Date(State.viewingYear + 1, 0, 1);
+        start = new Date(scopeYear, 0, 1);
+        end = new Date(scopeYear + 1, 0, 1);
         break;
       }
     }
@@ -2715,7 +2747,7 @@ export const UI = {
     const sidebarHandle = document.getElementById("sidebarHandle");
     if (sidebarHandle) {
       // Hide sidebar handle on mobile devices (unnecessary on mobile)
-      const isMobile = window.matchMedia("(max-width: 600px)").matches;
+      const isMobile = viewportManager.isMobileViewport();
       if (layout.showSidebar === false && !State.focusMode && !isMobile) {
         sidebarHandle.removeAttribute("hidden");
       } else {

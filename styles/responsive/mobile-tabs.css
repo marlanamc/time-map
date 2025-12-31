@@ -6,7 +6,7 @@
     /* Hidden on desktop */
 }
 
-@media (max-width: 600px) {
+@media (max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
     .mobile-tab-bar {
         position: fixed;
         bottom: 0;

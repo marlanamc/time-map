@@ -366,6 +366,8 @@ export interface UIElements {
   mobileSurpriseBtn: HTMLButtonElement | null;
   mobileTabHome: HTMLElement | null;
   mobileGoalsByLevel: HTMLElement | null;
+  mobileHereContext: HTMLElement | null;
+  mobileHereGarden: HTMLElement | null;
 
   goalModal: HTMLElement | null;
   goalForm: HTMLFormElement | null;

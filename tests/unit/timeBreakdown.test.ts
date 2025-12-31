@@ -25,3 +25,26 @@ describe('TimeBreakdown.calculateForYear', () => {
   });
 });
 
+describe('TimeBreakdown.calculate (month)', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('does not count partial months (Dec 31 → Jan 1 = 0 months)', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2025-12-31T12:00:00'));
+
+    const breakdown = TimeBreakdown.calculate(0, 2026); // Jan 2026
+    expect(breakdown.days).toBe(1);
+    expect(breakdown.weeks).toBe(0);
+    expect(breakdown.months).toBe(0);
+  });
+
+  it('treats the current month as inclusive through end-of-day', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2025-12-31T12:00:00'));
+
+    const breakdown = TimeBreakdown.calculate(11, 2025); // Dec 2025 (current month)
+    expect(breakdown.isCurrentMonth).toBe(true);
+    expect(breakdown.isPast).toBe(false);
+    expect(breakdown.days).toBe(1);
+  });
+});

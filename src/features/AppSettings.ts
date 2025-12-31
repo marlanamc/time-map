@@ -24,6 +24,7 @@ export const AppSettings = {
 
   showPanel() {
     if (!State.data) return;
+    const isMobile = document.body.classList.contains("is-mobile");
     const modal = document.createElement("div");
     modal.className = "modal-overlay active app-settings-modal";
 
@@ -39,54 +40,60 @@ export const AppSettings = {
           <div class="modal-body nd-settings-body">
             <div class="settings-section">
               <h3>General</h3>
-              <div class="setting-row">
-                <label for="settingsDefaultView">Default view</label>
-                <select id="settingsDefaultView">
-                  <option value="year" ${prefs.defaultView === VIEWS.YEAR ? "selected" : ""}>Year</option>
-                  <option value="month" ${prefs.defaultView === VIEWS.MONTH ? "selected" : ""}>Month</option>
-                  <option value="week" ${prefs.defaultView === VIEWS.WEEK ? "selected" : ""}>Week</option>
-                  <option value="day" ${prefs.defaultView === VIEWS.DAY ? "selected" : ""}>Day</option>
-                </select>
-              </div>
+              ${isMobile ? "" : `
+                <div class="setting-row">
+                  <label for="settingsDefaultView">Default view</label>
+                  <select id="settingsDefaultView">
+                    <option value="year" ${prefs.defaultView === VIEWS.YEAR ? "selected" : ""}>Year</option>
+                    <option value="month" ${prefs.defaultView === VIEWS.MONTH ? "selected" : ""}>Month</option>
+                    <option value="week" ${prefs.defaultView === VIEWS.WEEK ? "selected" : ""}>Week</option>
+                    <option value="day" ${prefs.defaultView === VIEWS.DAY ? "selected" : ""}>Day</option>
+                  </select>
+                </div>
+              `}
               <div class="setting-row checkbox-row">
                 <label>
                   <input type="checkbox" id="settingsFocusMode" ${prefs.focusMode ? "checked" : ""}>
                   Start in Focus (reduce visual noise)
                 </label>
               </div>
-              <div class="setting-row">
-                <label>Help</label>
-                <button class="btn btn-ghost" id="settingsShortcutsBtn">Keyboard shortcuts</button>
-              </div>
+              ${isMobile ? "" : `
+                <div class="setting-row">
+                  <label>Help</label>
+                  <button class="btn btn-ghost" id="settingsShortcutsBtn">Keyboard shortcuts</button>
+                </div>
+              `}
             </div>
 
-            <div class="settings-section">
-              <h3>Visibility</h3>
-              <div class="setting-row checkbox-row">
-                <label>
-                  <input type="checkbox" id="settingsShowHeader" ${prefs.layout?.showHeader !== false ? "checked" : ""}>
-                  Show header
-                </label>
+            ${isMobile ? "" : `
+              <div class="settings-section">
+                <h3>Visibility</h3>
+                <div class="setting-row checkbox-row">
+                  <label>
+                    <input type="checkbox" id="settingsShowHeader" ${prefs.layout?.showHeader !== false ? "checked" : ""}>
+                    Show header
+                  </label>
+                </div>
+                <div class="setting-row checkbox-row">
+                  <label>
+                    <input type="checkbox" id="settingsShowControlBar" ${prefs.layout?.showControlBar !== false ? "checked" : ""}>
+                    Show top controls
+                  </label>
+                </div>
+                <div class="setting-row checkbox-row">
+                  <label>
+                    <input type="checkbox" id="settingsShowSidebar" ${prefs.layout?.showSidebar !== false ? "checked" : ""}>
+                    Show sidebar
+                  </label>
+                </div>
+                <div class="setting-row checkbox-row">
+                  <label>
+                    <input type="checkbox" id="settingsShowNowPanel" ${prefs.layout?.showNowPanel !== false ? "checked" : ""}>
+                    Show "You Are Here"
+                  </label>
+                </div>
               </div>
-              <div class="setting-row checkbox-row">
-                <label>
-                  <input type="checkbox" id="settingsShowControlBar" ${prefs.layout?.showControlBar !== false ? "checked" : ""}>
-                  Show top controls
-                </label>
-              </div>
-              <div class="setting-row checkbox-row">
-                <label>
-                  <input type="checkbox" id="settingsShowSidebar" ${prefs.layout?.showSidebar !== false ? "checked" : ""}>
-                  Show sidebar
-                </label>
-              </div>
-              <div class="setting-row checkbox-row">
-                <label>
-                  <input type="checkbox" id="settingsShowNowPanel" ${prefs.layout?.showNowPanel !== false ? "checked" : ""}>
-                  Show "You Are Here"
-                </label>
-              </div>
-            </div>
+            `}
 
             <div class="settings-section">
               <h3>Accessibility & Overwhelm Support</h3>
@@ -96,27 +103,29 @@ export const AppSettings = {
               </div>
             </div>
 
-            <div class="settings-section">
-              <h3>Sidebar</h3>
-              <div class="setting-row checkbox-row">
-                <label>
-                  <input type="checkbox" id="settingsShowAffirmation" ${sidebarPrefs.showAffirmation ? "checked" : ""}>
-                  Show affirmation
-                </label>
+            ${isMobile ? "" : `
+              <div class="settings-section">
+                <h3>Sidebar</h3>
+                <div class="setting-row checkbox-row">
+                  <label>
+                    <input type="checkbox" id="settingsShowAffirmation" ${sidebarPrefs.showAffirmation ? "checked" : ""}>
+                    Show affirmation
+                  </label>
+                </div>
+                <div class="setting-row checkbox-row">
+                  <label>
+                    <input type="checkbox" id="settingsShowWhatsNext" ${sidebarPrefs.showWhatsNext ? "checked" : ""}>
+                    Show Coming Up
+                  </label>
+                </div>
+                <div class="setting-row checkbox-row">
+                  <label>
+                    <input type="checkbox" id="settingsShowAchievements" ${sidebarPrefs.showAchievements ? "checked" : ""}>
+                    Show achievements
+                  </label>
+                </div>
               </div>
-              <div class="setting-row checkbox-row">
-                <label>
-                  <input type="checkbox" id="settingsShowWhatsNext" ${sidebarPrefs.showWhatsNext ? "checked" : ""}>
-                  Show Coming Up
-                </label>
-              </div>
-              <div class="setting-row checkbox-row">
-                <label>
-                  <input type="checkbox" id="settingsShowAchievements" ${sidebarPrefs.showAchievements ? "checked" : ""}>
-                  Show achievements
-                </label>
-              </div>
-            </div>
+            `}
 
             <div class="settings-section">
               <h3>Data</h3>
@@ -201,16 +210,12 @@ export const AppSettings = {
       const defaultView = (modal.querySelector("#settingsDefaultView") as HTMLSelectElement | null)?.value;
       const startFocusMode = !!(modal.querySelector("#settingsFocusMode") as HTMLInputElement)?.checked;
       const showHeader = !!(modal.querySelector("#settingsShowHeader") as HTMLInputElement)?.checked;
-      const showControlBar = !!(modal.querySelector("#settingsShowControlBar") as HTMLInputElement)
-        ?.checked;
+      const showControlBar = !!(modal.querySelector("#settingsShowControlBar") as HTMLInputElement)?.checked;
       const showSidebar = !!(modal.querySelector("#settingsShowSidebar") as HTMLInputElement)?.checked;
       const showNowPanel = !!(modal.querySelector("#settingsShowNowPanel") as HTMLInputElement)?.checked;
-      const showAffirmation = !!(modal.querySelector("#settingsShowAffirmation") as HTMLInputElement)
-        ?.checked;
-      const showWhatsNext = !!(modal.querySelector("#settingsShowWhatsNext") as HTMLInputElement)
-        ?.checked;
-      const showAchievements = !!(modal.querySelector("#settingsShowAchievements") as HTMLInputElement)
-        ?.checked;
+      const showAffirmation = !!(modal.querySelector("#settingsShowAffirmation") as HTMLInputElement)?.checked;
+      const showWhatsNext = !!(modal.querySelector("#settingsShowWhatsNext") as HTMLInputElement)?.checked;
+      const showAchievements = !!(modal.querySelector("#settingsShowAchievements") as HTMLInputElement)?.checked;
 
       if (
         State.data &&
@@ -226,20 +231,22 @@ export const AppSettings = {
         State.data.preferences.focusMode = startFocusMode;
         UI.setFocusMode(startFocusMode, { silent: true });
 
-        State.data.preferences.layout = {
-          ...(State.data.preferences.layout || {}),
-          showHeader,
-          showControlBar,
-          showSidebar,
-          showNowPanel,
-        };
+        if (!isMobile) {
+          State.data.preferences.layout = {
+            ...(State.data.preferences.layout || {}),
+            showHeader,
+            showControlBar,
+            showSidebar,
+            showNowPanel,
+          };
 
-        State.data.preferences.sidebar = {
-          ...State.data.preferences.sidebar,
-          showAffirmation,
-          showWhatsNext,
-          showAchievements,
-        };
+          State.data.preferences.sidebar = {
+            ...State.data.preferences.sidebar,
+            showAffirmation,
+            showWhatsNext,
+            showAchievements,
+          };
+        }
 
         State.save();
       }

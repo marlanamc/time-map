@@ -42,7 +42,7 @@
     overflow: hidden;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
     .support-panel-overlay {
         justify-content: center;
         align-items: stretch;
@@ -171,6 +171,11 @@
 
 .support-panel-profile-section + .support-panel-group-label {
     margin-top: var(--space-3);
+}
+
+/* Mobile: hide desktop/dev-only settings blocks to keep the panel focused. */
+body.is-mobile .support-panel-appearance-card[aria-label="Time of day theme"] {
+    display: none;
 }
 
 .support-panel-item {

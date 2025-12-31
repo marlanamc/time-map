@@ -22,13 +22,15 @@ class ViewportManager {
   private _initialMobileDefaultsApplied: boolean = false;
   private _mobileLayoutRaf: number | null = null;
   private callbacks: ViewportChangeCallbacks = {};
+  private readonly mobileQuery =
+    "(max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse))";
 
   /**
    * Check if current viewport is mobile
    */
   isMobileViewport(): boolean {
     if (this._mobileMql) return this._mobileMql.matches;
-    return window.matchMedia("(max-width: 600px)").matches;
+    return window.matchMedia(this.mobileQuery).matches;
   }
 
   /**
@@ -45,7 +47,7 @@ class ViewportManager {
     if (this._mobileModeSetup) return;
     this._mobileModeSetup = true;
 
-    this._mobileMql = window.matchMedia("(max-width: 600px)");
+    this._mobileMql = window.matchMedia(this.mobileQuery);
 
     const apply = () => {
       const isMobile = this.isMobileViewport();
