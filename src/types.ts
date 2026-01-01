@@ -374,7 +374,9 @@ export interface UIElements {
   nowDate: HTMLElement | null;
   nowContext: HTMLElement | null;
   daysLeft: HTMLElement | null;
+  daysLeftLabel?: HTMLElement | null;
   weeksLeft: HTMLElement | null;
+  weeksLeftLabel?: HTMLElement | null;
   timeProgress: HTMLElement | null;
   yearProgressFill: HTMLElement | null;
   gardenBloom: HTMLElement | null;

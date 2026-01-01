@@ -2262,6 +2262,10 @@ export const UI = {
     let end: Date;
     let daysLeft: number;
     let weeksLeft: number;
+    let daysLeftLabel = 'Days Left';
+    let weeksLeftLabel = 'Weeks Left';
+    let daysAriaLabel = 'Days left in year';
+    let weeksAriaLabel = 'Weeks left in year';
 
     switch (effectiveView) {
       case VIEWS.DAY: {
@@ -2270,7 +2274,11 @@ export const UI = {
         end.setHours(23, 59, 59, 999);
         const hoursLeft = Math.max(0, (end.getTime() - now.getTime()) / (1000 * 60 * 60));
         daysLeft = hoursLeft > 0 ? 1 : 0; // Show 1 if any time left, 0 if day is over
-        weeksLeft = 0;
+        weeksLeft = Math.ceil(hoursLeft);
+        daysLeftLabel = 'Days Left';
+        weeksLeftLabel = 'Hours Left';
+        daysAriaLabel = 'Days left today';
+        weeksAriaLabel = 'Hours left today';
         break;
       }
       case VIEWS.WEEK: {
@@ -2286,6 +2294,10 @@ export const UI = {
         }
         daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
         weeksLeft = 0;
+        daysLeftLabel = 'Days Left';
+        weeksLeftLabel = 'Weeks Left';
+        daysAriaLabel = 'Days left this week';
+        weeksAriaLabel = 'Weeks left this week';
         break;
       }
       case VIEWS.MONTH: {
@@ -2293,6 +2305,10 @@ export const UI = {
         end = new Date(scopeYear, scopeMonth + 1, 1);
         daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
         weeksLeft = Math.floor(daysLeft / 7);
+        daysLeftLabel = 'Days Left';
+        weeksLeftLabel = 'Weeks Left';
+        daysAriaLabel = 'Days left this month';
+        weeksAriaLabel = 'Weeks left this month';
         break;
       }
       case VIEWS.YEAR:
@@ -2301,15 +2317,27 @@ export const UI = {
         end = new Date(scopeYear, 11, 31, 23, 59, 59, 999);
         daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
         weeksLeft = Math.floor(daysLeft / 7);
+        daysLeftLabel = 'Days Left';
+        weeksLeftLabel = 'Weeks Left';
+        daysAriaLabel = 'Days left this year';
+        weeksAriaLabel = 'Weeks left this year';
         break;
       }
     }
 
     if (this.elements.daysLeft) {
       this.elements.daysLeft.textContent = String(daysLeft);
+      this.elements.daysLeft.setAttribute('aria-label', daysAriaLabel);
     }
     if (this.elements.weeksLeft) {
       this.elements.weeksLeft.textContent = String(weeksLeft);
+      this.elements.weeksLeft.setAttribute('aria-label', weeksAriaLabel);
+    }
+    if (this.elements.daysLeftLabel) {
+      this.elements.daysLeftLabel.textContent = daysLeftLabel;
+    }
+    if (this.elements.weeksLeftLabel) {
+      this.elements.weeksLeftLabel.textContent = weeksLeftLabel;
     }
   },
 
