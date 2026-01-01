@@ -14,8 +14,17 @@
 
 ### Applying Migrations
 
-- Run SQL in order: `supabase/migrations/001_initial_schema.sql`, `supabase/migrations/002_enable_rls.sql`, `supabase/migrations/003_add_performance_indexes.sql`, `supabase/migrations/004_add_streaks.sql`
+- Run SQL in order: `supabase/migrations/001_initial_schema.sql`, `supabase/migrations/002_enable_rls.sql`, `supabase/migrations/003_add_performance_indexes.sql`, `supabase/migrations/004_add_streaks.sql`, `supabase/migrations/005_add_goal_time_columns.sql`, `supabase/migrations/006_patch_goals_schema.sql`
 - If you’re using Supabase Dashboard: SQL Editor → New query → paste file contents → Run
+
+If you get an error like `Could not find the 'end_time' column of 'goals' in the schema cache` after running SQL:
+- Ensure `supabase/migrations/005_add_goal_time_columns.sql` has been applied
+- If you get an error like `Could not find the 'level' column of 'goals' in the schema cache`:
+  - Ensure `supabase/migrations/006_patch_goals_schema.sql` has been applied
+- Reload the PostgREST schema cache (Supabase Dashboard → Settings → API → Reload) or run:
+```sql
+select pg_notify('pgrst', 'reload schema');
+```
 
 | Data Type | Syncs to Cloud? | Notes |
 |-----------|-----------------|-------|

@@ -231,6 +231,7 @@ class SyncQueue {
 
     const operations = [...this.queue];
     const retryable: QueuedOperation[] = [];
+    let succeededCount = 0;
 
     console.log(`🔄 Processing ${operations.length} queued operations...`);
 
@@ -240,6 +241,7 @@ class SyncQueue {
 
         // Remove from queue on success
         this.queue = this.queue.filter(q => q.id !== op.id);
+        succeededCount++;
         console.log(`  ✓ Synced ${op.entity} ${op.type}`);
       } catch (error) {
         console.error(`  ✗ Failed to sync ${op.entity}:`, error);
@@ -261,9 +263,8 @@ class SyncQueue {
     this.queue = retryable;
     this.saveQueue();
 
-    const succeeded = operations.length - retryable.length;
-    if (succeeded > 0) {
-      console.log(`✓ Successfully synced ${succeeded}/${operations.length} operations`);
+    if (succeededCount > 0) {
+      console.log(`✓ Successfully synced ${succeededCount}/${operations.length} operations`);
     }
 
     this.processing = false;
