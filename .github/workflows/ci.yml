@@ -34,6 +34,9 @@ jobs:
 
       - name: Unit + E2E tests
         run: npm run test:all
+        # Note: Visual regression snapshots are OS-specific
+        # Linux snapshots will be auto-generated in CI if missing
+        # They need to be committed back to the repo after first CI run
 
       - name: Coverage
         run: npm run test:coverage
