@@ -158,6 +158,11 @@ export const AppSettings = {
                 <button class="btn btn-ghost" id="downloadBackupBtn">Download JSON</button>
               </div>
               <div class="setting-row">
+                <label>Export goals</label>
+                <button class="btn btn-ghost" id="exportGoalsJsonBtn" type="button">JSON</button>
+                <button class="btn btn-ghost" id="exportGoalsCsvBtn" type="button">CSV</button>
+              </div>
+              <div class="setting-row">
                 <label>Restore</label>
                 <button class="btn btn-ghost" id="importBackupBtn">Import JSON</button>
                 <input type="file" id="importBackupFile" accept="application/json,.json" hidden />
@@ -256,6 +261,20 @@ export const AppSettings = {
       ?.addEventListener("click", () => {
         this.downloadBackup();
         callbacks.onShowToast?.("⬇️", "Backup downloaded");
+      });
+
+    modal
+      .querySelector("#exportGoalsJsonBtn")
+      ?.addEventListener("click", () => {
+        this.downloadGoalsJson();
+        callbacks.onShowToast?.("⬇️", "Goals exported");
+      });
+
+    modal
+      .querySelector("#exportGoalsCsvBtn")
+      ?.addEventListener("click", () => {
+        this.downloadGoalsCsv();
+        callbacks.onShowToast?.("⬇️", "Goals exported");
       });
 
     const importFile = modal.querySelector("#importBackupFile") as HTMLInputElement | null;
@@ -367,6 +386,108 @@ export const AppSettings = {
 
     const json = JSON.stringify(payload, null, 2);
     const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
+
+  downloadGoalsJson() {
+    const date = new Date().toISOString().split("T")[0];
+    const filename = `visionboard-goals-${date}.json`;
+
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      storageKey: CONFIG.STORAGE_KEY,
+      goals: State.data?.goals ?? [],
+    };
+
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
+
+  downloadGoalsCsv() {
+    const date = new Date().toISOString().split("T")[0];
+    const filename = `visionboard-goals-${date}.csv`;
+    const goals = State.data?.goals ?? [];
+
+    const escape = (value: unknown): string => {
+      if (value === null || value === undefined) return "";
+      const s = String(value);
+      if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+
+    const rows: string[] = [];
+    const headers = [
+      "id",
+      "title",
+      "level",
+      "description",
+      "month",
+      "year",
+      "category",
+      "priority",
+      "status",
+      "progress",
+      "dueDate",
+      "startTime",
+      "endTime",
+      "completedAt",
+      "lastWorkedOn",
+      "createdAt",
+      "updatedAt",
+      "tags",
+      "parentId",
+      "parentLevel",
+    ];
+    rows.push(headers.join(","));
+
+    goals.forEach((g) => {
+      rows.push(
+        [
+          g.id,
+          g.title,
+          g.level,
+          g.description,
+          g.month,
+          g.year,
+          g.category,
+          g.priority,
+          g.status,
+          g.progress,
+          g.dueDate,
+          g.startTime ?? "",
+          g.endTime ?? "",
+          g.completedAt ?? "",
+          g.lastWorkedOn ?? "",
+          g.createdAt,
+          g.updatedAt,
+          Array.isArray(g.tags) ? g.tags.join(";") : "",
+          g.parentId ?? "",
+          g.parentLevel ?? "",
+        ]
+          .map(escape)
+          .join(","),
+      );
+    });
+
+    const csv = rows.join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");

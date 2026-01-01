@@ -6,6 +6,11 @@ import { Goals } from '../core/Goals';
 import { ThemeManager } from '../theme/ThemeManager';
 import { ModalManager } from '../utils/modalManager';
 import { CONFIG, ND_CONFIG } from '../config';
+import DB, { DB_STORES } from '../db';
+import { dirtyTracker } from '../services/DirtyTracker';
+import { debouncedBrainDumpSync } from '../utils/syncHelpers';
+import { syncQueue } from '../services/SyncQueue';
+import { SupabaseService } from '../services/SupabaseService';
 import type {
   BrainDumpEntry,
   TextSpacing,
@@ -32,6 +37,18 @@ interface NDSupportCallbacks {
 }
 
 let callbacks: NDSupportCallbacks = {};
+
+function persistBrainDumpEntryToIndexedDb(entry: BrainDumpEntry): void {
+  void DB.update(DB_STORES.BRAIN_DUMP, entry).catch((err: unknown) => {
+    console.warn('[NDSupport] Failed to persist brain dump entry to IndexedDB:', err);
+  });
+}
+
+function deleteBrainDumpEntryFromIndexedDb(id: string): void {
+  void DB.delete(DB_STORES.BRAIN_DUMP, id).catch((err: unknown) => {
+    console.warn('[NDSupport] Failed to delete brain dump entry from IndexedDB:', err);
+  });
+}
 
 export const NDSupport = {
   setCallbacks(cb: NDSupportCallbacks) {
@@ -118,13 +135,16 @@ export const NDSupport = {
       if (!State.data) throw new Error("State not initialized");
     }
     const entry: BrainDumpEntry = {
-      id: Date.now().toString(36),
+      id: crypto.randomUUID(),
       text: thought,
       createdAt: new Date().toISOString(),
       processed: false,
     };
     State.data.brainDump.unshift(entry);
     State.save();
+    persistBrainDumpEntryToIndexedDb(entry);
+    dirtyTracker.markDirty('brainDump', entry.id);
+    debouncedBrainDumpSync(entry);
     return entry;
   },
 
@@ -141,13 +161,28 @@ export const NDSupport = {
       item.processedAction = action;
       item.processedAt = new Date().toISOString();
       State.save();
+      persistBrainDumpEntryToIndexedDb(item);
+      dirtyTracker.markDirty('brainDump', item.id);
+      debouncedBrainDumpSync(item);
     }
   },
 
   clearProcessedBrainDump(): void {
     if (!State.data) return;
+    const removed = State.data.brainDump.filter((i) => i.processed);
     State.data.brainDump = State.data.brainDump.filter((i) => !i.processed);
     State.save();
+
+    removed.forEach((item) => {
+      deleteBrainDumpEntryFromIndexedDb(item.id);
+      SupabaseService.deleteBrainDump(item.id).catch((error) => {
+        try {
+          syncQueue.enqueue({ type: 'delete', entity: 'brainDump', data: { id: item.id } });
+        } catch (queueError) {
+          console.warn('[NDSupport] Failed to queue brain dump delete:', { error, queueError });
+        }
+      });
+    });
   },
 
   // Body doubling timer

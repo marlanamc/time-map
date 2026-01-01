@@ -189,9 +189,9 @@ Current issues identified:
 ## 🔮 Future Features
 
 ### 12. Data Export/Import
-- [ ] Export goals to JSON/CSV
+- [x] Export goals to JSON/CSV
 - [ ] Import from other planning apps
-- [ ] Backup to file system
+- [x] Backup to file system
 - [ ] Share goals via link
 
 ### 13. Widgets & Shortcuts

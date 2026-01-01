@@ -3,12 +3,28 @@
    =================================== */
 @media (max-width: 1200px) {
     .calendar-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, minmax(240px, 1fr));
+    }
+    
+    .year-view-container .calendar-grid {
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
     }
 
     .month-overview,
     .goals-by-status {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .year-view-container .calendar-grid {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .year-view-container .calendar-grid {
+        grid-template-columns: 1fr;
     }
 }
 

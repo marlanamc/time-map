@@ -5,7 +5,7 @@
  * and limiting sync frequency, crucial for ADHD-friendly instant UI feedback.
  */
 
-import type { Goal, BrainDumpEntry, Preferences } from '../types';
+import type { Analytics, BrainDumpEntry, Goal, Preferences, Streak } from '../types';
 import { SupabaseService } from '../services/SupabaseService';
 import { dirtyTracker } from '../services/DirtyTracker';
 import { syncQueue } from '../services/SyncQueue';
@@ -126,6 +126,33 @@ export const throttledPreferencesSync = throttle(async (prefs: Preferences) => {
     console.log('✓ Preferences synced to cloud');
   } catch (error) {
     console.error('Failed to sync preferences:', error);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'error' } }));
+  }
+}, 5000); // Max once per 5 seconds
+
+export const throttledPreferencesAndAnalyticsSync = throttle(
+  async (prefs: Preferences, analytics?: Analytics) => {
+    try {
+      window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
+      await SupabaseService.savePreferences(prefs, analytics);
+      window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'synced' } }));
+      console.log('✓ Preferences + analytics synced to cloud');
+    } catch (error) {
+      console.error('Failed to sync preferences + analytics:', error);
+      window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'error' } }));
+    }
+  },
+  5000
+); // Max once per 5 seconds
+
+export const throttledStreakSync = throttle(async (streak: Streak, bestStreak?: number) => {
+  try {
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
+    await SupabaseService.saveStreak(streak, bestStreak);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'synced' } }));
+    console.log('✓ Streak synced to cloud');
+  } catch (error) {
+    console.error('Failed to sync streak:', error);
     window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'error' } }));
   }
 }, 5000); // Max once per 5 seconds

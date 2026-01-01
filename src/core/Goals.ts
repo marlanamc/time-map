@@ -7,6 +7,7 @@ import { CONFIG } from '../config';
 import { SupabaseService } from '../services/SupabaseService';
 import { dirtyTracker } from '../services/DirtyTracker';
 import { debouncedGoalSync } from '../utils/syncHelpers';
+import DB, { DB_STORES } from '../db';
 
 const INTERNAL_TAG_PREFIX = "__tm:";
 
@@ -116,6 +117,18 @@ interface GoalsCallbacks {
 }
 
 let callbacks: GoalsCallbacks = {};
+
+function persistGoalToIndexedDb(goal: Goal): void {
+  void DB.update(DB_STORES.GOALS, goal).catch((err: unknown) => {
+    console.warn('[Goals] Failed to persist goal to IndexedDB:', err);
+  });
+}
+
+function deleteGoalFromIndexedDb(goalId: string): void {
+  void DB.delete(DB_STORES.GOALS, goalId).catch((err: unknown) => {
+    console.warn('[Goals] Failed to delete goal from IndexedDB:', err);
+  });
+}
 
 export const Goals = {
   // Set callbacks for UI interactions
@@ -230,6 +243,7 @@ export const Goals = {
     State.data.goals.push(goal);
     State.data.analytics.goalsCreated++;
     State.save();
+    persistGoalToIndexedDb(goal);
 
     // Force sync for new goals to ensure creation persists immediately
     // debouncedGoalSync is better for rapid edits, but creation should be atomic
@@ -329,6 +343,7 @@ export const Goals = {
     }
 
     State.save();
+    persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
     dirtyTracker.markDirty('goal', goalId);
     debouncedGoalSync(goal);
@@ -340,6 +355,7 @@ export const Goals = {
     if (!State.data) return;
     State.data.goals = State.data.goals.filter((g) => g.id !== goalId);
     State.save();
+    deleteGoalFromIndexedDb(goalId);
     if (callbacks.onScheduleRender) callbacks.onScheduleRender();
     // Cloud Delete
     SupabaseService.deleteGoal(goalId).catch(err => console.error('Failed to delete goal from cloud', err));
@@ -399,6 +415,7 @@ export const Goals = {
     State.data.analytics.goalsCompleted++;
 
     State.save();
+    persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
     dirtyTracker.markDirty('goal', goalId);
     debouncedGoalSync(goal);
@@ -439,6 +456,7 @@ export const Goals = {
     goal.subtasks.push(subtask);
     goal.updatedAt = new Date().toISOString();
     State.save();
+    persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
     dirtyTracker.markDirty('goal', goalId);
     debouncedGoalSync(goal);
@@ -479,6 +497,7 @@ export const Goals = {
     goal.notes.push(note);
     goal.updatedAt = new Date().toISOString();
     State.save();
+    persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
     dirtyTracker.markDirty('goal', goalId);
     debouncedGoalSync(goal);
@@ -502,6 +521,7 @@ export const Goals = {
     goal.lastWorkedOn = new Date().toISOString();
     State.data.analytics.totalTimeSpent += minutes;
     State.save();
+    persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
     dirtyTracker.markDirty('goal', goalId);
     debouncedGoalSync(goal);

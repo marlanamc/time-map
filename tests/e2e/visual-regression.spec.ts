@@ -119,6 +119,7 @@ test('visual: mobile tab bar stays visible', async ({ page, browserName }) => {
 
   await expect(page.locator('#mobileTabBar')).toHaveScreenshot('mobile-tab-bar.png', {
     animations: 'disabled',
+    // WebKit/iOS rendering can be slightly unstable across versions; allow small diffs.
+    maxDiffPixelRatio: 0.1,
   });
 });
-

@@ -114,10 +114,8 @@ CREATE INDEX IF NOT EXISTS idx_preferences_user
 -- Expression Indexes for Common Queries
 -- =============================================================================
 
--- Overdue goals (goals past due date that aren't done)
-CREATE INDEX IF NOT EXISTS idx_goals_overdue
-  ON goals(user_id, due_date)
-  WHERE status != 'done' AND due_date < NOW();
+-- Note: We can't use NOW() in index predicates (it's not immutable)
+-- Overdue queries will use the idx_goals_due_date index instead
 
 -- Goals by category
 CREATE INDEX IF NOT EXISTS idx_goals_user_category

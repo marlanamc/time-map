@@ -34,3 +34,6 @@ npm-debug.log*
 .env
 .env.local
 env.js
+
+# Supabase CLI artifacts
+supabase/.temp/

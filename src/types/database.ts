@@ -100,3 +100,15 @@ export interface PreferencesRow {
   data: any; // JSONB - stores the full Preferences object
   updated_at: string;
 }
+
+/**
+ * Streaks table schema
+ * Stores user streak tracking for cross-device sync
+ */
+export interface StreakRow {
+  user_id: string;
+  count: number;
+  last_date: string | null;
+  best_streak: number;
+  updated_at: string;
+}

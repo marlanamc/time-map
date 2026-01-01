@@ -9,7 +9,7 @@ import { batchSaveService } from '../services/BatchSaveService';
 import { cacheService } from '../services/CacheService';
 import { warmCache } from '../services/cacheWarmup';
 import { syncQueue } from '../services/SyncQueue';
-import { throttledPreferencesSync } from '../utils/syncHelpers';
+import { throttledPreferencesAndAnalyticsSync, throttledStreakSync } from '../utils/syncHelpers';
 import { eventBus } from './EventBus';
 import { isSupabaseConfigured } from '../supabaseClient';
 
@@ -263,6 +263,9 @@ export const State: AppState & {
   ensureDataShape() {
     const defaults = this.getDefaultData();
     let changed = false;
+    const isUuid = (value: unknown): value is string =>
+      typeof value === 'string' &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
     if (!this.data || typeof this.data !== "object") {
       this.data = defaults;
@@ -284,6 +287,16 @@ export const State: AppState & {
     if (!Array.isArray(this.data.brainDump)) {
       this.data.brainDump = [];
       changed = true;
+    } else {
+      // Ensure IDs are UUIDs for Supabase compatibility (brain_dump.id is UUID)
+      this.data.brainDump.forEach((entry) => {
+        if (!entry || typeof entry !== 'object') return;
+        const id = (entry as { id?: unknown }).id;
+        if (!isUuid(id)) {
+          (entry as { id: string }).id = crypto.randomUUID();
+          changed = true;
+        }
+      });
     }
     if (!Array.isArray(this.data.bodyDoubleHistory)) {
       this.data.bodyDoubleHistory = [];
@@ -353,18 +366,57 @@ export const State: AppState & {
 
   async load(): Promise<void> {
     try {
+      console.log('[State] Loading data from cloud...');
       const cloudData = await SupabaseService.loadAllData();
       if (cloudData) {
         // Merge cloud data with defaults to ensure complete state
         this.data = { ...this.getDefaultData(), ...cloudData } as AppData;
+        console.log('[State] ✓ Data loaded from cloud:', {
+          goals: this.data.goals.length,
+          brainDump: this.data.brainDump.length,
+          achievements: this.data.achievements.length,
+          weeklyReviews: this.data.weeklyReviews.length,
+          hasPreferences: !!this.data.preferences
+        });
       } else {
         // Fallback to local or default
+        console.log('[State] No cloud data found, checking localStorage...');
         const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
-        this.data = stored ? (JSON.parse(stored) as AppData) : null;
+        if (stored) {
+          try {
+            this.data = JSON.parse(stored) as AppData;
+            console.log('[State] ✓ Data loaded from localStorage');
+          } catch (parseError) {
+            console.error('[State] Failed to parse localStorage data:', parseError);
+            this.data = null;
+          }
+        } else {
+          console.log('[State] No local data found, will use defaults');
+          this.data = null;
+        }
       }
     } catch (e) {
-      console.error("Failed to load data:", e);
-      this.data = null;
+      console.error("[State] Failed to load data:", e);
+      if (e instanceof Error) {
+        console.error("[State] Error details:", {
+          message: e.message,
+          stack: e.stack,
+          name: e.name
+        });
+      }
+      // Try to fallback to localStorage on error
+      try {
+        const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
+        if (stored) {
+          this.data = JSON.parse(stored) as AppData;
+          console.log('[State] ✓ Fallback: Data loaded from localStorage after error');
+        } else {
+          this.data = null;
+        }
+      } catch (fallbackError) {
+        console.error("[State] Fallback to localStorage also failed:", fallbackError);
+        this.data = null;
+      }
     }
   },
 
@@ -379,16 +431,47 @@ export const State: AppState & {
     try {
       if (this.data) {
         // Local backup always
-        localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
+        try {
+          localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
+          console.log('[State] ✓ Data saved to localStorage');
+        } catch (storageError) {
+          console.error("[State] Failed to save to localStorage:", storageError);
+          // Continue with cloud save even if localStorage fails
+        }
 
         // Cloud save - use throttled sync for preferences (max once per 5s)
-        const user = await SupabaseService.getUser();
-        if (user && this.data.preferences) {
-          throttledPreferencesSync(this.data.preferences);
+        try {
+          const user = await SupabaseService.getUser();
+          if (user && this.data.preferences) {
+            throttledPreferencesAndAnalyticsSync(this.data.preferences, this.data.analytics);
+            throttledStreakSync(this.data.streak, this.data.analytics?.streakBest);
+          } else if (!user) {
+            console.log('[State] Not authenticated, skipping cloud save');
+          }
+        } catch (cloudError) {
+          console.error("[State] Failed to save preferences to cloud:", cloudError);
+          if (cloudError instanceof Error) {
+            console.error("[State] Cloud save error details:", {
+              message: cloudError.message,
+              stack: cloudError.stack,
+              name: cloudError.name
+            });
+          }
+          // Don't throw - local save succeeded, cloud save is best-effort
         }
+      } else {
+        console.warn('[State] Cannot save: data is null');
       }
     } catch (e) {
-      console.error("Failed to save data:", e);
+      console.error("[State] Failed to save data:", e);
+      if (e instanceof Error) {
+        console.error("[State] Save error details:", {
+          message: e.message,
+          stack: e.stack,
+          name: e.name
+        });
+      }
+      // Don't throw - this is a best-effort save operation
     }
   },
 

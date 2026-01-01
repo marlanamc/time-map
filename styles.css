@@ -2698,12 +2698,17 @@ body.hide-sidebar .canvas-zoom-controls {
 
 .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(4, 280px);
+    grid-template-columns: repeat(4, minmax(240px, 280px));
     gap: var(--space-6);
     justify-content: center;
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
     margin: 0 auto;
+}
+
+/* Year view specific grid adjustments */
+.year-view-container .calendar-grid {
+    grid-template-columns: repeat(4, minmax(220px, 280px));
 }
 
 /* View Containers */
@@ -2726,8 +2731,9 @@ body.hide-sidebar .canvas-zoom-controls {
 
 .year-view {
     padding: var(--space-6);
-    max-width: 900px;
+    max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
 }
 
 .year-view-header {
