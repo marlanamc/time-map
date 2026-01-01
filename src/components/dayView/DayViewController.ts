@@ -3,11 +3,11 @@ import type { DayViewOptions, DayViewCallbacks, DragData, UpdateGoalTimeCommand 
 import { TimeSlotCalculator } from "./TimeSlotCalculator";
 import { CardComponent } from "./CardComponent";
 import { TimelineGrid } from "./TimelineGrid";
-import { TimelineDayViewRenderer } from "./TimelineDayViewRenderer";
-import { ListDayViewRenderer } from "./ListDayViewRenderer";
 import { PlannerDayViewRenderer } from "./PlannerDayViewRenderer";
 import { DragDropManager } from "./DragDropManager";
 import { haptics } from "../../utils/haptics";
+import { Goals } from "../../core/Goals";
+import type { Category } from "../../types";
 
 /**
  * Application configuration interface
@@ -33,8 +33,6 @@ export class DayViewController {
   private calculator: TimeSlotCalculator;
   private cardComponent: CardComponent;
   private timelineGrid: TimelineGrid;
-  private renderer: TimelineDayViewRenderer;
-  private simpleRenderer: ListDayViewRenderer;
   private plannerRenderer: PlannerDayViewRenderer;
   private dragDropManager: DragDropManager;
 
@@ -49,10 +47,17 @@ export class DayViewController {
   private timeUpdateInterval: number | null = null;
   private readonly boundHandleClick: (e: Event) => void;
   private readonly boundHandleKeyDown: (e: KeyboardEvent) => void;
+  private readonly boundHandleNativeDragStart: (e: DragEvent) => void;
+  private readonly boundHandleNativeDragEnd: (e: DragEvent) => void;
+  private readonly boundHandleNativeDragOver: (e: DragEvent) => void;
+  private readonly boundHandleNativeDrop: (e: DragEvent) => void;
   private swipeCleanup: (() => void) | null = null;
 
   // Options
   private options: DayViewOptions;
+  private activeCommonTemplate:
+    | { title: string; category: string; duration: number }
+    | null = null;
 
   /**
    * Creates a new DayViewController instance
@@ -66,6 +71,13 @@ export class DayViewController {
     this.callbacks = callbacks;
     this.boundHandleClick = (e: Event) => this.handleClick(e);
     this.boundHandleKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
+    this.boundHandleNativeDragStart = (e: DragEvent) =>
+      this.handleNativeDragStart(e);
+    this.boundHandleNativeDragEnd = (e: DragEvent) =>
+      this.handleNativeDragEnd(e);
+    this.boundHandleNativeDragOver = (e: DragEvent) =>
+      this.handleNativeDragOver(e);
+    this.boundHandleNativeDrop = (e: DragEvent) => this.handleNativeDrop(e);
 
     // Merge options with defaults
     this.options = {
@@ -91,18 +103,6 @@ export class DayViewController {
 
     this.cardComponent = new CardComponent(_config);
     this.timelineGrid = new TimelineGrid(this.calculator);
-
-    this.renderer = new TimelineDayViewRenderer(
-      container,
-      this.calculator,
-      this.cardComponent,
-      this.timelineGrid
-    );
-
-    this.simpleRenderer = new ListDayViewRenderer(
-      container,
-      this.cardComponent
-    );
 
     this.plannerRenderer = new PlannerDayViewRenderer(
       container,
@@ -132,6 +132,10 @@ export class DayViewController {
       // Delegate event listeners
       this.container.addEventListener("click", this.boundHandleClick);
       this.container.addEventListener("keydown", this.boundHandleKeyDown);
+      this.container.addEventListener("dragstart", this.boundHandleNativeDragStart);
+      this.container.addEventListener("dragend", this.boundHandleNativeDragEnd);
+      this.container.addEventListener("dragover", this.boundHandleNativeDragOver);
+      this.container.addEventListener("drop", this.boundHandleNativeDrop);
       this.setupSwipeToComplete();
 
       // Set up resize observer to update on viewport changes
@@ -145,7 +149,19 @@ export class DayViewController {
       // Update current time indicator every minute
       this.timeUpdateInterval = window.setInterval(() => {
         if (this.currentDate) {
-          this.renderer.update(this.currentDate, this.currentGoals);
+          const today = new Date();
+          if (this.currentDate.toDateString() === today.toDateString()) {
+            this.plannerRenderer.update(
+              this.currentDate,
+              this.currentGoals,
+              this.currentContextGoals
+            );
+          } else {
+            const gridEl = this.container.querySelector(".day-bed-grid") as
+              | HTMLElement
+              | null;
+            if (gridEl) this.timelineGrid.updateElement(gridEl);
+          }
         }
       }, 60000);
     } catch (error) {
@@ -184,7 +200,6 @@ export class DayViewController {
 
     // Cleanup drag-drop manager
     this.dragDropManager.destroy();
-    this.renderer.clearCaches();
 
     // Remove event listeners with defensive null checks
     if (this.boundHandleClick) {
@@ -193,6 +208,10 @@ export class DayViewController {
     if (this.boundHandleKeyDown) {
       this.container.removeEventListener("keydown", this.boundHandleKeyDown);
     }
+    this.container.removeEventListener("dragstart", this.boundHandleNativeDragStart);
+    this.container.removeEventListener("dragend", this.boundHandleNativeDragEnd);
+    this.container.removeEventListener("dragover", this.boundHandleNativeDragOver);
+    this.container.removeEventListener("drop", this.boundHandleNativeDrop);
   }
 
   /**
@@ -224,16 +243,7 @@ export class DayViewController {
    */
   private renderCurrent(contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     if (!this.currentDate) return;
-    const style = (this.callbacks.onGetPreference?.("dayViewStyle") as string | undefined) || "planner";
-    if (style === "simple") {
-      this.simpleRenderer.renderInitial(this.currentDate, this.currentGoals);
-    } else if (style === "planner") {
-      this.plannerRenderer.renderInitial(this.currentDate, this.currentGoals, contextGoals);
-    } else if (style === "timeline") {
-      this.renderer.renderInitial(this.currentDate, this.currentGoals);
-    } else {
-      this.plannerRenderer.renderInitial(this.currentDate, this.currentGoals, contextGoals);
-    }
+    this.plannerRenderer.renderInitial(this.currentDate, this.currentGoals, contextGoals);
   }
 
   /**
@@ -241,16 +251,7 @@ export class DayViewController {
    */
   private updateCurrent(contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     if (!this.currentDate) return;
-    const style = (this.callbacks.onGetPreference?.("dayViewStyle") as string | undefined) || "planner";
-    if (style === "simple") {
-      this.simpleRenderer.update(this.currentDate, this.currentGoals);
-    } else if (style === "planner") {
-      this.plannerRenderer.update(this.currentDate, this.currentGoals, contextGoals);
-    } else if (style === "timeline") {
-      this.renderer.update(this.currentDate, this.currentGoals);
-    } else {
-      this.plannerRenderer.update(this.currentDate, this.currentGoals, contextGoals);
-    }
+    this.plannerRenderer.update(this.currentDate, this.currentGoals, contextGoals);
   }
 
   /**
@@ -272,16 +273,7 @@ export class DayViewController {
    * Also updates the internal goals array.
    */
   updateGoal(goalId: string, goal: Goal): void {
-    const style = (this.callbacks.onGetPreference?.("dayViewStyle") as string | undefined) || "planner";
-    if (style === "simple") {
-      this.simpleRenderer.updateCard(goalId, goal);
-    } else if (style === "planner") {
-      this.plannerRenderer.updateCard(goalId, goal);
-    } else if (style === "timeline") {
-      this.renderer.updateCard(goalId, goal);
-    } else {
-      this.plannerRenderer.updateCard(goalId, goal);
-    }
+    this.plannerRenderer.updateCard(goalId, goal);
 
     // Update currentGoals
     const index = this.currentGoals.findIndex((g) => g.id === goalId);
@@ -321,11 +313,10 @@ export class DayViewController {
 
     this.calculator = new TimeSlotCalculator(start, end, this.options.maxLanes, this.options.snapInterval);
     this.timelineGrid = new TimelineGrid(this.calculator);
-
-    this.renderer = new TimelineDayViewRenderer(
+    this.plannerRenderer = new PlannerDayViewRenderer(
       this.container,
-      this.calculator,
       this.cardComponent,
+      this.calculator,
       this.timelineGrid
     );
 
@@ -469,6 +460,171 @@ export class DayViewController {
     // Note: Removed "Plant something" button - users can add tasks via the main add button
   }
 
+  private snapMinutesToInterval(mins: number, interval: number): number {
+    return Math.round(mins / interval) * interval;
+  }
+
+  private ensureTimelineDropIndicator(dayBed: HTMLElement): HTMLElement {
+    let indicator = dayBed.querySelector(
+      ".planner-drop-indicator"
+    ) as HTMLElement | null;
+    if (indicator) return indicator;
+    indicator = document.createElement("div");
+    indicator.className = "planner-drop-indicator";
+    indicator.setAttribute("aria-hidden", "true");
+    indicator.innerHTML = `
+      <div class="planner-drop-indicator-line"></div>
+      <div class="planner-drop-indicator-label"></div>
+    `;
+    dayBed.appendChild(indicator);
+    return indicator;
+  }
+
+  private clearTimelineDropUi(): void {
+    const dayBed = this.container.querySelector(".day-timeline") as
+      | HTMLElement
+      | null;
+    if (!dayBed) return;
+    dayBed.classList.remove("is-drop-target");
+    const indicator = dayBed.querySelector(".planner-drop-indicator");
+    if (indicator) indicator.remove();
+  }
+
+  private handleNativeDragStart(e: DragEvent): void {
+    const target = e.target as HTMLElement | null;
+    const item = target?.closest(".common-intention-item") as HTMLElement | null;
+    if (!item) return;
+    if (!e.dataTransfer) return;
+
+    const title = item.dataset.title ?? "";
+    const category = item.dataset.category ?? "";
+    const duration = Number(item.dataset.duration ?? "60") || 60;
+
+    this.activeCommonTemplate = { title, category, duration };
+    item.classList.add("is-dragging");
+
+    const payload = JSON.stringify({ title, category, duration });
+    e.dataTransfer.effectAllowed = "copy";
+    e.dataTransfer.setData("application/json", payload);
+    e.dataTransfer.setData("text/plain", payload);
+  }
+
+  private handleNativeDragEnd(e: DragEvent): void {
+    const target = e.target as HTMLElement | null;
+    const item = target?.closest(".common-intention-item") as HTMLElement | null;
+    if (item) item.classList.remove("is-dragging");
+    this.activeCommonTemplate = null;
+    this.clearTimelineDropUi();
+  }
+
+  private handleNativeDragOver(e: DragEvent): void {
+    const target = e.target as HTMLElement | null;
+    const dayBed = target?.closest(".day-timeline") as HTMLElement | null;
+    if (!dayBed) return;
+
+    e.preventDefault();
+
+    const rect = dayBed.getBoundingClientRect();
+    const y = (e.clientY ?? rect.top) - rect.top;
+    const rawStartMin = this.calculator.yToMinutes(y, rect.height);
+
+    const startMin = this.calculator.clamp(
+      this.snapMinutesToInterval(rawStartMin, 15),
+      this.calculator.getPlotStartMin(),
+      this.calculator.getPlotEndMin() - 15
+    );
+
+    const pct = this.calculator.minutesToPercent(startMin);
+    const indicator = this.ensureTimelineDropIndicator(dayBed);
+    indicator.style.top = `${pct}%`;
+    const label = indicator.querySelector(
+      ".planner-drop-indicator-label"
+    ) as HTMLElement | null;
+    if (label) {
+      const title = this.activeCommonTemplate?.title
+        ? `• ${this.activeCommonTemplate.title}`
+        : "";
+      label.textContent = `${this.calculator.format12h(startMin)} ${title}`.trim();
+    }
+
+    dayBed.classList.add("is-drop-target");
+  }
+
+  private handleNativeDrop(e: DragEvent): void {
+    const target = e.target as HTMLElement | null;
+    const dayBed = target?.closest(".day-timeline") as HTMLElement | null;
+    if (!dayBed) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!this.currentDate) return;
+
+    const dt = e.dataTransfer;
+    if (!dt) return;
+
+    const raw =
+      dt.getData("application/json") ||
+      dt.getData("text/plain") ||
+      "";
+    let payload: { title: string; category: string; duration: number } | null =
+      null;
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      payload = null;
+    }
+    if (!payload?.title) return;
+
+    const rect = dayBed.getBoundingClientRect();
+    const y = (e.clientY ?? rect.top) - rect.top;
+    const rawStartMin = this.calculator.yToMinutes(y, rect.height);
+
+    const startMin = this.calculator.clamp(
+      this.snapMinutesToInterval(rawStartMin, 15),
+      this.calculator.getPlotStartMin(),
+      this.calculator.getPlotEndMin() - 15
+    );
+
+    const duration = Math.max(15, Math.floor(payload.duration || 60));
+    const endMin = Math.min(startMin + duration, this.calculator.getPlotEndMin());
+
+    const startTime = this.calculator.toTimeString(startMin);
+    const endTime = this.calculator.toTimeString(
+      endMin > startMin ? endMin : Math.min(startMin + 15, this.calculator.getPlotEndMin())
+    );
+
+    const ymd = `${this.currentDate.getFullYear()}-${String(
+      this.currentDate.getMonth() + 1
+    ).padStart(2, "0")}-${String(this.currentDate.getDate()).padStart(2, "0")}`;
+
+    const coerceCategory = (value: string): Category | null => {
+      switch (value) {
+        case "career":
+        case "health":
+        case "finance":
+        case "personal":
+        case "creative":
+          return value;
+        default:
+          return null;
+      }
+    };
+
+    Goals.create({
+      level: "intention",
+      title: payload.title,
+      category: coerceCategory(payload.category),
+      startDate: ymd,
+      startTime,
+      endTime,
+    });
+
+    this.callbacks.onShowToast?.("🌱", `Added: ${payload.title}`);
+    this.clearTimelineDropUi();
+    this.render();
+  }
+
   private handleKeyDown(e: KeyboardEvent): void {
     const target = e.target as HTMLElement;
 
@@ -508,6 +664,13 @@ export class DayViewController {
         this.options.timeWindowEnd,
         newMaxLanes,
         this.options.snapInterval,
+      );
+      this.timelineGrid = new TimelineGrid(this.calculator);
+      this.plannerRenderer = new PlannerDayViewRenderer(
+        this.container,
+        this.cardComponent,
+        this.calculator,
+        this.timelineGrid
       );
       this.render();
     }

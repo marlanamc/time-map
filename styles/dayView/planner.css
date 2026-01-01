@@ -91,6 +91,67 @@
     gap: 0.75rem;
 }
 
+.common-intentions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.common-intention-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+    border: 1px solid rgba(31, 45, 42, 0.08);
+    box-shadow: var(--shadow-xs);
+    cursor: grab;
+    user-select: none;
+    transition: transform var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out),
+        background var(--duration-fast) var(--ease-out);
+}
+
+.dark-mode .common-intention-item {
+    background: rgba(17, 30, 45, 0.50);
+    border-color: rgba(140, 183, 217, 0.16);
+}
+
+.common-intention-item:hover {
+    transform: translateY(-1px);
+    background: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+    box-shadow: var(--shadow-sm);
+}
+
+.common-intention-item:active {
+    cursor: grabbing;
+    transform: translateY(0);
+}
+
+.common-intention-item.is-dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+}
+
+.common-intention-emoji {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.common-intention-title {
+    font-size: 0.85rem;
+    font-weight: 650;
+    color: var(--text-primary);
+}
+
+.common-intention-drag {
+    margin-left: 0.1rem;
+    font-size: 0.9rem;
+    opacity: 0.55;
+    color: var(--text-secondary);
+}
+
 .section-title {
     font-size: 0.85rem;
     font-weight: 700;
@@ -174,6 +235,46 @@
     position: relative;
     min-height: 900px;
     /* 14 hours * ~64px */
+}
+
+.planner-timeline-container.is-drop-target {
+    background: color-mix(in srgb, var(--bg-hover) 55%, transparent);
+    border-radius: 24px;
+}
+
+.planner-drop-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    transform: translateY(-1px);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.planner-drop-indicator-line {
+    height: 2px;
+    background: color-mix(in srgb, var(--accent-border) 45%, transparent);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
+}
+
+.planner-drop-indicator-label {
+    position: absolute;
+    top: -14px;
+    right: 12px;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--glass-bg) 80%, transparent);
+    border: 1px solid color-mix(in srgb, var(--glass-border) 70%, transparent);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    box-shadow: var(--shadow-xs);
+}
+
+.dark-mode .planner-drop-indicator-label {
+    background: rgba(10, 22, 36, 0.72);
+    border-color: rgba(140, 183, 217, 0.18);
 }
 
 .planner-timeline-content {

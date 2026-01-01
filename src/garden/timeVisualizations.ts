@@ -78,11 +78,11 @@ export class TimeVisualizations {
         block.innerHTML = '🌱'; // Bud
       }
       
-      // Set title after innerHTML to ensure it persists - use textContent to avoid any encoding issues
-      if (formattedTime && formattedTime.trim()) {
-        block.title = formattedTime;
-        block.setAttribute('aria-label', `${formattedTime} - ${hour < currentHour ? 'completed' : hour === currentHour ? 'current hour' : 'upcoming'}`);
-      }
+      // Set title after innerHTML to ensure it persists
+      // Always set title, even if formattedTime is empty (fallback will be used)
+      const titleText = formattedTime || `${hour}:00`;
+      block.title = titleText;
+      block.setAttribute('aria-label', `${titleText} - ${hour < currentHour ? 'completed' : hour === currentHour ? 'current hour' : 'upcoming'}`);
 
       container.appendChild(block);
     }
@@ -119,11 +119,11 @@ export class TimeVisualizations {
         block.innerHTML = '🌱';
       }
       
-      // Set title after innerHTML to ensure it persists - use textContent to avoid any encoding issues
-      if (formattedTime && formattedTime.trim()) {
-        block.title = formattedTime;
-        block.setAttribute('aria-label', `${formattedTime} - ${hour < currentHour ? 'completed' : hour === currentHour ? 'current hour' : 'upcoming'}`);
-      }
+      // Set title after innerHTML to ensure it persists
+      // Always set title, even if formattedTime is empty (fallback will be used)
+      const titleText = formattedTime || `${hour}:00`;
+      block.title = titleText;
+      block.setAttribute('aria-label', `${titleText} - ${hour < currentHour ? 'completed' : hour === currentHour ? 'current hour' : 'upcoming'}`);
     });
 
     // Update aria-valuenow
@@ -137,8 +137,9 @@ export class TimeVisualizations {
    */
   private static formatHour(hour: number): string {
     // Ensure hour is a valid number
-    const h = Number(hour);
+    const h = Math.floor(Number(hour));
     if (isNaN(h) || h < 0 || h > 23) {
+      console.warn('Invalid hour value:', hour);
       return '12:00 AM'; // Fallback
     }
     if (h === 0) return '12:00 AM';

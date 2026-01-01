@@ -168,7 +168,7 @@
   height: 24px;
   padding: 0 6px;
   background: var(--accent-badge);
-  color: white;
+  color: var(--text-on-accent);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
   font-weight: 700;
@@ -414,7 +414,7 @@
   border: none;
   border-radius: var(--radius-full);
   background: var(--accent-button);
-  color: white;
+  color: var(--text-on-accent);
   box-shadow: 0 8px 32px var(--accent-subtle);
   display: inline-flex;
   align-items: center;
@@ -629,14 +629,14 @@
   padding: 0 var(--space-3);
   background: var(--accent-badge);
   border-color: transparent;
-  color: white;
+  color: var(--text-on-accent);
   font-weight: 600;
 }
 
 .dark-mode .today-btn {
   background: var(--accent-badge);
   border-color: transparent;
-  color: white;
+  color: var(--text-on-accent);
 }
 
 .dark-mode .today-btn:hover {

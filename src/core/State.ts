@@ -219,7 +219,6 @@ export const State: AppState & {
           taskStartReminders: true, // "Ready to start?" prompts
           allowPartialProgress: true, // Can mark tasks as 10%, 20%, etc.
           reduceEmojis: false, // Minimize emoji usage for less visual noise
-          dayViewStyle: "planner" as const, // timeline, simple, planner
           contextBarCollapsed: false, // Level context bar expanded by default
         },
       },

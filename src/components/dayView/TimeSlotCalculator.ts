@@ -25,6 +25,14 @@ export class TimeSlotCalculator {
     return this.plotRangeMin;
   }
 
+  getPlotStartMin(): number {
+    return this.plotStartMin;
+  }
+
+  getPlotEndMin(): number {
+    return this.plotEndMin;
+  }
+
   /**
    * Parse time string (HH:MM) to minutes from midnight
    */

@@ -168,3 +168,115 @@
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
+
+/* ===================================
+   YEAR VIEW - CENTERED VISION BANNER
+   (Inserted by UIManager.renderCalendar)
+   =================================== */
+
+.year-vision-banner {
+  width: min(980px, calc(100% - 64px));
+  margin: 18px auto 24px;
+}
+
+.year-vision-card,
+.year-vision-empty {
+  width: 100%;
+  text-align: left;
+  border-radius: 18px;
+  padding: 18px 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.year-vision-card {
+  cursor: pointer;
+  border: 1px solid var(--glass-border);
+  appearance: none;
+}
+
+.year-vision-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.year-vision-card:focus-visible {
+  outline: 3px solid var(--accent-highlight);
+  outline-offset: 3px;
+}
+
+:root:not(.dark-mode) .year-vision-card,
+:root:not(.dark-mode) .year-vision-empty {
+  background: rgba(242, 247, 246, 0.72);
+  border-color: rgba(31, 45, 42, 0.08);
+}
+
+.year-vision-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.year-vision-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.year-vision-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.85;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.year-vision-more {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.dark-mode .year-vision-more {
+  background: rgba(255, 255, 255, 0.10);
+  color: var(--text-primary);
+}
+
+.year-vision-edit {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.year-vision-title {
+  font-size: 22px;
+  font-weight: 750;
+  margin-top: 6px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.year-vision-desc {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.year-add-vision-btn {
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .year-vision-banner {
+    width: calc(100% - 32px);
+    margin: 14px auto 18px;
+  }
+}

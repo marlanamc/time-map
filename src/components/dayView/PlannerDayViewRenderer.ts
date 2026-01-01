@@ -14,6 +14,18 @@ export class PlannerDayViewRenderer {
   private calculator: TimeSlotCalculator;
   private timelineGrid: TimelineGrid;
 
+  private getCommonIntentions() {
+    return [
+      { title: "Deep work", category: "career", duration: 90 },
+      { title: "Email + admin", category: "career", duration: 45 },
+      { title: "Workout", category: "health", duration: 60 },
+      { title: "Meal prep", category: "health", duration: 60 },
+      { title: "Budget check-in", category: "finance", duration: 30 },
+      { title: "Creative session", category: "creative", duration: 60 },
+      { title: "Journal + reflect", category: "personal", duration: 20 },
+    ] as const;
+  }
+
   /**
    * Generate SVG icon markup
    * @param name - The icon type to generate
@@ -103,6 +115,7 @@ export class PlannerDayViewRenderer {
       day % 10 === 2 && day !== 12 ? "nd" :
         day % 10 === 3 && day !== 13 ? "rd" : "th";
     const dayName = `${weekday}, ${month} ${day}${ordinal}`;
+    const common = this.getCommonIntentions();
 
     const html = `
       <div class="day-view planner-day-view">
@@ -121,6 +134,32 @@ export class PlannerDayViewRenderer {
           </div>
 
           ${contextGoals ? this.renderContextSection(contextGoals) : ''}
+
+          <div class="planner-sidebar-section">
+            <div class="section-title">Common intentions</div>
+            <div class="common-intentions" aria-label="Common intentions">
+              ${common
+                .map((t) => {
+                  const emoji = this.getCategoryEmoji(t.category);
+                  return `
+                    <div
+                      class="common-intention-item"
+                      draggable="true"
+                      data-title="${this.escapeHtml(t.title)}"
+                      data-category="${this.escapeHtml(t.category)}"
+                      data-duration="${t.duration}"
+                    >
+                      <span class="common-intention-emoji">${emoji}</span>
+                      <span class="common-intention-title">${this.escapeHtml(
+                        t.title
+                      )}</span>
+                      <span class="common-intention-drag" aria-hidden="true">⠿</span>
+                    </div>
+                  `;
+                })
+                .join("")}
+            </div>
+          </div>
 
           <div class="planner-sidebar-section">
             <div class="section-title">Task cloud</div>
@@ -148,7 +187,7 @@ export class PlannerDayViewRenderer {
         </aside>
 
         <main class="planner-main">
-          <div class="planner-timeline-container">
+          <div class="planner-timeline-container day-timeline">
             ${this.timelineGrid.render()}
             <div class="planner-timeline-content">
               ${scheduled.map(g => this.renderTimedTask(g)).join('')}

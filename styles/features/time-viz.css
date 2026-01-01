@@ -35,7 +35,8 @@
     justify-content: center;
     border-radius: var(--radius-sm);
     transition: all var(--duration-normal) var(--ease-out);
-    cursor: help;
+    cursor: default;
+    position: relative;
 }
 
 .hour-block.hour-past {
@@ -56,6 +57,54 @@
 
 .hour-block:hover {
     transform: scale(1.2);
+}
+
+.hour-block:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%);
+    padding: 6px 10px;
+    border-radius: var(--radius-full);
+    background: var(--surface-2, var(--bg-surface));
+    border: 1px solid rgba(31, 45, 42, 0.18);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.hour-block:hover::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    background: var(--surface-2, var(--bg-surface));
+    border-left: 1px solid rgba(31, 45, 42, 0.18);
+    border-bottom: 1px solid rgba(31, 45, 42, 0.18);
+    transform: translateX(-50%) rotate(45deg);
+    pointer-events: none;
+    z-index: 9;
+}
+
+:root.dark-mode .hour-block:hover::after {
+    background: rgba(10, 22, 18, 0.86);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+}
+
+:root.dark-mode .hour-block:hover::before {
+    background: rgba(10, 22, 18, 0.86);
+    border-left-color: rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Light mode time themes - improve hour block visibility against bright backgrounds */

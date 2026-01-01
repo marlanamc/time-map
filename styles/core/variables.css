@@ -32,6 +32,8 @@
     --text-secondary: #4B6761;
     --text-tertiary: rgba(31, 45, 42, 0.64);
     --text-ghost: rgba(31, 45, 42, 0.48);
+    /* Text on accent-filled UI (chips, badges, zoom controls) */
+    --text-on-accent: rgba(255, 255, 255, 0.95);
 
     /* Daylight Garden Colors (Vibrant Primary) */
     --sage: #5A9B8D;
@@ -76,7 +78,7 @@
     --accent-border: var(--sky);  /* Borders, dividers */
     --accent-highlight: var(--petal);  /* Highlights, focus rings */
     --accent-link: var(--indigo);  /* Links, interactive text */
-    --accent-badge: var(--amber);  /* Badges, tags */
+    --accent-badge: #D96320;  /* Badges, tags (deeper for readable label text) */
     --accent-progress: var(--sunset);  /* Progress bars, meters */
     --accent-icon: var(--violet);  /* Icons, decorative elements */
 
@@ -267,6 +269,8 @@
     --text-secondary: rgba(255, 255, 255, 0.75);
     --text-tertiary: rgba(255, 255, 255, 0.60);
     --text-ghost: rgba(255, 255, 255, 0.45);
+    /* Dark UI uses lighter accents; use dark ink for legible text on them */
+    --text-on-accent: rgba(8, 23, 39, 0.92);
 
     --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.45);
     --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.55);

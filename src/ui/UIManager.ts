@@ -1743,9 +1743,6 @@ export const UI = {
 
     // Set goals and render
     this.dayViewController.setGoals(date, allGoals, contextGoals);
-
-    // Add day view style toggle
-    this.ensureDayViewStyleToggle();
   },
 
   async ensureDayViewControllerCtor(): Promise<void> {
@@ -1767,95 +1764,6 @@ export const UI = {
       });
 
     return this._dayViewControllerLoading;
-  },
-
-  ensureDayViewStyleToggle() {
-    const header = document.querySelector(".day-view-header");
-    if (!header) return;
-
-    // Remove any existing toggle to avoid duplicates
-    const existing = header.querySelector(".day-style-toggle");
-    if (existing) existing.remove();
-
-    // Get current mode (default to planner)
-    const currentMode = State.data?.preferences?.nd?.dayViewStyle || "planner";
-
-    // Create mode switcher
-    const toggle = document.createElement("div");
-    toggle.className = "day-style-toggle";
-    toggle.innerHTML = `
-      <button class="day-mode-btn ${
-        currentMode === "timeline" ? "active" : ""
-      }" data-mode="timeline" title="Timeline View">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-        <span>Timeline</span>
-      </button>
-      <button class="day-mode-btn ${
-        currentMode === "simple" ? "active" : ""
-      }" data-mode="simple" title="Simple View">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="8" y1="6" x2="21" y2="6"></line>
-          <line x1="8" y1="12" x2="21" y2="12"></line>
-          <line x1="8" y1="18" x2="21" y2="18"></line>
-          <circle cx="4" cy="6" r="1" fill="currentColor"></circle>
-          <circle cx="4" cy="12" r="1" fill="currentColor"></circle>
-          <circle cx="4" cy="18" r="1" fill="currentColor"></circle>
-        </svg>
-        <span>Simple</span>
-      </button>
-      <button class="day-mode-btn ${
-        currentMode === "planner" ? "active" : ""
-      }" data-mode="planner" title="Planner View">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
-        <span>Planner</span>
-      </button>
-    `;
-
-    // Add click handlers
-    toggle.querySelectorAll(".day-mode-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const mode = (btn as HTMLElement).dataset.mode as
-          | "timeline"
-          | "simple"
-          | "planner";
-
-        // Update active state
-        toggle
-          .querySelectorAll(".day-mode-btn")
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        // Save preference
-        if (State.data) {
-          State.data.preferences.nd = {
-            ...(State.data.preferences.nd || {}),
-            dayViewStyle: mode,
-          };
-          State.save();
-        }
-
-        // Trigger re-render with new mode
-        if (this.dayViewController) {
-          this.dayViewController.render();
-          Toast.show(
-            this.elements,
-            "✨",
-            `Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`
-          );
-        }
-      });
-    });
-
-    header.appendChild(toggle);
   },
 
   // Render a single goal card for day view
@@ -2013,6 +1921,13 @@ export const UI = {
     // Update year display
     this.updateYearDisplay();
 
+    const yearStart = new Date(viewingYear, 0, 1);
+    const yearEnd = new Date(viewingYear, 11, 31);
+    const visionGoals = Goals.getForRange(yearStart, yearEnd).filter(
+      (g) => g.level === "vision" && g.status !== "done"
+    );
+    const primaryVision = visionGoals[0] ?? null;
+
     // Render year header + grid
     container.className = "year-view-container";
     container.innerHTML = "";
@@ -2027,16 +1942,83 @@ export const UI = {
       <p class="year-view-subtitle">Your year as a garden of months</p>
     `;
 
+    const visionWrap = document.createElement("div");
+    visionWrap.className = "year-vision-banner";
+
+    if (primaryVision) {
+      const visionDesc = primaryVision.description?.trim();
+      visionWrap.innerHTML = `
+        <button type="button" class="year-vision-card" data-goal-id="${
+          primaryVision.id
+        }">
+          <div class="year-vision-top">
+            <div class="year-vision-label">✨ ${viewingYear} Vision</div>
+            <div class="year-vision-meta">
+              <span class="year-vision-count">${visionGoals.length} vision(s)</span>
+              ${
+                visionGoals.length > 1
+                  ? `<span class="year-vision-more">+${visionGoals.length - 1}</span>`
+                  : ""
+              }
+              <span class="year-vision-edit">✏️ Edit</span>
+            </div>
+          </div>
+          <div class="year-vision-title">${this.escapeHtml(
+            primaryVision.title
+          )}</div>
+          ${
+            visionDesc
+              ? `<div class="year-vision-desc">${this.escapeHtml(visionDesc)}</div>`
+              : ""
+          }
+        </button>
+      `;
+    } else {
+      visionWrap.innerHTML = `
+        <div class="year-vision-empty">
+          <div class="year-vision-label">✨ ${viewingYear} Vision</div>
+          <div class="year-vision-title">No vision yet</div>
+          <div class="year-vision-desc">Add one big outcome you want this year.</div>
+          <button type="button" class="btn btn-sm btn-ghost year-add-vision-btn">+ Add Vision</button>
+        </div>
+      `;
+    }
+
     const grid = document.createElement("div");
     grid.className = "calendar-grid";
 
     yearView.appendChild(header);
+    yearView.appendChild(visionWrap);
     yearView.appendChild(grid);
     container.appendChild(yearView);
     console.log(
       "renderCalendar: Created yearView structure, container children:",
       container.children.length
     );
+
+    const visionCard = yearView.querySelector<HTMLButtonElement>(
+      ".year-vision-card[data-goal-id]"
+    );
+    if (visionCard) {
+      visionCard.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const goalId = visionCard.dataset.goalId;
+        if (!goalId) return;
+        container.dispatchEvent(new CustomEvent("goal-click", { detail: { goalId } }));
+      });
+    }
+
+    const addVisionBtn = yearView.querySelector<HTMLButtonElement>(
+      ".year-add-vision-btn"
+    );
+    if (addVisionBtn) {
+      addVisionBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openGoalModal("vision", null, viewingYear);
+      });
+    }
 
     CONFIG.MONTHS.forEach((monthName, monthIndex) => {
       try {

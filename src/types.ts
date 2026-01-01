@@ -274,8 +274,6 @@ export interface NDPreferences {
   taskStartReminders: boolean;
   allowPartialProgress: boolean;
   reduceEmojis: boolean;
-  /** Preferred day view layout style */
-  dayViewStyle?: 'timeline' | 'simple' | 'planner';
   /** Whether the level context bar is collapsed */
   contextBarCollapsed?: boolean;
 }
