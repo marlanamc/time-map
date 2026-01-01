@@ -65,6 +65,7 @@ async function openSupportPanel(page: Page) {
 
 test('visual: support panel (dark + morning) stays readable', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'Use Chromium snapshots for stability.');
+  test.skip(process.platform !== 'darwin', 'Snapshots are maintained on macOS; skip on other platforms.');
 
   await installFixedNow(page);
   await page.addInitScript(() => {
@@ -97,6 +98,7 @@ test('visual: support panel (dark + morning) stays readable', async ({ page, bro
 
 test('visual: mobile tab bar stays visible', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'Mobile snapshots run on iPhone/WebKit.');
+  test.skip(process.platform !== 'darwin', 'Snapshots are maintained on macOS; skip on other platforms.');
 
   await installFixedNow(page);
   await page.addInitScript(() => {
