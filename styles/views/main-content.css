@@ -27,6 +27,7 @@
     margin-bottom: 0;
     width: 100%;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    flex-shrink: 0;
 }
 
 /* ===================================
@@ -980,4 +981,18 @@
     color: var(--text-tertiary);
     min-width: 44px;
     text-align: center;
+}
+
+/* Desktop: Ensure control bar stays at top in all views */
+@media (min-width: 901px) {
+    .control-bar {
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+    }
+    
+    .main-content {
+        /* Ensure sticky positioning works correctly */
+        position: relative;
+    }
 }
