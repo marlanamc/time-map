@@ -211,50 +211,76 @@ export const SupabaseService = {
 
         try {
             const supabase = await getSupabaseClient();
-            const { error } = await supabase
-                .from('goals')
-                .upsert({
+            
+            // Prepare the data object
+            const goalData = {
                 id: goal.id,
                 user_id: user.id,
                 title: goal.title,
                 level: goal.level,
-                description: goal.description,
+                description: goal.description || null,
                 month: goal.month,
                 year: goal.year,
-                category: goal.category,
+                category: goal.category || null,
                 priority: goal.priority,
                 status: goal.status,
                 progress: goal.progress,
-                subtasks: goal.subtasks, // JSONB
-                notes: goal.notes, // JSONB
-                time_log: goal.timeLog, // JSONB
+                subtasks: goal.subtasks || [], // JSONB
+                notes: goal.notes || [], // JSONB
+                time_log: goal.timeLog || [], // JSONB
                 created_at: goal.createdAt,
                 updated_at: goal.updatedAt,
-                completed_at: goal.completedAt,
-                last_worked_on: goal.lastWorkedOn,
-                due_date: goal.dueDate,
-                start_time: goal.startTime,
-                end_time: goal.endTime,
-                tags: goal.tags,
+                completed_at: goal.completedAt || null,
+                last_worked_on: goal.lastWorkedOn || null,
+                due_date: goal.dueDate || null,
+                start_time: goal.startTime || null,
+                end_time: goal.endTime || null,
+                tags: goal.tags || [],
                 parent_id: goal.parentId ?? null,
                 parent_level: goal.parentLevel ?? null
+            };
+
+            console.log('[SupabaseService] Attempting to save goal:', {
+                goalId: goal.id,
+                goalTitle: goal.title,
+                userId: user.id,
+                level: goal.level
             });
+
+            const { data, error } = await supabase
+                .from('goals')
+                .upsert(goalData, {
+                    onConflict: 'id',
+                    ignoreDuplicates: false
+                })
+                .select();
 
             if (error) {
                 console.error('[SupabaseService] Failed to save goal:', {
                     goalId: goal.id,
                     goalTitle: goal.title,
+                    userId: user.id,
                     message: error.message,
                     details: error.details,
                     hint: error.hint,
-                    code: error.code
+                    code: error.code,
+                    goalData: goalData
                 });
                 throw new DatabaseError(`Failed to save goal "${goal.title}": ${error.message}`, error);
             }
 
+            // Verify the save was successful
+            if (!data || data.length === 0) {
+                console.warn('[SupabaseService] Upsert returned no data - goal may not have been saved:', {
+                    goalId: goal.id,
+                    goalTitle: goal.title
+                });
+            } else {
+                console.log(`✓ Saved goal: "${goal.title}" (${goal.id}) - Database confirmed`);
+            }
+
             // Invalidate goals cache after save
             cacheService.invalidate(/^goals:/);
-            console.log(`✓ Saved goal: "${goal.title}" (${goal.id})`);
         } catch (err) {
             console.error('[SupabaseService] Error in saveGoal:', err);
             throw err;
@@ -951,6 +977,63 @@ export const SupabaseService = {
                 success: false,
                 error: err.message || 'Unknown error',
                 details: err
+            };
+        }
+    },
+
+    /**
+     * Diagnostic function to check if goals are being saved correctly
+     * Returns all goals for the current user from the database
+     */
+    async diagnosticGetAllGoals(): Promise<{ success: boolean; goals?: Goal[]; error?: string; count?: number }> {
+        try {
+            const user = await this.getUser();
+            if (!user) {
+                return { success: false, error: 'Not authenticated' };
+            }
+
+            const supabase = await getSupabaseClient();
+            const { data, error } = await supabase
+                .from('goals')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('[SupabaseService] Diagnostic query failed:', error);
+                return {
+                    success: false,
+                    error: error.message,
+                    count: 0
+                };
+            }
+
+            const goals = (data || []).map((g: GoalRow) => ({
+                ...g,
+                level: g.level || 'milestone',
+                createdAt: g.created_at,
+                updatedAt: g.updated_at,
+                completedAt: g.completed_at,
+                lastWorkedOn: g.last_worked_on,
+                dueDate: g.due_date,
+                timeLog: g.time_log || [],
+                subtasks: g.subtasks || [],
+                notes: g.notes || [],
+                parentId: g.parent_id ?? null,
+                parentLevel: (g.parent_level as unknown as Goal['parentLevel']) ?? null
+            }));
+
+            console.log(`[SupabaseService] Diagnostic: Found ${goals.length} goals in database for user ${user.id}`);
+            return {
+                success: true,
+                goals,
+                count: goals.length
+            };
+        } catch (err: any) {
+            console.error('[SupabaseService] Diagnostic query error:', err);
+            return {
+                success: false,
+                error: err.message || 'Unknown error',
+                count: 0
             };
         }
     }
