@@ -34,7 +34,9 @@ export const WeekRenderer = {
 
     const focusGoals = Goals.getForRange(weekStart, weekEnd)
       .filter((g) => g.level === "focus" && g.status !== "done")
-      .slice(0, 2);
+      .slice();
+    const primaryFocus = focusGoals[0];
+    const additionalFocusCount = Math.max(0, focusGoals.length - 1);
 
     // Format date range with years if they differ
     const startYear = weekStart.getFullYear();
@@ -50,6 +52,8 @@ export const WeekRenderer = {
       year: "numeric"
     });
 
+    const weekStartYmd = formatYmd(weekStart);
+
     let html = `<div class="week-view">
         <div class="week-view-header">
           <h2 class="week-view-title">Week ${weekNum}</h2>
@@ -63,18 +67,24 @@ export const WeekRenderer = {
               </button>
             </div>
           ` : ""}
-          ${focusGoals.length > 0 ? `
-            <div class="week-focus-strip" aria-label="Week focus">
-              <span class="week-focus-label">🔎 Focus</span>
-              <div class="week-focus-chips">
-                ${focusGoals.map((g) => `
-                  <button type="button" class="week-focus-chip" data-goal-id="${g.id}" title="${escapeHtmlFn(g.title)}">
-                    ${escapeHtmlFn(g.title)}
-                  </button>
-                `).join("")}
-              </div>
+          <div class="week-focus-card" aria-label="Week focus">
+            <div class="week-focus-card-body">
+              <div class="week-focus-card-label">This week’s focus</div>
+              <div class="week-focus-card-title">${primaryFocus ? escapeHtmlFn(primaryFocus.title) : "No focus set"}</div>
             </div>
-          ` : ""}
+            <div class="week-focus-card-right">
+              ${additionalFocusCount > 0 ? `<div class="week-focus-card-meta">+${additionalFocusCount} more</div>` : ""}
+              ${primaryFocus ? `
+                <button type="button" class="week-focus-card-action" data-action="edit" data-goal-id="${primaryFocus.id}">
+                  Edit
+                </button>
+              ` : `
+                <button type="button" class="week-focus-card-action" data-action="add" data-date="${weekStartYmd}">
+                  Add
+                </button>
+              `}
+            </div>
+          </div>
         </div>
         <div class="week-grid">
       `;
@@ -131,6 +141,26 @@ export const WeekRenderer = {
 
     container.innerHTML = html;
 
+    container.querySelectorAll<HTMLButtonElement>('.week-focus-card-action[data-action]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        if (action === 'edit') {
+          const goalId = btn.dataset.goalId;
+          if (!goalId) return;
+          const event = new CustomEvent('goal-click', { detail: { goalId } });
+          container.dispatchEvent(event);
+          return;
+        }
+        if (action === 'add') {
+          const date = btn.dataset.date ?? weekStartYmd;
+          const event = new CustomEvent('goal-create', { detail: { level: "focus", date } });
+          container.dispatchEvent(event);
+        }
+      });
+    });
+
     // Navigate to the day view when tapping a day header.
     container.querySelectorAll<HTMLElement>('.week-day-jump[data-date]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -154,18 +184,6 @@ export const WeekRenderer = {
         const goalId = (card as HTMLElement).dataset.goalId;
         if (goalId) {
           // Trigger goal detail (callback needed)
-          const event = new CustomEvent('goal-click', { detail: { goalId } });
-          container.dispatchEvent(event);
-        }
-      });
-    });
-
-    // Click handlers for focus chips
-    container.querySelectorAll('.week-focus-chip[data-goal-id]').forEach((chip: Element) => {
-      chip.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const goalId = (chip as HTMLElement).dataset.goalId;
-        if (goalId) {
           const event = new CustomEvent('goal-click', { detail: { goalId } });
           container.dispatchEvent(event);
         }

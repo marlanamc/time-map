@@ -9,7 +9,7 @@
     justify-content: center;
     padding: var(--space-6);
     z-index: 5000;
-    background: rgba(253, 251, 247, 0.65);
+    background: rgba(234, 244, 242, 0.72);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -22,8 +22,8 @@
 
 .quick-add-container {
     width: min(560px, 100%);
-    background: rgba(255, 255, 255, 0.86);
-    border: 1px solid rgba(180, 106, 74, 0.18);
+    background: var(--surface-2);
+    border: 1px solid var(--divider);
     border-radius: var(--radius-xl);
     padding: var(--space-5);
     box-shadow: var(--shadow-lg);
@@ -55,14 +55,14 @@
 .quick-add-overlay input#quickAddInput {
     width: 100%;
     padding: var(--space-4);
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid var(--glass-border);
+    background: var(--surface-1);
+    border: 1px solid var(--divider);
     border-radius: var(--radius-lg);
     color: var(--text-primary);
     font-family: inherit;
     font-size: var(--text-lg);
     outline: none;
-    box-shadow: inset 0 0 0 1px rgba(180, 106, 74, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(31, 45, 42, 0.06);
 }
 
 .dark-mode .quick-add-overlay input#quickAddInput {
@@ -358,6 +358,14 @@ body.hide-sidebar .app {
         "main";
 }
 
+@media (min-width: 901px) {
+    body.hide-sidebar .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+        grid-template-areas: "main";
+    }
+}
+
 body.hide-now-panel .now-panel {
     display: none;
 }
@@ -414,10 +422,10 @@ body.focus-mode .sidebar-hide-btn {
     }
 
     /* Keep focus mode calm on mobile: simplify sidebar instead of hiding */
-    body.focus-mode .sidebar {
+    :root:not(.dark-mode) body.focus-mode .sidebar {
         display: flex !important;
         /* Simplify sidebar in focus mode - reduce visual noise */
-        background: rgba(255, 255, 255, 0.4);
+        background: var(--glass-bg);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
     }
@@ -439,4 +447,3 @@ body.focus-mode .sidebar-hide-btn {
         opacity: 0.8;
     }
 }
-

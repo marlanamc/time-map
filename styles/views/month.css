@@ -16,6 +16,97 @@
     margin-bottom: var(--space-5);
 }
 
+.month-milestone-card {
+    width: min(920px, 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid #3b82f6;
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-sm);
+    text-align: left;
+}
+
+.month-milestone-card.empty {
+    border-left-color: rgba(31, 45, 42, 0.18);
+}
+
+.month-milestone-card-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.month-milestone-card-label {
+    font-size: var(--text-xs);
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+
+.month-milestone-card-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.month-milestone-card-right {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.month-milestone-card-meta {
+    font-size: var(--text-sm);
+    font-weight: 650;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+}
+
+.month-milestone-card-action {
+    appearance: none;
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+    padding: 8px 12px;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+    white-space: nowrap;
+}
+
+.month-milestone-card-action:hover:not(:disabled) {
+    background: rgba(59, 130, 246, 0.16);
+    border-color: rgba(59, 130, 246, 0.32);
+    transform: translateY(-1px);
+}
+
+.month-milestone-card-action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.month-milestone-card-action:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
 .month-view-context {
     display: flex;
     flex-wrap: wrap;
@@ -109,13 +200,85 @@
 }
 
 .month-calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 2px;
     background: var(--glass-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
     margin-bottom: var(--space-6);
+    position: relative;
+    padding: 2px;
+}
+
+.month-calendar-header-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.month-week-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    padding-top: 0;
+}
+
+.month-week-row.has-focus {
+    padding-top: 28px; /* room for week focus banner */
+}
+
+.month-week-focus-banner {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: 6px;
+    height: 22px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(245, 158, 11, 0.20);
+    background: rgba(245, 158, 11, 0.10);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: 0 10px;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.month-week-focus-text {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.month-week-focus-edit {
+    pointer-events: auto;
+    appearance: none;
+    border: 1px solid rgba(245, 158, 11, 0.26);
+    background: rgba(245, 158, 11, 0.18);
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+    padding: 2px 8px;
+    font-size: var(--text-xs);
+    font-weight: 750;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.month-week-focus-edit:hover {
+    background: rgba(245, 158, 11, 0.24);
+    border-color: rgba(245, 158, 11, 0.36);
+}
+
+.month-week-focus-edit:focus-visible {
+    outline: 2px solid #f59e0b;
+    outline-offset: 2px;
 }
 
 .month-calendar-header {
@@ -152,6 +315,55 @@
 
 .month-day.selected {
     background: var(--accent-muted);
+}
+
+:root:not(.dark-mode) .month-calendar {
+    background: var(--divider);
+}
+
+:root:not(.dark-mode) .month-milestone-card {
+    background: var(--surface-1);
+    border-color: var(--divider);
+}
+
+:root:not(.dark-mode) .month-calendar-header {
+    background: var(--surface-1);
+}
+
+:root:not(.dark-mode) .month-day {
+    background: var(--surface-1);
+}
+
+:root:not(.dark-mode) .month-day:hover {
+    background: var(--surface-2);
+}
+
+:root:not(.dark-mode) .month-day.today {
+    background: var(--surface-2);
+}
+
+:root:not(.dark-mode) .month-day.selected {
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 2px rgba(31, 45, 42, 0.10);
+}
+
+:root:not(.dark-mode) .month-week-focus-banner {
+    border-color: rgba(245, 158, 11, 0.18);
+    background: rgba(245, 158, 11, 0.08);
+}
+
+@media (max-width: 700px) {
+    .month-milestone-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: left;
+    }
+
+    .month-milestone-card-right {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        text-align: left;
+    }
 }
 
 /* Dark mode time themes (dawn, morning, afternoon, evening) - lighter accent background for today.selected */

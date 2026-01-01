@@ -1,47 +1,68 @@
 // ===================================
 // UI Manager - Main UI Orchestration
 // ===================================
-import { State } from '../core/State';
-import { Goals } from '../core/Goals';
-import { Planning } from '../core/Planning';
-import { Streaks } from '../core/Streaks';
-import { CONFIG, ND_CONFIG, VIEWS } from '../config';
-import { TimeBreakdown } from '../utils/TimeBreakdown';
-import { cacheElements } from './elements/UIElements';
-import { Toast } from './feedback/Toast';
-import { Celebration } from './feedback/Celebration';
-import { MonthRenderer, WeekRenderer, MobileHereRenderer, GardenRenderer } from './renderers';
-import type { DayViewController } from '../components/dayView/DayViewController';
-import { ThemeManager } from '../theme/ThemeManager';
-import { eventBus } from '../core/EventBus';
-import { viewportManager } from './viewport/ViewportManager';
-import { goalDetailModal } from './modals/GoalDetailModal';
-import { monthDetailModal } from './modals/MonthDetailModal';
-import { isSupabaseConfigured } from '../supabaseClient';
-import { batchSaveService } from '../services/BatchSaveService';
-import { SupabaseService } from '../services/SupabaseService';
-import { syncQueue } from '../services/SyncQueue';
-import { SwipeNavigator } from './gestures/SwipeNavigator';
-import { haptics } from '../utils/haptics';
-import { createFeatureLoaders } from './featureLoaders';
-import type { FeatureLoaders, NDSupportApi, AppSettingsApi, ZenFocusApi, QuickAddApi } from './featureLoaders';
-import * as goalModal from './goalModal';
-import * as weeklyReview from './weeklyReview';
-import * as focusMode from './focusMode';
-import * as keyboardShortcuts from './keyboardShortcuts';
-import * as syncIssues from './syncIssues';
-import type { UIElements, FilterDocListeners, ViewType, Goal, GoalLevel, AccentTheme, Subtask } from '../types';
+import { State } from "../core/State";
+import { Goals } from "../core/Goals";
+import { Planning } from "../core/Planning";
+import { Streaks } from "../core/Streaks";
+import { CONFIG, ND_CONFIG, VIEWS } from "../config";
+import { TimeBreakdown } from "../utils/TimeBreakdown";
+import { cacheElements } from "./elements/UIElements";
+import { Toast } from "./feedback/Toast";
+import { Celebration } from "./feedback/Celebration";
+import {
+  MonthRenderer,
+  WeekRenderer,
+  MobileHereRenderer,
+  GardenRenderer,
+} from "./renderers";
+import type { DayViewController } from "../components/dayView/DayViewController";
+import { ThemeManager } from "../theme/ThemeManager";
+import { eventBus } from "../core/EventBus";
+import { viewportManager } from "./viewport/ViewportManager";
+import { goalDetailModal } from "./modals/GoalDetailModal";
+import { monthDetailModal } from "./modals/MonthDetailModal";
+import { isSupabaseConfigured } from "../supabaseClient";
+import { batchSaveService } from "../services/BatchSaveService";
+import { SupabaseService } from "../services/SupabaseService";
+import { syncQueue } from "../services/SyncQueue";
+import { SwipeNavigator } from "./gestures/SwipeNavigator";
+import { haptics } from "../utils/haptics";
+import { createFeatureLoaders } from "./featureLoaders";
+import type {
+  FeatureLoaders,
+  NDSupportApi,
+  AppSettingsApi,
+  ZenFocusApi,
+  QuickAddApi,
+} from "./featureLoaders";
+import * as goalModal from "./goalModal";
+import * as weeklyReview from "./weeklyReview";
+import * as focusMode from "./focusMode";
+import * as keyboardShortcuts from "./keyboardShortcuts";
+import * as syncIssues from "./syncIssues";
+import type {
+  UIElements,
+  FilterDocListeners,
+  ViewType,
+  Goal,
+  GoalLevel,
+  AccentTheme,
+  Subtask,
+} from "../types";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
 export const UI = {
   els: {}, // Shortcut reference for elements
   elements: {} as UIElements, // Will be populated by cacheElements
   dayViewController: null as DayViewController | null, // New day view controller
-  _dayViewControllerCtor: null as (new (...args: any[]) => DayViewController) | null,
+  _dayViewControllerCtor: null as
+    | (new (...args: any[]) => DayViewController)
+    | null,
   _dayViewControllerLoading: null as Promise<void> | null,
   _featureLoaders: null as FeatureLoaders | null,
   _filterDocListeners: null as FilterDocListeners | null, // For managing document event listeners
@@ -69,7 +90,8 @@ export const UI = {
         onShowToast: (message, type) => this.showToast(message, type ?? ""),
         onScheduleRender: () => this.scheduleRender(),
         onShowKeyboardShortcuts: () => this.showKeyboardShortcuts(),
-        onSetFocusMode: (enabled, options) => this.setFocusMode(enabled, options),
+        onSetFocusMode: (enabled, options) =>
+          this.setFocusMode(enabled, options),
         onApplyLayoutVisibility: () => this.applyLayoutVisibility(),
         onApplySidebarVisibility: () => this.applySidebarVisibility(),
         onSyncViewButtons: () => this.syncViewButtons(),
@@ -78,7 +100,10 @@ export const UI = {
     return this._featureLoaders;
   },
 
-  getLevelLabel(level: GoalLevel, opts?: { lowercase?: boolean; plural?: boolean }): string {
+  getLevelLabel(
+    level: GoalLevel,
+    opts?: { lowercase?: boolean; plural?: boolean }
+  ): string {
     const base = (() => {
       switch (level) {
         case "vision":
@@ -150,7 +175,7 @@ export const UI = {
       onRenderRequired: () => {
         // Re-render current view to adjust to new dimensions
         this.renderCurrentView();
-      }
+      },
     });
 
     // Initialize viewport detection and responsive behavior
@@ -158,16 +183,22 @@ export const UI = {
   },
   getCurrentLevel(): GoalLevel {
     switch (State.currentView) {
-      case "year": return "vision";
-      case "month": return "milestone";
-      case "week": return "focus";
-      case "day": return "intention";
-      default: return "milestone";
+      case "year":
+        return "vision";
+      case "month":
+        return "milestone";
+      case "week":
+        return "focus";
+      case "day":
+        return "intention";
+      default:
+        return "milestone";
     }
   },
 
-
-  updateSyncStatus(status: 'syncing' | 'synced' | 'error' | 'local' | 'offline'): void {
+  updateSyncStatus(
+    status: "syncing" | "synced" | "error" | "local" | "offline"
+  ): void {
     const el = document.getElementById("syncStatus");
     const supportPanelEl = document.getElementById("supportPanelSyncStatus");
 
@@ -178,24 +209,26 @@ export const UI = {
 
       element.classList.remove("syncing", "synced", "error", "offline");
 
-      if (status === 'syncing') {
+      if (status === "syncing") {
         element.classList.add("syncing");
         if (icon) icon.textContent = "⏳";
         if (text) text.textContent = "Syncing...";
-      } else if (status === 'synced') {
+      } else if (status === "synced") {
         element.classList.add("synced");
         if (icon) icon.textContent = "✅";
         if (text) text.textContent = "Cloud Saved";
         // Revert to subtle synced look after 3s
         setTimeout(() => {
-          if (icon && element.classList.contains("synced")) icon.textContent = "☁️";
-          if (text && element.classList.contains("synced")) text.textContent = "Synced";
+          if (icon && element.classList.contains("synced"))
+            icon.textContent = "☁️";
+          if (text && element.classList.contains("synced"))
+            text.textContent = "Synced";
         }, 3000);
-      } else if (status === 'error') {
+      } else if (status === "error") {
         element.classList.add("error");
         if (icon) icon.textContent = "❌";
         if (text) text.textContent = "Sync Error";
-      } else if (status === 'offline') {
+      } else if (status === "offline") {
         element.classList.add("offline");
         if (icon) icon.textContent = "📴";
         if (text) text.textContent = "Offline";
@@ -284,7 +317,13 @@ export const UI = {
         );
       };
 
-      const viewOrder: ViewType[] = [VIEWS.HOME, VIEWS.DAY, VIEWS.WEEK, VIEWS.MONTH, VIEWS.YEAR];
+      const viewOrder: ViewType[] = [
+        VIEWS.HOME,
+        VIEWS.DAY,
+        VIEWS.WEEK,
+        VIEWS.MONTH,
+        VIEWS.YEAR,
+      ];
       const navigate = (dir: "left" | "right") => {
         const idx = viewOrder.indexOf(State.currentView);
         if (idx === -1) return;
@@ -341,7 +380,13 @@ export const UI = {
       );
     };
 
-    const setIndicator = (opts: { active: boolean; pull?: number; ready?: boolean; loading?: boolean; label?: string }) => {
+    const setIndicator = (opts: {
+      active: boolean;
+      pull?: number;
+      ready?: boolean;
+      loading?: boolean;
+      label?: string;
+    }) => {
       indicator.classList.toggle("active", !!opts.active);
       indicator.classList.toggle("ready", !!opts.ready);
       indicator.classList.toggle("loading", !!opts.loading);
@@ -357,7 +402,13 @@ export const UI = {
       pulling = false;
       locked = false;
       pullPx = 0;
-      setIndicator({ active: false, pull: 0, ready: false, loading: false, label: "Pull to refresh" });
+      setIndicator({
+        active: false,
+        pull: 0,
+        ready: false,
+        loading: false,
+        label: "Pull to refresh",
+      });
     };
 
     const doRefresh = async () => {
@@ -393,7 +444,13 @@ export const UI = {
       pulling = true;
       locked = false;
       pullPx = 0;
-      setIndicator({ active: true, pull: 0, ready: false, loading: false, label: "Pull to refresh" });
+      setIndicator({
+        active: true,
+        pull: 0,
+        ready: false,
+        loading: false,
+        label: "Pull to refresh",
+      });
     };
 
     const onTouchMove = (e: TouchEvent) => {
@@ -433,7 +490,13 @@ export const UI = {
 
       if (!shouldRefresh) return reset();
 
-      setIndicator({ active: true, pull: thresholdPx, ready: true, loading: true, label: "Refreshing…" });
+      setIndicator({
+        active: true,
+        pull: thresholdPx,
+        ready: true,
+        loading: true,
+        label: "Refreshing…",
+      });
       await doRefresh();
       window.setTimeout(reset, 450);
     };
@@ -469,26 +532,26 @@ export const UI = {
    */
   setupEventBusListeners() {
     // Listen for view changes from State
-    eventBus.on('view:changed', (data) => {
+    eventBus.on("view:changed", (data) => {
       this.scheduleRender(data);
     });
 
     // Listen for view button sync requests
-    eventBus.on('view:sync-buttons', () => {
+    eventBus.on("view:sync-buttons", () => {
       this.syncViewButtons?.();
     });
 
     // Listen for toast notifications
-    eventBus.on('ui:toast', (data) => {
+    eventBus.on("ui:toast", (data) => {
       Toast.show(this.elements, data.icon, data.message);
     });
 
     // Listen for celebration animations
-    eventBus.on('ui:celebrate', (data) => {
+    eventBus.on("ui:celebrate", (data) => {
       Celebration.show(this.elements, data.icon, data.title, data.message);
     });
 
-    console.log('✓ EventBus listeners registered in UIManager');
+    console.log("✓ EventBus listeners registered in UIManager");
   },
 
   /**
@@ -497,30 +560,42 @@ export const UI = {
    */
   setupSyncEventListeners() {
     // Listen for sync errors from SyncQueue
-    window.addEventListener('sync-error', ((e: CustomEvent) => {
-      const message = e.detail?.message || 'Sync failed';
-      this.updateSyncStatus('error');
-      Toast.show(this.elements, '⚠️', `Sync needs attention: ${message}`);
+    window.addEventListener("sync-error", ((e: CustomEvent) => {
+      const message = e.detail?.message || "Sync failed";
+      this.updateSyncStatus("error");
+      Toast.show(this.elements, "⚠️", `Sync needs attention: ${message}`);
       this.syncSyncIssuesBadge();
     }) as EventListener);
 
     // Listen for sync storage errors from SyncQueue
-    window.addEventListener('sync-storage-error', ((e: CustomEvent) => {
-      const message = e.detail?.message || 'Sync queue corrupted';
-      this.updateSyncStatus('error');
-      Toast.show(this.elements, '⚠️', `Sync error: ${message}`);
+    window.addEventListener("sync-storage-error", ((e: CustomEvent) => {
+      const message = e.detail?.message || "Sync queue corrupted";
+      this.updateSyncStatus("error");
+      Toast.show(this.elements, "⚠️", `Sync error: ${message}`);
     }) as EventListener);
 
     // Generic sync status events (syncing/synced/error/local)
-    window.addEventListener('sync-status', ((e: CustomEvent) => {
-      const status = e.detail?.status as ('syncing' | 'synced' | 'error' | 'local' | 'offline' | undefined);
+    window.addEventListener("sync-status", ((e: CustomEvent) => {
+      const status = e.detail?.status as
+        | "syncing"
+        | "synced"
+        | "error"
+        | "local"
+        | "offline"
+        | undefined;
       if (!status) return;
-      if (status === 'syncing' || status === 'synced' || status === 'error' || status === 'local' || status === 'offline') {
+      if (
+        status === "syncing" ||
+        status === "synced" ||
+        status === "error" ||
+        status === "local" ||
+        status === "offline"
+      ) {
         this.updateSyncStatus(status);
       }
     }) as EventListener);
 
-    console.log('✓ Sync event listeners registered in UIManager');
+    console.log("✓ Sync event listeners registered in UIManager");
   },
 
   syncSyncIssuesBadge() {
@@ -531,7 +606,10 @@ export const UI = {
     if (count > 0) {
       btn.removeAttribute("hidden");
       const desc = btn.querySelector(".support-panel-desc");
-      if (desc) desc.textContent = `${count} change${count === 1 ? "" : "s"} need review`;
+      if (desc)
+        desc.textContent = `${count} change${
+          count === 1 ? "" : "s"
+        } need review`;
     } else {
       btn.setAttribute("hidden", "");
       const desc = btn.querySelector(".support-panel-desc");
@@ -543,12 +621,18 @@ export const UI = {
     const installBtn = document.getElementById("installAppBtn");
     if (!installBtn) return;
 
-    const supportPanelToggleBtn = document.getElementById("supportPanelToggleBtn");
-    const supportPanelToggleBtnMobile = document.getElementById("supportPanelToggleBtnMobile");
+    const supportPanelToggleBtn = document.getElementById(
+      "supportPanelToggleBtn"
+    );
+    const supportPanelToggleBtnMobile = document.getElementById(
+      "supportPanelToggleBtnMobile"
+    );
     const supportPanelBtn = document.getElementById("supportPanelBtn");
-    const toggleBtns = [supportPanelToggleBtn, supportPanelToggleBtnMobile, supportPanelBtn].filter(
-      Boolean,
-    ) as HTMLElement[];
+    const toggleBtns = [
+      supportPanelToggleBtn,
+      supportPanelToggleBtnMobile,
+      supportPanelBtn,
+    ].filter(Boolean) as HTMLElement[];
 
     const INSTALL_TOAST_LAST_SHOWN_KEY = "gardenFence.install.toastShownAt";
     const INSTALL_PROMPT_DISMISSED_AT_KEY = "gardenFence.install.dismissedAt";
@@ -574,7 +658,9 @@ export const UI = {
 
     const setInstallAvailable = (available: boolean) => {
       installBtn.classList.toggle("install-available", available);
-      toggleBtns.forEach((btn) => btn.classList.toggle("install-available", available));
+      toggleBtns.forEach((btn) =>
+        btn.classList.toggle("install-available", available)
+      );
 
       if (available) installBtn.removeAttribute("hidden");
       else installBtn.setAttribute("hidden", "");
@@ -592,7 +678,11 @@ export const UI = {
         now - lastToastAt > INSTALL_TOAST_COOLDOWN_MS &&
         now - dismissedAt > INSTALL_TOAST_COOLDOWN_MS;
       if (canToast) {
-      Toast.show(this.elements, "📲", "Install is available in Support Tools.");
+        Toast.show(
+          this.elements,
+          "📲",
+          "Install is available in Support Tools."
+        );
         writeNow(INSTALL_TOAST_LAST_SHOWN_KEY);
       }
     });
@@ -623,7 +713,7 @@ export const UI = {
         try {
           localStorage.setItem(
             "gardenFence.install.dismissedAt",
-            String(Date.now()),
+            String(Date.now())
           );
         } catch {
           // ignore
@@ -648,7 +738,8 @@ export const UI = {
       escapeHtml: this.escapeHtml.bind(this),
       onRender: () => this.render(),
       onToast: (icon, message) => Toast.show(this.elements, icon, message),
-      onCelebrate: (icon, title, message) => Celebration.show(this.elements, icon, title, message)
+      onCelebrate: (icon, title, message) =>
+        Celebration.show(this.elements, icon, title, message),
     });
   },
 
@@ -662,7 +753,7 @@ export const UI = {
       formatMinutes: this.formatMinutes.bind(this),
       spawnPollenSparkles: this.spawnPollenSparkles.bind(this),
       onRender: () => this.render(),
-      onToast: (icon, message) => Toast.show(this.elements, icon, message)
+      onToast: (icon, message) => Toast.show(this.elements, icon, message),
     });
   },
 
@@ -674,7 +765,8 @@ export const UI = {
     quickAdd?.setCallbacks({
       onRender: () => this.render(),
       onToast: (icon, message) => Toast.show(this.elements, icon, message),
-      onCelebrate: (icon, title, message) => Celebration.show(this.elements, icon, title, message)
+      onCelebrate: (icon, title, message) =>
+        Celebration.show(this.elements, icon, title, message),
     });
   },
 
@@ -690,13 +782,15 @@ export const UI = {
       escapeHtml: this.escapeHtml.bind(this),
       onRender: () => this.render(),
       onToast: (icon, message) => Toast.show(this.elements, icon, message),
-      onShowGoalDetail: (goalId) => goalDetailModal.show(goalId)
+      onShowGoalDetail: (goalId) => goalDetailModal.show(goalId),
     });
   },
 
   // Update body double timer display
   updateBodyDoubleDisplay() {
-    const remaining = this.getFeatureLoaders().getNDSupportIfLoaded()?.getBodyDoubleRemaining?.();
+    const remaining = this.getFeatureLoaders()
+      .getNDSupportIfLoaded()
+      ?.getBodyDoubleRemaining?.();
     const display = document.getElementById("bodyDoubleDisplay");
     const timer = document.getElementById("bdTimer");
 
@@ -764,8 +858,12 @@ export const UI = {
       });
 
     // Support panel toggle buttons (desktop and mobile)
-    const supportPanelToggleBtn = document.getElementById("supportPanelToggleBtn");
-    const supportPanelToggleBtnMobile = document.getElementById("supportPanelToggleBtnMobile");
+    const supportPanelToggleBtn = document.getElementById(
+      "supportPanelToggleBtn"
+    );
+    const supportPanelToggleBtnMobile = document.getElementById(
+      "supportPanelToggleBtnMobile"
+    );
 
     supportPanelToggleBtn?.addEventListener("click", (e) => {
       e.preventDefault();
@@ -786,51 +884,49 @@ export const UI = {
       ?.addEventListener("click", (e) => {
         if (e.target === e.currentTarget) this.closeSupportPanel();
       });
-    document
-      .getElementById("supportPanel")
-      ?.addEventListener("click", (e) => {
-        const target = e.target as Element | null;
-        const actionEl = target?.closest("[data-action]") as HTMLElement | null;
-        const action = actionEl?.dataset.action;
-        if (!action) return;
+    document.getElementById("supportPanel")?.addEventListener("click", (e) => {
+      const target = e.target as Element | null;
+      const actionEl = target?.closest("[data-action]") as HTMLElement | null;
+      const action = actionEl?.dataset.action;
+      if (!action) return;
 
-        this.closeSupportPanel();
+      this.closeSupportPanel();
 
-        switch (action) {
-          case "brainDump":
-            void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal());
-            break;
-          case "bodyDouble":
-            void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal());
-            break;
-          case "quickWins":
-            void this.ensureNDSupport().then((nd) => nd.showDopamineMenu());
-            break;
-          case "ndSettings":
-            void this.ensureNDSupport().then((nd) => nd.showSettingsPanel());
-            break;
-          case "settings":
-            void this.ensureAppSettings().then((s) => s.showPanel());
-            break;
-          case "syncNow":
-            this.forceCloudSync();
-            break;
-          case "install":
-            void this.promptInstall();
-            break;
-          case "syncIssues":
-            syncIssues.showSyncIssuesModal({
-              showToast: (iconOrMessage, messageOrType) =>
-                this.showToast(iconOrMessage, messageOrType ?? ""),
-              updateSyncStatus: (status) => this.updateSyncStatus(status),
-            });
-            this.syncSyncIssuesBadge();
-            break;
-          case "logout":
-            this.handleLogout();
-            break;
-        }
-      });
+      switch (action) {
+        case "brainDump":
+          void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal());
+          break;
+        case "bodyDouble":
+          void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal());
+          break;
+        case "quickWins":
+          void this.ensureNDSupport().then((nd) => nd.showDopamineMenu());
+          break;
+        case "ndSettings":
+          void this.ensureNDSupport().then((nd) => nd.showSettingsPanel());
+          break;
+        case "settings":
+          void this.ensureAppSettings().then((s) => s.showPanel());
+          break;
+        case "syncNow":
+          this.forceCloudSync();
+          break;
+        case "install":
+          void this.promptInstall();
+          break;
+        case "syncIssues":
+          syncIssues.showSyncIssuesModal({
+            showToast: (iconOrMessage, messageOrType) =>
+              this.showToast(iconOrMessage, messageOrType ?? ""),
+            updateSyncStatus: (status) => this.updateSyncStatus(status),
+          });
+          this.syncSyncIssuesBadge();
+          break;
+        case "logout":
+          this.handleLogout();
+          break;
+      }
+    });
 
     // Handle collapsible section toggles
     document.addEventListener("click", (e) => {
@@ -867,7 +963,11 @@ export const UI = {
     document
       .getElementById("addGoalBtn")
       ?.addEventListener("click", () =>
-        this.openGoalModal(this.getCurrentLevel(), State.viewingMonth, State.viewingYear),
+        this.openGoalModal(
+          this.getCurrentLevel(),
+          State.viewingMonth,
+          State.viewingYear
+        )
       );
 
     // Modal controls
@@ -883,7 +983,7 @@ export const UI = {
 
     // Goal form submission
     this.elements.goalForm?.addEventListener("submit", (e: Event) =>
-      this.handleGoalSubmit(e),
+      this.handleGoalSubmit(e)
     );
 
     // Level context bar interactions (Vision/Milestone/Focus/Intention)
@@ -898,7 +998,9 @@ export const UI = {
         return;
       }
 
-      const addEl = target.closest('[data-action="add-level"]') as HTMLElement | null;
+      const addEl = target.closest(
+        '[data-action="add-level"]'
+      ) as HTMLElement | null;
       const level = addEl?.dataset.level as GoalLevel | undefined;
       if (!level) return;
       this.openGoalModal(level, State.viewingMonth, State.viewingYear);
@@ -937,7 +1039,7 @@ export const UI = {
       });
 
     const supportPanelThemePicker = document.getElementById(
-      "supportPanelThemePicker",
+      "supportPanelThemePicker"
     );
     supportPanelThemePicker?.addEventListener("click", (e) => {
       const target = e.target as Element | null;
@@ -1005,7 +1107,10 @@ export const UI = {
     // Settings
     document
       .getElementById("appSettingsBtn")
-      ?.addEventListener("click", () => void this.ensureAppSettings().then((s) => s.showPanel()));
+      ?.addEventListener(
+        "click",
+        () => void this.ensureAppSettings().then((s) => s.showPanel())
+      );
 
     // Affirmation click
     document
@@ -1031,19 +1136,34 @@ export const UI = {
     // ND Support button bindings
     document
       .getElementById("brainDumpBtn")
-      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal()));
+      ?.addEventListener(
+        "click",
+        () => void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal())
+      );
     document
       .getElementById("bodyDoubleBtn")
-      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal()));
+      ?.addEventListener(
+        "click",
+        () => void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal())
+      );
     document
       .getElementById("ndSettingsBtn")
-      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showSettingsPanel()));
+      ?.addEventListener(
+        "click",
+        () => void this.ensureNDSupport().then((nd) => nd.showSettingsPanel())
+      );
     document
       .getElementById("appearanceBtn")
-      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showAppearancePanel()));
+      ?.addEventListener(
+        "click",
+        () => void this.ensureNDSupport().then((nd) => nd.showAppearancePanel())
+      );
     document
       .getElementById("dopamineMenuBtn")
-      ?.addEventListener("click", () => void this.ensureNDSupport().then((nd) => nd.showDopamineMenu()));
+      ?.addEventListener(
+        "click",
+        () => void this.ensureNDSupport().then((nd) => nd.showDopamineMenu())
+      );
 
     // Body double stop button
     document.getElementById("bdStop")?.addEventListener("click", () => {
@@ -1051,7 +1171,9 @@ export const UI = {
       const sessions = State.data.bodyDoubleHistory;
       const active = sessions[sessions.length - 1];
       if (active && !active.endedAt) {
-        void this.ensureNDSupport().then((nd) => nd.endBodyDouble(active.id, false));
+        void this.ensureNDSupport().then((nd) =>
+          nd.endBodyDouble(active.id, false)
+        );
         document
           .getElementById("bodyDoubleDisplay")
           ?.setAttribute("hidden", "");
@@ -1087,7 +1209,9 @@ export const UI = {
     overlay.removeAttribute("hidden");
     overlay.classList.add("active");
     document.body.classList.add("support-panel-open");
-    (document.getElementById("supportPanelClose") as HTMLElement | null)?.focus();
+    (
+      document.getElementById("supportPanelClose") as HTMLElement | null
+    )?.focus();
   },
 
   closeSupportPanel() {
@@ -1116,38 +1240,49 @@ export const UI = {
       await SupabaseService.signOut();
 
       // Emit logout event
-      eventBus.emit('auth:logout');
+      eventBus.emit("auth:logout");
 
       // Reload to show auth modal
       location.reload();
     } catch (error) {
-      console.error('Error during logout:', error);
-      Toast.show(this.elements, '⚠️', 'Logout failed. Please try again.');
+      console.error("Error during logout:", error);
+      Toast.show(this.elements, "⚠️", "Logout failed. Please try again.");
     }
   },
 
   async forceCloudSync() {
     if (!navigator.onLine) {
-      Toast.show(this.elements, '📡', 'You appear to be offline. Changes will sync when you’re back online.');
-      this.updateSyncStatus('local');
+      Toast.show(
+        this.elements,
+        "📡",
+        "You appear to be offline. Changes will sync when you’re back online."
+      );
+      this.updateSyncStatus("local");
       return;
     }
 
     if (!isSupabaseConfigured) {
-      Toast.show(this.elements, '⚙️', 'Cloud sync is disabled (missing Supabase credentials).');
-      this.updateSyncStatus('local');
+      Toast.show(
+        this.elements,
+        "⚙️",
+        "Cloud sync is disabled (missing Supabase credentials)."
+      );
+      this.updateSyncStatus("local");
       return;
     }
 
     try {
-      this.updateSyncStatus('syncing');
-      await Promise.allSettled([batchSaveService.forceSave(), syncQueue.forceSync()]);
-      this.updateSyncStatus('synced');
-      Toast.show(this.elements, '☁️', 'Synced!');
+      this.updateSyncStatus("syncing");
+      await Promise.allSettled([
+        batchSaveService.forceSave(),
+        syncQueue.forceSync(),
+      ]);
+      this.updateSyncStatus("synced");
+      Toast.show(this.elements, "☁️", "Synced!");
     } catch (error) {
-      console.error('Force sync failed:', error);
-      this.updateSyncStatus('error');
-      Toast.show(this.elements, '⚠️', 'Sync failed. Try again in a moment.');
+      console.error("Force sync failed:", error);
+      this.updateSyncStatus("error");
+      Toast.show(this.elements, "⚠️", "Sync failed. Try again in a moment.");
     }
   },
 
@@ -1209,12 +1344,16 @@ export const UI = {
     });
 
     // Mouse wheel zoom (non-passive because we conditionally preventDefault)
-    container.addEventListener("wheel", (e: WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        this.zoom(e.deltaY < 0 ? 10 : -10);
-      }
-    }, { passive: false });
+    container.addEventListener(
+      "wheel",
+      (e: WheelEvent) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          this.zoom(e.deltaY < 0 ? 10 : -10);
+        }
+      },
+      { passive: false }
+    );
   },
 
   scheduleRender(opts?: { transition?: boolean }) {
@@ -1252,7 +1391,9 @@ export const UI = {
       const year = State.viewingYear;
       const month = State.viewingMonth;
       const week = State.viewingWeek;
-      const day = State.viewingDate ? State.viewingDate.toISOString().slice(0, 10) : "";
+      const day = State.viewingDate
+        ? State.viewingDate.toISOString().slice(0, 10)
+        : "";
 
       switch (State.currentView) {
         case VIEWS.YEAR:
@@ -1333,21 +1474,29 @@ export const UI = {
         const appEl = document.querySelector(".app") as HTMLElement | null;
         if (appEl) appEl.scrollTop = 0;
 
-        const scrollingElement = document.scrollingElement as HTMLElement | null;
+        const scrollingElement =
+          document.scrollingElement as HTMLElement | null;
         if (scrollingElement) scrollingElement.scrollTop = 0;
       });
     }
   },
 
   updateMobileHomeView() {
-    MobileHereRenderer.render(this.elements, this.escapeHtml.bind(this), (goalId) => goalDetailModal.show(goalId));
+    MobileHereRenderer.render(
+      this.elements,
+      this.escapeHtml.bind(this),
+      (goalId) => goalDetailModal.show(goalId)
+    );
   },
 
   // Render based on current view
   renderCurrentView() {
     const container = this.elements.calendarGrid;
     if (!container) {
-      console.error("renderCurrentView: calendarGrid element not found! Current view:", State.currentView);
+      console.error(
+        "renderCurrentView: calendarGrid element not found! Current view:",
+        State.currentView
+      );
       return;
     }
     console.log("renderCurrentView: rendering view", State.currentView);
@@ -1381,7 +1530,8 @@ export const UI = {
           this.elements,
           this.escapeHtml.bind(this),
           (goalId) => goalDetailModal.show(goalId),
-          (level) => this.openGoalModal(level, State.viewingMonth, State.viewingYear),
+          (level) =>
+            this.openGoalModal(level, State.viewingMonth, State.viewingYear)
         );
         break;
       default:
@@ -1414,7 +1564,7 @@ export const UI = {
         text = State.viewingYear.toString();
         display.classList.toggle(
           "is-today",
-          State.viewingYear === now.getFullYear(),
+          State.viewingYear === now.getFullYear()
         );
         break;
       case VIEWS.MONTH:
@@ -1422,20 +1572,26 @@ export const UI = {
         display.classList.toggle(
           "is-today",
           State.viewingMonth === now.getMonth() &&
-          State.viewingYear === now.getFullYear(),
+            State.viewingYear === now.getFullYear()
         );
         break;
       case VIEWS.WEEK:
         const weekStart = State.getWeekStart(
           State.viewingYear,
-          State.viewingWeek || 1,
+          State.viewingWeek || 1
         );
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 6);
-        text = `${weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+        text = `${weekStart.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })} - ${weekEnd.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })}`;
         display.classList.toggle(
           "is-today",
-          now >= weekStart && now <= weekEnd,
+          now >= weekStart && now <= weekEnd
         );
         break;
       case VIEWS.DAY:
@@ -1465,10 +1621,14 @@ export const UI = {
   },
 
   // Get context goals (Vision/Milestone/Focus) for a specific date
-  getContextGoalsForDate(date: Date): { vision: Goal[], milestone: Goal[], focus: Goal[] } {
+  getContextGoalsForDate(date: Date): {
+    vision: Goal[];
+    milestone: Goal[];
+    focus: Goal[];
+  } {
     if (!State.data) return { vision: [], milestone: [], focus: [] };
 
-    const allGoals = State.data.goals.filter(g => g.status !== 'done');
+    const allGoals = State.data.goals.filter((g) => g.status !== "done");
     const viewingYear = date.getFullYear();
     const viewingMonth = date.getMonth();
 
@@ -1479,26 +1639,32 @@ export const UI = {
     weekEnd.setDate(weekEnd.getDate() + 6);
 
     // Vision: goals for the year
-    const vision = allGoals.filter(g => {
-      if (g.level !== 'vision') return false;
-      if (!g.year) return false;
-      return g.year === viewingYear;
-    }).slice(0, 2); // Show max 2
+    const vision = allGoals
+      .filter((g) => {
+        if (g.level !== "vision") return false;
+        if (!g.year) return false;
+        return g.year === viewingYear;
+      })
+      .slice(0, 2); // Show max 2
 
     // Milestone: goals for the month
-    const milestone = allGoals.filter(g => {
-      if (g.level !== 'milestone') return false;
-      if (g.year === undefined || g.month === undefined) return false;
-      return g.year === viewingYear && g.month === viewingMonth;
-    }).slice(0, 2); // Show max 2
+    const milestone = allGoals
+      .filter((g) => {
+        if (g.level !== "milestone") return false;
+        if (g.year === undefined || g.month === undefined) return false;
+        return g.year === viewingYear && g.month === viewingMonth;
+      })
+      .slice(0, 2); // Show max 2
 
     // Focus: goals for the week
-    const focus = allGoals.filter(g => {
-      if (g.level !== 'focus') return false;
-      if (!g.dueDate) return false;
-      const dueDate = new Date(g.dueDate);
-      return dueDate >= weekStart && dueDate <= weekEnd;
-    }).slice(0, 2); // Show max 2
+    const focus = allGoals
+      .filter((g) => {
+        if (g.level !== "focus") return false;
+        if (!g.dueDate) return false;
+        const dueDate = new Date(g.dueDate);
+        return dueDate >= weekStart && dueDate <= weekEnd;
+      })
+      .slice(0, 2); // Show max 2
 
     return { vision, milestone, focus };
   },
@@ -1533,8 +1699,14 @@ export const UI = {
             Goals.update(goalId, updates);
             // Re-render to update the view
             if (this.dayViewController) {
-              const contextGoals = this.getContextGoalsForDate(State.viewingDate);
-              this.dayViewController.setGoals(State.viewingDate, State.data?.goals || [], contextGoals);
+              const contextGoals = this.getContextGoalsForDate(
+                State.viewingDate
+              );
+              this.dayViewController.setGoals(
+                State.viewingDate,
+                State.data?.goals || [],
+                contextGoals
+              );
             }
           },
           onGoalClick: (goalId: string) => {
@@ -1559,7 +1731,7 @@ export const UI = {
             State.navigate(direction);
           },
         },
-        CONFIG,
+        CONFIG
       );
 
       // Mount the controller
@@ -1580,7 +1752,9 @@ export const UI = {
     if (this._dayViewControllerCtor) return;
     if (this._dayViewControllerLoading) return this._dayViewControllerLoading;
 
-    this._dayViewControllerLoading = import("../components/dayView/DayViewController")
+    this._dayViewControllerLoading = import(
+      "../components/dayView/DayViewController"
+    )
       .then((mod) => {
         this._dayViewControllerCtor = mod.DayViewController as any;
       })
@@ -1610,7 +1784,9 @@ export const UI = {
     const toggle = document.createElement("div");
     toggle.className = "day-style-toggle";
     toggle.innerHTML = `
-      <button class="day-mode-btn ${currentMode === "timeline" ? "active" : ""}" data-mode="timeline" title="Timeline View">
+      <button class="day-mode-btn ${
+        currentMode === "timeline" ? "active" : ""
+      }" data-mode="timeline" title="Timeline View">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -1618,7 +1794,9 @@ export const UI = {
         </svg>
         <span>Timeline</span>
       </button>
-      <button class="day-mode-btn ${currentMode === "simple" ? "active" : ""}" data-mode="simple" title="Simple View">
+      <button class="day-mode-btn ${
+        currentMode === "simple" ? "active" : ""
+      }" data-mode="simple" title="Simple View">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="8" y1="6" x2="21" y2="6"></line>
           <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -1629,7 +1807,9 @@ export const UI = {
         </svg>
         <span>Simple</span>
       </button>
-      <button class="day-mode-btn ${currentMode === "planner" ? "active" : ""}" data-mode="planner" title="Planner View">
+      <button class="day-mode-btn ${
+        currentMode === "planner" ? "active" : ""
+      }" data-mode="planner" title="Planner View">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
           <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -1641,12 +1821,17 @@ export const UI = {
     `;
 
     // Add click handlers
-    toggle.querySelectorAll(".day-mode-btn").forEach(btn => {
+    toggle.querySelectorAll(".day-mode-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const mode = (btn as HTMLElement).dataset.mode as "timeline" | "simple" | "planner";
+        const mode = (btn as HTMLElement).dataset.mode as
+          | "timeline"
+          | "simple"
+          | "planner";
 
         // Update active state
-        toggle.querySelectorAll(".day-mode-btn").forEach(b => b.classList.remove("active"));
+        toggle
+          .querySelectorAll(".day-mode-btn")
+          .forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
 
         // Save preference
@@ -1661,7 +1846,11 @@ export const UI = {
         // Trigger re-render with new mode
         if (this.dayViewController) {
           this.dayViewController.render();
-          Toast.show(this.elements, "✨", `Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
+          Toast.show(
+            this.elements,
+            "✨",
+            `Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`
+          );
         }
       });
     });
@@ -1670,7 +1859,10 @@ export const UI = {
   },
 
   // Render a single goal card for day view
-  renderDayGoalCard(goal: Goal, opts?: { variant?: "planter" | "seed" | "compost"; style?: string }) {
+  renderDayGoalCard(
+    goal: Goal,
+    opts?: { variant?: "planter" | "seed" | "compost"; style?: string }
+  ) {
     const cat = goal.category ? CONFIG.CATEGORIES[goal.category] : undefined;
     const isCompleted = goal.status === "done";
     const levelInfo = CONFIG.LEVELS[goal.level] || CONFIG.LEVELS.intention;
@@ -1679,15 +1871,15 @@ export const UI = {
       variant === "planter"
         ? "day-goal-variant-planter"
         : variant === "compost"
-          ? "day-goal-variant-compost"
-          : "day-goal-variant-seed";
+        ? "day-goal-variant-compost"
+        : "day-goal-variant-seed";
     const styleAttr = opts?.style ? ` style="${opts.style}"` : "";
     const dragAttrs =
       variant === "seed" && !isCompleted
         ? ` draggable="true" aria-grabbed="false"`
         : variant === "planter" && !isCompleted
-          ? ` draggable="true" aria-grabbed="false"`
-          : "";
+        ? ` draggable="true" aria-grabbed="false"`
+        : "";
 
     const resizeHandles =
       variant === "planter" && !isCompleted
@@ -1698,7 +1890,11 @@ export const UI = {
         : "";
 
     return `
-      <div class="day-goal-card ${variantClass} ${isCompleted ? "completed" : ""}" data-goal-id="${goal.id}" role="button" tabindex="0"${styleAttr}${dragAttrs}>
+      <div class="day-goal-card ${variantClass} ${
+      isCompleted ? "completed" : ""
+    }" data-goal-id="${
+      goal.id
+    }" role="button" tabindex="0"${styleAttr}${dragAttrs}>
         ${resizeHandles}
         <div class="day-goal-checkbox ${isCompleted ? "checked" : ""}"></div>
         <div class="day-goal-content">
@@ -1707,24 +1903,49 @@ export const UI = {
             <span class="day-goal-level-label">${levelInfo.label}</span>
           </div>
           <div class="day-goal-title">${this.escapeHtml(goal.title)}</div>
-          ${goal.description ? `<div class="day-goal-desc">${this.escapeHtml(goal.description)}</div>` : ""}
+          ${
+            goal.description
+              ? `<div class="day-goal-desc">${this.escapeHtml(
+                  goal.description
+                )}</div>`
+              : ""
+          }
           <div class="day-goal-meta">
-            ${goal.startTime ? `<span class="day-goal-time">🕒 ${goal.startTime}${goal.endTime ? ` - ${goal.endTime}` : ""}</span>` : ""}
-            ${cat ? `<span class="day-goal-cat" style="color: ${cat.color}">${cat.emoji} ${cat.label}</span>` : ""}
-            ${goal.priority !== "medium" ? `<span class="day-goal-priority priority-${goal.priority}">${CONFIG.PRIORITIES[goal.priority]?.symbol || ""} ${goal.priority}</span>` : ""}
-            <button class="btn-zen-focus" title="Zen Focus Mode" data-goal-id="${goal.id}">👁️ Focus</button>
+            ${
+              goal.startTime
+                ? `<span class="day-goal-time">🕒 ${goal.startTime}${
+                    goal.endTime ? ` - ${goal.endTime}` : ""
+                  }</span>`
+                : ""
+            }
+            ${
+              cat
+                ? `<span class="day-goal-cat" style="color: ${cat.color}">${cat.emoji} ${cat.label}</span>`
+                : ""
+            }
+            ${
+              goal.priority !== "medium"
+                ? `<span class="day-goal-priority priority-${goal.priority}">${
+                    CONFIG.PRIORITIES[goal.priority]?.symbol || ""
+                  } ${goal.priority}</span>`
+                : ""
+            }
+            <button class="btn-zen-focus" title="Zen Focus Mode" data-goal-id="${
+              goal.id
+            }">👁️ Focus</button>
           </div>
         </div>
-        ${goal.progress > 0 && goal.progress < 100
-        ? `
+        ${
+          goal.progress > 0 && goal.progress < 100
+            ? `
             <div class="day-goal-progress">
               <div class="progress-bar-lg">
                 <div class="progress-fill-lg" style="width: ${goal.progress}%"></div>
               </div>
             </div>
           `
-        : ""
-      }
+            : ""
+        }
       </div>
     `;
   },
@@ -1738,12 +1959,18 @@ export const UI = {
       .map((g) => {
         const cat = g.category ? CONFIG.CATEGORIES[g.category] : undefined;
         return `
-          <div class="goal-item ${g.status === "done" ? "completed" : ""}" data-goal-id="${g.id}">
-            <div class="goal-checkbox ${g.status === "done" ? "checked" : ""}"></div>
+          <div class="goal-item ${
+            g.status === "done" ? "completed" : ""
+          }" data-goal-id="${g.id}">
+            <div class="goal-checkbox ${
+              g.status === "done" ? "checked" : ""
+            }"></div>
             <div class="goal-content">
               <div class="goal-title">${this.escapeHtml(g.title)}</div>
               <div class="goal-tags">
-                <span class="goal-tag">${cat?.emoji ?? ""} ${cat?.label ?? ""}</span>
+                <span class="goal-tag">${cat?.emoji ?? ""} ${
+          cat?.label ?? ""
+        }</span>
               </div>
             </div>
           </div>
@@ -1762,7 +1989,7 @@ export const UI = {
       this.elements.yearDisplay.textContent = String(State.viewingYear);
       this.elements.yearDisplay.classList.toggle(
         "current-year",
-        State.viewingYear === currentYear,
+        State.viewingYear === currentYear
       );
     }
   },
@@ -1773,7 +2000,10 @@ export const UI = {
       console.error("renderCalendar: calendarGrid element not found!");
       return;
     }
-    console.log("renderCalendar: rendering calendar for year", State.viewingYear);
+    console.log(
+      "renderCalendar: rendering calendar for year",
+      State.viewingYear
+    );
 
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -1803,7 +2033,10 @@ export const UI = {
     yearView.appendChild(header);
     yearView.appendChild(grid);
     container.appendChild(yearView);
-    console.log("renderCalendar: Created yearView structure, container children:", container.children.length);
+    console.log(
+      "renderCalendar: Created yearView structure, container children:",
+      container.children.length
+    );
 
     CONFIG.MONTHS.forEach((monthName, monthIndex) => {
       try {
@@ -1812,7 +2045,7 @@ export const UI = {
           monthName,
           currentMonth,
           currentYear,
-          viewingYear,
+          viewingYear
         );
 
         // Click handler to drill into month view
@@ -1828,10 +2061,18 @@ export const UI = {
 
         grid.appendChild(card);
       } catch (error) {
-        console.error(`renderCalendar: Error creating card for ${monthName}:`, error);
+        console.error(
+          `renderCalendar: Error creating card for ${monthName}:`,
+          error
+        );
       }
     });
-    console.log("renderCalendar: Finished creating", CONFIG.MONTHS.length, "month cards, grid children:", grid.children.length);
+    console.log(
+      "renderCalendar: Finished creating",
+      CONFIG.MONTHS.length,
+      "month cards, grid children:",
+      grid.children.length
+    );
   },
 
   createMonthCard(
@@ -1839,7 +2080,7 @@ export const UI = {
     monthName: string,
     currentMonth: number,
     currentYear: number,
-    viewingYear: number,
+    viewingYear: number
   ) {
     const card = document.createElement("div");
     card.className = "month-card";
@@ -1860,10 +2101,10 @@ export const UI = {
     }
 
     // Year view is milestone-oriented (month goals), not week/day tasks.
-    const monthGoals = Goals.getByMonth(monthIndex, viewingYear).filter((g) => g.level === "milestone");
-    const completedCount = monthGoals.filter(
-      (g) => g.status === "done",
-    ).length;
+    const monthGoals = Goals.getByMonth(monthIndex, viewingYear).filter(
+      (g) => g.level === "milestone"
+    );
+    const completedCount = monthGoals.filter((g) => g.status === "done").length;
     const progressPercent =
       monthGoals.length > 0
         ? Math.round((completedCount / monthGoals.length) * 100)
@@ -1875,7 +2116,9 @@ export const UI = {
     const breakdown = TimeBreakdown.calculate(monthIndex, viewingYear);
 
     if (isPastYear) {
-      timeContext = `${currentYear - viewingYear} year${currentYear - viewingYear > 1 ? "s" : ""} ago`;
+      timeContext = `${currentYear - viewingYear} year${
+        currentYear - viewingYear > 1 ? "s" : ""
+      } ago`;
       timeDetail = "";
     } else if (isFutureYear) {
       const monthsAway =
@@ -1903,13 +2146,17 @@ export const UI = {
       <div class="month-header">
         <div class="month-name">${monthName}</div>
         <div class="month-context">${timeContext}</div>
-        ${timeDetail ? `<div class="month-time-detail">${timeDetail}</div>` : ""}
+        ${
+          timeDetail ? `<div class="month-time-detail">${timeDetail}</div>` : ""
+        }
       </div>
       <div class="month-progress">
         <div class="month-progress-bar">
           <div class="month-progress-fill" style="width: ${progressPercent}%"></div>
         </div>
-        <div class="month-progress-label">${completedCount}/${monthGoals.length} milestones</div>
+        <div class="month-progress-label">${completedCount}/${
+      monthGoals.length
+    } milestones</div>
       </div>
       <div class="month-goals">
         ${this.renderMonthGoals(monthGoals)}
@@ -1946,44 +2193,68 @@ export const UI = {
     // Filter by active category
     let filteredGoals = goals;
     if (State.activeCategory !== "all") {
-      filteredGoals = goals.filter(
-        (g) => g.category === State.activeCategory,
-      );
+      filteredGoals = goals.filter((g) => g.category === State.activeCategory);
     }
 
     return filteredGoals
       .slice(0, 5)
       .map((goal) => {
-        const cat = goal.category ? (CONFIG.CATEGORIES[goal.category] ?? null) : null;
+        const cat = goal.category
+          ? CONFIG.CATEGORIES[goal.category] ?? null
+          : null;
         const statusClass = goal.status === "done" ? "completed" : "";
         const priorityTag =
           goal.priority === "urgent" || goal.priority === "high"
-            ? `<span class="goal-tag priority-${goal.priority}">${CONFIG.PRIORITIES[goal.priority]?.symbol || ""} ${goal.priority}</span>`
+            ? `<span class="goal-tag priority-${goal.priority}">${
+                CONFIG.PRIORITIES[goal.priority]?.symbol || ""
+              } ${goal.priority}</span>`
             : "";
 
         const level = CONFIG.LEVELS[goal.level] || CONFIG.LEVELS.milestone;
         const subtasksSummary =
           goal.subtasks.length > 0
-            ? `${goal.subtasks.filter((s: Subtask) => s.done).length}/${goal.subtasks.length}`
+            ? `${goal.subtasks.filter((s: Subtask) => s.done).length}/${
+                goal.subtasks.length
+              }`
             : "";
 
         return `
           <div class="goal-item ${statusClass}" data-goal-id="${goal.id}">
-            <div class="goal-checkbox ${goal.status === "done" ? "checked" : ""}" data-goal-id="${goal.id}"></div>
+            <div class="goal-checkbox ${
+              goal.status === "done" ? "checked" : ""
+            }" data-goal-id="${goal.id}"></div>
             <div class="goal-content">
               <div class="goal-title">
                 <span class="goal-level-emoji">${level.emoji}</span>
                 ${this.escapeHtml(goal.title)}
               </div>
               <div class="goal-meta">
-                ${cat ? `<span class="goal-category" style="color: ${cat.color}">${cat.emoji}</span>` : ""}
-                ${subtasksSummary ? `<span class="goal-subtasks">${subtasksSummary}</span>` : ""}
+                ${
+                  cat
+                    ? `<span class="goal-category" style="color: ${cat.color}">${cat.emoji}</span>`
+                    : ""
+                }
+                ${
+                  subtasksSummary
+                    ? `<span class="goal-subtasks">${subtasksSummary}</span>`
+                    : ""
+                }
                 ${priorityTag}
-                ${goal.progress > 0 && goal.progress < 100 ? `<span class="goal-progress-text">${goal.progress}%</span>` : ""}
+                ${
+                  goal.progress > 0 && goal.progress < 100
+                    ? `<span class="goal-progress-text">${goal.progress}%</span>`
+                    : ""
+                }
               </div>
-              ${goal.progress > 0 ? `<div class="goal-progress"><div class="goal-progress-fill" style="width: ${goal.progress}%"></div></div>` : ""}
+              ${
+                goal.progress > 0
+                  ? `<div class="goal-progress"><div class="goal-progress-fill" style="width: ${goal.progress}%"></div></div>`
+                  : ""
+              }
             </div>
-            <button class="btn btn-icon btn-ghost goal-edit-btn" data-goal-id="${goal.id}" type="button" aria-label="Options">⋮</button>
+            <button class="btn btn-icon btn-ghost goal-edit-btn" data-goal-id="${
+              goal.id
+            }" type="button" aria-label="Options">⋮</button>
           </div>
         `;
       })
@@ -2014,8 +2285,8 @@ export const UI = {
         </button>
         <div class="filter-menu" role="menu" hidden>
           ${categories
-        .map(
-          (cat) => `
+            .map(
+              (cat) => `
                 <button
                   class="category-filter ${activeId === cat.id ? "active" : ""}"
                   type="button"
@@ -2025,15 +2296,19 @@ export const UI = {
                 >
                   ${cat.emoji} ${cat.label}
                 </button>
-              `,
-        )
-        .join("")}
+              `
+            )
+            .join("")}
         </div>
       </div>
     `;
 
-    const dropdown = container.querySelector(".filter-dropdown") as HTMLElement | null;
-    const trigger = container.querySelector(".filter-trigger") as HTMLElement | null;
+    const dropdown = container.querySelector(
+      ".filter-dropdown"
+    ) as HTMLElement | null;
+    const trigger = container.querySelector(
+      ".filter-trigger"
+    ) as HTMLElement | null;
     const menu = container.querySelector(".filter-menu") as HTMLElement | null;
 
     if (!dropdown || !trigger || !menu) return;
@@ -2046,40 +2321,42 @@ export const UI = {
     const openMenu = () => {
       menu.hidden = false;
       trigger.setAttribute("aria-expanded", "true");
-      const activeBtn = menu.querySelector(".category-filter.active") as HTMLElement | null;
-      (activeBtn || menu.querySelector(".category-filter") as HTMLElement | null)?.focus?.();
+      const activeBtn = menu.querySelector(
+        ".category-filter.active"
+      ) as HTMLElement | null;
+      (
+        activeBtn ||
+        (menu.querySelector(".category-filter") as HTMLElement | null)
+      )?.focus?.();
     };
 
     if (this._filterDocListeners) {
-      document.removeEventListener("click", this._filterDocListeners.onDocClick);
+      document.removeEventListener(
+        "click",
+        this._filterDocListeners.onDocClick
+      );
       document.removeEventListener(
         "keydown",
-        this._filterDocListeners.onDocKeydown,
+        this._filterDocListeners.onDocKeydown
       );
       this._filterDocListeners = null;
     }
 
-    trigger.addEventListener(
-      "click",
-      () => {
-        if (menu.hidden) openMenu();
-        else closeMenu();
-      },
-    );
+    trigger.addEventListener("click", () => {
+      if (menu.hidden) openMenu();
+      else closeMenu();
+    });
 
-    trigger.addEventListener(
-      "keydown",
-      (e) => {
-        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openMenu();
-        }
-        if (e.key === "Escape") {
-          e.preventDefault();
-          closeMenu();
-        }
-      },
-    );
+    trigger.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openMenu();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeMenu();
+      }
+    });
 
     const onDocClick = (e: MouseEvent) => {
       if (!dropdown.contains(e.target as Node | null)) closeMenu();
@@ -2093,29 +2370,23 @@ export const UI = {
     document.addEventListener("keydown", onDocKeydown);
     this._filterDocListeners = { onDocClick, onDocKeydown };
 
-    menu.addEventListener(
-      "keydown",
-      (e) => {
-        if (e.key === "Escape") {
-          e.preventDefault();
-          closeMenu();
-          trigger.focus();
-        }
-      },
-    );
+    menu.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeMenu();
+        trigger.focus();
+      }
+    });
 
     // Bind filter events
     menu.querySelectorAll(".category-filter").forEach((btn) => {
-      btn.addEventListener(
-        "click",
-        () => {
-          State.activeCategory = (btn as HTMLElement).dataset.category ?? "all";
-          closeMenu();
-          this.renderCategoryFilters();
-          this.renderCalendar();
-          this.renderUpcomingGoals();
-        },
-      );
+      btn.addEventListener("click", () => {
+        State.activeCategory = (btn as HTMLElement).dataset.category ?? "all";
+        closeMenu();
+        this.renderCategoryFilters();
+        this.renderCalendar();
+        this.renderUpcomingGoals();
+      });
     });
   },
 
@@ -2136,17 +2407,18 @@ export const UI = {
 
     container.innerHTML = upcoming
       .map((goal) => {
-        const cat = goal.category ? (CONFIG.CATEGORIES[goal.category] ?? null) : null;
+        const cat = goal.category
+          ? CONFIG.CATEGORIES[goal.category] ?? null
+          : null;
         const monthName = CONFIG.MONTHS[goal.month];
 
-        const timeLeft = TimeBreakdown.getSimpleTimeLeft(
-          goal.month,
-          goal.year,
-        );
+        const timeLeft = TimeBreakdown.getSimpleTimeLeft(goal.month, goal.year);
 
         return `
           <div class="upcoming-goal" data-goal-id="${goal.id}">
-            <div class="upcoming-dot" style="background: ${cat ? cat.color : "rgba(255, 255, 255, 0.18)"}"></div>
+            <div class="upcoming-dot" style="background: ${
+              cat ? cat.color : "rgba(255, 255, 255, 0.18)"
+            }"></div>
             <div class="upcoming-content">
               <div class="upcoming-title">${this.escapeHtml(goal.title)}</div>
               <div class="upcoming-meta">${monthName} • ${timeLeft}</div>
@@ -2174,10 +2446,12 @@ export const UI = {
     container.innerHTML = Object.entries(CONFIG.ACHIEVEMENTS)
       .map(
         ([id, ach]) => `
-          <div class="achievement ${unlocked.includes(id) ? "unlocked" : ""}" data-tooltip="${this.escapeHtml(ach.desc)}">
+          <div class="achievement ${
+            unlocked.includes(id) ? "unlocked" : ""
+          }" data-tooltip="${this.escapeHtml(ach.desc)}">
             ${ach.emoji}
           </div>
-        `,
+        `
       )
       .join("");
   },
@@ -2185,7 +2459,11 @@ export const UI = {
   // ============================================
   // Modal Handling
   // ============================================
-  openGoalModal(level: GoalLevel = "milestone", preselectedMonth: number | null = null, preselectedYear: number | null = null): void {
+  openGoalModal(
+    level: GoalLevel = "milestone",
+    preselectedMonth: number | null = null,
+    preselectedYear: number | null = null
+  ): void {
     goalModal.openGoalModal(this, level, preselectedMonth, preselectedYear);
   },
 
@@ -2199,7 +2477,7 @@ export const UI = {
 
   populateMonthSelect(
     preselectedMonth: number | null = null,
-    year: number | null = null,
+    year: number | null = null
   ) {
     goalModal.populateMonthSelect(this, preselectedMonth, year);
   },
@@ -2248,7 +2526,12 @@ export const UI = {
 
     // Days and weeks left - based on current scope (day, week, month, year) when in home view
     // Otherwise, default to year stats
-    const homeScopeViews: ViewType[] = [VIEWS.DAY, VIEWS.WEEK, VIEWS.MONTH, VIEWS.YEAR];
+    const homeScopeViews: ViewType[] = [
+      VIEWS.DAY,
+      VIEWS.WEEK,
+      VIEWS.MONTH,
+      VIEWS.YEAR,
+    ];
     const effectiveView: ViewType =
       State.currentView === VIEWS.HOME
         ? homeScopeViews[this._homeProgressScopeIndex] ?? VIEWS.YEAR
@@ -2262,23 +2545,26 @@ export const UI = {
     let end: Date;
     let daysLeft: number;
     let weeksLeft: number;
-    let daysLeftLabel = 'Days Left';
-    let weeksLeftLabel = 'Weeks Left';
-    let daysAriaLabel = 'Days left in year';
-    let weeksAriaLabel = 'Weeks left in year';
+    let daysLeftLabel = "Days Left";
+    let weeksLeftLabel = "Weeks Left";
+    let daysAriaLabel = "Days left in year";
+    let weeksAriaLabel = "Weeks left in year";
 
     switch (effectiveView) {
       case VIEWS.DAY: {
         // Days/hours left in current day
         end = new Date(scopeDate);
         end.setHours(23, 59, 59, 999);
-        const hoursLeft = Math.max(0, (end.getTime() - now.getTime()) / (1000 * 60 * 60));
+        const hoursLeft = Math.max(
+          0,
+          (end.getTime() - now.getTime()) / (1000 * 60 * 60)
+        );
         daysLeft = hoursLeft > 0 ? 1 : 0; // Show 1 if any time left, 0 if day is over
         weeksLeft = Math.ceil(hoursLeft);
-        daysLeftLabel = 'Days Left';
-        weeksLeftLabel = 'Hours Left';
-        daysAriaLabel = 'Days left today';
-        weeksAriaLabel = 'Hours left today';
+        daysLeftLabel = "Days Left";
+        weeksLeftLabel = "Hours Left";
+        daysAriaLabel = "Days left today";
+        weeksAriaLabel = "Hours left today";
         break;
       }
       case VIEWS.WEEK: {
@@ -2292,46 +2578,55 @@ export const UI = {
           end = State.getWeekStart(State.viewingYear, State.viewingWeek ?? 1);
           end.setDate(end.getDate() + 7);
         }
-        daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        daysLeft = Math.max(
+          0,
+          Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        );
         weeksLeft = 0;
-        daysLeftLabel = 'Days Left';
-        weeksLeftLabel = 'Weeks Left';
-        daysAriaLabel = 'Days left this week';
-        weeksAriaLabel = 'Weeks left this week';
+        daysLeftLabel = "Days Left";
+        weeksLeftLabel = "Weeks Left";
+        daysAriaLabel = "Days left this week";
+        weeksAriaLabel = "Weeks left this week";
         break;
       }
       case VIEWS.MONTH: {
         // Days/weeks left in current month
         end = new Date(scopeYear, scopeMonth + 1, 1);
-        daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        daysLeft = Math.max(
+          0,
+          Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        );
         weeksLeft = Math.floor(daysLeft / 7);
-        daysLeftLabel = 'Days Left';
-        weeksLeftLabel = 'Weeks Left';
-        daysAriaLabel = 'Days left this month';
-        weeksAriaLabel = 'Weeks left this month';
+        daysLeftLabel = "Days Left";
+        weeksLeftLabel = "Weeks Left";
+        daysAriaLabel = "Days left this month";
+        weeksAriaLabel = "Weeks left this month";
         break;
       }
       case VIEWS.YEAR:
       default: {
         // Days/weeks left in year
         end = new Date(scopeYear, 11, 31, 23, 59, 59, 999);
-        daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        daysLeft = Math.max(
+          0,
+          Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        );
         weeksLeft = Math.floor(daysLeft / 7);
-        daysLeftLabel = 'Days Left';
-        weeksLeftLabel = 'Weeks Left';
-        daysAriaLabel = 'Days left this year';
-        weeksAriaLabel = 'Weeks left this year';
+        daysLeftLabel = "Days Left";
+        weeksLeftLabel = "Weeks Left";
+        daysAriaLabel = "Days left this year";
+        weeksAriaLabel = "Weeks left this year";
         break;
       }
     }
 
     if (this.elements.daysLeft) {
       this.elements.daysLeft.textContent = String(daysLeft);
-      this.elements.daysLeft.setAttribute('aria-label', daysAriaLabel);
+      this.elements.daysLeft.setAttribute("aria-label", daysAriaLabel);
     }
     if (this.elements.weeksLeft) {
       this.elements.weeksLeft.textContent = String(weeksLeft);
-      this.elements.weeksLeft.setAttribute('aria-label', weeksAriaLabel);
+      this.elements.weeksLeft.setAttribute("aria-label", weeksAriaLabel);
     }
     if (this.elements.daysLeftLabel) {
       this.elements.daysLeftLabel.textContent = daysLeftLabel;
@@ -2351,7 +2646,12 @@ export const UI = {
     let end: Date;
     let label = "Progress";
 
-    const homeScopeViews: ViewType[] = [VIEWS.DAY, VIEWS.WEEK, VIEWS.MONTH, VIEWS.YEAR];
+    const homeScopeViews: ViewType[] = [
+      VIEWS.DAY,
+      VIEWS.WEEK,
+      VIEWS.MONTH,
+      VIEWS.YEAR,
+    ];
     const effectiveView: ViewType =
       State.currentView === VIEWS.HOME
         ? homeScopeViews[this._homeProgressScopeIndex] ?? VIEWS.YEAR
@@ -2399,7 +2699,8 @@ export const UI = {
       }
     }
 
-    const ratio = (now.getTime() - start.getTime()) / (end.getTime() - start.getTime());
+    const ratio =
+      (now.getTime() - start.getTime()) / (end.getTime() - start.getTime());
     const progress = toPercent(ratio);
 
     if (this.elements.yearProgressFill) {
@@ -2421,7 +2722,9 @@ export const UI = {
       petals.forEach((petal: Element, index: number) => {
         const baseRotation = index * 72;
         const p = petal as SVGElement;
-        p.style.transform = `rotate(${baseRotation + rotationOffset}deg) scale(${scale})`;
+        p.style.transform = `rotate(${
+          baseRotation + rotationOffset
+        }deg) scale(${scale})`;
       });
 
       if (this.elements.gardenBloom) {
@@ -2435,7 +2738,10 @@ export const UI = {
 
     if (this.elements.timeProgress) {
       this.elements.timeProgress.setAttribute("aria-label", label);
-      this.elements.timeProgress.setAttribute("aria-valuenow", String(progress));
+      this.elements.timeProgress.setAttribute(
+        "aria-valuenow",
+        String(progress)
+      );
       this.elements.timeProgress.setAttribute("aria-valuetext", `${progress}%`);
     }
   },
@@ -2447,13 +2753,16 @@ export const UI = {
       sparkle.className = "pollen-sparkle";
       sparkle.style.left = `${x}px`;
       sparkle.style.top = `${y}px`;
-      sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      sparkle.style.backgroundColor =
+        colors[Math.floor(Math.random() * colors.length)];
 
       const tx = (Math.random() - 0.5) * 100;
       const ty = (Math.random() - 0.5) * 100;
       sparkle.style.setProperty("--tx", `${tx}px`);
       sparkle.style.setProperty("--ty", `${ty}px`);
-      sparkle.style.animation = `pollen-drift ${0.6 + Math.random() * 0.4}s var(--ease-out) forwards`;
+      sparkle.style.animation = `pollen-drift ${
+        0.6 + Math.random() * 0.4
+      }s var(--ease-out) forwards`;
 
       document.body.appendChild(sparkle);
       setTimeout(() => sparkle.remove(), 1000);
@@ -2469,7 +2778,7 @@ export const UI = {
   showRandomAffirmation() {
     const affirmation =
       CONFIG.AFFIRMATIONS[
-      Math.floor(Math.random() * CONFIG.AFFIRMATIONS.length)
+        Math.floor(Math.random() * CONFIG.AFFIRMATIONS.length)
       ];
     const affirmationText = this.elements.affirmationText;
     if (affirmationText) {
@@ -2511,7 +2820,7 @@ export const UI = {
 
   setFocusMode(
     enabled: boolean,
-    options: { silent?: boolean; persist?: boolean } = {},
+    options: { silent?: boolean; persist?: boolean } = {}
   ) {
     focusMode.setFocusMode(this, enabled, options);
   },
@@ -2550,13 +2859,21 @@ export const UI = {
                 aria-label="${theme.label}"
                 role="radio"
                 aria-checked="false"
-                style="--swatch-color: ${theme.color}"
+                ${
+                  key === "rainbow"
+                    ? `style="--swatch-color: #0EA5E9"`
+                    : `style="--swatch-color: ${theme.color}"`
+                }
                 type="button"
               >
-                <span class="swatch-color"></span>
+                <span class="swatch-color" ${
+                  key === "rainbow"
+                    ? `style="background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)"`
+                    : ""
+                }></span>
                 <span class="swatch-emoji">${theme.emoji}</span>
               </button>
-            `,
+            `
         )
         .join("");
     }
@@ -2571,11 +2888,14 @@ export const UI = {
     // Sync Time Theme Picker (Developer Tool)
     const timeThemePicker = document.getElementById("timeThemePicker");
     if (timeThemePicker) {
-      const devTimeOverride = localStorage.getItem("gardenFence.devTimeOverride") || "auto";
-      timeThemePicker.querySelectorAll<HTMLElement>(".time-theme-btn").forEach((btn) => {
-        const isActive = btn.dataset.time === devTimeOverride;
-        btn.setAttribute("aria-checked", String(isActive));
-      });
+      const devTimeOverride =
+        localStorage.getItem("gardenFence.devTimeOverride") || "auto";
+      timeThemePicker
+        .querySelectorAll<HTMLElement>(".time-theme-btn")
+        .forEach((btn) => {
+          const isActive = btn.dataset.time === devTimeOverride;
+          btn.setAttribute("aria-checked", String(isActive));
+        });
     }
   },
 
@@ -2593,7 +2913,7 @@ export const UI = {
         "hide-header",
         "hide-control-bar",
         "hide-sidebar",
-        "hide-now-panel",
+        "hide-now-panel"
       );
       document.getElementById("layoutHandle")?.setAttribute("hidden", "");
       document.getElementById("sidebarHandle")?.setAttribute("hidden", "");
@@ -2606,12 +2926,15 @@ export const UI = {
     document.body.classList.toggle("hide-header", layout.showHeader === false);
     document.body.classList.toggle(
       "hide-control-bar",
-      layout.showControlBar === false,
+      layout.showControlBar === false
     );
-    document.body.classList.toggle("hide-sidebar", layout.showSidebar === false);
+    document.body.classList.toggle(
+      "hide-sidebar",
+      layout.showSidebar === false
+    );
     document.body.classList.toggle(
       "hide-now-panel",
-      layout.showNowPanel === false,
+      layout.showNowPanel === false
     );
 
     const layoutHandle = document.getElementById("layoutHandle");
@@ -2641,15 +2964,15 @@ export const UI = {
 
     document.body.classList.toggle(
       "hide-affirmation",
-      sidebar.showAffirmation === false,
+      sidebar.showAffirmation === false
     );
     document.body.classList.toggle(
       "hide-whats-next",
-      sidebar.showWhatsNext === false,
+      sidebar.showWhatsNext === false
     );
     document.body.classList.toggle(
       "hide-achievements",
-      sidebar.showAchievements === false,
+      sidebar.showAchievements === false
     );
   },
 
@@ -2670,8 +2993,10 @@ export const UI = {
     });
 
     // Sync mobile tab bar
-    const isMobileHomeView = document.body.classList.contains("mobile-home-view");
-    const isMobileGardenView = document.body.classList.contains("mobile-garden-view");
+    const isMobileHomeView =
+      document.body.classList.contains("mobile-home-view");
+    const isMobileGardenView =
+      document.body.classList.contains("mobile-garden-view");
     document.querySelectorAll(".mobile-tab").forEach((tab) => {
       const tabView = (tab as HTMLElement).dataset.view;
       let isActive = false;
@@ -2680,7 +3005,10 @@ export const UI = {
       } else if (tabView === "garden") {
         isActive = isMobileGardenView;
       } else {
-        isActive = !isMobileHomeView && !isMobileGardenView && tabView === State.currentView;
+        isActive =
+          !isMobileHomeView &&
+          !isMobileGardenView &&
+          tabView === State.currentView;
       }
       tab.classList.toggle("active", isActive);
       tab.setAttribute("aria-selected", String(isActive));
@@ -2764,7 +3092,11 @@ export const UI = {
     // Ctrl/Cmd + N for new item (based on view)
     if ((e.ctrlKey || e.metaKey) && e.key === "n") {
       e.preventDefault();
-      this.openGoalModal(this.getCurrentLevel(), State.viewingMonth, State.viewingYear);
+      this.openGoalModal(
+        this.getCurrentLevel(),
+        State.viewingMonth,
+        State.viewingYear
+      );
     }
 
     // Ctrl/Cmd + F for focus mode
@@ -2824,7 +3156,13 @@ export const UI = {
     const root = document.documentElement;
 
     // Remove all time classes
-    root.classList.remove("time-dawn", "time-morning", "time-afternoon", "time-evening", "time-night");
+    root.classList.remove(
+      "time-dawn",
+      "time-morning",
+      "time-afternoon",
+      "time-evening",
+      "time-night"
+    );
 
     if (timeOfDay === "auto") {
       // Determine actual time of day

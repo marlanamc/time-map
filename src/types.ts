@@ -18,7 +18,7 @@ export type Priority = "low" | "medium" | "high" | "urgent";
 /** Main category types for organizing goals */
 export type Category = "career" | "health" | "finance" | "personal" | "creative" | null;
 /** Available accent theme colors for the UI */
-export type AccentTheme = "rose" | "coral" | "amber" | "clay" | "mint" | "sage" | "sky" | "teal" | "indigo" | "violet";
+export type AccentTheme = "rose" | "coral" | "amber" | "mint" | "sage" | "sky" | "teal" | "indigo" | "violet" | "rainbow";
 
 /** Break reminder frequency options for ADHD support */
 export type BreakReminder = "pomodoro" | "gentle" | "hyperfocus" | "off";

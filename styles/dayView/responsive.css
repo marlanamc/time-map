@@ -425,7 +425,7 @@
   .day-land,
   .day-bed-canvas,
   .day-goal-card {
-    background: white !important;
+    background: var(--surface-2) !important;
     backdrop-filter: none !important;
     box-shadow: none !important;
   }
@@ -438,7 +438,7 @@
 
   /* Simplify colors */
   :root.dark-mode body {
-    background: white !important;
+    background: #FAFCFB !important;
     color: black !important;
   }
 

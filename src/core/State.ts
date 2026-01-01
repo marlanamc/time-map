@@ -203,7 +203,7 @@ export const State: AppState & {
         },
         // Neurodivergent accessibility preferences
         nd: {
-          accentTheme: "sage", // teal, coral, sage, amber, clay
+          accentTheme: "sage", // teal, coral, sage, amber, mint, sky, rose, indigo, violet
           breakReminder: "gentle", // pomodoro, gentle, hyperfocus, off
           feedbackStyle: "moderate", // subtle, moderate, celebration, minimal
           maxVisibleTasks: "normal", // overwhelmed, low_energy, normal, high_energy

@@ -65,18 +65,23 @@ export class TimeVisualizations {
       block.dataset.hour = hour.toString();
 
       // Determine state: past, current, or future
+      const formattedTime = this.formatHour(hour);
+      
       if (hour < currentHour) {
         block.classList.add('hour-past');
         block.innerHTML = '🌸'; // Fully bloomed
-        block.setAttribute('aria-label', `${this.formatHour(hour)} - completed`);
       } else if (hour === currentHour) {
         block.classList.add('hour-current');
         block.innerHTML = '🌼'; // Half bloomed
-        block.setAttribute('aria-label', `${this.formatHour(hour)} - current hour`);
       } else {
         block.classList.add('hour-future');
         block.innerHTML = '🌱'; // Bud
-        block.setAttribute('aria-label', `${this.formatHour(hour)} - upcoming`);
+      }
+      
+      // Set title after innerHTML to ensure it persists - use textContent to avoid any encoding issues
+      if (formattedTime && formattedTime.trim()) {
+        block.title = formattedTime;
+        block.setAttribute('aria-label', `${formattedTime} - ${hour < currentHour ? 'completed' : hour === currentHour ? 'current hour' : 'upcoming'}`);
       }
 
       container.appendChild(block);
@@ -95,24 +100,29 @@ export class TimeVisualizations {
 
     const blocks = container.querySelectorAll<HTMLElement>('.hour-block');
     blocks.forEach(block => {
-      const hour = parseInt(block.dataset.hour || '0');
+      const hour = parseInt(block.dataset.hour || '0', 10);
 
       // Remove all state classes
       block.classList.remove('hour-past', 'hour-current', 'hour-future');
 
       // Apply new state
+      const formattedTime = this.formatHour(hour);
+      
       if (hour < currentHour) {
         block.classList.add('hour-past');
         block.innerHTML = '🌸';
-        block.setAttribute('aria-label', `${this.formatHour(hour)} - completed`);
       } else if (hour === currentHour) {
         block.classList.add('hour-current');
         block.innerHTML = '🌼';
-        block.setAttribute('aria-label', `${this.formatHour(hour)} - current hour`);
       } else {
         block.classList.add('hour-future');
         block.innerHTML = '🌱';
-        block.setAttribute('aria-label', `${this.formatHour(hour)} - upcoming`);
+      }
+      
+      // Set title after innerHTML to ensure it persists - use textContent to avoid any encoding issues
+      if (formattedTime && formattedTime.trim()) {
+        block.title = formattedTime;
+        block.setAttribute('aria-label', `${formattedTime} - ${hour < currentHour ? 'completed' : hour === currentHour ? 'current hour' : 'upcoming'}`);
       }
     });
 
@@ -123,13 +133,18 @@ export class TimeVisualizations {
   }
 
   /**
-   * Format hour for display (12-hour format)
+   * Format hour for display (12-hour format with minutes)
    */
   private static formatHour(hour: number): string {
-    if (hour === 0) return '12 AM';
-    if (hour === 12) return '12 PM';
-    if (hour < 12) return `${hour} AM`;
-    return `${hour - 12} PM`;
+    // Ensure hour is a valid number
+    const h = Number(hour);
+    if (isNaN(h) || h < 0 || h > 23) {
+      return '12:00 AM'; // Fallback
+    }
+    if (h === 0) return '12:00 AM';
+    if (h === 12) return '12:00 PM';
+    if (h < 12) return `${h}:00 AM`;
+    return `${h - 12}:00 PM`;
   }
 
   /**

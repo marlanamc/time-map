@@ -412,11 +412,11 @@
 .whats-next,
 .achievements-panel {
     padding: var(--space-4);
-    background: rgba(255, 255, 255, 0.82);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(180, 106, 74, 0.12);
+    border: 1px solid var(--divider);
     box-shadow: var(--shadow-xs);
 }
 
@@ -436,7 +436,7 @@
 
 .affirmation-panel:hover {
     background: var(--bg-hover);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--divider);
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
 }

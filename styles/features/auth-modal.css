@@ -39,7 +39,7 @@
     height: 40px;
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.65);
+    background: var(--surface-2);
     color: var(--text-primary);
     font-size: 22px;
     line-height: 1;

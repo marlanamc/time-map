@@ -109,18 +109,24 @@ export function updateFocusLayoutVars() {
   const controlBar = document.querySelector(".control-bar") as HTMLElement | null;
   const root = document.documentElement;
 
-  if (header) {
-    root.style.setProperty(
-      "--focus-header-height",
-      `${Math.max(56, header.offsetHeight)}px`,
-    );
-  }
-  if (controlBar) {
-    root.style.setProperty(
-      "--focus-controlbar-height",
-      `${Math.max(48, controlBar.offsetHeight)}px`,
-    );
-  }
+  const getVisibleHeight = (el: HTMLElement | null) => {
+    if (!el) return 0;
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return 0;
+    return rect.height;
+  };
+
+  const headerHeight = getVisibleHeight(header);
+  root.style.setProperty(
+    "--focus-header-height",
+    `${headerHeight > 0 ? Math.max(56, headerHeight) : 0}px`,
+  );
+
+  const controlBarHeight = getVisibleHeight(controlBar);
+  root.style.setProperty(
+    "--focus-controlbar-height",
+    `${controlBarHeight > 0 ? Math.max(48, controlBarHeight) : 0}px`,
+  );
 }
 
 export function setupFocusHoverReveal(ctx: FocusModeContext) {
@@ -186,4 +192,3 @@ export function setupFocusHoverReveal(ctx: FocusModeContext) {
     );
   });
 }
-

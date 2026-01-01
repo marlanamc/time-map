@@ -372,8 +372,16 @@ export class GardenEngine {
     // root is already defined above from document.documentElement
 
     // Lighting
-    root.style.setProperty('--time-brightness', lighting.brightness.toString());
-    root.style.setProperty('--time-saturation', lighting.saturation.toString());
+    const isDarkMode = root.classList.contains('dark-mode');
+    const brightness = isDarkMode
+      ? lighting.brightness
+      : Math.min(1.05, Math.max(0.82, lighting.brightness));
+    const saturation = isDarkMode
+      ? lighting.saturation
+      : Math.min(1.05, Math.max(0.9, lighting.saturation));
+
+    root.style.setProperty('--time-brightness', brightness.toString());
+    root.style.setProperty('--time-saturation', saturation.toString());
     root.style.setProperty('--time-hue-shift', `${lighting.hueShift}deg`);
 
     // Shadows

@@ -11,8 +11,8 @@
   gap: 0.875rem;
   --swipe-x: 0px;
   translate: var(--swipe-x) 0;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(180, 106, 74, 0.15);
+  background: var(--card-bg);
+  border: var(--card-border);
   border-radius: var(--radius-lg);
   padding: 1rem 1.125rem;
   cursor: pointer;
@@ -122,8 +122,8 @@
   border-radius: 50%;
   border: 2.5px solid rgba(111, 155, 134, 0.3);
   background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.9) 0%,
-      rgba(247, 243, 237, 0.7) 100%);
+      var(--surface-2) 0%,
+      var(--surface-1) 100%);
   cursor: pointer;
   flex-shrink: 0;
   display: flex;
@@ -658,19 +658,19 @@
 
 /* Subtle background tints */
 .day-goal-card.parent-level-vision {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, var(--surface-2) 100%);
 }
 
 .day-goal-card.parent-level-milestone {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, var(--surface-2) 100%);
 }
 
 .day-goal-card.parent-level-focus {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, var(--surface-2) 100%);
 }
 
 .day-goal-card.parent-level-intention {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, var(--surface-2) 100%);
 }
 
 /* Parent level badge */

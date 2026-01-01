@@ -46,6 +46,17 @@
     background: var(--swatch-color);
 }
 
+/* Rainbow swatch - special handling for gradient */
+.theme-swatch[data-theme="rainbow"] .swatch-color {
+    background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9);
+}
+
+.theme-swatch[data-theme="rainbow"]:hover,
+.theme-swatch[data-theme="rainbow"].active {
+    border-color: #0EA5E9; /* Use teal as the border color for rainbow */
+    box-shadow: 0 0 0 3px color-mix(in srgb, #0EA5E9 30%, transparent);
+}
+
 .swatch-emoji {
     font-size: 12px;
     line-height: 1;

@@ -172,13 +172,13 @@
       rose: { label: "Rose Petal", emoji: "🌹", color: "#E11D48" },
       coral: { label: "Warm Coral", emoji: "🏺", color: "#B8472F" },
       amber: { label: "Golden Amber", emoji: "☀️", color: "#D96320" },
-      clay: { label: "Soft Clay", emoji: "🧱", color: "#9B4C2E" },
       mint: { label: "Mint Fresh", emoji: "🌱", color: "#10B981" },
       sage: { label: "Forest Sage", emoji: "🌿", color: "#3B7057" },
       sky: { label: "Sky Blue", emoji: "☁️", color: "#0EA5E9" },
       teal: { label: "Ocean Teal", emoji: "🌊", color: "#1E6FB8" },
       indigo: { label: "Deep Indigo", emoji: "🌌", color: "#4F46E5" },
       violet: { label: "Violet", emoji: "💜", color: "#6D28D9" },
+      rainbow: { label: "Rainbow", emoji: "🌈", color: "linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)" },
     },
 
     // Body doubling / coworking timer options
@@ -1628,9 +1628,9 @@
                       data-theme="${key}"
                       title="${theme.label}"
                       aria-label="${theme.label}"
-                      style="--swatch-color: ${theme.color}"
+                      ${key === "rainbow" ? `style="--swatch-color: #0EA5E9"` : `style="--swatch-color: ${theme.color}"`}
                     >
-                      <span class="swatch-color"></span>
+                      <span class="swatch-color" ${key === "rainbow" ? `style="background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)"` : ""}></span>
                       <span class="swatch-emoji">${theme.emoji}</span>
                     </button>
                   `,

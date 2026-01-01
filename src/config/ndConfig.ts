@@ -6,15 +6,15 @@ export const ND_CONFIG = {
   // Ordered in rainbow spectrum: red → orange → yellow → green → blue → indigo → violet
   ACCENT_THEMES: {
     rose: { label: "Rose Petal", emoji: "🌹", color: "#E11D48" },
-    coral: { label: "Clay Red", emoji: "🏺", color: "#B8472F" },
+    coral: { label: "Warm Earth", emoji: "🏺", color: "#B8472F" },
     amber: { label: "Sunlight", emoji: "☀️", color: "#D96320" },
-    clay: { label: "Warm Earth", emoji: "🧱", color: "#9B4C2E" },
     mint: { label: "Mint Fresh", emoji: "🌱", color: "#10B981" },
     sage: { label: "Garden Green", emoji: "🌿", color: "#3B7057" },
     sky: { label: "Sky Blue", emoji: "☁️", color: "#0EA5E9" },
     teal: { label: "Daylight Blue", emoji: "🌊", color: "#1E6FB8" },
     indigo: { label: "Deep Indigo", emoji: "🌌", color: "#4F46E5" },
     violet: { label: "Violet", emoji: "💜", color: "#6D28D9" },
+    rainbow: { label: "Rainbow", emoji: "🌈", color: "linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)" },
   },
 
   // Body doubling / coworking timer options

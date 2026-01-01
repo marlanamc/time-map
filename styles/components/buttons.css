@@ -23,7 +23,7 @@
 .btn-primary {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--terracotta, var(--clay)) 120%);
+    background: linear-gradient(135deg, var(--accent-button) 0%, var(--accent-progress) 120%);
     color: var(--bg-base);
 }
 
@@ -44,7 +44,8 @@
 }
 
 .btn-primary:hover {
-    background: var(--accent-hover);
+    background: var(--accent-button);
+    filter: brightness(1.1);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm), var(--shadow-glow-sm);
 }
@@ -77,7 +78,7 @@
 .toggle-switch:focus-visible,
 .pick-btn:focus-visible,
 .category-filter:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: 3px solid var(--accent-highlight);
     /* WCAG AA: 3px for better visibility (was 2px) */
     outline-offset: 2px;
 }
@@ -91,7 +92,7 @@ select:focus-visible,
 [role="button"]:focus-visible,
 [role="tab"]:focus-visible,
 [tabindex]:not([tabindex="-1"]):focus-visible {
-    outline: 3px solid var(--accent);
+    outline: 3px solid var(--accent-highlight);
     outline-offset: 2px;
 }
 

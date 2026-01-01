@@ -82,13 +82,13 @@ export const NDSupport = {
         "theme-rose",
         "theme-coral",
         "theme-amber",
-        "theme-clay",
         "theme-mint",
         "theme-sage",
         "theme-sky",
         "theme-teal",
         "theme-indigo",
         "theme-violet",
+        "theme-rainbow",
       );
       document.body.classList.add(`theme-${prefs.accentTheme}`);
     }
@@ -634,9 +634,9 @@ export const NDSupport = {
                       data-theme="${key}"
                       title="${theme.label}"
                       aria-label="${theme.label}"
-                      style="--swatch-color: ${theme.color}"
+                      ${key === "rainbow" ? `style="--swatch-color: #0EA5E9"` : `style="--swatch-color: ${theme.color}"`}
                     >
-                      <span class="swatch-color"></span>
+                      <span class="swatch-color" ${key === "rainbow" ? `style="background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)"` : ""}></span>
                       <span class="swatch-emoji">${theme.emoji}</span>
                     </button>
                   `,
@@ -846,10 +846,10 @@ export const NDSupport = {
                         data-theme="${key}"
                         title="${theme.label}"
                         aria-label="${theme.label}"
-                        style="--swatch-color: ${theme.color}"
+                        ${key === "rainbow" ? `style="--swatch-color: #0EA5E9"` : `style="--swatch-color: ${theme.color}"`}
                         type="button"
                       >
-                        <span class="swatch-color"></span>
+                        <span class="swatch-color" ${key === "rainbow" ? `style="background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)"` : ""}></span>
                         <span class="swatch-emoji">${theme.emoji}</span>
                       </button>
                     `,

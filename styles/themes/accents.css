@@ -19,6 +19,15 @@ body.theme-teal {
     --accent-subtle: rgba(30, 111, 184, 0.10);
     --shadow-glow: 0 0 24px rgba(30, 111, 184, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(30, 111, 184, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #1E6FB8;
+    --accent-active: #1E6FB8;
+    --accent-border: #1E6FB8;
+    --accent-highlight: #1E6FB8;
+    --accent-link: #1E6FB8;
+    --accent-badge: #1E6FB8;
+    --accent-progress: #1E6FB8;
+    --accent-icon: #1E6FB8;
 }
 
 /* Sky - Day Mode */
@@ -29,6 +38,15 @@ body.theme-sky {
     --accent-subtle: rgba(14, 165, 233, 0.10);
     --shadow-glow: 0 0 24px rgba(14, 165, 233, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(14, 165, 233, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #0EA5E9;
+    --accent-active: #0EA5E9;
+    --accent-border: #0EA5E9;
+    --accent-highlight: #0EA5E9;
+    --accent-link: #0EA5E9;
+    --accent-badge: #0EA5E9;
+    --accent-progress: #0EA5E9;
+    --accent-icon: #0EA5E9;
 }
 
 /* Mint - Day Mode */
@@ -39,6 +57,15 @@ body.theme-mint {
     --accent-subtle: rgba(16, 185, 129, 0.10);
     --shadow-glow: 0 0 24px rgba(16, 185, 129, 0.22);
     --shadow-glow-sm: 0 0 12px rgba(16, 185, 129, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #10B981;
+    --accent-active: #10B981;
+    --accent-border: #10B981;
+    --accent-highlight: #10B981;
+    --accent-link: #10B981;
+    --accent-badge: #10B981;
+    --accent-progress: #10B981;
+    --accent-icon: #10B981;
 }
 
 /* Sage - Day Mode */
@@ -49,6 +76,15 @@ body.theme-sage {
     --accent-subtle: rgba(59, 112, 87, 0.09);
     --shadow-glow: 0 0 24px rgba(59, 112, 87, 0.22);
     --shadow-glow-sm: 0 0 12px rgba(59, 112, 87, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #3B7057;
+    --accent-active: #3B7057;
+    --accent-border: #3B7057;
+    --accent-highlight: #3B7057;
+    --accent-link: #3B7057;
+    --accent-badge: #3B7057;
+    --accent-progress: #3B7057;
+    --accent-icon: #3B7057;
 }
 
 /* Amber - Day Mode */
@@ -59,6 +95,15 @@ body.theme-amber {
     --accent-subtle: rgba(217, 99, 32, 0.10);
     --shadow-glow: 0 0 28px rgba(217, 99, 32, 0.28);
     --shadow-glow-sm: 0 0 14px rgba(217, 99, 32, 0.18);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #D96320;
+    --accent-active: #D96320;
+    --accent-border: #D96320;
+    --accent-highlight: #D96320;
+    --accent-link: #D96320;
+    --accent-badge: #D96320;
+    --accent-progress: #D96320;
+    --accent-icon: #D96320;
 }
 
 /* Coral - Day Mode */
@@ -69,6 +114,15 @@ body.theme-coral {
     --accent-subtle: rgba(184, 71, 47, 0.08);
     --shadow-glow: 0 0 24px rgba(184, 71, 47, 0.22);
     --shadow-glow-sm: 0 0 12px rgba(184, 71, 47, 0.14);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #B8472F;
+    --accent-active: #B8472F;
+    --accent-border: #B8472F;
+    --accent-highlight: #B8472F;
+    --accent-link: #B8472F;
+    --accent-badge: #B8472F;
+    --accent-progress: #B8472F;
+    --accent-icon: #B8472F;
 }
 
 /* Rose - Day Mode */
@@ -79,17 +133,18 @@ body.theme-rose {
     --accent-subtle: rgba(225, 29, 72, 0.10);
     --shadow-glow: 0 0 24px rgba(225, 29, 72, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(225, 29, 72, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #E11D48;
+    --accent-active: #E11D48;
+    --accent-border: #E11D48;
+    --accent-highlight: #E11D48;
+    --accent-link: #E11D48;
+    --accent-badge: #E11D48;
+    --accent-progress: #E11D48;
+    --accent-icon: #E11D48;
 }
 
-/* Clay - Day Mode */
-body.theme-clay {
-    --accent: #9B4C2E;  /* Deep clay for day readability */
-    --accent-hover: #B35838;
-    --accent-muted: rgba(155, 76, 46, 0.16);
-    --accent-subtle: rgba(155, 76, 46, 0.08);
-    --shadow-glow: 0 0 24px rgba(155, 76, 46, 0.20);
-    --shadow-glow-sm: 0 0 12px rgba(155, 76, 46, 0.14);
-}
+/* Clay theme removed - using coral instead */
 
 /* Violet - Day Mode */
 body.theme-violet {
@@ -99,6 +154,15 @@ body.theme-violet {
     --accent-subtle: rgba(109, 40, 217, 0.10);
     --shadow-glow: 0 0 24px rgba(109, 40, 217, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(109, 40, 217, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #6D28D9;
+    --accent-active: #6D28D9;
+    --accent-border: #6D28D9;
+    --accent-highlight: #6D28D9;
+    --accent-link: #6D28D9;
+    --accent-badge: #6D28D9;
+    --accent-progress: #6D28D9;
+    --accent-icon: #6D28D9;
 }
 
 /* Indigo - Day Mode */
@@ -109,6 +173,15 @@ body.theme-indigo {
     --accent-subtle: rgba(79, 70, 229, 0.10);
     --shadow-glow: 0 0 24px rgba(79, 70, 229, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(79, 70, 229, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #4F46E5;
+    --accent-active: #4F46E5;
+    --accent-border: #4F46E5;
+    --accent-highlight: #4F46E5;
+    --accent-link: #4F46E5;
+    --accent-badge: #4F46E5;
+    --accent-progress: #4F46E5;
+    --accent-icon: #4F46E5;
 }
 
 /* ============= NIGHT MODE COLORS (Beautiful Soft) ============= */
@@ -121,6 +194,15 @@ body.theme-indigo {
     --accent-subtle: rgba(140, 183, 217, 0.10);
     --shadow-glow: 0 0 24px rgba(140, 183, 217, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(140, 183, 217, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #8CB7D9;
+    --accent-active: #8CB7D9;
+    --accent-border: #8CB7D9;
+    --accent-highlight: #8CB7D9;
+    --accent-link: #8CB7D9;
+    --accent-badge: #8CB7D9;
+    --accent-progress: #8CB7D9;
+    --accent-icon: #8CB7D9;
 }
 
 /* Sky - Night Mode */
@@ -131,6 +213,15 @@ body.theme-indigo {
     --accent-subtle: rgba(125, 211, 252, 0.10);
     --shadow-glow: 0 0 24px rgba(125, 211, 252, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(125, 211, 252, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #7DD3FC;
+    --accent-active: #7DD3FC;
+    --accent-border: #7DD3FC;
+    --accent-highlight: #7DD3FC;
+    --accent-link: #7DD3FC;
+    --accent-badge: #7DD3FC;
+    --accent-progress: #7DD3FC;
+    --accent-icon: #7DD3FC;
 }
 
 /* Mint - Night Mode */
@@ -141,6 +232,15 @@ body.theme-indigo {
     --accent-subtle: rgba(110, 231, 183, 0.10);
     --shadow-glow: 0 0 24px rgba(110, 231, 183, 0.22);
     --shadow-glow-sm: 0 0 12px rgba(110, 231, 183, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #6EE7B7;
+    --accent-active: #6EE7B7;
+    --accent-border: #6EE7B7;
+    --accent-highlight: #6EE7B7;
+    --accent-link: #6EE7B7;
+    --accent-badge: #6EE7B7;
+    --accent-progress: #6EE7B7;
+    --accent-icon: #6EE7B7;
 }
 
 /* Sage - Night Mode */
@@ -151,6 +251,15 @@ body.theme-indigo {
     --accent-subtle: rgba(111, 155, 134, 0.09);
     --shadow-glow: 0 0 24px rgba(111, 155, 134, 0.22);
     --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #6F9B86;
+    --accent-active: #6F9B86;
+    --accent-border: #6F9B86;
+    --accent-highlight: #6F9B86;
+    --accent-link: #6F9B86;
+    --accent-badge: #6F9B86;
+    --accent-progress: #6F9B86;
+    --accent-icon: #6F9B86;
 }
 
 /* Amber - Night Mode */
@@ -161,6 +270,15 @@ body.theme-indigo {
     --accent-subtle: rgba(231, 125, 62, 0.10);
     --shadow-glow: 0 0 28px rgba(231, 125, 62, 0.28);
     --shadow-glow-sm: 0 0 14px rgba(231, 125, 62, 0.18);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #E77D3E;
+    --accent-active: #E77D3E;
+    --accent-border: #E77D3E;
+    --accent-highlight: #E77D3E;
+    --accent-link: #E77D3E;
+    --accent-badge: #E77D3E;
+    --accent-progress: #E77D3E;
+    --accent-icon: #E77D3E;
 }
 
 /* Coral - Night Mode */
@@ -171,6 +289,15 @@ body.theme-indigo {
     --accent-subtle: rgba(200, 107, 74, 0.08);
     --shadow-glow: 0 0 24px rgba(200, 107, 74, 0.22);
     --shadow-glow-sm: 0 0 12px rgba(200, 107, 74, 0.14);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #C06C52;
+    --accent-active: #C06C52;
+    --accent-border: #C06C52;
+    --accent-highlight: #C06C52;
+    --accent-link: #C06C52;
+    --accent-badge: #C06C52;
+    --accent-progress: #C06C52;
+    --accent-icon: #C06C52;
 }
 
 /* Rose - Night Mode */
@@ -181,17 +308,18 @@ body.theme-indigo {
     --accent-subtle: rgba(251, 113, 133, 0.10);
     --shadow-glow: 0 0 24px rgba(251, 113, 133, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(251, 113, 133, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #FB7185;
+    --accent-active: #FB7185;
+    --accent-border: #FB7185;
+    --accent-highlight: #FB7185;
+    --accent-link: #FB7185;
+    --accent-badge: #FB7185;
+    --accent-progress: #FB7185;
+    --accent-icon: #FB7185;
 }
 
-/* Clay - Night Mode */
-:root.dark-mode body.theme-clay {
-    --accent: #B46A4A;  /* Warm earth */
-    --accent-hover: #C57A58;
-    --accent-muted: rgba(180, 106, 74, 0.16);
-    --accent-subtle: rgba(180, 106, 74, 0.08);
-    --shadow-glow: 0 0 24px rgba(180, 106, 74, 0.20);
-    --shadow-glow-sm: 0 0 12px rgba(180, 106, 74, 0.14);
-}
+/* Clay theme removed - using coral instead */
 
 /* Violet - Night Mode */
 :root.dark-mode body.theme-violet {
@@ -201,6 +329,15 @@ body.theme-indigo {
     --accent-subtle: rgba(139, 92, 246, 0.10);
     --shadow-glow: 0 0 24px rgba(139, 92, 246, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(139, 92, 246, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #8B5CF6;
+    --accent-active: #8B5CF6;
+    --accent-border: #8B5CF6;
+    --accent-highlight: #8B5CF6;
+    --accent-link: #8B5CF6;
+    --accent-badge: #8B5CF6;
+    --accent-progress: #8B5CF6;
+    --accent-icon: #8B5CF6;
 }
 
 /* Indigo - Night Mode */
@@ -211,5 +348,55 @@ body.theme-indigo {
     --accent-subtle: rgba(129, 140, 248, 0.10);
     --shadow-glow: 0 0 24px rgba(129, 140, 248, 0.24);
     --shadow-glow-sm: 0 0 12px rgba(129, 140, 248, 0.16);
+    /* Set rainbow accent variables to use theme color */
+    --accent-button: #818CF8;
+    --accent-active: #818CF8;
+    --accent-border: #818CF8;
+    --accent-highlight: #818CF8;
+    --accent-link: #818CF8;
+    --accent-badge: #818CF8;
+    --accent-progress: #818CF8;
+    --accent-icon: #818CF8;
+}
+
+/* Rainbow - Day Mode - Uses rainbow accent system */
+body.theme-rainbow {
+    /* Override all accent variables to use rainbow system */
+    --accent: var(--accent-button);  /* Teal for primary accent */
+    --accent-hover: #5AAAB2;
+    --accent-muted: rgba(74, 144, 153, 0.16);
+    --accent-subtle: rgba(74, 144, 153, 0.08);
+    --shadow-glow: 0 0 24px rgba(74, 144, 153, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(74, 144, 153, 0.16);
+    
+    /* Ensure rainbow accent variables are set */
+    --accent-button: #4A9099;  /* Teal */
+    --accent-active: #5A9B8D;  /* Sage */
+    --accent-border: #8CB7D9;  /* Sky */
+    --accent-highlight: #E59AA0;  /* Petal */
+    --accent-link: #4F46E5;  /* Indigo */
+    --accent-badge: #F4A460;  /* Amber */
+    --accent-progress: #E77D3E;  /* Sunset */
+    --accent-icon: #6D28D9;  /* Violet */
+}
+
+/* Rainbow - Night Mode */
+:root.dark-mode body.theme-rainbow {
+    --accent: var(--accent-button);  /* Sky blue for primary accent */
+    --accent-hover: #9CC6E6;
+    --accent-muted: rgba(140, 183, 217, 0.18);
+    --accent-subtle: rgba(140, 183, 217, 0.10);
+    --shadow-glow: 0 0 24px rgba(140, 183, 217, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(140, 183, 217, 0.16);
+    
+    /* Ensure rainbow accent variables are set for dark mode */
+    --accent-button: #8CB7D9;  /* Sky blue */
+    --accent-active: #6F9B86;  /* Sage */
+    --accent-border: #7DD3FC;  /* Light sky */
+    --accent-highlight: #FB7185;  /* Rose pink */
+    --accent-link: #818CF8;  /* Indigo */
+    --accent-badge: #E77D3E;  /* Sunset orange */
+    --accent-progress: #6EE7B7;  /* Mint */
+    --accent-icon: #8B5CF6;  /* Violet */
 }
 
