@@ -245,8 +245,8 @@
 
 /* Time-of-day UI tuning (light mode): soften glass + shadows for transition periods */
 :root.time-dawn {
-    --bg-surface: rgba(248, 240, 244, 0.80);
-    --glass-bg: rgba(250, 242, 246, 0.75);
+    --bg-surface: rgba(235, 228, 232, 0.80);
+    --glass-bg: rgba(237, 230, 234, 0.75);
     --glass-border: rgba(184, 140, 160, 0.20);
     --shadow-sm: 0 4px 12px rgba(33, 55, 44, 0.10);
     --shadow-md: 0 12px 24px rgba(33, 55, 44, 0.10);
@@ -254,24 +254,24 @@
 }
 
 :root.time-morning {
-    --bg-surface: rgba(238, 246, 250, 0.80);
-    --glass-bg: rgba(242, 250, 255, 0.74);
+    --bg-surface: rgba(225, 233, 237, 0.80);
+    --glass-bg: rgba(229, 237, 242, 0.74);
     --glass-border: rgba(135, 206, 235, 0.18);
     --shadow-sm: 0 4px 12px rgba(33, 55, 44, 0.10);
     --shadow-md: 0 12px 24px rgba(33, 55, 44, 0.10);
 }
 
 :root.time-afternoon {
-    --bg-surface: rgba(236, 244, 252, 0.80);
-    --glass-bg: rgba(238, 248, 255, 0.72);
+    --bg-surface: rgba(223, 231, 239, 0.80);
+    --glass-bg: rgba(225, 235, 242, 0.72);
     --glass-border: rgba(74, 144, 226, 0.16);
     --shadow-sm: 0 4px 12px rgba(33, 55, 44, 0.12);
     --shadow-md: 0 12px 24px rgba(33, 55, 44, 0.12);
 }
 
 :root.time-evening {
-    --bg-surface: rgba(252, 246, 238, 0.80);
-    --glass-bg: rgba(255, 250, 242, 0.75);
+    --bg-surface: rgba(239, 233, 225, 0.80);
+    --glass-bg: rgba(242, 237, 229, 0.75);
     --glass-border: rgba(255, 140, 66, 0.18);
     --shadow-sm: 0 4px 12px rgba(70, 40, 20, 0.14);
     --shadow-md: 0 12px 24px rgba(70, 40, 20, 0.14);
