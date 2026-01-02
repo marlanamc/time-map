@@ -1,1058 +1,1703 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
-    <meta name="description"
-        content="The Garden Fence is an ADHD-friendly focus tool that helps you set boundaries and watch your day bloom." />
-    <meta name="theme-color" content="#6F9B86" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta
+      name="description"
+      content="The Garden Fence is an ADHD-friendly focus tool that helps you set boundaries and watch your day bloom."
+    />
+    <meta name="theme-color" content="#E8F4F8" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="apple-mobile-web-app-title" content="Garden Fence" />
     <link rel="manifest" href="/manifest.webmanifest" />
-	    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
-	    <link rel="icon" href="icons/ios/32.png" type="image/png" sizes="32x32" />
-	    <link rel="icon" href="icons/ios/16.png" type="image/png" sizes="16x16" />
-	    <link rel="apple-touch-icon" href="icons/ios/152.png" sizes="152x152" />
-	    <link rel="apple-touch-icon" href="icons/ios/167.png" sizes="167x167" />
-	    <link rel="apple-touch-icon" href="icons/ios/180.png" sizes="180x180" />
-	    <link rel="apple-touch-startup-image" href="splash/1290x2796.png"
-	        media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" />
-	    <link rel="apple-touch-startup-image" href="splash/1179x2556.png"
-	        media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" />
-	    <link rel="apple-touch-startup-image" href="splash/1170x2532.png"
-	        media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
-	    <title>The Garden Fence | Boundaries & Blooms</title>
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="icons/ios/32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="icons/ios/16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="icons/ios/152.png" sizes="152x152" />
+    <link rel="apple-touch-icon" href="icons/ios/167.png" sizes="167x167" />
+    <link rel="apple-touch-icon" href="icons/ios/180.png" sizes="180x180" />
+    <link
+      rel="apple-touch-startup-image"
+      href="splash/1290x2796.png"
+      media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="splash/1179x2556.png"
+      media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="splash/1170x2532.png"
+      media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
+    />
+    <title>The Garden Fence | Boundaries & Blooms</title>
     <!-- Dyslexia-friendly font option -->
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        html {
-            background: #E8F4F8;
-        }
+      html {
+        background: #e8f4f8;
+      }
 
-        html.dark-mode {
-            background: #0A1A2E;
-        }
+      html.dark-mode {
+        background: #0a1a2e;
+      }
 
-        /* Minimal app loading skeleton (visible before CSS bundles load) */
-        .app-loading {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: grid;
-            place-items: center;
-            padding: 24px;
-            background: rgba(232, 244, 248, 0.92);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: opacity 0.35s ease;
-        }
+      /* Minimal app loading skeleton (visible before CSS bundles load) */
+      .app-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: rgba(232, 244, 248, 0.92);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: opacity 0.35s ease;
+      }
 
-        html.dark-mode .app-loading {
-            background: rgba(10, 26, 46, 0.84);
-        }
+      html.dark-mode .app-loading {
+        background: rgba(10, 26, 46, 0.84);
+      }
 
-        .app-loading.loaded {
-            opacity: 0;
-            pointer-events: none;
-        }
+      .app-loading.loaded {
+        opacity: 0;
+        pointer-events: none;
+      }
 
-        .app-loading-card {
-            width: min(520px, 92vw);
-            border-radius: 16px;
-            border: 1px solid rgba(140, 183, 217, 0.22);
-            background: rgba(255, 255, 255, 0.75);
-            padding: 18px 18px 14px;
-            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.08);
-        }
+      .app-loading-card {
+        width: min(520px, 92vw);
+        border-radius: 16px;
+        border: 1px solid rgba(140, 183, 217, 0.22);
+        background: rgba(255, 255, 255, 0.75);
+        padding: 18px 18px 14px;
+        box-shadow: 0 10px 36px rgba(0, 0, 0, 0.08);
+      }
 
-        html.dark-mode .app-loading-card {
-            background: rgba(15, 23, 42, 0.7);
-            border-color: rgba(140, 183, 217, 0.18);
-            box-shadow: 0 12px 42px rgba(0, 0, 0, 0.35);
-        }
+      html.dark-mode .app-loading-card {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: rgba(140, 183, 217, 0.18);
+        box-shadow: 0 12px 42px rgba(0, 0, 0, 0.35);
+      }
 
-        .app-loading-title {
-            font: 700 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
-            margin-bottom: 12px;
-            color: rgba(13, 21, 23, 0.88);
-        }
+      .app-loading-title {
+        font: 700 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Inter,
+          sans-serif;
+        margin-bottom: 12px;
+        color: rgba(13, 21, 23, 0.88);
+      }
 
-        html.dark-mode .app-loading-title {
-            color: rgba(255, 255, 255, 0.9);
-        }
+      html.dark-mode .app-loading-title {
+        color: rgba(255, 255, 255, 0.9);
+      }
 
-        .skeleton-line {
-            height: 12px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, rgba(140, 183, 217, 0.16), rgba(140, 183, 217, 0.32), rgba(140, 183, 217, 0.16));
-            background-size: 200% 100%;
-            animation: skeleton-shimmer 1.15s ease-in-out infinite;
-            margin: 10px 0;
-        }
+      .skeleton-line {
+        height: 12px;
+        border-radius: 999px;
+        background: linear-gradient(
+          90deg,
+          rgba(140, 183, 217, 0.16),
+          rgba(140, 183, 217, 0.32),
+          rgba(140, 183, 217, 0.16)
+        );
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.15s ease-in-out infinite;
+        margin: 10px 0;
+      }
 
-        .skeleton-line.w-90 {
-            width: 90%;
-        }
+      .skeleton-line.w-90 {
+        width: 90%;
+      }
 
-        .skeleton-line.w-70 {
-            width: 70%;
-        }
+      .skeleton-line.w-70 {
+        width: 70%;
+      }
 
-        .skeleton-line.w-55 {
-            width: 55%;
-        }
+      .skeleton-line.w-55 {
+        width: 55%;
+      }
 
-        @keyframes skeleton-shimmer {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
+      @keyframes skeleton-shimmer {
+        0% {
+          background-position: 200% 0;
         }
+        100% {
+          background-position: -200% 0;
+        }
+      }
 
-        /* Hide pull-to-refresh on desktop (enabled via mobile CSS) */
-        .pull-to-refresh {
-            display: none;
-        }
+      /* Hide pull-to-refresh on desktop (enabled via mobile CSS) */
+      .pull-to-refresh {
+        display: none;
+      }
     </style>
     <script>
-        (function () {
-            try {
-                var root = document.documentElement;
+      (function () {
+        try {
+          var root = document.documentElement;
 
-                // Check for saved preference first
-                var savedTheme = null;
-                try {
-                    savedTheme = localStorage.getItem("gardenFence.theme");
-                } catch (e) { }
+          // Check for saved preference first
+          var savedTheme = null;
+          try {
+            savedTheme = localStorage.getItem("gardenFence.theme");
+          } catch (e) {}
 
-                // Determine time of day
-                var now = new Date();
-                var hour = now.getHours();
-                var timeOfDay = "night";
-                if (hour >= 5 && hour < 7) timeOfDay = "dawn";
-                else if (hour >= 7 && hour < 12) timeOfDay = "morning";
-                else if (hour >= 12 && hour < 17) timeOfDay = "afternoon";
-                else if (hour >= 17 && hour < 20) timeOfDay = "evening"; // Sunset phase ends at 8 PM
+          // Determine time of day
+          var now = new Date();
+          var hour = now.getHours();
+          var timeOfDay = "night";
+          if (hour >= 5 && hour < 7) timeOfDay = "dawn";
+          else if (hour >= 7 && hour < 12) timeOfDay = "morning";
+          else if (hour >= 12 && hour < 17) timeOfDay = "afternoon";
+          else if (hour >= 17 && hour < 20) timeOfDay = "evening"; // Sunset phase ends at 8 PM
 
-                // Apply theme classes - saved preference overrides time of day
-                var isNightTime;
-                if (savedTheme === "day") isNightTime = false;
-                else if (savedTheme === "night") isNightTime = true;
-                else isNightTime = (timeOfDay === "night");
+          // Apply theme classes - saved preference overrides time of day
+          var isNightTime;
+          if (savedTheme === "day") isNightTime = false;
+          else if (savedTheme === "night") isNightTime = true;
+          else isNightTime = timeOfDay === "night";
 
-                // Set initial background color to transparent to allow garden-background to show
-                root.style.backgroundColor = "transparent";
-                root.classList.toggle("light-mode", !isNightTime);
-                root.classList.toggle("dark-mode", isNightTime);
-                root.style.colorScheme = isNightTime ? "dark" : "light";
+          // Set initial background color to transparent to allow garden-background to show
+          root.style.backgroundColor = "transparent";
+          root.classList.toggle("light-mode", !isNightTime);
+          root.classList.toggle("dark-mode", isNightTime);
+          root.style.colorScheme = isNightTime ? "dark" : "light";
 
-                var meta = document.querySelector('meta[name="theme-color"]');
-                if (meta) {
-                    // Set theme color based on time of day
-                    var themeColors = {
-                        dawn: "#E8C8D8",
-                        morning: "#87CEEB",
-                        afternoon: "#4A90E2",
-                        evening: "#FF8C42",
-                        night: "#0A1A2E"
-                    };
-                    // Override meta color if forced day mode during night
-                    if (!isNightTime && timeOfDay === "night") {
-                        meta.setAttribute("content", "#E8F4F8");
-                    } else {
-                        meta.setAttribute("content", themeColors[timeOfDay] || "#E8F4F8");
-                    }
-                }
-
-                root.classList.remove("time-dawn", "time-morning", "time-afternoon", "time-evening", "time-night");
-                root.classList.add("time-" + timeOfDay);
-
-                // Apply season class to html element
-                var month = now.getMonth();
-                var season = "spring";
-                if (month >= 2 && month < 5) season = "spring";
-                else if (month >= 5 && month < 8) season = "summer";
-                else if (month >= 8 && month < 11) season = "fall";
-                else season = "winter";
-
-                root.classList.remove("season-spring", "season-summer", "season-fall", "season-winter");
-                root.classList.add("season-" + season);
-            } catch (e) {
-                // no-op
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            // Set theme color based on time of day
+            var themeColors = {
+              dawn: "#E8C8D8",
+              morning: "#87CEEB",
+              afternoon: "#4A90E2",
+              evening: "#FF8C42",
+              night: "#0A1A2E",
+            };
+            // Override meta color if forced day mode during night
+            if (!isNightTime && timeOfDay === "night") {
+              meta.setAttribute("content", "#E8F4F8");
+            } else {
+              meta.setAttribute("content", themeColors[timeOfDay] || "#E8F4F8");
             }
-        })();
+          }
+
+          root.classList.remove(
+            "time-dawn",
+            "time-morning",
+            "time-afternoon",
+            "time-evening",
+            "time-night"
+          );
+          root.classList.add("time-" + timeOfDay);
+
+          // Apply season class to html element
+          var month = now.getMonth();
+          var season = "spring";
+          if (month >= 2 && month < 5) season = "spring";
+          else if (month >= 5 && month < 8) season = "summer";
+          else if (month >= 8 && month < 11) season = "fall";
+          else season = "winter";
+
+          root.classList.remove(
+            "season-spring",
+            "season-summer",
+            "season-fall",
+            "season-winter"
+          );
+          root.classList.add("season-" + season);
+        } catch (e) {
+          // no-op
+        }
+      })();
     </script>
     <!-- 
       CSS is imported via JavaScript (src/app.ts imports styles/main.css)
       Vite handles bundling and HMR automatically.
     -->
-</head>
+  </head>
 
-<body>
-    <div class="app-loading" id="appLoading" role="status" aria-live="polite" aria-label="Loading">
-        <div class="app-loading-card">
-            <div class="app-loading-title">Loading…</div>
-            <div class="skeleton-line w-90"></div>
-            <div class="skeleton-line w-70"></div>
-            <div class="skeleton-line w-55"></div>
-        </div>
+  <body>
+    <div
+      class="app-loading"
+      id="appLoading"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading"
+    >
+      <div class="app-loading-card">
+        <div class="app-loading-title">Loading…</div>
+        <div class="skeleton-line w-90"></div>
+        <div class="skeleton-line w-70"></div>
+        <div class="skeleton-line w-55"></div>
+      </div>
     </div>
 
     <div class="pull-to-refresh" id="pullToRefresh" aria-hidden="true">
-        <div class="ptr-spinner" aria-hidden="true"></div>
-        <div class="ptr-label" id="pullToRefreshLabel">Pull to refresh</div>
+      <div class="ptr-spinner" aria-hidden="true"></div>
+      <div class="ptr-label" id="pullToRefreshLabel">Pull to refresh</div>
     </div>
 
     <!-- Garden Background -->
     <div class="garden-background" id="gardenBackground" aria-hidden="true">
-        <div class="garden-sky" id="gardenSky"></div>
-        <div class="garden-backdrop" id="gardenBackdrop"></div>
-        <div id="gardenMidground" class="garden-midground"></div>
+      <div class="garden-sky" id="gardenSky"></div>
+      <div class="garden-backdrop" id="gardenBackdrop"></div>
+      <div id="gardenMidground" class="garden-midground"></div>
     </div>
 
     <!-- Celestial indicator moved into the Support Tools button -->
 
     <!-- Confetti Container -->
-    <div class="confetti-container" id="confettiContainer" aria-hidden="true"></div>
+    <div
+      class="confetti-container"
+      id="confettiContainer"
+      aria-hidden="true"
+    ></div>
 
     <!-- Focus Mode Reveal Zones (hover to show UI) -->
-    <div class="focus-reveal-zone focus-reveal-top" id="focusRevealTop" aria-hidden="true"></div>
-    <div class="focus-reveal-zone focus-reveal-left" id="focusRevealLeft" aria-hidden="true"></div>
-    <button class="focus-handle" id="focusHandle" type="button" aria-label="Toggle focus controls" hidden></button>
-    <button class="layout-handle" id="layoutHandle" type="button" aria-label="Show top bar" hidden></button>
-    <button class="sidebar-handle" id="sidebarHandle" type="button" aria-label="Show sidebar" hidden></button>
+    <div
+      class="focus-reveal-zone focus-reveal-top"
+      id="focusRevealTop"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="focus-reveal-zone focus-reveal-left"
+      id="focusRevealLeft"
+      aria-hidden="true"
+    ></div>
+    <button
+      class="focus-handle"
+      id="focusHandle"
+      type="button"
+      aria-label="Toggle focus controls"
+      hidden
+    ></button>
+    <button
+      class="layout-handle"
+      id="layoutHandle"
+      type="button"
+      aria-label="Show top bar"
+      hidden
+    ></button>
+    <button
+      class="sidebar-handle"
+      id="sidebarHandle"
+      type="button"
+      aria-label="Show sidebar"
+      hidden
+    ></button>
 
     <!-- Mobile Support Panel Button (shown only on mobile) -->
-    <button class="header-mobile-support-btn support-panel-toggle-btn" id="supportPanelToggleBtnMobile"
-        type="button" aria-label="Open support tools" title="Support Tools" hidden>
-            <span class="support-panel-celestial support-panel-sun" aria-hidden="true">☀️</span>
-            <span class="support-panel-celestial support-panel-moon" aria-hidden="true">🌙</span>
-            <span class="support-panel-toggle-fallback-icon" aria-hidden="true">
-                <svg class="support-panel-toggle-icon support-panel-toggle-icon-sun" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" width="20" height="20">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2"></path>
-                    <path d="M12 20v2"></path>
-                    <path d="M4.93 4.93l1.41 1.41"></path>
-                    <path d="M17.66 17.66l1.41 1.41"></path>
-                    <path d="M2 12h2"></path>
-                    <path d="M20 12h2"></path>
-                    <path d="M4.93 19.07l1.41-1.41"></path>
-                    <path d="M17.66 6.34l1.41-1.41"></path>
-                </svg>
-                <svg class="support-panel-toggle-icon support-panel-toggle-icon-moon" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" width="20" height="20">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-                </svg>
-            </span>
-        </button>
+    <button
+      class="header-mobile-support-btn support-panel-toggle-btn"
+      id="supportPanelToggleBtnMobile"
+      type="button"
+      aria-label="Open support tools"
+      title="Support Tools"
+      hidden
+    >
+      <span class="support-panel-celestial support-panel-sun" aria-hidden="true"
+        >☀️</span
+      >
+      <span
+        class="support-panel-celestial support-panel-moon"
+        aria-hidden="true"
+        >🌙</span
+      >
+      <span class="support-panel-toggle-fallback-icon" aria-hidden="true">
+        <svg
+          class="support-panel-toggle-icon support-panel-toggle-icon-sun"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          width="20"
+          height="20"
+        >
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="M4.93 4.93l1.41 1.41"></path>
+          <path d="M17.66 17.66l1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="M4.93 19.07l1.41-1.41"></path>
+          <path d="M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg
+          class="support-panel-toggle-icon support-panel-toggle-icon-moon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          width="20"
+          height="20"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+        </svg>
+      </span>
+    </button>
 
     <!-- Mobile Home View (Distinct from Desktop Sidebar) -->
     <div id="mobileHomeView" class="mobile-home-view" hidden>
-        <!-- Content will be populated by JS or replicated here -->
-        <header class="mobile-home-header">
-            <div class="logo-text">The Garden Fence</div>
-            <div class="current-date-small" id="mobileDateDisplay"></div>
-        </header>
+      <!-- Content will be populated by JS or replicated here -->
+      <header class="mobile-home-header">
+        <div class="logo-text">The Garden Fence</div>
+        <div class="current-date-small" id="mobileDateDisplay"></div>
+      </header>
 
-        <div class="mobile-home-content">
-            <!-- You Are Here -->
-            <section class="mobile-card time-card">
-                <div class="card-label">You Are Here</div>
-                <div class="now-context-mobile" id="mobileNowContext"></div>
-                <div class="time-visualization-mobile" id="mobileTimeVis"></div>
-                <div class="time-stats-row" id="mobileTimeStats">
-                    <!-- populated by JS -->
-                </div>
-            </section>
+      <div class="mobile-home-content">
+        <!-- You Are Here -->
+        <section class="mobile-card time-card">
+          <div class="card-label">You Are Here</div>
+          <div class="now-context-mobile" id="mobileNowContext"></div>
+          <div class="time-visualization-mobile" id="mobileTimeVis"></div>
+          <div class="time-stats-row" id="mobileTimeStats">
+            <!-- populated by JS -->
+          </div>
+        </section>
 
-	            <!-- All Items -->
-            <section class="mobile-card goals-card">
-                <div class="card-label">Your Garden</div>
-                <div class="goals-by-level" id="mobileGoalsByLevel">
-                    <!-- populated by JS -->
-                </div>
-            </section>
+        <!-- All Items -->
+        <section class="mobile-card goals-card">
+          <div class="card-label">Your Garden</div>
+          <div class="goals-by-level" id="mobileGoalsByLevel">
+            <!-- populated by JS -->
+          </div>
+        </section>
 
-            <!-- Daily Bloom -->
-            <section class="mobile-card bloom-card">
-                <div class="card-label">Daily Bloom</div>
-                <div class="garden-bloom-mobile" id="mobileGardenBloom">
-                    <!-- Clone of flower SVG will go here -->
-                </div>
-                <div class="bloom-stats-mobile">
-                    <span id="mobileBloomText">Growing...</span>
-                </div>
-            </section>
+        <!-- Daily Bloom -->
+        <section class="mobile-card bloom-card">
+          <div class="card-label">Daily Bloom</div>
+          <div class="garden-bloom-mobile" id="mobileGardenBloom">
+            <!-- Clone of flower SVG will go here -->
+          </div>
+          <div class="bloom-stats-mobile">
+            <span id="mobileBloomText">Growing...</span>
+          </div>
+        </section>
 
-            <!-- Affirmation -->
-            <section class="mobile-card affirmation-card" id="mobileAffirmationCard">
-                <div class="card-icon">✨</div>
-                <div class="affirmation-text-mobile" id="mobileAffirmationText">
-                    "You're doing better than you think."
-                </div>
-            </section>
+        <!-- Affirmation -->
+        <section
+          class="mobile-card affirmation-card"
+          id="mobileAffirmationCard"
+        >
+          <div class="card-icon">✨</div>
+          <div class="affirmation-text-mobile" id="mobileAffirmationText">
+            "You're doing better than you think."
+          </div>
+        </section>
 
-            <!-- What's Next -->
-            <section class="mobile-card upcoming-card">
-                <div class="card-header-row">
-                    <div class="card-label">Coming Up</div>
-                    <button class="btn-xs btn-ghost" id="mobileSurpriseBtn">Surprise Me</button>
-                </div>
-                <div id="mobileUpcomingList" class="upcoming-list-mobile"></div>
-            </section>
-        </div>
+        <!-- What's Next -->
+        <section class="mobile-card upcoming-card">
+          <div class="card-header-row">
+            <div class="card-label">Coming Up</div>
+            <button class="btn-xs btn-ghost" id="mobileSurpriseBtn">
+              Surprise Me
+            </button>
+          </div>
+          <div id="mobileUpcomingList" class="upcoming-list-mobile"></div>
+        </section>
+      </div>
     </div>
 
     <!-- Main App -->
     <div class="app">
-        <!-- Mobile Header Slot (date nav is moved here on mobile) -->
-        <header class="header mobile-header" id="mobileHeader" role="banner">
-            <div class="logo">
-                <div class="logo-icon" aria-hidden="true">🌱</div>
-                <span class="logo-text">The Garden Fence</span>
+      <!-- Mobile Header Slot (date nav is moved here on mobile) -->
+      <header class="header mobile-header" id="mobileHeader" role="banner">
+        <div class="logo">
+          <div class="logo-icon" aria-hidden="true">🌱</div>
+          <span class="logo-text">The Garden Fence</span>
+        </div>
+        <div
+          class="header-mobile-nav"
+          id="headerMobileNav"
+          aria-hidden="true"
+        ></div>
+      </header>
+      <!-- Sidebar -->
+      <aside
+        class="sidebar"
+        id="sidebar"
+        role="complementary"
+        aria-label="Planning sidebar"
+      >
+        <button
+          class="sidebar-hide-btn"
+          id="hideSidebarBtn"
+          type="button"
+          aria-label="Hide sidebar"
+          title="Hide sidebar"
+        >
+          <span aria-hidden="true">⟨</span>
+        </button>
+        <!-- You Are Here - Time Blindness Support -->
+        <div class="now-panel" role="region" aria-label="Current time context">
+          <!-- App Title -->
+          <div class="now-panel-logo">
+            <div class="logo-icon" aria-hidden="true">🌱</div>
+            <span class="logo-text">The Garden Fence</span>
+          </div>
+          <div class="now-label">You Are Here</div>
+          <div class="now-context" id="nowContext"></div>
+          <div class="now-date" id="nowDate" aria-live="polite">Loading...</div>
+
+          <!-- Year Progress (Relocated from Header) -->
+          <!-- The Daily Bloom (Floral Progress) -->
+          <div
+            class="garden-bloom"
+            id="gardenBloom"
+            role="button"
+            aria-label="Daily Bloom (tap to change scope)"
+            tabindex="0"
+          >
+            <div class="flower-container">
+              <svg class="flower-svg" viewBox="0 0 100 100">
+                <!-- Stem -->
+                <path
+                  class="flower-stem"
+                  d="M50 95 Q50 70 50 60"
+                  fill="none"
+                  stroke="var(--sage)"
+                  stroke-width="3"
+                />
+                <!-- Petals -->
+                <g class="flower-petals" id="flowerPetals">
+                  <ellipse
+                    class="petal"
+                    cx="50"
+                    cy="35"
+                    rx="10"
+                    ry="20"
+                    fill="var(--petal)"
+                  />
+                  <ellipse
+                    class="petal"
+                    cx="50"
+                    cy="35"
+                    rx="10"
+                    ry="20"
+                    fill="var(--petal)"
+                    transform="rotate(72 50 50)"
+                  />
+                  <ellipse
+                    class="petal"
+                    cx="50"
+                    cy="35"
+                    rx="10"
+                    ry="20"
+                    fill="var(--petal)"
+                    transform="rotate(144 50 50)"
+                  />
+                  <ellipse
+                    class="petal"
+                    cx="50"
+                    cy="35"
+                    rx="10"
+                    ry="20"
+                    fill="var(--petal)"
+                    transform="rotate(216 50 50)"
+                  />
+                  <ellipse
+                    class="petal"
+                    cx="50"
+                    cy="35"
+                    rx="10"
+                    ry="20"
+                    fill="var(--petal)"
+                    transform="rotate(288 50 50)"
+                  />
+                </g>
+                <!-- Center -->
+                <circle
+                  class="flower-center"
+                  cx="50"
+                  cy="50"
+                  r="6"
+                  fill="var(--sunset)"
+                />
+              </svg>
             </div>
-            <div class="header-mobile-nav" id="headerMobileNav" aria-hidden="true"></div>
-        </header>
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar" role="complementary" aria-label="Planning sidebar">
-            <button class="sidebar-hide-btn" id="hideSidebarBtn" type="button" aria-label="Hide sidebar"
-                title="Hide sidebar">
-                <span aria-hidden="true">⟨</span>
+            <div class="bloom-stats">
+              <span class="bloom-label" id="yearProgressLabel"
+                >Blooming...</span
+              >
+              <span class="bloom-value" id="yearProgressValue">0%</span>
+            </div>
+          </div>
+          <div
+            class="time-stats"
+            role="group"
+            aria-label="Time remaining this year"
+          >
+            <div class="time-stat">
+              <div
+                class="time-stat-value"
+                id="daysLeft"
+                aria-label="Days left in year"
+              >
+                --
+              </div>
+              <div class="time-stat-label" id="daysLeftLabel">Days Left</div>
+            </div>
+            <div class="time-stat">
+              <div
+                class="time-stat-value"
+                id="weeksLeft"
+                aria-label="Weeks left in year"
+              >
+                --
+              </div>
+              <div class="time-stat-label" id="weeksLeftLabel">Weeks Left</div>
+            </div>
+          </div>
+
+          <!-- Time Remaining Visualization -->
+          <div class="time-garden-plot">
+            <div class="plot-label">Time Remaining Today</div>
+            <div class="time-visualization" id="timeVisualization">
+              <!-- Hour blocks populated by JS -->
+              <div class="hour-blocks" id="hourBlocks"></div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="sidebar-section collapsible mobile-only"
+          data-section="here-garden"
+        >
+          <button
+            class="section-toggle"
+            aria-expanded="true"
+            aria-controls="hereGardenContent"
+          >
+            <span class="section-toggle-icon">▼</span>
+            <span class="section-toggle-label">Your Garden</span>
+          </button>
+          <div class="section-content" id="hereGardenContent">
+            <div
+              class="mobile-here-garden"
+              id="mobileHereGarden"
+              role="list"
+              aria-label="Your garden"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Affirmation - Emotional Regulation Support -->
+        <div class="sidebar-section collapsible" data-section="affirmation">
+          <button
+            class="section-toggle"
+            aria-expanded="false"
+            aria-controls="affirmationContent"
+          >
+            <span class="section-toggle-icon">▼</span>
+            <span class="section-toggle-label">Affirmation</span>
+          </button>
+          <div class="section-content" id="affirmationContent">
+            <div
+              class="affirmation-panel"
+              id="affirmationPanel"
+              role="button"
+              tabindex="0"
+              aria-label="Click for a new affirmation"
+            >
+              <div
+                class="affirmation-text"
+                id="affirmationText"
+                aria-live="polite"
+              >
+                "You're doing better than you think."
+              </div>
+              <div class="affirmation-hint" aria-hidden="true">
+                Click for a new affirmation
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- What's Next - Decision Paralysis Support -->
+        <div class="sidebar-section collapsible" data-section="upcoming">
+          <button
+            class="section-toggle"
+            aria-expanded="true"
+            aria-controls="upcomingContent"
+          >
+            <span class="section-toggle-icon">▼</span>
+            <span class="section-toggle-label">Coming Up</span>
+          </button>
+          <div class="section-content" id="upcomingContent">
+            <div
+              class="whats-next"
+              role="region"
+              aria-label="Upcoming intentions, focuses, milestones, and visions"
+            >
+              <div class="section-header">
+                <button
+                  class="pick-btn"
+                  id="pickOneBtn"
+                  aria-describedby="pick-hint"
+                >
+                  Surprise me
+                </button>
+                <span id="pick-hint" class="visually-hidden"
+                  >Randomly select an intention, focus, milestone, or vision to
+                  return to if you can't decide</span
+                >
+              </div>
+              <div
+                id="upcomingGoals"
+                role="list"
+                aria-label="Upcoming intentions, focuses, milestones, and visions list"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Achievements - Dopamine/Reward Support -->
+        <div class="sidebar-section collapsible" data-section="achievements">
+          <button
+            class="section-toggle"
+            aria-expanded="false"
+            aria-controls="achievementsContent"
+          >
+            <span class="section-toggle-icon">▼</span>
+            <span class="section-toggle-label">Achievements</span>
+          </button>
+          <div class="section-content" id="achievementsContent">
+            <div
+              class="achievements-panel"
+              role="region"
+              aria-label="Your achievements"
+            >
+              <div
+                class="achievements-grid"
+                id="achievementsGrid"
+                role="list"
+                aria-label="Achievements list"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content" id="main-content" role="main">
+        <!-- Control Bar -->
+        <div class="control-bar" role="toolbar" aria-label="Calendar controls">
+          <div class="control-left">
+            <!-- View Switcher -->
+            <div class="view-switcher" role="tablist" aria-label="Zoom level">
+              <button
+                class="view-btn"
+                data-view="day"
+                role="tab"
+                aria-selected="false"
+                aria-label="Day view"
+              >
+                Day
+              </button>
+              <button
+                class="view-btn"
+                data-view="week"
+                role="tab"
+                aria-selected="false"
+                aria-label="Week view"
+              >
+                Week
+              </button>
+              <button
+                class="view-btn"
+                data-view="month"
+                role="tab"
+                aria-selected="false"
+                aria-label="Month view"
+              >
+                Month
+              </button>
+              <button
+                class="view-btn active"
+                data-view="year"
+                role="tab"
+                aria-selected="true"
+                aria-label="Year view"
+              >
+                Year
+              </button>
+            </div>
+          </div>
+
+          <div class="control-center">
+            <!-- Date Navigation -->
+            <div class="date-nav" role="group" aria-label="Date navigation">
+              <button class="nav-btn" id="navPrev" aria-label="Previous">
+                ←
+              </button>
+              <button
+                class="nav-btn today-btn"
+                id="navToday"
+                aria-label="Go to today"
+              >
+                Today
+              </button>
+              <span class="date-display" id="dateDisplay" aria-live="polite"
+                >2025</span
+              >
+              <button class="nav-btn" id="navNext" aria-label="Next">→</button>
+            </div>
+          </div>
+
+          <div class="control-right">
+            <div class="filter-group" role="group" aria-label="Scope filter">
+              <span class="filter-label" id="filter-label">Scope</span>
+              <div
+                class="category-filters"
+                id="categoryFilters"
+                role="group"
+                aria-labelledby="filter-label"
+              ></div>
+            </div>
+            <span class="connection-status" id="connectionStatus" hidden>
+              <span class="status-dot" aria-hidden="true"></span>
+              <span class="status-text">Offline</span>
+            </span>
+            <button
+              class="btn btn-ghost btn-icon support-panel-toggle-btn"
+              id="supportPanelToggleBtn"
+              type="button"
+              aria-label="Open support tools"
+              title="Support Tools"
+            >
+              <span
+                class="support-panel-celestial support-panel-sun"
+                aria-hidden="true"
+                >☀️</span
+              >
+              <span
+                class="support-panel-celestial support-panel-moon"
+                aria-hidden="true"
+                >🌙</span
+              >
+              <span
+                class="support-panel-toggle-fallback-icon"
+                aria-hidden="true"
+              >
+                <svg
+                  class="support-panel-toggle-icon support-panel-toggle-icon-sun"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  width="20"
+                  height="20"
+                >
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2"></path>
+                  <path d="M12 20v2"></path>
+                  <path d="M4.93 4.93l1.41 1.41"></path>
+                  <path d="M17.66 17.66l1.41 1.41"></path>
+                  <path d="M2 12h2"></path>
+                  <path d="M20 12h2"></path>
+                  <path d="M4.93 19.07l1.41-1.41"></path>
+                  <path d="M17.66 6.34l1.41-1.41"></path>
+                </svg>
+                <svg
+                  class="support-panel-toggle-icon support-panel-toggle-icon-moon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  width="20"
+                  height="20"
+                >
+                  <path
+                    d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"
+                  ></path>
+                </svg>
+              </span>
             </button>
-            <!-- You Are Here - Time Blindness Support -->
-            <div class="now-panel" role="region" aria-label="Current time context">
-                <!-- App Title -->
-                <div class="now-panel-logo">
-                    <div class="logo-icon" aria-hidden="true">🌱</div>
-                    <span class="logo-text">The Garden Fence</span>
-                </div>
-                <div class="now-label">You Are Here</div>
-                <div class="now-context" id="nowContext"></div>
-                <div class="now-date" id="nowDate" aria-live="polite">
-                    Loading...
-                </div>
+          </div>
+        </div>
 
-                <!-- Year Progress (Relocated from Header) -->
-                <!-- The Daily Bloom (Floral Progress) -->
-                <div class="garden-bloom" id="gardenBloom" role="button" aria-label="Daily Bloom (tap to change scope)" tabindex="0">
-                    <div class="flower-container">
-                        <svg class="flower-svg" viewBox="0 0 100 100">
-                            <!-- Stem -->
-                            <path class="flower-stem" d="M50 95 Q50 70 50 60" fill="none" stroke="var(--sage)"
-                                stroke-width="3" />
-                            <!-- Petals -->
-                            <g class="flower-petals" id="flowerPetals">
-                                <ellipse class="petal" cx="50" cy="35" rx="10" ry="20" fill="var(--petal)" />
-                                <ellipse class="petal" cx="50" cy="35" rx="10" ry="20" fill="var(--petal)"
-                                    transform="rotate(72 50 50)" />
-                                <ellipse class="petal" cx="50" cy="35" rx="10" ry="20" fill="var(--petal)"
-                                    transform="rotate(144 50 50)" />
-                                <ellipse class="petal" cx="50" cy="35" rx="10" ry="20" fill="var(--petal)"
-                                    transform="rotate(216 50 50)" />
-                                <ellipse class="petal" cx="50" cy="35" rx="10" ry="20" fill="var(--petal)"
-                                    transform="rotate(288 50 50)" />
-                            </g>
-                            <!-- Center -->
-                            <circle class="flower-center" cx="50" cy="50" r="6" fill="var(--sunset)" />
-                        </svg>
-                    </div>
-                    <div class="bloom-stats">
-                        <span class="bloom-label" id="yearProgressLabel">Blooming...</span>
-                        <span class="bloom-value" id="yearProgressValue">0%</span>
-                    </div>
-                </div>
-                <div class="time-stats" role="group" aria-label="Time remaining this year">
-                    <div class="time-stat">
-                        <div class="time-stat-value" id="daysLeft" aria-label="Days left in year">
-                            --
-                        </div>
-                        <div class="time-stat-label" id="daysLeftLabel">Days Left</div>
-                    </div>
-                    <div class="time-stat">
-                        <div class="time-stat-value" id="weeksLeft" aria-label="Weeks left in year">
-                            --
-                        </div>
-                        <div class="time-stat-label" id="weeksLeftLabel">Weeks Left</div>
-                    </div>
-                </div>
+        <!-- Current Level Context (Vision / Milestone / Focus / Intention) -->
+        <div
+          class="level-context-bar"
+          id="levelContextBar"
+          role="region"
+          aria-label="Current focus context"
+        ></div>
 
-                <!-- Time Remaining Visualization -->
-                <div class="time-garden-plot">
-                    <div class="plot-label">Time Remaining Today</div>
-                    <div class="time-visualization" id="timeVisualization">
-                        <!-- Hour blocks populated by JS -->
-                        <div class="hour-blocks" id="hourBlocks"></div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="sidebar-section collapsible mobile-only" data-section="here-garden">
-                <button class="section-toggle" aria-expanded="true" aria-controls="hereGardenContent">
-                    <span class="section-toggle-icon">▼</span>
-                    <span class="section-toggle-label">Your Garden</span>
-                </button>
-                <div class="section-content" id="hereGardenContent">
-                    <div class="mobile-here-garden" id="mobileHereGarden" role="list"
-                        aria-label="Your garden"></div>
-                </div>
-            </div>
-
-            <!-- Affirmation - Emotional Regulation Support -->
-            <div class="sidebar-section collapsible" data-section="affirmation">
-                <button class="section-toggle" aria-expanded="false" aria-controls="affirmationContent">
-                    <span class="section-toggle-icon">▼</span>
-                    <span class="section-toggle-label">Affirmation</span>
-                </button>
-                <div class="section-content" id="affirmationContent">
-                    <div class="affirmation-panel" id="affirmationPanel" role="button" tabindex="0"
-                        aria-label="Click for a new affirmation">
-                        <div class="affirmation-text" id="affirmationText" aria-live="polite">
-                            "You're doing better than you think."
-                        </div>
-                        <div class="affirmation-hint" aria-hidden="true">
-                            Click for a new affirmation
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- What's Next - Decision Paralysis Support -->
-            <div class="sidebar-section collapsible" data-section="upcoming">
-                <button class="section-toggle" aria-expanded="true" aria-controls="upcomingContent">
-                    <span class="section-toggle-icon">▼</span>
-                    <span class="section-toggle-label">Coming Up</span>
-                </button>
-                <div class="section-content" id="upcomingContent">
-		                    <div class="whats-next" role="region" aria-label="Upcoming intentions, focuses, milestones, and visions">
-                        <div class="section-header">
-                            <button class="pick-btn" id="pickOneBtn" aria-describedby="pick-hint">
-                                Surprise me
-                            </button>
-		                            <span id="pick-hint" class="visually-hidden">Randomly select an intention, focus, milestone, or vision to return to if you can't decide</span>
-                        </div>
-		                        <div id="upcomingGoals" role="list" aria-label="Upcoming intentions, focuses, milestones, and visions list"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Achievements - Dopamine/Reward Support -->
-            <div class="sidebar-section collapsible" data-section="achievements">
-                <button class="section-toggle" aria-expanded="false" aria-controls="achievementsContent">
-                    <span class="section-toggle-icon">▼</span>
-                    <span class="section-toggle-label">Achievements</span>
-                </button>
-                <div class="section-content" id="achievementsContent">
-                    <div class="achievements-panel" role="region" aria-label="Your achievements">
-                        <div class="achievements-grid" id="achievementsGrid" role="list" aria-label="Achievements list">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content" id="main-content" role="main">
-            <!-- Control Bar -->
-            <div class="control-bar" role="toolbar" aria-label="Calendar controls">
-                <div class="control-left">
-                    <!-- View Switcher -->
-                    <div class="view-switcher" role="tablist" aria-label="Zoom level">
-                        <button class="view-btn" data-view="day" role="tab" aria-selected="false" aria-label="Day view">
-                            Day
-                        </button>
-                        <button class="view-btn" data-view="week" role="tab" aria-selected="false"
-                            aria-label="Week view">
-                            Week
-                        </button>
-                        <button class="view-btn" data-view="month" role="tab" aria-selected="false"
-                            aria-label="Month view">
-                            Month
-                        </button>
-                        <button class="view-btn active" data-view="year" role="tab" aria-selected="true"
-                            aria-label="Year view">
-                            Year
-                        </button>
-                    </div>
-                </div>
-
-                <div class="control-center">
-                    <!-- Date Navigation -->
-                    <div class="date-nav" role="group" aria-label="Date navigation">
-                        <button class="nav-btn" id="navPrev" aria-label="Previous">
-                            ←
-                        </button>
-                        <button class="nav-btn today-btn" id="navToday" aria-label="Go to today">
-                            Today
-                        </button>
-                        <span class="date-display" id="dateDisplay" aria-live="polite">2025</span>
-                        <button class="nav-btn" id="navNext" aria-label="Next">
-                            →
-                        </button>
-                    </div>
-                </div>
-
-                <div class="control-right">
-                    <div class="filter-group" role="group" aria-label="Scope filter">
-                        <span class="filter-label" id="filter-label">Scope</span>
-                        <div class="category-filters" id="categoryFilters" role="group" aria-labelledby="filter-label">
-                        </div>
-                    </div>
-                    <span class="connection-status" id="connectionStatus" hidden>
-                        <span class="status-dot" aria-hidden="true"></span>
-                        <span class="status-text">Offline</span>
-                    </span>
-                    <button class="btn btn-ghost btn-icon support-panel-toggle-btn" id="supportPanelToggleBtn"
-                        type="button" aria-label="Open support tools" title="Support Tools">
-                            <span class="support-panel-celestial support-panel-sun" aria-hidden="true">☀️</span>
-                            <span class="support-panel-celestial support-panel-moon" aria-hidden="true">🌙</span>
-                            <span class="support-panel-toggle-fallback-icon" aria-hidden="true">
-                                <svg class="support-panel-toggle-icon support-panel-toggle-icon-sun" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" width="20" height="20">
-                                    <circle cx="12" cy="12" r="4"></circle>
-                                    <path d="M12 2v2"></path>
-                                    <path d="M12 20v2"></path>
-                                    <path d="M4.93 4.93l1.41 1.41"></path>
-                                    <path d="M17.66 17.66l1.41 1.41"></path>
-                                    <path d="M2 12h2"></path>
-                                    <path d="M20 12h2"></path>
-                                    <path d="M4.93 19.07l1.41-1.41"></path>
-                                    <path d="M17.66 6.34l1.41-1.41"></path>
-                                </svg>
-                                <svg class="support-panel-toggle-icon support-panel-toggle-icon-moon" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" width="20" height="20">
-                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-                                </svg>
-                            </span>
-                        </button>
-                </div>
-            </div>
-
-            <!-- Current Level Context (Vision / Milestone / Focus / Intention) -->
-            <div class="level-context-bar" id="levelContextBar" role="region" aria-label="Current focus context"></div>
-
-            <!-- Zoomable Canvas -->
-            <div class="canvas-container" id="canvasContainer">
-                <div class="canvas" id="canvas">
-		                    <div class="calendar-grid" id="calendarGrid" role="region" aria-label="Calendar with intentions, focuses, milestones, and visions">
-                    </div>
-                    <!-- Now Beam - Visual indicator for current time in day view -->
-                    <div class="now-beam" id="nowBeam" aria-hidden="true" style="display: none;"></div>
-                </div>
-                <div class="zoom-controls canvas-zoom-controls" role="group" aria-label="Zoom controls">
-                    <button class="zoom-btn" id="zoomOut" aria-label="Zoom out">
-                        −
-                    </button>
-                    <span class="zoom-level" id="zoomLevel" aria-live="polite">100%</span>
-                    <button class="zoom-btn" id="zoomIn" aria-label="Zoom in">
-                        +
-                    </button>
-                </div>
-            </div>
-        </main>
+        <!-- Zoomable Canvas -->
+        <div class="canvas-container" id="canvasContainer">
+          <div class="canvas" id="canvas">
+            <div
+              class="calendar-grid"
+              id="calendarGrid"
+              role="region"
+              aria-label="Calendar with intentions, focuses, milestones, and visions"
+            ></div>
+            <!-- Now Beam - Visual indicator for current time in day view -->
+            <div
+              class="now-beam"
+              id="nowBeam"
+              aria-hidden="true"
+              style="display: none"
+            ></div>
+          </div>
+          <div
+            class="zoom-controls canvas-zoom-controls"
+            role="group"
+            aria-label="Zoom controls"
+          >
+            <button class="zoom-btn" id="zoomOut" aria-label="Zoom out">
+              −
+            </button>
+            <span class="zoom-level" id="zoomLevel" aria-live="polite"
+              >100%</span
+            >
+            <button class="zoom-btn" id="zoomIn" aria-label="Zoom in">+</button>
+          </div>
+        </div>
+      </main>
     </div>
 
-		    <!-- Add Item Modal -->
-    <div class="modal-overlay" id="goalModal" role="dialog" aria-modal="true" aria-labelledby="goal-modal-title">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title" id="goal-modal-title">
-		                    Set New Intention
-                </h2>
-                <button class="modal-close" id="closeModal" aria-label="Close modal">
-                    ×
-                </button>
-            </div>
-            <form id="goalForm">
-                <div class="form-group">
-                    <label for="goalTitle">What would you like to place here?</label>
-                    <input type="text" id="goalTitle" placeholder="e.g., Make space for my side project" required
-                        aria-required="true" />
-                </div>
-                <div class="form-row" id="goalScopeRow">
-                    <div class="form-group" id="goalYearGroup" style="display: none;">
-                        <label for="goalYear">Year</label>
-                        <input type="number" id="goalYear" min="1970" max="2100" inputmode="numeric" />
-                    </div>
-                    <div class="form-group" id="goalStartDateGroup" style="display: none;">
-                        <label for="goalStartDate">Start date</label>
-                        <input type="date" id="goalStartDate" />
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="goalMonth">When?</label>
-                        <select id="goalMonth" required aria-required="true"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="goalCategory">Category (optional)</label>
-                        <select id="goalCategory">
-                            <option value="" selected>No category</option>
-                            <option value="career">Career</option>
-                            <option value="health">Health</option>
-                            <option value="finance">Finance</option>
-                            <option value="personal">Personal</option>
-                            <option value="creative">Creative</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row" id="goalDurationRow">
-                    <div class="form-group" id="milestoneDurationGroup" style="display: none;">
-                        <label for="milestoneDurationMonths">Duration (months)</label>
-                        <select id="milestoneDurationMonths">
-                            <option value="1" selected>1 month</option>
-                            <option value="2">2 months</option>
-                            <option value="3">3 months</option>
-                            <option value="4">4 months</option>
-                            <option value="5">5 months</option>
-                            <option value="6">6 months</option>
-                            <option value="7">7 months</option>
-                            <option value="8">8 months</option>
-                            <option value="9">9 months</option>
-                            <option value="10">10 months</option>
-                            <option value="11">11 months</option>
-                            <option value="12">12 months</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="focusDurationGroup" style="display: none;">
-                        <label for="focusDurationWeeks">Duration (weeks)</label>
-                        <select id="focusDurationWeeks">
-                            <option value="1" selected>1 week</option>
-                            <option value="2">2 weeks</option>
-                            <option value="3">3 weeks</option>
-                            <option value="4">4 weeks</option>
-                            <option value="5">5 weeks</option>
-                            <option value="6">6 weeks</option>
-                            <option value="7">7 weeks</option>
-                            <option value="8">8 weeks</option>
-                            <option value="9">9 weeks</option>
-                            <option value="10">10 weeks</option>
-                            <option value="11">11 weeks</option>
-                            <option value="12">12 weeks</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="goalStartTime">Start Time</label>
-                        <input type="time" id="goalStartTime" />
-                    </div>
-                    <div class="form-group">
-                        <label for="goalEndTime">End Time</label>
-                        <input type="time" id="goalEndTime" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="goalPriority">Priority</label>
-                    <select id="goalPriority">
-                        <option value="low">Low - No rush</option>
-                        <option value="medium" selected>
-                            Medium - When you can
-                        </option>
-                        <option value="high">High - Important</option>
-                        <option value="urgent">Urgent - Do soon</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-ghost" id="cancelModal">
-                        Cancel
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-		                        Set Intention
-                    </button>
-                </div>
-            </form>
+    <!-- Add Item Modal -->
+    <div
+      class="modal-overlay"
+      id="goalModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="goal-modal-title"
+    >
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title" id="goal-modal-title">Set New Intention</h2>
+          <button class="modal-close" id="closeModal" aria-label="Close modal">
+            ×
+          </button>
         </div>
+        <form id="goalForm">
+          <div class="form-group">
+            <label for="goalTitle">What would you like to place here?</label>
+            <input
+              type="text"
+              id="goalTitle"
+              placeholder="e.g., Make space for my side project"
+              required
+              aria-required="true"
+            />
+          </div>
+          <div class="form-row" id="goalScopeRow">
+            <div class="form-group" id="goalYearGroup" style="display: none">
+              <label for="goalYear">Year</label>
+              <input
+                type="number"
+                id="goalYear"
+                min="1970"
+                max="2100"
+                inputmode="numeric"
+              />
+            </div>
+            <div
+              class="form-group"
+              id="goalStartDateGroup"
+              style="display: none"
+            >
+              <label for="goalStartDate">Start date</label>
+              <input type="date" id="goalStartDate" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="goalMonth">When?</label>
+              <select id="goalMonth" required aria-required="true"></select>
+            </div>
+            <div class="form-group">
+              <label for="goalCategory">Category (optional)</label>
+              <select id="goalCategory">
+                <option value="" selected>No category</option>
+                <option value="career">Career</option>
+                <option value="health">Health</option>
+                <option value="finance">Finance</option>
+                <option value="personal">Personal</option>
+                <option value="creative">Creative</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" id="goalDurationRow">
+            <div
+              class="form-group"
+              id="milestoneDurationGroup"
+              style="display: none"
+            >
+              <label for="milestoneDurationMonths">Duration (months)</label>
+              <select id="milestoneDurationMonths">
+                <option value="1" selected>1 month</option>
+                <option value="2">2 months</option>
+                <option value="3">3 months</option>
+                <option value="4">4 months</option>
+                <option value="5">5 months</option>
+                <option value="6">6 months</option>
+                <option value="7">7 months</option>
+                <option value="8">8 months</option>
+                <option value="9">9 months</option>
+                <option value="10">10 months</option>
+                <option value="11">11 months</option>
+                <option value="12">12 months</option>
+              </select>
+            </div>
+            <div
+              class="form-group"
+              id="focusDurationGroup"
+              style="display: none"
+            >
+              <label for="focusDurationWeeks">Duration (weeks)</label>
+              <select id="focusDurationWeeks">
+                <option value="1" selected>1 week</option>
+                <option value="2">2 weeks</option>
+                <option value="3">3 weeks</option>
+                <option value="4">4 weeks</option>
+                <option value="5">5 weeks</option>
+                <option value="6">6 weeks</option>
+                <option value="7">7 weeks</option>
+                <option value="8">8 weeks</option>
+                <option value="9">9 weeks</option>
+                <option value="10">10 weeks</option>
+                <option value="11">11 weeks</option>
+                <option value="12">12 weeks</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="goalStartTime">Start Time</label>
+              <input type="time" id="goalStartTime" />
+            </div>
+            <div class="form-group">
+              <label for="goalEndTime">End Time</label>
+              <input type="time" id="goalEndTime" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="goalPriority">Priority</label>
+            <select id="goalPriority">
+              <option value="low">Low - No rush</option>
+              <option value="medium" selected>Medium - When you can</option>
+              <option value="high">High - Important</option>
+              <option value="urgent">Urgent - Do soon</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="cancelModal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Set Intention</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Celebration Modal - Dopamine Reward -->
-    <div class="celebration-overlay" id="celebrationModal" role="dialog" aria-modal="true"
-        aria-labelledby="celebration-title-label">
-        <div class="celebration-content">
-            <div class="celebration-emoji" id="celebrationIcon" aria-hidden="true">🎉</div>
-            <div class="celebration-title" id="celebrationTitle" id="celebration-title-label">
-                Amazing!
-            </div>
-            <div class="celebration-text" id="celebrationText">
-		                Updated.
-            </div>
+    <div
+      class="celebration-overlay"
+      id="celebrationModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="celebration-title-label"
+    >
+      <div class="celebration-content">
+        <div class="celebration-emoji" id="celebrationIcon" aria-hidden="true">
+          🎉
         </div>
+        <div
+          class="celebration-title"
+          id="celebrationTitle"
+          id="celebration-title-label"
+        >
+          Amazing!
+        </div>
+        <div class="celebration-text" id="celebrationText">Updated.</div>
+      </div>
     </div>
 
     <!-- Toast -->
     <div class="toast" id="toast" role="status" aria-live="polite">
-        <span class="toast-icon" id="toastIcon" aria-hidden="true"></span>
-		        <span class="toast-message" id="toastMessage">Saved.</span>
+      <span class="toast-icon" id="toastIcon" aria-hidden="true"></span>
+      <span class="toast-message" id="toastMessage">Saved.</span>
     </div>
 
     <!-- Support Tools Panel (right drawer) -->
     <div class="support-panel-overlay" id="supportPanelOverlay" hidden>
-        <aside class="support-panel" id="supportPanel" role="dialog" aria-modal="true" aria-label="Support tools panel">
-	            <div class="support-panel-header">
-	                <h2 class="support-panel-title">Menu</h2>
-	                <button class="btn btn-ghost btn-icon support-panel-close" id="supportPanelClose" type="button"
-	                    aria-label="Close support tools">
-	                    <span aria-hidden="true">×</span>
-	                </button>
-	            </div>
-	            <div class="support-panel-body" role="menu" aria-label="Support tools">
-	                <!-- User Profile Section -->
-	                <div class="support-panel-profile-section enhanced" aria-label="User profile">
-	                    <div class="support-panel-avatar-wrapper">
-	                        <div class="user-avatar gradient-border" id="supportPanelUserAvatar">U</div>
-	                    </div>
-	                    <div class="support-panel-profile-info">
-	                        <div class="user-name" id="supportPanelUserName">User</div>
-	                        <div class="sync-status" id="supportPanelSyncStatus" title="Cloud Sync Status">
-	                            <span class="sync-icon">☁️</span>
-	                            <span class="sync-text">Local Only</span>
-	                        </div>
-	                        <button class="support-panel-item secondary support-panel-sync-now" type="button" role="menuitem" data-action="syncNow">
-	                            <span class="support-panel-icon" aria-hidden="true">🔄</span>
-	                            <span class="support-panel-text">
-	                                <span class="support-panel-name">Sync Now</span>
-	                                <span class="support-panel-desc">Push local changes to cloud</span>
-	                            </span>
-	                        </button>
-	                    </div>
-	                </div>
+      <aside
+        class="support-panel"
+        id="supportPanel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Support tools panel"
+      >
+        <div class="support-panel-header">
+          <h2 class="support-panel-title">Menu</h2>
+          <button
+            class="btn btn-ghost btn-icon support-panel-close"
+            id="supportPanelClose"
+            type="button"
+            aria-label="Close support tools"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="support-panel-body" role="menu" aria-label="Support tools">
+          <!-- User Profile Section -->
+          <div
+            class="support-panel-profile-section enhanced"
+            aria-label="User profile"
+          >
+            <div class="support-panel-avatar-wrapper">
+              <div
+                class="user-avatar gradient-border"
+                id="supportPanelUserAvatar"
+              >
+                U
+              </div>
+            </div>
+            <div class="support-panel-profile-info">
+              <div class="user-name" id="supportPanelUserName">User</div>
+              <div
+                class="sync-status"
+                id="supportPanelSyncStatus"
+                title="Cloud Sync Status"
+              >
+                <span class="sync-icon">☁️</span>
+                <span class="sync-text">Local Only</span>
+              </div>
+              <button
+                class="support-panel-item secondary support-panel-sync-now"
+                type="button"
+                role="menuitem"
+                data-action="syncNow"
+              >
+                <span class="support-panel-icon" aria-hidden="true">🔄</span>
+                <span class="support-panel-text">
+                  <span class="support-panel-name">Sync Now</span>
+                  <span class="support-panel-desc"
+                    >Push local changes to cloud</span
+                  >
+                </span>
+              </button>
+            </div>
+          </div>
 
-	                <div class="support-panel-group-label" aria-hidden="true">Preferences</div>
+          <div class="support-panel-group-label" aria-hidden="true">
+            Preferences
+          </div>
 
-	                <!-- Settings Button -->
-	                        <button class="support-panel-item primary" type="button" role="menuitem" id="supportPanelSettingsBtn" data-action="settings">
-	                            <span class="support-panel-icon" aria-hidden="true">
-	                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	                                    stroke-linecap="round" stroke-linejoin="round">
-	                            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
-	                            <path
-	                                d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z">
-	                            </path>
-	                        </svg>
-	                    </span>
-	                    <span class="support-panel-text">
-	                        <span class="support-panel-name">Settings</span>
-	                        <span class="support-panel-desc">App preferences & layout</span>
-	                    </span>
-	                    <span class="support-panel-chevron" aria-hidden="true">
-	                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	                            stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-	                            <path d="m9 18 6-6-6-6"></path>
-	                        </svg>
-	                    </span>
-	                    </button>
+          <!-- Settings Button -->
+          <button
+            class="support-panel-item primary"
+            type="button"
+            role="menuitem"
+            id="supportPanelSettingsBtn"
+            data-action="settings"
+          >
+            <span class="support-panel-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+                <path
+                  d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z"
+                ></path>
+              </svg>
+            </span>
+            <span class="support-panel-text">
+              <span class="support-panel-name">Settings</span>
+              <span class="support-panel-desc">App preferences & layout</span>
+            </span>
+            <span class="support-panel-chevron" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                width="20"
+                height="20"
+              >
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </span>
+          </button>
 
-	                    <button class="support-panel-item secondary" type="button" role="menuitem" id="installAppBtn" data-action="install" hidden>
-	                        <span class="support-panel-icon" aria-hidden="true">⬇️</span>
-	                        <span class="support-panel-text">
-	                            <span class="support-panel-name">Install App</span>
-	                            <span class="support-panel-desc">Add to your home screen</span>
-	                        </span>
-	                    </button>
+          <button
+            class="support-panel-item secondary"
+            type="button"
+            role="menuitem"
+            id="installAppBtn"
+            data-action="install"
+            hidden
+          >
+            <span class="support-panel-icon" aria-hidden="true">⬇️</span>
+            <span class="support-panel-text">
+              <span class="support-panel-name">Install App</span>
+              <span class="support-panel-desc">Add to your home screen</span>
+            </span>
+          </button>
 
-	                    <button class="support-panel-item secondary" type="button" role="menuitem" id="syncIssuesBtn" data-action="syncIssues" hidden>
-	                        <span class="support-panel-icon" aria-hidden="true">🧩</span>
-	                        <span class="support-panel-text">
-	                            <span class="support-panel-name">Sync Issues</span>
-	                            <span class="support-panel-desc">Resolve failed sync changes</span>
-	                        </span>
-	                    </button>
+          <button
+            class="support-panel-item secondary"
+            type="button"
+            role="menuitem"
+            id="syncIssuesBtn"
+            data-action="syncIssues"
+            hidden
+          >
+            <span class="support-panel-icon" aria-hidden="true">🧩</span>
+            <span class="support-panel-text">
+              <span class="support-panel-name">Sync Issues</span>
+              <span class="support-panel-desc"
+                >Resolve failed sync changes</span
+              >
+            </span>
+          </button>
 
-	                <!-- Logout Button -->
-	                <button class="support-panel-item danger" type="button" role="menuitem" id="logoutBtn" data-action="logout">
-	                    <span class="support-panel-icon" aria-hidden="true">
-	                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	                            stroke-linecap="round" stroke-linejoin="round">
-	                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-	                            <polyline points="16 17 21 12 16 7"></polyline>
-	                            <line x1="21" y1="12" x2="9" y2="12"></line>
-	                        </svg>
-	                    </span>
-	                    <span class="support-panel-text">
-	                        <span class="support-panel-name">Log Out</span>
-	                        <span class="support-panel-desc">Sign out of your account</span>
-	                    </span>
-	                </button>
+          <!-- Logout Button -->
+          <button
+            class="support-panel-item danger"
+            type="button"
+            role="menuitem"
+            id="logoutBtn"
+            data-action="logout"
+          >
+            <span class="support-panel-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </span>
+            <span class="support-panel-text">
+              <span class="support-panel-name">Log Out</span>
+              <span class="support-panel-desc">Sign out of your account</span>
+            </span>
+          </button>
 
-	                <!-- Focus Mode Toggle -->
-	                <div class="support-panel-focus-toggle secondary">
-	                    <label for="supportPanelFocusToggle" class="support-panel-focus-label" id="support-panel-focus-label">
-	                        Focus (reduce visual noise)
-	                    </label>
-	                    <button class="toggle-switch" id="supportPanelFocusToggle" role="switch" aria-checked="false"
-	                        aria-labelledby="support-panel-focus-label" aria-describedby="support-panel-focus-desc"></button>
-	                    <span class="sr-only" id="support-panel-focus-desc">Focus reduces visual noise. It doesn't track productivity.</span>
-	                </div>
+          <!-- Focus Mode Toggle -->
+          <div class="support-panel-focus-toggle secondary">
+            <label
+              for="supportPanelFocusToggle"
+              class="support-panel-focus-label"
+              id="support-panel-focus-label"
+            >
+              Focus (reduce visual noise)
+            </label>
+            <button
+              class="toggle-switch"
+              id="supportPanelFocusToggle"
+              role="switch"
+              aria-checked="false"
+              aria-labelledby="support-panel-focus-label"
+              aria-describedby="support-panel-focus-desc"
+            ></button>
+            <span class="sr-only" id="support-panel-focus-desc"
+              >Focus reduces visual noise. It doesn't track productivity.</span
+            >
+          </div>
 
-	                <div class="support-panel-group-label" aria-hidden="true">Appearance</div>
+          <div class="support-panel-group-label" aria-hidden="true">
+            Appearance
+          </div>
 
-	                <div class="support-panel-focus-toggle secondary support-panel-theme-toggle">
-	                    <label for="supportPanelThemeToggle" class="support-panel-focus-label" id="support-panel-theme-label">
-	                        Dark Garden Mode
-	                    </label>
-	                    <button class="toggle-switch" id="supportPanelThemeToggle" role="switch" aria-checked="false"
-	                        aria-labelledby="support-panel-theme-label"></button>
-	                </div>
+          <div
+            class="support-panel-focus-toggle secondary support-panel-theme-toggle"
+          >
+            <label
+              for="supportPanelThemeToggle"
+              class="support-panel-focus-label"
+              id="support-panel-theme-label"
+            >
+              Dark Garden Mode
+            </label>
+            <button
+              class="toggle-switch"
+              id="supportPanelThemeToggle"
+              role="switch"
+              aria-checked="false"
+              aria-labelledby="support-panel-theme-label"
+            ></button>
+          </div>
 
-	                <div class="support-panel-appearance-card" aria-label="Accent color">
-	                    <div class="support-panel-appearance-label">Accent color</div>
-	                    <div class="theme-picker support-panel-theme-picker" id="supportPanelThemePicker" role="radiogroup"
-	                        aria-label="Choose accent color"></div>
-	                </div>
+          <div class="support-panel-appearance-card" aria-label="Accent color">
+            <div class="support-panel-appearance-label">Accent color</div>
+            <div
+              class="theme-picker support-panel-theme-picker"
+              id="supportPanelThemePicker"
+              role="radiogroup"
+              aria-label="Choose accent color"
+            ></div>
+          </div>
 
-	                <div class="support-panel-appearance-card" aria-label="Time of day theme">
-	                    <div class="support-panel-appearance-label">Time Theme (Dev)</div>
-	                    <div class="time-theme-picker" id="timeThemePicker" role="radiogroup"
-	                        aria-label="Choose time of day theme">
-	                        <button class="time-theme-btn" data-time="auto" role="radio" aria-checked="true" title="Auto (follows system time)">
-	                            Auto
-	                        </button>
-	                        <button class="time-theme-btn" data-time="dawn" role="radio" aria-checked="false" title="Dawn (5-7 AM)">
-	                            🌅
-	                        </button>
-	                        <button class="time-theme-btn" data-time="morning" role="radio" aria-checked="false" title="Morning (7-12 PM)">
-	                            🌄
-	                        </button>
-	                        <button class="time-theme-btn" data-time="afternoon" role="radio" aria-checked="false" title="Afternoon (12-5 PM)">
-	                            ☀️
-	                        </button>
-	                        <button class="time-theme-btn" data-time="evening" role="radio" aria-checked="false" title="Evening (5-8 PM)">
-	                            🌇
-	                        </button>
-	                        <button class="time-theme-btn" data-time="night" role="radio" aria-checked="false" title="Night (8 PM-5 AM)">
-	                            🌙
-	                        </button>
-	                    </div>
-	                </div>
+          <div
+            class="support-panel-appearance-card"
+            aria-label="Time of day theme"
+          >
+            <div class="support-panel-appearance-label">Time Theme (Dev)</div>
+            <div
+              class="time-theme-picker"
+              id="timeThemePicker"
+              role="radiogroup"
+              aria-label="Choose time of day theme"
+            >
+              <button
+                class="time-theme-btn"
+                data-time="auto"
+                role="radio"
+                aria-checked="true"
+                title="Auto (follows system time)"
+              >
+                Auto
+              </button>
+              <button
+                class="time-theme-btn"
+                data-time="dawn"
+                role="radio"
+                aria-checked="false"
+                title="Dawn (5-7 AM)"
+              >
+                🌅
+              </button>
+              <button
+                class="time-theme-btn"
+                data-time="morning"
+                role="radio"
+                aria-checked="false"
+                title="Morning (7-12 PM)"
+              >
+                🌄
+              </button>
+              <button
+                class="time-theme-btn"
+                data-time="afternoon"
+                role="radio"
+                aria-checked="false"
+                title="Afternoon (12-5 PM)"
+              >
+                ☀️
+              </button>
+              <button
+                class="time-theme-btn"
+                data-time="evening"
+                role="radio"
+                aria-checked="false"
+                title="Evening (5-8 PM)"
+              >
+                🌇
+              </button>
+              <button
+                class="time-theme-btn"
+                data-time="night"
+                role="radio"
+                aria-checked="false"
+                title="Night (8 PM-5 AM)"
+              >
+                🌙
+              </button>
+            </div>
+          </div>
 
-	                <div class="support-panel-appearance-card" aria-label="Time Range Configuration">
-	                    <div class="support-panel-appearance-label">Daily Time Range</div>
-	                    <div class="time-range-config">
-	                        <div class="time-range-inputs">
-	                            <div class="time-range-input-group">
-	                                <label for="timeRangeStart">Start</label>
-	                                <select id="timeRangeStart" class="time-range-select">
-	                                    <option value="0">12 AM</option>
-	                                    <option value="1">1 AM</option>
-	                                    <option value="2">2 AM</option>
-	                                    <option value="3">3 AM</option>
-	                                    <option value="4">4 AM</option>
-	                                    <option value="5">5 AM</option>
-	                                    <option value="6">6 AM</option>
-	                                    <option value="7">7 AM</option>
-	                                    <option value="8" selected>8 AM</option>
-	                                    <option value="9">9 AM</option>
-	                                    <option value="10">10 AM</option>
-	                                    <option value="11">11 AM</option>
-	                                    <option value="12">12 PM</option>
-	                                    <option value="13">1 PM</option>
-	                                    <option value="14">2 PM</option>
-	                                    <option value="15">3 PM</option>
-	                                    <option value="16">4 PM</option>
-	                                    <option value="17">5 PM</option>
-	                                    <option value="18">6 PM</option>
-	                                </select>
-	                            </div>
-	                            <div class="time-range-separator">to</div>
-	                            <div class="time-range-input-group">
-	                                <label for="timeRangeEnd">End</label>
-	                                <select id="timeRangeEnd" class="time-range-select">
-	                                    <option value="12">12 PM</option>
-	                                    <option value="13">1 PM</option>
-	                                    <option value="14">2 PM</option>
-	                                    <option value="15">3 PM</option>
-	                                    <option value="16">4 PM</option>
-	                                    <option value="17">5 PM</option>
-	                                    <option value="18">6 PM</option>
-	                                    <option value="19">7 PM</option>
-	                                    <option value="20">8 PM</option>
-	                                    <option value="21">9 PM</option>
-	                                    <option value="22" selected>10 PM</option>
-	                                    <option value="23">11 PM</option>
-	                                    <option value="24">12 AM</option>
-	                                </select>
-	                            </div>
-	                        </div>
-	                        <div class="time-range-hint">Configure the hours shown in "Time Remaining Today"</div>
-	                    </div>
-	                </div>
+          <div
+            class="support-panel-appearance-card"
+            aria-label="Time Range Configuration"
+          >
+            <div class="support-panel-appearance-label">Daily Time Range</div>
+            <div class="time-range-config">
+              <div class="time-range-inputs">
+                <div class="time-range-input-group">
+                  <label for="timeRangeStart">Start</label>
+                  <select id="timeRangeStart" class="time-range-select">
+                    <option value="0">12 AM</option>
+                    <option value="1">1 AM</option>
+                    <option value="2">2 AM</option>
+                    <option value="3">3 AM</option>
+                    <option value="4">4 AM</option>
+                    <option value="5">5 AM</option>
+                    <option value="6">6 AM</option>
+                    <option value="7">7 AM</option>
+                    <option value="8" selected>8 AM</option>
+                    <option value="9">9 AM</option>
+                    <option value="10">10 AM</option>
+                    <option value="11">11 AM</option>
+                    <option value="12">12 PM</option>
+                    <option value="13">1 PM</option>
+                    <option value="14">2 PM</option>
+                    <option value="15">3 PM</option>
+                    <option value="16">4 PM</option>
+                    <option value="17">5 PM</option>
+                    <option value="18">6 PM</option>
+                  </select>
+                </div>
+                <div class="time-range-separator">to</div>
+                <div class="time-range-input-group">
+                  <label for="timeRangeEnd">End</label>
+                  <select id="timeRangeEnd" class="time-range-select">
+                    <option value="12">12 PM</option>
+                    <option value="13">1 PM</option>
+                    <option value="14">2 PM</option>
+                    <option value="15">3 PM</option>
+                    <option value="16">4 PM</option>
+                    <option value="17">5 PM</option>
+                    <option value="18">6 PM</option>
+                    <option value="19">7 PM</option>
+                    <option value="20">8 PM</option>
+                    <option value="21">9 PM</option>
+                    <option value="22" selected>10 PM</option>
+                    <option value="23">11 PM</option>
+                    <option value="24">12 AM</option>
+                  </select>
+                </div>
+              </div>
+              <div class="time-range-hint">
+                Configure the hours shown in "Time Remaining Today"
+              </div>
+            </div>
+          </div>
 
-	                <div class="support-panel-group-label" aria-hidden="true">Optional</div>
+          <div class="support-panel-group-label" aria-hidden="true">
+            Optional
+          </div>
 
-	                <!-- Optional Tools (Collapsible Section) -->
-	                <div class="support-panel-collapsible-section">
-	                    <button class="support-panel-section-header" type="button" data-toggle="optional-tools" aria-expanded="false">
-	                        <div class="section-header-icon">🧰</div>
-	                        <div class="section-header-title">Tools (optional)</div>
-	                        <div class="section-header-chevron" aria-hidden="true">
-	                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	                                stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-	                                <path d="m6 9 6 6 6-6"></path>
-	                            </svg>
-	                        </div>
-	                    </button>
+          <!-- Optional Tools (Collapsible Section) -->
+          <div class="support-panel-collapsible-section">
+            <button
+              class="support-panel-section-header"
+              type="button"
+              data-toggle="optional-tools"
+              aria-expanded="false"
+            >
+              <div class="section-header-icon">🧰</div>
+              <div class="section-header-title">Tools (optional)</div>
+              <div class="section-header-chevron" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  width="20"
+                  height="20"
+                >
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </div>
+            </button>
 
-	                    <div class="support-panel-section-content" data-section="optional-tools">
-	                        <button class="support-panel-item compact" type="button" role="menuitem" data-action="brainDump">
-	                            <span class="support-panel-icon small" aria-hidden="true">
-	                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	                                    stroke-linecap="round" stroke-linejoin="round">
-	                                    <path d="M8 18a4 4 0 1 1 0-8"></path>
-	                                    <path d="M12 18a4 4 0 1 0 0-8"></path>
-	                                    <path d="M8 10a4 4 0 1 1 0-8"></path>
-	                                    <path d="M12 10a4 4 0 1 0 0-8"></path>
-	                                    <path d="M8 18h8"></path>
-	                                </svg>
-	                            </span>
-	                            <span class="support-panel-text">
-	                                <span class="support-panel-name">Brain Dump</span>
-	                                <span class="support-panel-desc">Park intrusive thoughts</span>
-	                            </span>
-	                        </button>
+            <div
+              class="support-panel-section-content"
+              data-section="optional-tools"
+            >
+              <button
+                class="support-panel-item compact"
+                type="button"
+                role="menuitem"
+                data-action="brainDump"
+              >
+                <span class="support-panel-icon small" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M8 18a4 4 0 1 1 0-8"></path>
+                    <path d="M12 18a4 4 0 1 0 0-8"></path>
+                    <path d="M8 10a4 4 0 1 1 0-8"></path>
+                    <path d="M12 10a4 4 0 1 0 0-8"></path>
+                    <path d="M8 18h8"></path>
+                  </svg>
+                </span>
+                <span class="support-panel-text">
+                  <span class="support-panel-name">Brain Dump</span>
+                  <span class="support-panel-desc"
+                    >Park intrusive thoughts</span
+                  >
+                </span>
+              </button>
 
-	                        <button class="support-panel-item compact" type="button" role="menuitem" data-action="bodyDouble">
-	                            <span class="support-panel-icon small" aria-hidden="true">
-	                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	                                    stroke-linecap="round" stroke-linejoin="round">
-	                                    <circle cx="12" cy="12" r="10"></circle>
-	                                    <path d="M12 6v6l4 2"></path>
-	                                </svg>
-	                            </span>
-	                            <span class="support-panel-text">
-	                                <span class="support-panel-name">Body Double</span>
-	                                <span class="support-panel-desc">Focused work sessions</span>
-	                            </span>
-	                        </button>
+              <button
+                class="support-panel-item compact"
+                type="button"
+                role="menuitem"
+                data-action="bodyDouble"
+              >
+                <span class="support-panel-icon small" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 6v6l4 2"></path>
+                  </svg>
+                </span>
+                <span class="support-panel-text">
+                  <span class="support-panel-name">Body Double</span>
+                  <span class="support-panel-desc">Focused work sessions</span>
+                </span>
+              </button>
 
-	                        <button class="support-panel-item compact" type="button" role="menuitem" data-action="quickWins">
-	                            <span class="support-panel-icon small" aria-hidden="true">
-	                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	                                    stroke-linecap="round" stroke-linejoin="round">
-	                                    <path d="M13 2 3 14h9l-1 8 10-12h-9z"></path>
-	                                </svg>
-	                            </span>
-	                            <span class="support-panel-text">
-	                                <span class="support-panel-name">Quick Wins</span>
-	                                <span class="support-panel-desc">Low motivation tasks</span>
-	                            </span>
-	                        </button>
-	                    </div>
-	                </div>
-	            </div>
-	        </aside>
-	    </div>
-
-    <!-- Body Double Timer Display (shows when active) -->
-    <div class="body-double-display" id="bodyDoubleDisplay" role="timer" aria-live="polite" hidden>
-        <span class="bd-icon" aria-hidden="true"></span>
-        <span class="bd-timer" id="bdTimer">25:00</span>
-        <button class="bd-stop" id="bdStop" aria-label="Stop body double timer">
-            Stop
-        </button>
+              <button
+                class="support-panel-item compact"
+                type="button"
+                role="menuitem"
+                data-action="quickWins"
+              >
+                <span class="support-panel-icon small" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M13 2 3 14h9l-1 8 10-12h-9z"></path>
+                  </svg>
+                </span>
+                <span class="support-panel-text">
+                  <span class="support-panel-name">Quick Wins</span>
+                  <span class="support-panel-desc">Low motivation tasks</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
 
-		    <button class="fab-add" id="addGoalBtn" type="button" aria-label="Set new intention" title="Set new intention">
-	        <span class="fab-icon" aria-hidden="true"></span>
-	    </button>
+    <!-- Body Double Timer Display (shows when active) -->
+    <div
+      class="body-double-display"
+      id="bodyDoubleDisplay"
+      role="timer"
+      aria-live="polite"
+      hidden
+    >
+      <span class="bd-icon" aria-hidden="true"></span>
+      <span class="bd-timer" id="bdTimer">25:00</span>
+      <button class="bd-stop" id="bdStop" aria-label="Stop body double timer">
+        Stop
+      </button>
+    </div>
+
+    <button
+      class="fab-add"
+      id="addGoalBtn"
+      type="button"
+      aria-label="Set new intention"
+      title="Set new intention"
+    >
+      <span class="fab-icon" aria-hidden="true"></span>
+    </button>
 
     <!-- Mobile Bottom Tab Bar -->
-    <nav class="mobile-tab-bar" id="mobileTabBar" role="tablist" aria-label="Main navigation">
-        <button class="mobile-tab active" data-view="home" role="tab" aria-selected="true">
-            <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"></path>
-                </svg>
-            </span>
-            <span class="mobile-tab-label">Here</span>
-        </button>
-        <button class="mobile-tab" data-view="garden" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path>
-                    <circle cx="12" cy="9" r="2.5"></circle>
-                </svg>
-            </span>
-            <span class="mobile-tab-label">Garden</span>
-        </button>
-        <button class="mobile-tab" data-view="day" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2"></path>
-                    <path d="M12 20v2"></path>
-                    <path d="m4.93 4.93 1.41 1.41"></path>
-                    <path d="m17.66 17.66 1.41 1.41"></path>
-                    <path d="M2 12h2"></path>
-                    <path d="M20 12h2"></path>
-                    <path d="m6.34 17.66-1.41 1.41"></path>
-                    <path d="m19.07 4.93-1.41 1.41"></path>
-                </svg>
-            </span>
-            <span class="mobile-tab-label">Day</span>
-        </button>
-        <button class="mobile-tab" data-view="week" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M3 3v18h18"></path>
-                    <path d="M18 17V9"></path>
-                    <path d="M13 17V5"></path>
-                    <path d="M8 17v-7"></path>
-                </svg>
-            </span>
-            <span class="mobile-tab-label">Week</span>
-        </button>
-        <button class="mobile-tab" data-view="month" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M8 2v4"></path>
-                    <path d="M16 2v4"></path>
-                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                    <path d="M3 10h18"></path>
-                </svg>
-            </span>
-            <span class="mobile-tab-label">Month</span>
-        </button>
-        <button class="mobile-tab" data-view="year" role="tab" aria-selected="false">
-            <span class="mobile-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <!-- Grid of 12 squares representing 12 months -->
-                    <rect x="2" y="2" width="4" height="4" rx="0.5"></rect>
-                    <rect x="8" y="2" width="4" height="4" rx="0.5"></rect>
-                    <rect x="14" y="2" width="4" height="4" rx="0.5"></rect>
-                    <rect x="20" y="2" width="4" height="4" rx="0.5"></rect>
-                    <rect x="2" y="8" width="4" height="4" rx="0.5"></rect>
-                    <rect x="8" y="8" width="4" height="4" rx="0.5"></rect>
-                    <rect x="14" y="8" width="4" height="4" rx="0.5"></rect>
-                    <rect x="20" y="8" width="4" height="4" rx="0.5"></rect>
-                    <rect x="2" y="14" width="4" height="4" rx="0.5"></rect>
-                    <rect x="8" y="14" width="4" height="4" rx="0.5"></rect>
-                    <rect x="14" y="14" width="4" height="4" rx="0.5"></rect>
-                    <rect x="20" y="14" width="4" height="4" rx="0.5"></rect>
-                </svg>
-            </span>
-            <span class="mobile-tab-label">Year</span>
-        </button>
+    <nav
+      class="mobile-tab-bar"
+      id="mobileTabBar"
+      role="tablist"
+      aria-label="Main navigation"
+    >
+      <button
+        class="mobile-tab active"
+        data-view="home"
+        role="tab"
+        aria-selected="true"
+      >
+        <span class="mobile-tab-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"
+            ></path>
+          </svg>
+        </span>
+        <span class="mobile-tab-label">Here</span>
+      </button>
+      <button
+        class="mobile-tab"
+        data-view="garden"
+        role="tab"
+        aria-selected="false"
+      >
+        <span class="mobile-tab-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+            ></path>
+            <circle cx="12" cy="9" r="2.5"></circle>
+          </svg>
+        </span>
+        <span class="mobile-tab-label">Garden</span>
+      </button>
+      <button
+        class="mobile-tab"
+        data-view="day"
+        role="tab"
+        aria-selected="false"
+      >
+        <span class="mobile-tab-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
+          </svg>
+        </span>
+        <span class="mobile-tab-label">Day</span>
+      </button>
+      <button
+        class="mobile-tab"
+        data-view="week"
+        role="tab"
+        aria-selected="false"
+      >
+        <span class="mobile-tab-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 3v18h18"></path>
+            <path d="M18 17V9"></path>
+            <path d="M13 17V5"></path>
+            <path d="M8 17v-7"></path>
+          </svg>
+        </span>
+        <span class="mobile-tab-label">Week</span>
+      </button>
+      <button
+        class="mobile-tab"
+        data-view="month"
+        role="tab"
+        aria-selected="false"
+      >
+        <span class="mobile-tab-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M8 2v4"></path>
+            <path d="M16 2v4"></path>
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <path d="M3 10h18"></path>
+          </svg>
+        </span>
+        <span class="mobile-tab-label">Month</span>
+      </button>
+      <button
+        class="mobile-tab"
+        data-view="year"
+        role="tab"
+        aria-selected="false"
+      >
+        <span class="mobile-tab-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <!-- Grid of 12 squares representing 12 months -->
+            <rect x="2" y="2" width="4" height="4" rx="0.5"></rect>
+            <rect x="8" y="2" width="4" height="4" rx="0.5"></rect>
+            <rect x="14" y="2" width="4" height="4" rx="0.5"></rect>
+            <rect x="20" y="2" width="4" height="4" rx="0.5"></rect>
+            <rect x="2" y="8" width="4" height="4" rx="0.5"></rect>
+            <rect x="8" y="8" width="4" height="4" rx="0.5"></rect>
+            <rect x="14" y="8" width="4" height="4" rx="0.5"></rect>
+            <rect x="20" y="8" width="4" height="4" rx="0.5"></rect>
+            <rect x="2" y="14" width="4" height="4" rx="0.5"></rect>
+            <rect x="8" y="14" width="4" height="4" rx="0.5"></rect>
+            <rect x="14" y="14" width="4" height="4" rx="0.5"></rect>
+            <rect x="20" y="14" width="4" height="4" rx="0.5"></rect>
+          </svg>
+        </span>
+        <span class="mobile-tab-label">Year</span>
+      </button>
     </nav>
 
     <!-- Global Garden Effects Overlay (Particles, Butterflies, Petals) -->
@@ -1062,6 +1707,5 @@
     <!-- Vite dev: loads TypeScript directly with HMR -->
     <!-- Production: bundled by Vite build -->
     <script type="module" src="/src/app.ts"></script>
-</body>
-
+  </body>
 </html>
