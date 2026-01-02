@@ -167,7 +167,7 @@
   min-width: 24px;
   height: 24px;
   padding: 0 6px;
-  background: var(--accent-badge);
+  background: var(--accent-badge-fill);
   color: var(--text-on-accent);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
@@ -413,7 +413,7 @@
   height: 64px;
   border: none;
   border-radius: var(--radius-full);
-  background: var(--accent-button);
+  background: var(--accent-fill);
   color: var(--text-on-accent);
   box-shadow: 0 8px 32px var(--accent-subtle);
   display: inline-flex;
@@ -425,7 +425,6 @@
 }
 
 .fab-add:hover {
-  background: var(--accent-button);
   filter: brightness(1.1);
   transform: translateY(-1px);
 }
@@ -627,20 +626,22 @@
 
 .today-btn {
   padding: 0 var(--space-3);
-  background: var(--accent-badge);
+  background: var(--accent-badge-fill);
   border-color: transparent;
-  color: var(--text-on-accent);
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45), 0 0 3px rgba(0, 0, 0, 0.85);
   font-weight: 600;
 }
 
 .dark-mode .today-btn {
-  background: var(--accent-badge);
+  background: var(--accent-badge-fill);
   border-color: transparent;
-  color: var(--text-on-accent);
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55), 0 0 1px rgba(0, 0, 0, 0.75);
 }
 
 .dark-mode .today-btn:hover {
-  background: var(--accent-badge);
+  background: var(--accent-badge-fill);
   filter: brightness(1.1);
   box-shadow: 0 4px 12px
     color-mix(in srgb, var(--accent-badge) 30%, transparent);
@@ -953,7 +954,7 @@
 }
 
 .toggle-switch.active {
-  background: var(--accent-button);
+  background: var(--accent-stroke);
 }
 
 .toggle-switch.active::after {
