@@ -87,8 +87,18 @@ export class PlannerDayViewRenderer {
       .filter((g) => g.level === "intention");
 
     // Split goals
-    const unscheduled = dayGoals.filter(g => g.status !== 'done' && !g.startTime);
-    const scheduled = dayGoals.filter(g => g.status !== 'done' && g.startTime);
+    const sortDoneLast = (a: Goal, b: Goal) =>
+      Number(a.status === "done") - Number(b.status === "done");
+
+    const unscheduled = dayGoals
+      .filter((g) => !g.startTime)
+      .slice()
+      .sort(sortDoneLast);
+
+    const scheduled = dayGoals
+      .filter((g) => Boolean(g.startTime))
+      .slice()
+      .sort(sortDoneLast);
 
     // Group scheduled by "Ongoing" (started before now) and "Upcoming" (starting later)
     // Actually, following the user image: "Task cloud", "Ongoing tasks", "Upcoming tasks"
