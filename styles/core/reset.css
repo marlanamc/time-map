@@ -31,6 +31,9 @@
 
 html {
     height: 100%;
+    /* iOS Safari/PWA: prevent unexpected font scaling on rotation/zoom */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .sr-only {
@@ -62,5 +65,9 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-}
 
+    /* iOS Safari/PWA: reduce tap highlight flash */
+    -webkit-tap-highlight-color: transparent;
+    /* When supported, avoid scroll chaining/bounce into the browser UI */
+    overscroll-behavior: none;
+}

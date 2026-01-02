@@ -441,9 +441,13 @@
 
     .header {
         padding: calc(var(--space-4) + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) var(--space-4) calc(var(--space-4) + env(safe-area-inset-left, 0px));
+        /* Extend header background into the iOS status bar area (PWA). */
+        margin-top: calc(-1 * env(safe-area-inset-top, 0px));
         min-height: 64px;
         border-radius: 0;
-        margin: 0;
+        margin-right: 0;
+        margin-bottom: 0;
+        margin-left: 0;
         background: var(--glass-bg) !important;
         border-left: 0;
         border-right: 0;
