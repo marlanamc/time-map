@@ -600,6 +600,11 @@ export class GardenEngine {
         const hourBlocks = TimeVisualizations.createHourBlocks();
         hourBlocksContainer.appendChild(hourBlocks);
       }
+
+      // Notify that time range changed (for day view to update)
+      window.dispatchEvent(new CustomEvent('time-range-changed', {
+        detail: { startHour, endHour }
+      }));
     };
 
     startSelect.addEventListener('change', handleChange);

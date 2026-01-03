@@ -10,6 +10,7 @@ import { TimeBreakdown } from "../utils/TimeBreakdown";
 import { cacheElements } from "./elements/UIElements";
 import { Toast } from "./feedback/Toast";
 import { Celebration } from "./feedback/Celebration";
+import { TimeVisualizations } from "../garden/timeVisualizations";
 import {
   MonthRenderer,
   WeekRenderer,
@@ -60,6 +61,7 @@ export const UI = {
   els: {}, // Shortcut reference for elements
   elements: {} as UIElements, // Will be populated by cacheElements
   dayViewController: null as DayViewController | null, // New day view controller
+  _lastTimeRange: null as { start: number; end: number } | null, // Track last time range used
   _dayViewControllerCtor: null as
     | (new (...args: any[]) => DayViewController)
     | null,
@@ -558,6 +560,15 @@ export const UI = {
     // Listen for celebration animations
     eventBus.on("ui:celebrate", (data) => {
       Celebration.show(this.elements, data.icon, data.title, data.message);
+    });
+
+    // Listen for time range changes to update day view
+    window.addEventListener("time-range-changed", () => {
+      if (State.currentView === VIEWS.DAY) {
+        // Reset the last time range so day view will be recreated with new range
+        this._lastTimeRange = null;
+        this.renderDayView();
+      }
     });
 
     console.log("✓ EventBus listeners registered in UIManager");
@@ -1699,8 +1710,29 @@ export const UI = {
     const date = State.viewingDate;
     const allGoals = State.data?.goals || [];
 
+    // Get time range preferences from settings
+    const timeRangePrefs = TimeVisualizations.getTimeRangePreferences();
+    // Convert hours to minutes (e.g., 8 AM = 8 * 60 = 480 minutes)
+    const timeWindowStart = timeRangePrefs.startHour * 60;
+    const timeWindowEnd = timeRangePrefs.endHour * 60;
+
+    // Check if we need to recreate the controller due to time range change
+    const needsRecreate = this.dayViewController && this._lastTimeRange && (
+      this._lastTimeRange.start !== timeWindowStart ||
+      this._lastTimeRange.end !== timeWindowEnd
+    );
+
+    if (needsRecreate) {
+      // Destroy existing controller
+      if (this.dayViewController) {
+        this.dayViewController.destroy?.();
+        this.dayViewController = null;
+      }
+    }
+
     // Initialize DayViewController if not already done
     if (!this.dayViewController) {
+
       this.dayViewController = new this._dayViewControllerCtor(
         container,
         {
@@ -1740,11 +1772,18 @@ export const UI = {
             State.navigate(direction);
           },
         },
-        CONFIG
+        CONFIG,
+        {
+          timeWindowStart,
+          timeWindowEnd,
+        }
       );
 
       // Mount the controller
       this.dayViewController.mount();
+      
+      // Store the time range we used
+      this._lastTimeRange = { start: timeWindowStart, end: timeWindowEnd };
     }
 
     // Gather context goals (Vision/Milestone/Focus)

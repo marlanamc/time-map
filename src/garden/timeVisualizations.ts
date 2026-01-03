@@ -12,14 +12,14 @@ export class TimeVisualizations {
   /**
    * Get time range preferences from localStorage
    */
-  private static getTimeRangePreferences(): TimeRangePreferences {
+  public static getTimeRangePreferences(): TimeRangePreferences {
     try {
-      const saved = localStorage.getItem('time-range-preferences');
+      const saved = localStorage.getItem("time-range-preferences");
       if (saved) {
         return JSON.parse(saved);
       }
     } catch (e) {
-      console.warn('Failed to load time range preferences', e);
+      console.warn("Failed to load time range preferences", e);
     }
     return { startHour: 8, endHour: 22 }; // Default: 8 AM to 10 PM
   }
@@ -27,11 +27,17 @@ export class TimeVisualizations {
   /**
    * Save time range preferences to localStorage
    */
-  public static saveTimeRangePreferences(startHour: number, endHour: number): void {
+  public static saveTimeRangePreferences(
+    startHour: number,
+    endHour: number
+  ): void {
     try {
-      localStorage.setItem('time-range-preferences', JSON.stringify({ startHour, endHour }));
+      localStorage.setItem(
+        "time-range-preferences",
+        JSON.stringify({ startHour, endHour })
+      );
     } catch (e) {
-      console.warn('Failed to save time range preferences', e);
+      console.warn("Failed to save time range preferences", e);
     }
   }
 
@@ -40,10 +46,10 @@ export class TimeVisualizations {
    * Each hour is represented as a plant/flower
    */
   public static createHourBlocks(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'hour-blocks-container';
-    container.setAttribute('role', 'meter');
-    container.setAttribute('aria-label', 'Hours remaining today');
+    const container = document.createElement("div");
+    container.className = "hour-blocks-container";
+    container.setAttribute("role", "meter");
+    container.setAttribute("aria-label", "Hours remaining today");
 
     const now = new Date();
     const currentHour = now.getHours();
@@ -55,34 +61,43 @@ export class TimeVisualizations {
     const displayStart = currentHour < startOfDay ? startOfDay : currentHour;
     const hoursRemaining = Math.max(0, endOfDay - displayStart);
 
-    container.setAttribute('aria-valuenow', hoursRemaining.toString());
-    container.setAttribute('aria-valuemin', '0');
-    container.setAttribute('aria-valuemax', (endOfDay - startOfDay).toString());
+    container.setAttribute("aria-valuenow", hoursRemaining.toString());
+    container.setAttribute("aria-valuemin", "0");
+    container.setAttribute("aria-valuemax", (endOfDay - startOfDay).toString());
 
     for (let hour = startOfDay; hour < endOfDay; hour++) {
-      const block = document.createElement('div');
-      block.className = 'hour-block';
+      const block = document.createElement("div");
+      block.className = "hour-block";
       block.dataset.hour = hour.toString();
 
       // Determine state: past, current, or future
       const formattedTime = this.formatHour(hour);
-      
+
       if (hour < currentHour) {
-        block.classList.add('hour-past');
-        block.innerHTML = '🌸'; // Fully bloomed
+        block.classList.add("hour-past");
+        block.innerHTML = "🌸"; // Fully bloomed
       } else if (hour === currentHour) {
-        block.classList.add('hour-current');
-        block.innerHTML = '🌼'; // Half bloomed
+        block.classList.add("hour-current");
+        block.innerHTML = "🌼"; // Half bloomed
       } else {
-        block.classList.add('hour-future');
-        block.innerHTML = '🌱'; // Bud
+        block.classList.add("hour-future");
+        block.innerHTML = "🌱"; // Bud
       }
-      
+
       // Set title after innerHTML to ensure it persists
       // Always set title, even if formattedTime is empty (fallback will be used)
       const titleText = formattedTime || `${hour}:00`;
       block.title = titleText;
-      block.setAttribute('aria-label', `${titleText} - ${hour < currentHour ? 'completed' : hour === currentHour ? 'current hour' : 'upcoming'}`);
+      block.setAttribute(
+        "aria-label",
+        `${titleText} - ${
+          hour < currentHour
+            ? "completed"
+            : hour === currentHour
+            ? "current hour"
+            : "upcoming"
+        }`
+      );
 
       container.appendChild(block);
     }
@@ -98,38 +113,48 @@ export class TimeVisualizations {
     const currentHour = now.getHours();
     const prefs = this.getTimeRangePreferences();
 
-    const blocks = container.querySelectorAll<HTMLElement>('.hour-block');
-    blocks.forEach(block => {
-      const hour = parseInt(block.dataset.hour || '0', 10);
+    const blocks = container.querySelectorAll<HTMLElement>(".hour-block");
+    blocks.forEach((block) => {
+      const hour = parseInt(block.dataset.hour || "0", 10);
 
       // Remove all state classes
-      block.classList.remove('hour-past', 'hour-current', 'hour-future');
+      block.classList.remove("hour-past", "hour-current", "hour-future");
 
       // Apply new state
       const formattedTime = this.formatHour(hour);
-      
+
       if (hour < currentHour) {
-        block.classList.add('hour-past');
-        block.innerHTML = '🌸';
+        block.classList.add("hour-past");
+        block.innerHTML = "🌸";
       } else if (hour === currentHour) {
-        block.classList.add('hour-current');
-        block.innerHTML = '🌼';
+        block.classList.add("hour-current");
+        block.innerHTML = "🌼";
       } else {
-        block.classList.add('hour-future');
-        block.innerHTML = '🌱';
+        block.classList.add("hour-future");
+        block.innerHTML = "🌱";
       }
-      
+
       // Set title after innerHTML to ensure it persists
       // Always set title, even if formattedTime is empty (fallback will be used)
       const titleText = formattedTime || `${hour}:00`;
       block.title = titleText;
-      block.setAttribute('aria-label', `${titleText} - ${hour < currentHour ? 'completed' : hour === currentHour ? 'current hour' : 'upcoming'}`);
+      block.setAttribute(
+        "aria-label",
+        `${titleText} - ${
+          hour < currentHour
+            ? "completed"
+            : hour === currentHour
+            ? "current hour"
+            : "upcoming"
+        }`
+      );
     });
 
     // Update aria-valuenow
-    const displayStart = currentHour < prefs.startHour ? prefs.startHour : currentHour;
+    const displayStart =
+      currentHour < prefs.startHour ? prefs.startHour : currentHour;
     const hoursRemaining = Math.max(0, prefs.endHour - displayStart);
-    container.setAttribute('aria-valuenow', hoursRemaining.toString());
+    container.setAttribute("aria-valuenow", hoursRemaining.toString());
   }
 
   /**
@@ -139,11 +164,11 @@ export class TimeVisualizations {
     // Ensure hour is a valid number
     const h = Math.floor(Number(hour));
     if (isNaN(h) || h < 0 || h > 23) {
-      console.warn('Invalid hour value:', hour);
-      return '12:00 AM'; // Fallback
+      console.warn("Invalid hour value:", hour);
+      return "12:00 AM"; // Fallback
     }
-    if (h === 0) return '12:00 AM';
-    if (h === 12) return '12:00 PM';
+    if (h === 0) return "12:00 AM";
+    if (h === 12) return "12:00 PM";
     if (h < 12) return `${h}:00 AM`;
     return `${h - 12}:00 PM`;
   }
@@ -152,7 +177,7 @@ export class TimeVisualizations {
    * Create and position the "Now" beam in day view
    */
   public static updateNowBeam(): void {
-    const nowBeam = document.getElementById('nowBeam');
+    const nowBeam = document.getElementById("nowBeam");
     if (!nowBeam) return;
 
     const now = new Date();
@@ -166,11 +191,11 @@ export class TimeVisualizations {
 
     // If outside day view hours, hide beam
     if (hour < dayViewStart || hour >= dayViewEnd) {
-      nowBeam.style.display = 'none';
+      nowBeam.style.display = "none";
       return;
     }
 
-    nowBeam.style.display = 'block';
+    nowBeam.style.display = "block";
 
     // Calculate position
     const totalMinutes = (hour - dayViewStart) * 60 + minute;
@@ -181,17 +206,18 @@ export class TimeVisualizations {
     nowBeam.style.top = `${percentage}%`;
 
     // Update aria label
-    const timeString = this.formatHour(hour) + `:${minute.toString().padStart(2, '0')}`;
-    nowBeam.setAttribute('aria-label', `Current time: ${timeString}`);
+    const timeString =
+      this.formatHour(hour) + `:${minute.toString().padStart(2, "0")}`;
+    nowBeam.setAttribute("aria-label", `Current time: ${timeString}`);
   }
 
   /**
    * Enhance the garden bloom flower with time-based growth
    */
   public static updateGardenBloom(progressPercentage: number): void {
-    const petals = document.querySelectorAll<SVGElement>('.petal');
-    const flowerStem = document.querySelector<SVGElement>('.flower-stem');
-    const flowerCenter = document.querySelector<SVGElement>('.flower-center');
+    const petals = document.querySelectorAll<SVGElement>(".petal");
+    const flowerStem = document.querySelector<SVGElement>(".flower-stem");
+    const flowerCenter = document.querySelector<SVGElement>(".flower-center");
 
     // Scale petals based on progress (0.5 to 1.2)
     const petalScale = 0.5 + (progressPercentage / 100) * 0.7;
@@ -199,14 +225,17 @@ export class TimeVisualizations {
       const delay = index * 50; // Stagger animation
       setTimeout(() => {
         petal.style.transform = `scale(${petalScale})`;
-        petal.style.opacity = (0.6 + (progressPercentage / 100) * 0.4).toString();
+        petal.style.opacity = (
+          0.6 +
+          (progressPercentage / 100) * 0.4
+        ).toString();
       }, delay);
     });
 
     // Grow stem height based on week progress
     if (flowerStem) {
       const stemHeight = 35 + (progressPercentage / 100) * 15; // 35 to 50
-      flowerStem.setAttribute('d', `M50 95 Q50 ${95 - stemHeight} 50 60`);
+      flowerStem.setAttribute("d", `M50 95 Q50 ${95 - stemHeight} 50 60`);
     }
 
     // Brighten center based on month progress
@@ -220,38 +249,38 @@ export class TimeVisualizations {
    * Create transition effect between time blocks
    */
   public static createTimeTransition(fromTime: string, toTime: string): void {
-    const transitionEl = document.createElement('div');
-    transitionEl.className = 'time-transition';
-    transitionEl.setAttribute('aria-live', 'polite');
+    const transitionEl = document.createElement("div");
+    transitionEl.className = "time-transition";
+    transitionEl.setAttribute("aria-live", "polite");
 
     // Choose transition effect based on time
-    if (fromTime === 'morning' && toTime === 'afternoon') {
-      transitionEl.innerHTML = '☀️ Sun rising higher...';
-      transitionEl.classList.add('transition-sun-intensifies');
-    } else if (fromTime === 'afternoon' && toTime === 'evening') {
-      transitionEl.innerHTML = '🌅 Golden hour begins...';
-      transitionEl.classList.add('transition-golden-hour');
-    } else if (fromTime === 'evening' && toTime === 'night') {
-      transitionEl.innerHTML = '🌙 Moon rising...';
-      transitionEl.classList.add('transition-moonrise');
-    } else if (fromTime === 'night' && toTime === 'dawn') {
-      transitionEl.innerHTML = '🌄 Dawn breaking...';
-      transitionEl.classList.add('transition-dawn');
-    } else if (fromTime === 'dawn' && toTime === 'morning') {
-      transitionEl.innerHTML = '🌞 Day awakening...';
-      transitionEl.classList.add('transition-day-awakening');
+    if (fromTime === "morning" && toTime === "afternoon") {
+      transitionEl.innerHTML = "☀️ Sun rising higher...";
+      transitionEl.classList.add("transition-sun-intensifies");
+    } else if (fromTime === "afternoon" && toTime === "evening") {
+      transitionEl.innerHTML = "🌅 Golden hour begins...";
+      transitionEl.classList.add("transition-golden-hour");
+    } else if (fromTime === "evening" && toTime === "night") {
+      transitionEl.innerHTML = "🌙 Moon rising...";
+      transitionEl.classList.add("transition-moonrise");
+    } else if (fromTime === "night" && toTime === "dawn") {
+      transitionEl.innerHTML = "🌄 Dawn breaking...";
+      transitionEl.classList.add("transition-dawn");
+    } else if (fromTime === "dawn" && toTime === "morning") {
+      transitionEl.innerHTML = "🌞 Day awakening...";
+      transitionEl.classList.add("transition-day-awakening");
     }
 
     document.body.appendChild(transitionEl);
 
     // Animate in
     requestAnimationFrame(() => {
-      transitionEl.style.opacity = '1';
+      transitionEl.style.opacity = "1";
     });
 
     // Remove after 3 seconds
     setTimeout(() => {
-      transitionEl.style.opacity = '0';
+      transitionEl.style.opacity = "0";
       setTimeout(() => {
         transitionEl.remove();
       }, 500);
@@ -263,32 +292,33 @@ export class TimeVisualizations {
    */
   public static addTimeAnchor(
     element: HTMLElement,
-    type: 'now' | 'upcoming' | 'past',
+    type: "now" | "upcoming" | "past",
     label: string
   ): void {
     element.classList.add(`time-marker-${type}`);
 
     // Add glow effect for "now"
-    if (type === 'now') {
-      element.style.boxShadow = '0 0 20px rgba(255, 223, 128, 0.6), 0 4px 12px rgba(0, 0, 0, 0.1)';
-      element.style.borderColor = 'rgba(255, 223, 128, 0.8)';
+    if (type === "now") {
+      element.style.boxShadow =
+        "0 0 20px rgba(255, 223, 128, 0.6), 0 4px 12px rgba(0, 0, 0, 0.1)";
+      element.style.borderColor = "rgba(255, 223, 128, 0.8)";
 
       // Add pulsing animation
-      element.style.animation = 'time-marker-pulse 2s ease-in-out infinite';
+      element.style.animation = "time-marker-pulse 2s ease-in-out infinite";
     }
 
     // Add subtle highlight for upcoming
-    if (type === 'upcoming') {
-      element.style.borderLeft = '3px solid var(--seasonal-accent)';
+    if (type === "upcoming") {
+      element.style.borderLeft = "3px solid var(--seasonal-accent)";
     }
 
     // Dim past items
-    if (type === 'past') {
-      element.style.opacity = '0.6';
-      element.style.filter = 'saturate(0.7)';
+    if (type === "past") {
+      element.style.opacity = "0.6";
+      element.style.filter = "saturate(0.7)";
     }
 
     // Add aria label
-    element.setAttribute('aria-label', `${label} (${type})`);
+    element.setAttribute("aria-label", `${label} (${type})`);
   }
 }
