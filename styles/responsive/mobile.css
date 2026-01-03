@@ -1282,103 +1282,43 @@
         display: flex;
         flex-direction: column;
         gap: var(--space-4);
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.25) 0%,
-            rgba(255, 255, 255, 0.15) 50%,
-            rgba(255, 255, 255, 0.20) 100%);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 24px;
-        padding: var(--space-6);
-        box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.12),
-            0 4px 16px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.5);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+        transition: none;
         position: relative;
-        overflow: hidden;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        overflow: visible;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
     }
 
     .garden-group::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg,
-            var(--accent) 0%,
-            var(--accent-hover) 30%,
-            #7EC8A3 60%,
-            var(--accent-hover) 100%);
-        opacity: 0.8;
-        animation: shimmer 3s ease-in-out infinite;
-    }
-
-    @keyframes shimmer {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
+        display: none;
     }
 
     .garden-group::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.5s ease;
-        pointer-events: none;
-    }
-
-    .garden-group:hover::after {
-        opacity: 1;
+        display: none;
     }
 
     .garden-group-empty {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.18) 0%,
-            rgba(255, 255, 255, 0.12) 50%,
-            rgba(255, 255, 255, 0.15) 100%);
-        border-color: rgba(255, 255, 255, 0.25);
-        border-style: dashed;
+        background: transparent;
+        border: none;
     }
 
     .garden-group-empty::after {
-        opacity: 0.18;
-        transform: scale(1);
-        animation: empty-glow 3s ease-in-out infinite;
-        will-change: transform, opacity;
-    }
-
-    @keyframes empty-glow {
-        0%, 100% {
-            opacity: 0.18;
-            transform: scale(1);
-        }
-        50% {
-            opacity: 0.35;
-            transform: scale(1.04);
-        }
+        display: none;
     }
 
     .garden-group-has-items {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.30) 0%,
-            rgba(255, 255, 255, 0.20) 50%,
-            rgba(255, 255, 255, 0.25) 100%);
-        border-style: solid;
+        background: transparent;
+        border: none;
     }
 
     .garden-group-has-items:hover {
-        transform: translateY(-2px);
-        box-shadow: 
-            0 12px 40px rgba(0, 0, 0, 0.15),
-            0 6px 20px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        transform: none;
+        box-shadow: none;
     }
 
     .garden-group-header {
@@ -1392,7 +1332,7 @@
         text-transform: uppercase;
         color: var(--text-primary);
         padding-bottom: var(--space-4);
-        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        border-bottom: none;
         position: relative;
         z-index: 1;
     }
