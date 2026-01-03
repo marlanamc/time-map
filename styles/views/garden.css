@@ -46,7 +46,8 @@
   .garden-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
     grid-template-areas:
       "vision milestone"
       "focus intention";
@@ -277,14 +278,16 @@
     }
 
     .garden-content {
-      gap: var(--space-8);
+      column-gap: var(--space-8);
+      row-gap: var(--space-3);
     }
   }
 
   /* Small laptop: tighter spacing */
   @media (min-width: 901px) and (max-width: 1200px) {
     .garden-content {
-      gap: var(--space-5);
+      column-gap: var(--space-5);
+      row-gap: var(--space-2);
     }
 
     .garden-group {
