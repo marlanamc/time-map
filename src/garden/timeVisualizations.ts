@@ -12,7 +12,7 @@ export class TimeVisualizations {
   /**
    * Get time range preferences from localStorage
    */
-  public static getTimeRangePreferences(): TimeRangePreferences {
+  private static getTimeRangePreferences(): TimeRangePreferences {
     try {
       const saved = localStorage.getItem("time-range-preferences");
       if (saved) {
@@ -71,33 +71,25 @@ export class TimeVisualizations {
       block.dataset.hour = hour.toString();
 
       // Determine state: past, current, or future
-      const formattedTime = this.formatHour(hour);
-
       if (hour < currentHour) {
         block.classList.add("hour-past");
         block.innerHTML = "🌸"; // Fully bloomed
+        block.setAttribute(
+          "aria-label",
+          `${this.formatHour(hour)} - completed`
+        );
       } else if (hour === currentHour) {
         block.classList.add("hour-current");
         block.innerHTML = "🌼"; // Half bloomed
+        block.setAttribute(
+          "aria-label",
+          `${this.formatHour(hour)} - current hour`
+        );
       } else {
         block.classList.add("hour-future");
         block.innerHTML = "🌱"; // Bud
+        block.setAttribute("aria-label", `${this.formatHour(hour)} - upcoming`);
       }
-
-      // Set title after innerHTML to ensure it persists
-      // Always set title, even if formattedTime is empty (fallback will be used)
-      const titleText = formattedTime || `${hour}:00`;
-      block.title = titleText;
-      block.setAttribute(
-        "aria-label",
-        `${titleText} - ${
-          hour < currentHour
-            ? "completed"
-            : hour === currentHour
-            ? "current hour"
-            : "upcoming"
-        }`
-      );
 
       container.appendChild(block);
     }
@@ -115,39 +107,31 @@ export class TimeVisualizations {
 
     const blocks = container.querySelectorAll<HTMLElement>(".hour-block");
     blocks.forEach((block) => {
-      const hour = parseInt(block.dataset.hour || "0", 10);
+      const hour = parseInt(block.dataset.hour || "0");
 
       // Remove all state classes
       block.classList.remove("hour-past", "hour-current", "hour-future");
 
       // Apply new state
-      const formattedTime = this.formatHour(hour);
-
       if (hour < currentHour) {
         block.classList.add("hour-past");
         block.innerHTML = "🌸";
+        block.setAttribute(
+          "aria-label",
+          `${this.formatHour(hour)} - completed`
+        );
       } else if (hour === currentHour) {
         block.classList.add("hour-current");
         block.innerHTML = "🌼";
+        block.setAttribute(
+          "aria-label",
+          `${this.formatHour(hour)} - current hour`
+        );
       } else {
         block.classList.add("hour-future");
         block.innerHTML = "🌱";
+        block.setAttribute("aria-label", `${this.formatHour(hour)} - upcoming`);
       }
-
-      // Set title after innerHTML to ensure it persists
-      // Always set title, even if formattedTime is empty (fallback will be used)
-      const titleText = formattedTime || `${hour}:00`;
-      block.title = titleText;
-      block.setAttribute(
-        "aria-label",
-        `${titleText} - ${
-          hour < currentHour
-            ? "completed"
-            : hour === currentHour
-            ? "current hour"
-            : "upcoming"
-        }`
-      );
     });
 
     // Update aria-valuenow
@@ -158,19 +142,13 @@ export class TimeVisualizations {
   }
 
   /**
-   * Format hour for display (12-hour format with minutes)
+   * Format hour for display (12-hour format)
    */
   private static formatHour(hour: number): string {
-    // Ensure hour is a valid number
-    const h = Math.floor(Number(hour));
-    if (isNaN(h) || h < 0 || h > 23) {
-      console.warn("Invalid hour value:", hour);
-      return "12:00 AM"; // Fallback
-    }
-    if (h === 0) return "12:00 AM";
-    if (h === 12) return "12:00 PM";
-    if (h < 12) return `${h}:00 AM`;
-    return `${h - 12}:00 PM`;
+    if (hour === 0) return "12 AM";
+    if (hour === 12) return "12 PM";
+    if (hour < 12) return `${hour} AM`;
+    return `${hour - 12} PM`;
   }
 
   /**

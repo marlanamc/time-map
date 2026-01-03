@@ -39,7 +39,9 @@
 }
 
 /* Hide zoom controls when modal is open */
-body:has(.modal-overlay.active) .canvas-zoom-controls {
+body:has(.modal-overlay.active) .canvas-zoom-controls,
+body:has(.delete-confirmation-dialog[data-dialog-visible="true"]) .canvas-zoom-controls,
+body:has(.delete-confirmation-dialog.visible) .canvas-zoom-controls {
     display: none !important;
 }
 

@@ -134,18 +134,6 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
       ${renderEmojiPicker()}
     </div>
 
-    <!-- Delete confirmation dialog -->
-    <div class="delete-confirmation-dialog" data-dialog-visible="false" role="alertdialog" aria-labelledby="delete-dialog-title">
-      <div class="dialog-overlay"></div>
-      <div class="dialog-content">
-        <h3 id="delete-dialog-title" class="dialog-title">Delete Intention?</h3>
-        <p class="dialog-message">This action cannot be undone.</p>
-        <div class="dialog-actions">
-          <button type="button" class="btn-dialog-cancel">Cancel</button>
-          <button type="button" class="btn-dialog-confirm">Delete</button>
-        </div>
-      </div>
-    </div>
   `;
 }
 
@@ -256,16 +244,6 @@ function renderSortableIntention(intention: CustomIntention, index: number): str
             <path d="M11.333 2L14 4.667l-9.334 9.333H2v-2.667L11.333 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button
-          type="button"
-          class="btn-delete-intention"
-          data-intention-id="${intention.id}"
-          aria-label="Delete ${escapeHtml(intention.title)}"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 011.334-1.334h2.666a1.333 1.333 0 011.334 1.334V4m2 0v9.333a1.333 1.333 0 01-1.334 1.334H4.667a1.333 1.333 0 01-1.334-1.334V4h9.334z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
       </div>
     </div>
   `;
@@ -309,19 +287,25 @@ export function closeCustomizationPanel(container: HTMLElement, shouldSave: bool
   backdrop.dataset.panelVisible = 'false';
   backdrop.classList.remove('visible');
 
-  // Clear form
-  const form = backdrop.querySelector('.intention-form') as HTMLElement;
-  if (form) {
-    const titleInput = form.querySelector('#intention-title') as HTMLInputElement;
-    const emojiInput = form.querySelector('#intention-emoji') as HTMLInputElement;
-    const categorySelect = form.querySelector('#intention-category') as HTMLSelectElement;
-    const durationInput = form.querySelector('#intention-duration') as HTMLInputElement;
+    // Clear form
+    const form = backdrop.querySelector('.intention-form') as HTMLElement;
+    if (form) {
+      const titleInput = form.querySelector('#intention-title') as HTMLInputElement;
+      const emojiInput = form.querySelector('#intention-emoji') as HTMLInputElement;
+      const categorySelect = form.querySelector('#intention-category') as HTMLSelectElement;
+      const durationInput = form.querySelector('#intention-duration') as HTMLInputElement;
 
-    if (titleInput) titleInput.value = '';
-    if (emojiInput) emojiInput.value = '';
-    if (categorySelect) categorySelect.selectedIndex = 0;
-    if (durationInput) durationInput.value = '';
-  }
+      if (titleInput) titleInput.value = '';
+      if (emojiInput) emojiInput.value = '';
+      if (categorySelect) categorySelect.selectedIndex = 0;
+      if (durationInput) durationInput.value = '';
+
+      // Reset button text
+      const addBtn = form.querySelector('.btn-add-intention-submit') as HTMLElement;
+      if (addBtn) {
+        addBtn.innerHTML = '<span aria-hidden="true">+</span> Add Intention';
+      }
+    }
 }
 
 /**
@@ -374,7 +358,7 @@ export function setupCustomizationPanel(
   onIntentionsChanged?: () => void
 ): void {
   let draggedElement: HTMLElement | null = null;
-  let deleteTargetId: string | null = null;
+  let editingIntentionId: string | null = null;
 
   // Open panel button (handled in IntentionsGrid setup)
   // Close panel
@@ -431,71 +415,69 @@ export function setupCustomizationPanel(
       return;
     }
 
-    // Create new intention
-    const newIntention: CustomIntention = {
-      id: generateId(),
-      title: titleInput.value.trim(),
-      category: categorySelect.value as Category,
-      duration: parseInt(durationInput.value),
-      emoji: emojiInput.value.trim() || undefined,
-      order: IntentionsManager.getSorted().length,
-      createdAt: new Date().toISOString()
-    };
+    // Check if we're editing an existing intention
+    if (editingIntentionId) {
+      // Update existing intention
+      const updates: Partial<CustomIntention> = {
+        title: titleInput.value.trim(),
+        category: categorySelect.value as Category,
+        duration: parseInt(durationInput.value),
+        emoji: emojiInput.value.trim() || undefined,
+      };
 
-    // Add to manager
-    if (IntentionsManager.add(newIntention)) {
-      UI.showToast('✅ Intention added!', 'success');
+      if (IntentionsManager.update(editingIntentionId, updates)) {
+        UI.showToast('✅ Intention updated!', 'success');
 
-      // Clear form
-      titleInput.value = '';
-      emojiInput.value = '';
-      categorySelect.selectedIndex = 0;
-      durationInput.value = '';
+        // Clear form
+        titleInput.value = '';
+        emojiInput.value = '';
+        categorySelect.selectedIndex = 0;
+        durationInput.value = '';
+        editingIntentionId = null;
 
-      // Refresh list
-      refreshIntentionsList(container);
+        // Reset button text
+        const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
+        if (addBtn) {
+          addBtn.innerHTML = '<span aria-hidden="true">+</span> Add Intention';
+        }
 
-      if (onIntentionsChanged) onIntentionsChanged();
-    } else {
-      UI.showToast('❌ Failed to add intention', 'error');
-    }
-  });
-
-  // Delete intention
-  container.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const deleteBtn = target.closest('.btn-delete-intention') as HTMLElement;
-    if (!deleteBtn) return;
-
-    const intentionId = deleteBtn.dataset.intentionId;
-    if (!intentionId) return;
-
-    // Show confirmation dialog
-    deleteTargetId = intentionId;
-    showDeleteConfirmation(container, true);
-  });
-
-  // Delete confirmation dialog
-  container.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-
-    const confirmBtn = target.closest('.btn-dialog-confirm') as HTMLElement;
-    if (confirmBtn && deleteTargetId) {
-      if (IntentionsManager.delete(deleteTargetId)) {
-        UI.showToast('🗑️ Intention deleted', 'success');
+        // Refresh list
         refreshIntentionsList(container);
-        if (onIntentionsChanged) onIntentionsChanged();
-      }
-      deleteTargetId = null;
-      showDeleteConfirmation(container, false);
-      return;
-    }
 
-    const cancelBtn = target.closest('.btn-dialog-cancel') as HTMLElement;
-    if (cancelBtn) {
-      deleteTargetId = null;
-      showDeleteConfirmation(container, false);
-      return;
+        if (onIntentionsChanged) onIntentionsChanged();
+      } else {
+        UI.showToast('❌ Failed to update intention', 'error');
+      }
+    } else {
+      // Create new intention
+      const newIntention: CustomIntention = {
+        id: generateId(),
+        title: titleInput.value.trim(),
+        category: categorySelect.value as Category,
+        duration: parseInt(durationInput.value),
+        emoji: emojiInput.value.trim() || undefined,
+        order: IntentionsManager.getSorted().length,
+        createdAt: new Date().toISOString()
+      };
+
+      // Add to manager
+      if (IntentionsManager.add(newIntention)) {
+        UI.showToast('✅ Intention added!', 'success');
+
+        // Clear form
+        titleInput.value = '';
+        emojiInput.value = '';
+        categorySelect.selectedIndex = 0;
+        durationInput.value = '';
+        editingIntentionId = null;
+
+        // Refresh list
+        refreshIntentionsList(container);
+
+        if (onIntentionsChanged) onIntentionsChanged();
+      } else {
+        UI.showToast('❌ Failed to add intention', 'error');
+      }
     }
   });
 
@@ -525,9 +507,17 @@ export function setupCustomizationPanel(
     if (categorySelect) categorySelect.value = intention.category;
     if (durationInput) durationInput.value = intention.duration.toString();
 
-    // Delete the old one first
-    IntentionsManager.delete(intentionId);
-    refreshIntentionsList(container);
+    // Track that we're editing this intention
+    editingIntentionId = intentionId;
+
+    // Update button text to indicate editing
+    const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
+    if (addBtn) {
+      const plusSpan = addBtn.querySelector('span[aria-hidden="true"]');
+      if (plusSpan) {
+        addBtn.innerHTML = '<span aria-hidden="true">✏️</span> Update Intention';
+      }
+    }
 
     // Focus title input
     titleInput?.focus();
@@ -637,29 +627,6 @@ export function setupCustomizationPanel(
 
     draggedElement = null;
   });
-}
-
-/**
- * Show or hide delete confirmation dialog
- * @param container - Container element
- * @param visible - Whether to show or hide
- */
-function showDeleteConfirmation(container: HTMLElement, visible: boolean): void {
-  const dialog = container.querySelector('.delete-confirmation-dialog') as HTMLElement;
-  if (!dialog) return;
-
-  dialog.dataset.dialogVisible = visible.toString();
-  if (visible) {
-    dialog.classList.add('visible');
-
-    // Focus confirm button
-    const confirmBtn = dialog.querySelector('.btn-dialog-confirm') as HTMLButtonElement;
-    if (confirmBtn) {
-      setTimeout(() => confirmBtn.focus(), 100);
-    }
-  } else {
-    dialog.classList.remove('visible');
-  }
 }
 
 /**
