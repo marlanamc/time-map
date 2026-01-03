@@ -84,6 +84,11 @@ export class PlannerDayViewRenderer {
       .slice()
       .sort(sortDoneLast);
 
+    const unscheduled = dayGoals
+      .filter((g) => !g.startTime)
+      .slice()
+      .sort(sortDoneLast);
+
     const todayIntentions = dayGoals.slice().sort((a, b) => {
       const aDone = Number(a.status === "done");
       const bDone = Number(b.status === "done");
@@ -166,6 +171,16 @@ export class PlannerDayViewRenderer {
         </aside>
 
         <main class="planner-main">
+          ${unscheduled.length > 0 ? `
+            <div class="planner-unscheduled-section">
+              <div class="planner-unscheduled-header">
+                <h4 class="planner-unscheduled-title">Unscheduled</h4>
+              </div>
+              <div class="planner-unscheduled-list">
+                ${unscheduled.map(g => this.renderUnscheduledTask(g)).join('')}
+              </div>
+            </div>
+          ` : ''}
           <div class="planner-timeline-container day-timeline">
             ${this.timelineGrid.render()}
             <div class="planner-timeline-content">
@@ -222,6 +237,31 @@ export class PlannerDayViewRenderer {
         <span class="sidebar-item-emoji">${emoji}</span>
         <span class="sidebar-item-title">${goal.title}</span>
         ${timeStr}
+      </div>
+    `;
+  }
+
+  /**
+   * Render an unscheduled task (no time assigned)
+   * @param goal - The goal to render
+   * @returns HTML string for the unscheduled task card
+   * @private
+   */
+  private renderUnscheduledTask(goal: Goal): string {
+    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : '📍';
+    const colorClass = goal.category ? `cat-${goal.category}` : 'cat-default';
+
+    return `
+      <div class="planner-unscheduled-item ${colorClass}" data-goal-id="${goal.id}">
+        <div class="day-goal-checkbox ${goal.status === 'done' ? 'checked' : ''}"></div>
+        <div class="unscheduled-task-content">
+          <span class="unscheduled-task-emoji">${emoji}</span>
+          <span class="unscheduled-task-title">${goal.title}</span>
+        </div>
+        <div class="unscheduled-task-actions">
+          <button class="btn-icon btn-schedule-task" type="button" data-goal-id="${goal.id}" aria-label="Schedule" title="Schedule">${this.icon("plus")}</button>
+          <button class="btn-zen-focus btn-icon" type="button" data-goal-id="${goal.id}" aria-label="Focus" title="Focus">${this.icon("eye")}</button>
+        </div>
       </div>
     `;
   }

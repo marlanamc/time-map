@@ -231,12 +231,15 @@
     overflow-y: auto;
     position: relative;
     border-radius: 0 48px 48px 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .planner-timeline-container {
     position: relative;
     min-height: 900px;
     /* 14 hours * ~64px */
+    order: 1; /* Default: appears before unscheduled on desktop */
 }
 
 .planner-timeline-container.is-drop-target {
@@ -552,6 +555,122 @@
     gap: 0.5rem;
 }
 
+/* Unscheduled section */
+.planner-unscheduled-section {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--planner-border);
+    order: 2; /* Default: appears after timeline on desktop */
+}
+
+.planner-unscheduled-header {
+    margin-bottom: var(--space-4);
+}
+
+.planner-unscheduled-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--planner-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.planner-unscheduled-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.planner-unscheduled-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border-radius: 20px;
+    border: 1px solid var(--planner-border);
+    box-shadow: var(--shadow-xs);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.planner-unscheduled-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--accent);
+    background: var(--bg-hover);
+}
+
+.planner-unscheduled-item .day-goal-checkbox {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-width: 2px;
+}
+
+.planner-unscheduled-item .day-goal-checkbox.checked::after {
+    font-size: 13px;
+}
+
+.unscheduled-task-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.unscheduled-task-emoji {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.unscheduled-task-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unscheduled-task-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.btn-schedule-task {
+    background: var(--accent-muted);
+    color: var(--accent);
+}
+
+.btn-schedule-task:hover {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+}
+
+.planner-unscheduled-item.cat-career {
+    border-left: 4px solid var(--cat-career);
+}
+
+.planner-unscheduled-item.cat-health {
+    border-left: 4px solid var(--cat-health);
+}
+
+.planner-unscheduled-item.cat-finance {
+    border-left: 4px solid var(--cat-finance);
+}
+
+.planner-unscheduled-item.cat-personal {
+    border-left: 4px solid var(--cat-personal);
+}
+
+.planner-unscheduled-item.cat-creative {
+    border-left: 4px solid var(--cat-creative);
+}
+
 @media (max-width: 900px) {
     .planner-day-view {
         grid-template-columns: 1fr;
@@ -561,5 +680,19 @@
         border-right: none;
         border-bottom: 1px solid var(--planner-border);
         max-height: 400px;
+    }
+
+    .planner-unscheduled-section {
+        margin-top: 0;
+        margin-bottom: var(--space-6);
+        padding-top: 0;
+        padding-bottom: var(--space-4);
+        border-top: none;
+        border-bottom: 1px solid var(--planner-border);
+        order: 1; /* Appears before timeline on mobile */
+    }
+
+    .planner-timeline-container {
+        order: 2; /* Appears after unscheduled on mobile */
     }
 }

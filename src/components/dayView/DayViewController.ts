@@ -468,6 +468,22 @@ export class DayViewController {
       return;
     }
 
+    // Schedule unscheduled task
+    const scheduleBtn = target.closest(".btn-schedule-task") as HTMLElement;
+    if (scheduleBtn) {
+      e.stopPropagation();
+      const goalId = scheduleBtn.dataset.goalId;
+      if (goalId) {
+        const goal = this.currentGoals.find((g) => g.id === goalId);
+        if (goal && !goal.startTime) {
+          haptics.impact("light");
+          // Open goal detail to allow scheduling
+          this.callbacks.onGoalClick(goalId);
+        }
+      }
+      return;
+    }
+
     // Note: Removed "Plant something" button - users can add tasks via the main add button
   }
 

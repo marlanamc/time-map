@@ -311,8 +311,9 @@
   position: relative;
   overflow: hidden;
   display: inline-flex;
-  align-items: baseline;
-  gap: 14px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   max-width: min(520px, 100%);
   padding: 10px 16px;
   border: 2px solid transparent;
@@ -392,9 +393,12 @@
   letter-spacing: 0.02em;
   color: color-mix(in srgb, var(--year-vision-ink) 96%, transparent);
   text-shadow: var(--year-vision-title-shadow);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-wrap: break-word;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .year-vision-pill--empty .year-vision-pill-title {
@@ -671,5 +675,19 @@
 
   .year-vision-title {
     max-width: min(420px, 82vw);
+  }
+
+  /* Allow pill title to wrap on mobile */
+  .year-vision-pill {
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+
+  .year-vision-pill-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-wrap: break-word;
+    hyphens: auto;
   }
 }
