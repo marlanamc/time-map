@@ -1,0 +1,179 @@
+/**
+ * Intentions Grid - Customizable Pills with Shimmer & Drag
+ * @remarks Pill-shaped intention buttons with iridescent hover effects
+ */
+
+/* ===================================
+   Intentions Grid Container
+   =================================== */
+
+.intentions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+
+.intentions-grid-empty {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  color: var(--text-tertiary);
+}
+
+.intentions-grid-empty p {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-sm);
+}
+
+.btn-add-intention {
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-add-intention:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===================================
+   Intention Pills
+   =================================== */
+
+.intention-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--intention-pill-padding);
+  background: var(--intention-pill-bg);
+  backdrop-filter: blur(var(--liquid-glass-blur));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+  border: var(--intention-pill-border);
+  border-radius: var(--intention-pill-radius);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: grab;
+  transition: all var(--duration-fast) var(--ease-out);
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+
+.intention-pill:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  cursor: grab;
+}
+
+.intention-pill:active {
+  cursor: grabbing;
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.intention-pill.is-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+/* ===================================
+   Pill Content
+   =================================== */
+
+.intention-emoji {
+  font-size: var(--text-base);
+  line-height: 1;
+}
+
+.intention-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.intention-drag-handle {
+  opacity: 0;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  transition: opacity var(--duration-fast);
+}
+
+.intention-pill:hover .intention-drag-handle {
+  opacity: 1;
+}
+
+/* ===================================
+   Shimmer Effect on Hover
+   =================================== */
+
+.intention-pill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--shimmer-gradient);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  transform: translateX(-100%) rotate(45deg);
+  transition: opacity var(--duration-fast);
+}
+
+.intention-pill:hover::before {
+  animation: shimmer var(--liquid-shimmer-duration) ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intention-pill:hover::before {
+    animation: none;
+    opacity: 0.1;
+  }
+}
+
+/* ===================================
+   Responsive Grid
+   =================================== */
+
+@media (max-width: 600px) {
+  .intentions-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .intention-pill {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .intention-drag-handle {
+    /* Always show on mobile for clarity */
+    opacity: 0.5;
+  }
+}
+
+/* ===================================
+   Dark Mode
+   =================================== */
+
+:root.dark-mode .intention-pill {
+  background: var(--liquid-glass-bg);
+  border-color: var(--liquid-glass-border);
+}
+
+:root.dark-mode .intention-pill:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+}

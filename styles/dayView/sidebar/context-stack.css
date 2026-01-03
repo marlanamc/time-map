@@ -1,0 +1,374 @@
+/**
+ * Context Stack - Stacked Cards with Rotation & Depth
+ * @remarks Vision/Milestone/Focus cards with glass morphism and shimmer
+ */
+
+/* ===================================
+   Context Stack Container
+   =================================== */
+
+.context-stack {
+  position: relative;
+  min-height: 200px;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--liquid-item-gap);
+}
+
+.context-stack-empty {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--text-tertiary);
+}
+
+.context-stack-empty p {
+  margin: 0;
+  font-size: var(--text-base);
+}
+
+.context-stack-hint {
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
+  opacity: 0.7;
+}
+
+/* ===================================
+   Stacked Cards with Rotation
+   =================================== */
+
+.context-stack-card {
+  position: relative;
+  background: var(--liquid-glass-bg);
+  backdrop-filter: blur(var(--liquid-glass-blur));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+  border: 1px solid var(--liquid-glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+
+  /* Apply rotation and offset from CSS variables set in TS */
+  transform: rotate(var(--card-rotation, 0deg))
+             translateY(var(--card-offset-y, 0px))
+             translateX(var(--card-offset-x, 0px));
+
+  transition: transform var(--liquid-transition-smooth),
+              box-shadow var(--liquid-transition-smooth),
+              background var(--liquid-transition-smooth);
+
+  cursor: pointer;
+  overflow: hidden;
+
+  /* Ensure proper stacking with z-index set in TS */
+  will-change: transform, box-shadow;
+}
+
+/* Glass shine effect */
+.context-stack-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--liquid-glass-shine);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Hover state - lift and brighten */
+.context-stack-card.hover,
+.context-stack-card:hover {
+  transform: rotate(var(--card-rotation, 0deg))
+             translateY(calc(var(--card-offset-y, 0px) - 4px))
+             translateX(var(--card-offset-x, 0px));
+  box-shadow: var(--shadow-lg);
+  background: var(--surface-2);
+}
+
+/* Expanded state - straighten and enlarge */
+.context-stack-card.expanded {
+  transform: rotate(0deg) translateY(0) translateX(0) scale(1.02);
+  box-shadow: var(--shadow-xl);
+  z-index: 100 !important;
+  background: var(--surface-2);
+}
+
+/* ===================================
+   Card Header
+   =================================== */
+
+.context-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--divider);
+}
+
+.context-card-emoji {
+  font-size: var(--text-xl);
+  line-height: 1;
+}
+
+.context-card-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.context-card-count {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: var(--bg-active);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===================================
+   Card Goals
+   =================================== */
+
+.context-card-goals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.context-goal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  width: 100%;
+  text-align: left;
+}
+
+.context-goal-item.primary {
+  font-weight: 500;
+  background: var(--bg-elevated);
+  border-color: var(--card-color, var(--accent));
+  border-width: 1.5px;
+}
+
+.context-goal-item.secondary {
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.context-goal-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--card-color, var(--accent));
+  transform: translateX(2px);
+}
+
+.context-goal-item:active {
+  transform: translateX(1px);
+  background: var(--bg-active);
+}
+
+.context-goal-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context-goal-progress {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--card-color, var(--accent));
+  background: var(--accent-muted);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===================================
+   "More" Button
+   =================================== */
+
+.context-goal-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface);
+  border: 1px dashed var(--divider);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  width: 100%;
+}
+
+.context-goal-more:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  border-style: solid;
+  color: var(--accent);
+}
+
+.context-goal-more:active {
+  background: var(--bg-active);
+  transform: scale(0.98);
+}
+
+/* ===================================
+   Shimmer Overlay
+   =================================== */
+
+.context-card-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--shimmer-gradient);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.context-stack-card:hover .context-card-shimmer {
+  animation: shimmer var(--liquid-shimmer-duration) ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .context-stack-card:hover .context-card-shimmer {
+    animation: none;
+    opacity: 0.1;
+  }
+}
+
+/* ===================================
+   Level-Specific Colors
+   =================================== */
+
+.context-stack-card[data-level="vision"] {
+  --card-color: var(--context-vision-color);
+}
+
+.context-stack-card[data-level="milestone"] {
+  --card-color: var(--context-milestone-color);
+}
+
+.context-stack-card[data-level="focus"] {
+  --card-color: var(--context-focus-color);
+}
+
+/* Color accent on hover */
+.context-stack-card[data-level="vision"]:hover {
+  border-color: var(--context-vision-color);
+}
+
+.context-stack-card[data-level="milestone"]:hover {
+  border-color: var(--context-milestone-color);
+}
+
+.context-stack-card[data-level="focus"]:hover {
+  border-color: var(--context-focus-color);
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+
+@media (max-width: 600px) {
+  .context-stack {
+    min-height: 160px;
+    padding: var(--space-3);
+  }
+
+  .context-stack-card {
+    /* Reduce rotation on mobile for better readability */
+    transform: rotate(calc(var(--card-rotation, 0deg) * 0.5))
+               translateY(var(--card-offset-y, 0px))
+               translateX(var(--card-offset-x, 0px));
+  }
+
+  .context-stack-card.hover,
+  .context-stack-card:hover {
+    transform: rotate(calc(var(--card-rotation, 0deg) * 0.5))
+               translateY(calc(var(--card-offset-y, 0px) - 2px))
+               translateX(var(--card-offset-x, 0px));
+  }
+
+  .context-card-emoji {
+    font-size: var(--text-lg);
+  }
+
+  .context-card-label {
+    font-size: var(--text-xs);
+  }
+}
+
+/* ===================================
+   Dark Mode Adjustments
+   =================================== */
+
+:root.dark-mode .context-stack-card {
+  background: var(--liquid-glass-bg);
+  border-color: var(--liquid-glass-border);
+}
+
+:root.dark-mode .context-stack-card:hover {
+  background: var(--bg-elevated);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6),
+              0 0 0 1px var(--card-color, var(--accent));
+}
+
+:root.dark-mode .context-goal-item {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root.dark-mode .context-goal-item:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: var(--card-color, var(--accent));
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+.context-stack-card:focus-within {
+  outline: 2px solid var(--card-color, var(--accent));
+  outline-offset: 2px;
+}
+
+.context-goal-item:focus {
+  outline: 2px solid var(--card-color, var(--accent));
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .context-stack-card {
+    transform: none !important;
+    transition: none;
+  }
+
+  .context-stack-card:hover {
+    transform: none !important;
+  }
+
+  .context-goal-item:hover {
+    transform: none !important;
+  }
+}

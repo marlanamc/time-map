@@ -3,6 +3,8 @@ import { CardComponent } from "./CardComponent";
 import { TimeSlotCalculator } from "./TimeSlotCalculator";
 import { TimelineGrid } from "./TimelineGrid";
 import { CONFIG } from "../../config/constants";
+import { renderIntentionsGrid } from "./sidebar/IntentionsGrid";
+import { renderCustomizationPanel } from "./sidebar/CustomizationPanel";
 
 /**
  * Renderer for the Planner-style day view
@@ -13,18 +15,6 @@ export class PlannerDayViewRenderer {
   private container: HTMLElement;
   private calculator: TimeSlotCalculator;
   private timelineGrid: TimelineGrid;
-
-  private getCommonIntentions() {
-    return [
-      { title: "Deep work", category: "career", duration: 90 },
-      { title: "Email + admin", category: "career", duration: 45 },
-      { title: "Workout", category: "health", duration: 60 },
-      { title: "Meal prep", category: "health", duration: 60 },
-      { title: "Budget check-in", category: "finance", duration: 30 },
-      { title: "Creative session", category: "creative", duration: 60 },
-      { title: "Journal + reflect", category: "personal", duration: 20 },
-    ] as const;
-  }
 
   /**
    * Generate SVG icon markup
@@ -78,8 +68,7 @@ export class PlannerDayViewRenderer {
    * @param date - The date to display
    * @param allGoals - All goals in the system (will be filtered for this date)
    * @param contextGoals - Optional Vision/Milestone/Focus goals to display in sidebar
-   * @remarks Creates a complete planner layout with sidebar sections for
-   * unscheduled tasks, ongoing tasks, and upcoming tasks, plus a timeline.
+   * @remarks Creates a complete planner layout with sidebar sections and a timeline.
    */
   renderInitial(date: Date, allGoals: Goal[], contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
     const dayGoals = allGoals
@@ -90,31 +79,25 @@ export class PlannerDayViewRenderer {
     const sortDoneLast = (a: Goal, b: Goal) =>
       Number(a.status === "done") - Number(b.status === "done");
 
-    const unscheduled = dayGoals
-      .filter((g) => !g.startTime)
-      .slice()
-      .sort(sortDoneLast);
-
     const scheduled = dayGoals
       .filter((g) => Boolean(g.startTime))
       .slice()
       .sort(sortDoneLast);
 
-    // Group scheduled by "Ongoing" (started before now) and "Upcoming" (starting later)
-    // Actually, following the user image: "Task cloud", "Ongoing tasks", "Upcoming tasks"
-    // Unscheduled = Task cloud
-    // Scheduled = Ongoing + Upcoming
-    const nowMinutes = this.calculator.getCurrentTimeMinutes();
+    const todayIntentions = dayGoals.slice().sort((a, b) => {
+      const aDone = Number(a.status === "done");
+      const bDone = Number(b.status === "done");
+      if (aDone !== bDone) return aDone - bDone;
 
-    const ongoing = scheduled.filter(g => {
-      const startMin = this.calculator.parseTimeToMinutes(g.startTime) || 0;
-      const endMin = (this.calculator.parseTimeToMinutes(g.endTime) || startMin + 60);
-      return nowMinutes >= startMin && nowMinutes < endMin;
-    });
+      const aHasTime = Number(Boolean(a.startTime));
+      const bHasTime = Number(Boolean(b.startTime));
+      if (aHasTime !== bHasTime) return bHasTime - aHasTime;
 
-    const upcoming = scheduled.filter(g => {
-      const startMin = this.calculator.parseTimeToMinutes(g.startTime) || 0;
-      return startMin > nowMinutes;
+      const aStart = a.startTime ? this.calculator.parseTimeToMinutes(a.startTime) ?? 9999 : 9999;
+      const bStart = b.startTime ? this.calculator.parseTimeToMinutes(b.startTime) ?? 9999 : 9999;
+      if (aStart !== bStart) return aStart - bStart;
+
+      return a.title.localeCompare(b.title);
     });
 
     // Format date as "Monday, December 29th"
@@ -125,74 +108,60 @@ export class PlannerDayViewRenderer {
       day % 10 === 2 && day !== 12 ? "nd" :
         day % 10 === 3 && day !== 13 ? "rd" : "th";
     const dayName = `${weekday}, ${month} ${day}${ordinal}`;
-    const common = this.getCommonIntentions();
 
     const html = `
       <div class="day-view planner-day-view">
         <aside class="planner-sidebar">
           <div class="planner-sidebar-header">
             <h3>${dayName}</h3>
-          </div>
-          <div class="planner-sidebar-actions">
-            <div class="planner-date-nav" role="group" aria-label="Day navigation">
-              <button class="btn-icon btn-planner-prev" type="button" aria-label="Previous day" title="Previous day">‹</button>
-              <button class="btn-icon btn-planner-next" type="button" aria-label="Next day" title="Next day">›</button>
+            <div class="planner-sidebar-actions">
+              <div class="planner-date-nav" role="group" aria-label="Day navigation">
+                <button class="btn-icon btn-planner-prev" type="button" aria-label="Previous day" title="Previous day">‹</button>
+                <button class="btn-icon btn-planner-next" type="button" aria-label="Next day" title="Next day">›</button>
+              </div>
+              <button class="btn-icon btn-planner-add" type="button" aria-label="Add task" title="Add task">
+                ${this.icon("plus")}
+              </button>
             </div>
-            <button class="btn-icon btn-planner-add" type="button" aria-label="Add task" title="Add task">
-              ${this.icon("plus")}
-            </button>
           </div>
 
           ${contextGoals ? this.renderContextSection(contextGoals) : ''}
 
           <div class="planner-sidebar-section">
-            <div class="section-title">Common intentions</div>
-            <div class="common-intentions" aria-label="Common intentions">
-              ${common
-                .map((t) => {
-                  const emoji = this.getCategoryEmoji(t.category);
-                  return `
-                    <div
-                      class="common-intention-item"
-                      draggable="true"
-                      data-title="${this.escapeHtml(t.title)}"
-                      data-category="${this.escapeHtml(t.category)}"
-                      data-duration="${t.duration}"
-                    >
-                      <span class="common-intention-emoji">${emoji}</span>
-                      <span class="common-intention-title">${this.escapeHtml(
-                        t.title
-                      )}</span>
-                      <span class="common-intention-drag" aria-hidden="true">⠿</span>
-                    </div>
-                  `;
-                })
-                .join("")}
-            </div>
-          </div>
-
-          <div class="planner-sidebar-section">
-            <div class="section-title">Task cloud</div>
-            <div class="task-cloud-grid">
-              ${unscheduled.map(g => this.renderSidebarItem(g)).join('')}
-              ${unscheduled.length === 0 ? '<div class="empty-cloud">No tasks in cloud</div>' : ''}
-            </div>
-          </div>
-
-          <div class="planner-sidebar-section">
-            <div class="section-title">Ongoing tasks</div>
+            <div class="section-title">Today’s intentions</div>
             <div class="sidebar-list">
-              ${ongoing.map(g => this.renderSidebarItem(g, true)).join('')}
-              ${ongoing.length === 0 ? '<div class="empty-list">No ongoing tasks</div>' : ''}
+              ${todayIntentions.map(g => this.renderSidebarItem(g, Boolean(g.startTime))).join('')}
+              ${todayIntentions.length === 0 ? '<div class="empty-list">No intentions yet</div>' : ''}
             </div>
           </div>
 
           <div class="planner-sidebar-section">
-            <div class="section-title">Upcoming tasks</div>
-            <div class="sidebar-list">
-              ${upcoming.map(g => this.renderSidebarItem(g, true)).join('')}
-              ${upcoming.length === 0 ? '<div class="empty-list">No upcoming tasks</div>' : ''}
+            <div class="sidebar-section-header">
+              <div class="sidebar-section-left">
+                <span class="sidebar-section-title">Common intentions</span>
+              </div>
+              <div class="sidebar-section-actions">
+                <button
+                  type="button"
+                  class="sidebar-section-action-btn"
+                  data-action="customize"
+                  aria-label="Add new intention"
+                  title="Add new intention"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  class="sidebar-section-action-btn"
+                  data-action="customize"
+                  aria-label="Edit common intentions"
+                  title="Edit common intentions"
+                >
+                  ✏️
+                </button>
+              </div>
             </div>
+            ${renderIntentionsGrid()}
           </div>
         </aside>
 
@@ -205,6 +174,7 @@ export class PlannerDayViewRenderer {
           </div>
         </main>
       </div>
+      ${renderCustomizationPanel()}
     `;
 
     this.container.innerHTML = html;
@@ -241,7 +211,10 @@ export class PlannerDayViewRenderer {
    */
   private renderSidebarItem(goal: Goal, showTime: boolean = false): string {
     const emoji = goal.category ? this.getCategoryEmoji(goal.category) : '📍';
-    const timeStr = showTime ? `<span class="sidebar-item-time">${goal.startTime} - ${goal.endTime || ''}</span>` : '';
+    const timeStr =
+      showTime && goal.startTime
+        ? `<span class="sidebar-item-time">${goal.startTime}${goal.endTime ? ` - ${goal.endTime}` : ''}</span>`
+        : '';
 
     return `
       <div class="day-goal-card sidebar-item ${goal.status === 'done' ? 'completed' : ''}" data-goal-id="${goal.id}">
@@ -306,39 +279,44 @@ export class PlannerDayViewRenderer {
    * @private
    */
   private renderContextSection(contextGoals: { vision: Goal[], milestone: Goal[], focus: Goal[] }): string {
-    const renderContextLevel = (level: 'vision' | 'milestone' | 'focus', emoji: string, label: string, goals: Goal[]) => {
+    const renderCosmicMini = (level: 'vision' | 'milestone' | 'focus', levelLabel: string, goals: Goal[]) => {
       if (goals.length === 0) return '';
-
-      const shown = goals.slice(0, 2);
-      const remaining = Math.max(0, goals.length - shown.length);
+      const primary = goals[0];
+      const remaining = Math.max(0, goals.length - 1);
 
       return `
         <div class="context-level">
-          <div class="context-level-header">
-            <span class="context-emoji">${emoji}</span>
-            <span class="context-label">${label}</span>
-          </div>
-          <div class="context-goals">
-            ${shown.map(g => `
-              <button type="button" class="context-goal" data-goal-id="${g.id}" data-level="${level}">
-                ${this.escapeHtml(g.title)}
-              </button>
-            `).join('')}
+          <div class="context-goals context-goals--mini">
+            <button
+              type="button"
+              class="cosmic-card cosmic-card--${level} cosmic-card--mini"
+              data-goal-id="${primary.id}"
+              data-level="${level}"
+              title="${this.escapeHtml(primary.title)}"
+            >
+              <div class="cosmic-card-header cosmic-card-header--mini">
+                <div class="cosmic-card-label cosmic-card-label--mini">
+                  <span class="cosmic-card-label-text">${levelLabel.toUpperCase()}</span>
+                </div>
+              </div>
+              <div class="cosmic-card-content cosmic-card-content--mini">
+                <div class="cosmic-card-title">${this.escapeHtml(primary.title)}</div>
+              </div>
+            </button>
             ${remaining > 0 ? `<span class="context-more">+${remaining}</span>` : ''}
           </div>
         </div>
       `;
     };
 
-    const visionHtml = renderContextLevel('vision', '✨', 'Vision', contextGoals.vision);
-    const milestoneHtml = renderContextLevel('milestone', '🎯', 'Milestone', contextGoals.milestone);
-    const focusHtml = renderContextLevel('focus', '🔥', 'Focus', contextGoals.focus);
+    const visionHtml = renderCosmicMini('vision', 'Vision', contextGoals.vision);
+    const milestoneHtml = renderCosmicMini('milestone', 'Milestone', contextGoals.milestone);
+    const focusHtml = renderCosmicMini('focus', 'Focus', contextGoals.focus);
 
     if (!visionHtml && !milestoneHtml && !focusHtml) return '';
 
     return `
       <div class="planner-sidebar-section planner-context-section">
-        <div class="section-title">Context</div>
         <div class="context-levels">
           ${visionHtml}
           ${milestoneHtml}

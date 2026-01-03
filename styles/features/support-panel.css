@@ -247,20 +247,20 @@ body.is-mobile .support-panel-appearance-card[aria-label="Time of day theme"] {
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, var(--accent-subtle) 0%, rgba(74, 144, 153, 0.12) 100%);
+    background: linear-gradient(135deg, var(--accent-subtle) 0%, var(--accent-muted) 100%);
     color: var(--accent);
     flex-shrink: 0;
     transition: all var(--duration-normal) var(--ease-out);
-    box-shadow: 0 2px 8px rgba(74, 144, 153, 0.15);
-    border: 1px solid rgba(74, 144, 153, 0.1);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-stroke) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-stroke) 12%, transparent);
 }
 
 .support-panel-item:hover .support-panel-icon {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-    color: white;
+    background: var(--accent-fill);
+    color: var(--text-on-accent);
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(74, 144, 153, 0.25);
-    border-color: rgba(74, 144, 153, 0.2);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-stroke) 26%, transparent);
+    border-color: color-mix(in srgb, var(--accent-stroke) 18%, transparent);
 }
 
 .support-panel-icon svg {

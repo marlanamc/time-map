@@ -598,7 +598,7 @@ body.reduce-emojis .streak-icon {
 
 .year-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--accent-progress), var(--accent-badge));
+    background: var(--accent-fill);
     border-radius: inherit;
     transition: width var(--duration-slow) var(--ease-out);
 }

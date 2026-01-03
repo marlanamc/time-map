@@ -782,21 +782,6 @@ body.is-resizing-planter {
     box-shadow: var(--shadow-sm), var(--shadow-glow-sm);
 }
 
-.month-card.current::before {
-    content: "NOW";
-    position: absolute;
-    top: var(--space-4);
-    right: var(--space-4);
-    padding: 3px 10px;
-    background: var(--glass-bg);
-    color: var(--accent);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-full);
-    font-size: 0.625rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-}
-
 .month-card.past {
     background: var(--month-card-past-grey);
     opacity: 0.85;
@@ -1064,6 +1049,116 @@ body.is-resizing-planter {
 
 .goal-item:hover {
     background: rgba(255, 255, 255, 0.06);
+}
+
+/* Year view month card: milestone row (no checkbox) */
+.goal-item.goal-item--month-milestone {
+    align-items: center;
+    gap: var(--space-3);
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+.goal-item.goal-item--month-milestone:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
+:root:not(.dark-mode) .goal-item.goal-item--month-milestone {
+    background: rgba(10, 17, 19, 0.05);
+    border-color: rgba(10, 17, 19, 0.10);
+    box-shadow: 0 0 0 1px rgba(10, 17, 19, 0.05) inset;
+}
+
+:root:not(.dark-mode) .goal-item.goal-item--month-milestone:hover {
+    background: rgba(10, 17, 19, 0.07);
+    border-color: rgba(10, 17, 19, 0.14);
+}
+
+.goal-item.goal-item--month-milestone .goal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.goal-item.goal-item--month-milestone .month-goal-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.goal-item.goal-item--month-milestone .month-goal-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--goal-dot-color, var(--accent));
+    box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.12) inset,
+        0 0 14px color-mix(in srgb, var(--goal-dot-color, var(--accent)) 35%, transparent);
+    flex-shrink: 0;
+}
+
+:root:not(.dark-mode) .goal-item.goal-item--month-milestone .month-goal-dot {
+    box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.55) inset,
+        0 0 14px color-mix(in srgb, var(--goal-dot-color, var(--accent)) 22%, transparent);
+}
+
+.goal-item.goal-item--month-milestone .goal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-weight: 600;
+}
+
+.goal-item.goal-item--month-milestone .goal-title-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.goal-item.goal-item--month-milestone .month-goal-done {
+    margin-left: auto;
+    color: var(--success);
+    font-weight: 800;
+    opacity: 0.95;
+}
+
+.goal-item.goal-item--month-milestone .month-goal-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.goal-item.goal-item--month-milestone .month-goal-meta-chip {
+    padding: 1px 6px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+    line-height: 1.4;
+}
+
+:root:not(.dark-mode) .goal-item.goal-item--month-milestone .month-goal-meta-chip {
+    background: rgba(10, 17, 19, 0.08);
+}
+
+.goal-item.goal-item--month-milestone .goal-progress {
+    margin-top: 0;
+    opacity: 0.85;
+}
+
+.goal-item.goal-item--month-milestone .goal-edit-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
 }
 
 .goal-checkbox {

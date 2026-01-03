@@ -42,7 +42,8 @@ function getEmptyStateMessage(level: ContextLevel): string {
   return messages[level];
 }
 
-function renderGardenGroupHTML(
+// Render cosmic card for vision, milestone, focus, intention
+function renderCosmicCardHTML(
   level: ContextLevel,
   goals: Goal[],
   escapeHtmlFn: (t: string) => string,
@@ -53,35 +54,56 @@ function renderGardenGroupHTML(
 
   if (goals.length === 0) {
     return `
-      <div class="garden-group garden-group-empty">
-        <div class="garden-group-header">
-          <span class="garden-group-title">${emoji} ${escapeHtmlFn(label)}</span>
-          <span class="garden-count">0</span>
-        </div>
-        <div class="garden-empty-state">
-          <div class="garden-empty-icon">${emoji}</div>
-          <div class="garden-empty-message">${getEmptyStateMessage(level)}</div>
-          <button class="garden-add-btn" data-level="${level}" aria-label="Add ${escapeHtmlFn(label)}">
-            <span class="garden-add-icon">+</span>
-            <span>Add ${escapeHtmlFn(label)}</span>
-          </button>
+      <div class="garden-group garden-group-empty" data-level="${level}">
+        <div class="cosmic-card cosmic-card--${level} cosmic-card--empty">
+          <div class="cosmic-card-header">
+            <div class="cosmic-card-label">
+              <span class="cosmic-card-emoji">${emoji}</span>
+              <span class="cosmic-card-label-text">${escapeHtmlFn(label)}</span>
+            </div>
+          </div>
+          <div class="cosmic-card-content">
+            <div class="cosmic-empty-state">
+              <div class="cosmic-empty-icon">${emoji}</div>
+              <div class="cosmic-empty-message">${getEmptyStateMessage(level)}</div>
+              <button class="cosmic-add-btn" data-level="${level}" aria-label="Add ${escapeHtmlFn(label)}">
+                <span class="cosmic-add-icon">+</span>
+                <span>Add ${escapeHtmlFn(label)}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     `;
   }
 
-  const items = goals
-    .map((g) => `<div class="garden-goal-item" data-goal-id="${escapeHtmlFn(g.id)}">${escapeHtmlFn(g.title)}</div>`)
+  const goalItems = goals
+    .map((g) => `
+      <button
+        type="button"
+        class="cosmic-goal-item"
+        data-goal-id="${escapeHtmlFn(g.id)}"
+      >
+        ${escapeHtmlFn(g.title)}
+      </button>
+    `)
     .join('');
 
   return `
-    <div class="garden-group garden-group-has-items">
-      <div class="garden-group-header">
-        <span class="garden-group-title">${emoji} ${escapeHtmlFn(label)}</span>
-        <span class="garden-count">${goals.length}</span>
-      </div>
-      <div class="garden-goals-list">
-        ${items}
+    <div class="garden-group garden-group-has-items" data-level="${level}">
+      <div class="cosmic-card cosmic-card--${level}">
+        <div class="cosmic-card-header">
+          <div class="cosmic-card-label">
+            <span class="cosmic-card-emoji">${emoji}</span>
+            <span class="cosmic-card-label-text">${escapeHtmlFn(label)}</span>
+          </div>
+          <span class="cosmic-card-count">${goals.length}</span>
+        </div>
+        <div class="cosmic-card-content">
+          <div class="cosmic-goal-list">
+            ${goalItems}
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -111,17 +133,17 @@ export const GardenRenderer = {
       </div>
       <div class="garden-content" id="gardenContent" role="list" aria-label="Your garden">
         ${[
-          renderGardenGroupHTML('intention', context.intention, escapeHtmlFn),
-          renderGardenGroupHTML('focus', context.focus, escapeHtmlFn),
-          renderGardenGroupHTML('milestone', context.milestone, escapeHtmlFn),
-          renderGardenGroupHTML('vision', context.vision, escapeHtmlFn),
+          renderCosmicCardHTML('vision', context.vision, escapeHtmlFn),
+          renderCosmicCardHTML('milestone', context.milestone, escapeHtmlFn),
+          renderCosmicCardHTML('focus', context.focus, escapeHtmlFn),
+          renderCosmicCardHTML('intention', context.intention, escapeHtmlFn),
         ].join('')}
       </div>
     `;
 
-    // Attach click handlers for goals
+    // Attach click handlers for goals (both cosmic and simple)
     container
-      .querySelectorAll<HTMLElement>('.garden-goal-item[data-goal-id]')
+      .querySelectorAll<HTMLElement>('.cosmic-goal-item[data-goal-id]')
       .forEach((item) => {
         item.addEventListener('click', () => {
           const goalId = item.dataset.goalId;
@@ -129,10 +151,10 @@ export const GardenRenderer = {
         });
       });
 
-    // Attach click handlers for add buttons
+    // Attach click handlers for add buttons (both cosmic and simple)
     if (onAddGoal) {
       container
-        .querySelectorAll<HTMLElement>('.garden-add-btn')
+        .querySelectorAll<HTMLElement>('.cosmic-add-btn')
         .forEach((btn) => {
           btn.addEventListener('click', () => {
             const level = btn.dataset.level as GoalLevel;
@@ -142,4 +164,3 @@ export const GardenRenderer = {
     }
   },
 };
-

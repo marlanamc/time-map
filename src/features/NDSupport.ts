@@ -77,8 +77,7 @@ export const NDSupport = {
 
     // Apply accent theme
     if (prefs.accentTheme) {
-      // Remove all theme classes first
-      document.body.classList.remove(
+      const themeClasses = [
         "theme-rose",
         "theme-coral",
         "theme-amber",
@@ -89,8 +88,15 @@ export const NDSupport = {
         "theme-indigo",
         "theme-violet",
         "theme-rainbow",
-      );
-      document.body.classList.add(`theme-${prefs.accentTheme}`);
+      ] as const;
+
+      // Remove all theme classes first
+      document.body.classList.remove(...themeClasses);
+      root.classList.remove(...themeClasses);
+
+      const themeClass = `theme-${prefs.accentTheme}`;
+      document.body.classList.add(themeClass);
+      root.classList.add(themeClass);
     }
 
     // Apply font choice

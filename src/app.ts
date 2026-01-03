@@ -70,6 +70,9 @@ declare global {
 // Import UI Manager
 import { UI } from './ui/UIManager';
 
+// Import Liquid Effects for sidebar animations
+import { initLiquidEffects } from './components/dayView/sidebar/LiquidEffects';
+
 
 // ============================================
 // Initialize App
@@ -116,6 +119,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   UI.init();
+
+  // Initialize liquid effects (time theming, shimmer, ripple)
+  initLiquidEffects();
+
   // Initialize sync badge to reflect actual auth/config.
   try {
     const user = await SupabaseService.getUser();

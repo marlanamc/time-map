@@ -1,4 +1,5 @@
 /* Consolidated: Accessibility */
+@import './core/accessibility.css';
 @import './accessibility/wcag.css';
 @import './accessibility/dyslexia.css';
 @import './accessibility/colorblind.css';

@@ -290,6 +290,15 @@ export const UI = {
       const goalId = ev.detail?.goalId;
       if (goalId) goalDetailModal.show(goalId);
     });
+
+    this.elements.calendarGrid?.addEventListener("open-goal-modal", (e) => {
+      const ev = e as CustomEvent<{ level?: GoalLevel; month?: number | null; year?: number }>;
+      const level = ev.detail?.level;
+      if (!level) return;
+      const month = ev.detail?.month ?? null;
+      const year = ev.detail?.year ?? State.viewingYear;
+      this.openGoalModal(level, month, year);
+    });
   },
 
   setupSwipeNavigation() {
@@ -1939,48 +1948,32 @@ export const UI = {
     header.className = "year-view-header";
     header.innerHTML = `
       <h2 class="year-view-title">${viewingYear}</h2>
-      <p class="year-view-subtitle">Your year as a garden of months</p>
     `;
 
     const visionWrap = document.createElement("div");
-    visionWrap.className = "year-vision-banner";
+    visionWrap.className = "year-vision-banner year-vision-banner--pill";
 
     if (primaryVision) {
-      const visionDesc = primaryVision.description?.trim();
       visionWrap.innerHTML = `
-        <button type="button" class="year-vision-card" data-goal-id="${
+        <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--vision" data-goal-id="${
           primaryVision.id
         }">
-          <div class="year-vision-top">
-            <div class="year-vision-label">✨ ${viewingYear} Vision</div>
-            <div class="year-vision-meta">
-              <span class="year-vision-count">${visionGoals.length} vision(s)</span>
-              ${
-                visionGoals.length > 1
-                  ? `<span class="year-vision-more">+${visionGoals.length - 1}</span>`
-                  : ""
-              }
-              <span class="year-vision-edit">✏️ Edit</span>
-            </div>
-          </div>
-          <div class="year-vision-title">${this.escapeHtml(
-            primaryVision.title
-          )}</div>
-          ${
-            visionDesc
-              ? `<div class="year-vision-desc">${this.escapeHtml(visionDesc)}</div>`
-              : ""
-          }
+          <span class="year-vision-pill-label" aria-label="Vision">
+            <span class="year-vision-pill-dot" aria-hidden="true"></span>
+            VISION
+          </span>
+          <span class="year-vision-pill-title">${this.escapeHtml(primaryVision.title)}</span>
         </button>
       `;
     } else {
       visionWrap.innerHTML = `
-        <div class="year-vision-empty">
-          <div class="year-vision-label">✨ ${viewingYear} Vision</div>
-          <div class="year-vision-title">No vision yet</div>
-          <div class="year-vision-desc">Add one big outcome you want this year.</div>
-          <button type="button" class="btn btn-sm btn-ghost year-add-vision-btn">+ Add Vision</button>
-        </div>
+        <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--vision year-vision-pill--empty year-add-vision-btn">
+          <span class="year-vision-pill-label" aria-label="Vision">
+            <span class="year-vision-pill-dot" aria-hidden="true"></span>
+            VISION
+          </span>
+          <span class="year-vision-pill-title">+ Add Vision</span>
+        </button>
       `;
     }
 
@@ -2185,13 +2178,6 @@ export const UI = {
           ? CONFIG.CATEGORIES[goal.category] ?? null
           : null;
         const statusClass = goal.status === "done" ? "completed" : "";
-        const priorityTag =
-          goal.priority === "urgent" || goal.priority === "high"
-            ? `<span class="goal-tag priority-${goal.priority}">${
-                CONFIG.PRIORITIES[goal.priority]?.symbol || ""
-              } ${goal.priority}</span>`
-            : "";
-
         const level = CONFIG.LEVELS[goal.level] || CONFIG.LEVELS.milestone;
         const subtasksSummary =
           goal.subtasks.length > 0
@@ -2200,34 +2186,50 @@ export const UI = {
               }`
             : "";
 
+        const dotColor = cat?.color ?? "var(--accent)";
+        const hasMeta =
+          Boolean(cat) ||
+          Boolean(subtasksSummary) ||
+          (goal.progress > 0 && goal.progress < 100);
+
         return `
-          <div class="goal-item ${statusClass}" data-goal-id="${goal.id}">
-            <div class="goal-checkbox ${
-              goal.status === "done" ? "checked" : ""
-            }" data-goal-id="${goal.id}"></div>
+          <div class="goal-item goal-item--month-milestone ${statusClass}" data-goal-id="${goal.id}">
             <div class="goal-content">
-              <div class="goal-title">
-                <span class="goal-level-emoji">${level.emoji}</span>
-                ${this.escapeHtml(goal.title)}
-              </div>
-              <div class="goal-meta">
+              <div class="month-goal-row">
+                <span class="month-goal-dot" style="--goal-dot-color: ${dotColor}" aria-hidden="true"></span>
+                <div class="goal-title">
+                  <span class="goal-level-emoji" aria-hidden="true">${level.emoji}</span>
+                  <span class="goal-title-text">${this.escapeHtml(goal.title)}</span>
+                </div>
                 ${
-                  cat
-                    ? `<span class="goal-category" style="color: ${cat.color}">${cat.emoji}</span>`
-                    : ""
-                }
-                ${
-                  subtasksSummary
-                    ? `<span class="goal-subtasks">${subtasksSummary}</span>`
-                    : ""
-                }
-                ${priorityTag}
-                ${
-                  goal.progress > 0 && goal.progress < 100
-                    ? `<span class="goal-progress-text">${goal.progress}%</span>`
+                  goal.status === "done"
+                    ? `<span class="month-goal-done" aria-hidden="true">✓</span>`
                     : ""
                 }
               </div>
+              ${
+                hasMeta
+                  ? `<div class="month-goal-meta">
+                      ${
+                        cat
+                          ? `<span class="month-goal-meta-chip" style="color: ${cat.color}" title="${this.escapeHtml(
+                              cat.label
+                            )}">${cat.emoji}</span>`
+                          : ""
+                      }
+                      ${
+                        subtasksSummary
+                          ? `<span class="month-goal-meta-chip month-goal-meta-chip--subtasks" title="Subtasks">${subtasksSummary}</span>`
+                          : ""
+                      }
+                      ${
+                        goal.progress > 0 && goal.progress < 100
+                          ? `<span class="month-goal-meta-chip month-goal-meta-chip--progress" title="Progress">${goal.progress}%</span>`
+                          : ""
+                      }
+                    </div>`
+                  : ""
+              }
               ${
                 goal.progress > 0
                   ? `<div class="goal-progress"><div class="goal-progress-fill" style="width: ${goal.progress}%"></div></div>`
@@ -3054,6 +3056,11 @@ export const UI = {
       State.setView(VIEWS.DAY);
       this.syncViewButtons();
       this.showToast("", "Day view");
+    }
+    if (e.key === "g" && !e.ctrlKey && !e.metaKey) {
+      State.setView(VIEWS.GARDEN);
+      this.syncViewButtons();
+      this.showToast("🌿", "Garden view");
     }
 
     // Arrow key navigation

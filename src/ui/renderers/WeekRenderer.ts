@@ -36,7 +36,6 @@ export const WeekRenderer = {
       .filter((g) => g.level === "focus" && g.status !== "done")
       .slice();
     const primaryFocus = focusGoals[0];
-    const additionalFocusCount = Math.max(0, focusGoals.length - 1);
 
     // Format date range with years if they differ
     const startYear = weekStart.getFullYear();
@@ -67,23 +66,24 @@ export const WeekRenderer = {
               </button>
             </div>
           ` : ""}
-          <div class="week-focus-card" aria-label="Week focus">
-            <div class="week-focus-card-body">
-              <div class="week-focus-card-label">This week’s focus</div>
-              <div class="week-focus-card-title">${primaryFocus ? escapeHtmlFn(primaryFocus.title) : "No focus set"}</div>
-            </div>
-            <div class="week-focus-card-right">
-              ${additionalFocusCount > 0 ? `<div class="week-focus-card-meta">+${additionalFocusCount} more</div>` : ""}
-              ${primaryFocus ? `
-                <button type="button" class="week-focus-card-action" data-action="edit" data-goal-id="${primaryFocus.id}">
-                  Edit
-                </button>
-              ` : `
-                <button type="button" class="week-focus-card-action" data-action="add" data-date="${weekStartYmd}">
-                  Add
-                </button>
-              `}
-            </div>
+          <div class="week-focus-banner year-vision-banner--pill">
+            ${primaryFocus ? `
+              <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--focus week-focus-pill" data-goal-id="${primaryFocus.id}">
+                <span class="year-vision-pill-label" aria-label="Focus">
+                  <span class="year-vision-pill-dot" aria-hidden="true"></span>
+                  FOCUS
+                </span>
+                <span class="year-vision-pill-title">${escapeHtmlFn(primaryFocus.title)}</span>
+              </button>
+            ` : `
+              <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--focus year-vision-pill--empty week-focus-pill week-focus-pill--empty" data-action="add-focus" data-date="${weekStartYmd}">
+                <span class="year-vision-pill-label" aria-label="Focus">
+                  <span class="year-vision-pill-dot" aria-hidden="true"></span>
+                  FOCUS
+                </span>
+                <span class="year-vision-pill-title">+ Add Focus</span>
+              </button>
+            `}
           </div>
         </div>
         <div class="week-grid">
@@ -141,25 +141,31 @@ export const WeekRenderer = {
 
     container.innerHTML = html;
 
-    container.querySelectorAll<HTMLButtonElement>('.week-focus-card-action[data-action]').forEach((btn) => {
+    // Add click handlers for the focus pill
+    container.querySelectorAll<HTMLElement>('.week-focus-pill[data-goal-id]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
-        e.preventDefault();
         e.stopPropagation();
-        const action = btn.dataset.action;
-        if (action === 'edit') {
-          const goalId = btn.dataset.goalId;
-          if (!goalId) return;
-          const event = new CustomEvent('goal-click', { detail: { goalId } });
-          container.dispatchEvent(event);
-          return;
-        }
-        if (action === 'add') {
-          const date = btn.dataset.date ?? weekStartYmd;
-          const event = new CustomEvent('goal-create', { detail: { level: "focus", date } });
-          container.dispatchEvent(event);
-        }
+        const goalId = btn.dataset.goalId;
+        if (!goalId) return;
+        const event = new CustomEvent('goal-click', { detail: { goalId } });
+        container.dispatchEvent(event);
       });
     });
+
+    const addFocusBtn = container.querySelector<HTMLButtonElement>(
+      '[data-action="add-focus"]'
+    );
+    if (addFocusBtn) {
+      addFocusBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const date = addFocusBtn.dataset.date ?? weekStartYmd;
+        const event = new CustomEvent("goal-create", {
+          detail: { level: "focus", date },
+        });
+        container.dispatchEvent(event);
+      });
+    }
 
     // Navigate to the day view when tapping a day header.
     container.querySelectorAll<HTMLElement>('.week-day-jump[data-date]').forEach((btn) => {

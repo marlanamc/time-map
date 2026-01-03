@@ -12,6 +12,7 @@
 /* ============= DAY MODE COLORS (High Contrast) ============= */
 
 /* Teal - Day Mode */
+:root.theme-teal,
 body.theme-teal {
     --accent: #1E6FB8;  /* Deep ocean blue for day readability */
     --accent-hover: #2563B8;
@@ -31,6 +32,7 @@ body.theme-teal {
 }
 
 /* Sky - Day Mode */
+:root.theme-sky,
 body.theme-sky {
     --accent: #0EA5E9;  /* Bright sky blue for day readability */
     --accent-hover: #0284C7;
@@ -50,6 +52,7 @@ body.theme-sky {
 }
 
 /* Mint - Day Mode */
+:root.theme-mint,
 body.theme-mint {
     --accent: #10B981;  /* Fresh mint green for day readability */
     --accent-hover: #059669;
@@ -69,6 +72,7 @@ body.theme-mint {
 }
 
 /* Sage - Day Mode */
+:root.theme-sage,
 body.theme-sage {
     --accent: #3B7057;  /* Deep forest green for day readability */
     --accent-hover: #488062;
@@ -88,6 +92,7 @@ body.theme-sage {
 }
 
 /* Amber - Day Mode */
+:root.theme-amber,
 body.theme-amber {
     --accent: #D96320;  /* Deep amber for day readability */
     --accent-hover: #E87430;
@@ -107,6 +112,7 @@ body.theme-amber {
 }
 
 /* Coral - Day Mode */
+:root.theme-coral,
 body.theme-coral {
     --accent: #B8472F;  /* Deep terracotta for day readability */
     --accent-hover: #C85539;
@@ -126,6 +132,7 @@ body.theme-coral {
 }
 
 /* Rose - Day Mode */
+:root.theme-rose,
 body.theme-rose {
     --accent: #E11D48;  /* Deep rose for day readability */
     --accent-hover: #F43F5E;
@@ -147,6 +154,7 @@ body.theme-rose {
 /* Clay theme removed - using coral instead */
 
 /* Violet - Day Mode */
+:root.theme-violet,
 body.theme-violet {
     --accent: #6D28D9;  /* Deep purple for day readability */
     --accent-hover: #7C3AED;
@@ -166,6 +174,7 @@ body.theme-violet {
 }
 
 /* Indigo - Day Mode */
+:root.theme-indigo,
 body.theme-indigo {
     --accent: #4F46E5;  /* Deep indigo for day readability */
     --accent-hover: #6366F1;
@@ -187,7 +196,9 @@ body.theme-indigo {
 /* ============= NIGHT MODE COLORS (Beautiful Soft) ============= */
 
 /* Teal - Night Mode */
-:root.dark-mode body.theme-teal {
+:root.dark-mode.theme-teal,
+:root.dark-mode body.theme-teal,
+body.dark-mode.theme-teal {
     --accent: #8CB7D9;  /* Soft sky blue for night beauty */
     --accent-hover: #9CC6E6;
     --accent-muted: rgba(140, 183, 217, 0.18);
@@ -206,7 +217,9 @@ body.theme-indigo {
 }
 
 /* Sky - Night Mode */
-:root.dark-mode body.theme-sky {
+:root.dark-mode.theme-sky,
+:root.dark-mode body.theme-sky,
+body.dark-mode.theme-sky {
     --accent: #7DD3FC;  /* Soft sky blue */
     --accent-hover: #93C5FD;
     --accent-muted: rgba(125, 211, 252, 0.18);
@@ -225,7 +238,9 @@ body.theme-indigo {
 }
 
 /* Mint - Night Mode */
-:root.dark-mode body.theme-mint {
+:root.dark-mode.theme-mint,
+:root.dark-mode body.theme-mint,
+body.dark-mode.theme-mint {
     --accent: #6EE7B7;  /* Soft mint green */
     --accent-hover: #86EFAC;
     --accent-muted: rgba(110, 231, 183, 0.18);
@@ -244,7 +259,9 @@ body.theme-indigo {
 }
 
 /* Sage - Night Mode */
-:root.dark-mode body.theme-sage {
+:root.dark-mode.theme-sage,
+:root.dark-mode body.theme-sage,
+body.dark-mode.theme-sage {
     --accent: #6F9B86;  /* Soft forest green */
     --accent-hover: #7CAC96;
     --accent-muted: rgba(111, 155, 134, 0.18);
@@ -263,7 +280,9 @@ body.theme-indigo {
 }
 
 /* Amber - Night Mode */
-:root.dark-mode body.theme-amber {
+:root.dark-mode.theme-amber,
+:root.dark-mode body.theme-amber,
+body.dark-mode.theme-amber {
     --accent: #E77D3E;  /* Vibrant sunset orange */
     --accent-hover: #F5954E;
     --accent-muted: rgba(231, 125, 62, 0.18);
@@ -282,7 +301,9 @@ body.theme-indigo {
 }
 
 /* Coral - Night Mode */
-:root.dark-mode body.theme-coral {
+:root.dark-mode.theme-coral,
+:root.dark-mode body.theme-coral,
+body.dark-mode.theme-coral {
     --accent: #C06C52;  /* Warm terracotta */
     --accent-hover: #D97B59;
     --accent-muted: rgba(200, 107, 74, 0.16);
@@ -301,7 +322,9 @@ body.theme-indigo {
 }
 
 /* Rose - Night Mode */
-:root.dark-mode body.theme-rose {
+:root.dark-mode.theme-rose,
+:root.dark-mode body.theme-rose,
+body.dark-mode.theme-rose {
     --accent: #FB7185;  /* Soft rose pink */
     --accent-hover: #FCA5A5;
     --accent-muted: rgba(251, 113, 133, 0.18);
@@ -322,7 +345,9 @@ body.theme-indigo {
 /* Clay theme removed - using coral instead */
 
 /* Violet - Night Mode */
-:root.dark-mode body.theme-violet {
+:root.dark-mode.theme-violet,
+:root.dark-mode body.theme-violet,
+body.dark-mode.theme-violet {
     --accent: #8B5CF6;  /* Soft purple */
     --accent-hover: #9D6DF7;
     --accent-muted: rgba(139, 92, 246, 0.18);
@@ -341,7 +366,9 @@ body.theme-indigo {
 }
 
 /* Indigo - Night Mode */
-:root.dark-mode body.theme-indigo {
+:root.dark-mode.theme-indigo,
+:root.dark-mode body.theme-indigo,
+body.dark-mode.theme-indigo {
     --accent: #818CF8;  /* Soft indigo */
     --accent-hover: #A5B4FC;
     --accent-muted: rgba(129, 140, 248, 0.18);
@@ -360,43 +387,80 @@ body.theme-indigo {
 }
 
 /* Rainbow - Day Mode - Uses rainbow accent system */
+:root.theme-rainbow,
 body.theme-rainbow {
-    /* Override all accent variables to use rainbow system */
-    --accent: var(--accent-button);  /* Teal for primary accent */
-    --accent-hover: #5AAAB2;
-    --accent-muted: rgba(74, 144, 153, 0.16);
-    --accent-subtle: rgba(74, 144, 153, 0.08);
-    --shadow-glow: 0 0 24px rgba(74, 144, 153, 0.24);
-    --shadow-glow-sm: 0 0 12px rgba(74, 144, 153, 0.16);
-    
-    /* Ensure rainbow accent variables are set */
-    --accent-button: #4A9099;  /* Teal */
-    --accent-active: #5A9B8D;  /* Sage */
-    --accent-border: #8CB7D9;  /* Sky */
-    --accent-highlight: #E59AA0;  /* Petal */
-    --accent-link: #4F46E5;  /* Indigo */
-    --accent-badge: #F4A460;  /* Amber */
-    --accent-progress: #E77D3E;  /* Sunset */
-    --accent-icon: #6D28D9;  /* Violet */
+    /* Unified rainbow gradient for filled accents */
+    --accent-fill-angle: 90deg;
+    --accent-fill: linear-gradient(
+      var(--accent-fill-angle),
+      #E11D48,
+      #D96320,
+      #F4A460,
+      #10B981,
+      #0EA5E9,
+      #4F46E5,
+      #6D28D9
+    );
+    --accent-fill-gradient: var(--accent-fill);
+    --accent-badge-fill: var(--accent-fill);
+
+    /* Solid accent for strokes/text (picked from the gradient) */
+    --accent-stroke: #4F46E5;
+    --accent: var(--accent-stroke);
+    /* Darker ink reads better on the light portions of the gradient in day mode */
+    --text-on-accent: rgba(8, 23, 39, 0.92);
+    --accent-hover: #6366F1;
+    --accent-muted: rgba(79, 70, 229, 0.16);
+    --accent-subtle: rgba(79, 70, 229, 0.08);
+    --shadow-glow: 0 0 24px rgba(79, 70, 229, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(79, 70, 229, 0.16);
+
+    /* Keep legacy rainbow tokens, but unify them to the solid accent */
+    --accent-button: var(--accent-stroke);
+    --accent-active: var(--accent-stroke);
+    --accent-border: var(--accent-stroke);
+    --accent-highlight: var(--accent-stroke);
+    --accent-link: var(--accent-stroke);
+    --accent-badge: var(--accent-stroke);
+    --accent-progress: var(--accent-stroke);
+    --accent-icon: var(--accent-stroke);
 }
 
 /* Rainbow - Night Mode */
-:root.dark-mode body.theme-rainbow {
-    --accent: var(--accent-button);  /* Sky blue for primary accent */
-    --accent-hover: #9CC6E6;
-    --accent-muted: rgba(140, 183, 217, 0.18);
-    --accent-subtle: rgba(140, 183, 217, 0.10);
-    --shadow-glow: 0 0 24px rgba(140, 183, 217, 0.24);
-    --shadow-glow-sm: 0 0 12px rgba(140, 183, 217, 0.16);
-    
-    /* Ensure rainbow accent variables are set for dark mode */
-    --accent-button: #8CB7D9;  /* Sky blue */
-    --accent-active: #6F9B86;  /* Sage */
-    --accent-border: #7DD3FC;  /* Light sky */
-    --accent-highlight: #FB7185;  /* Rose pink */
-    --accent-link: #818CF8;  /* Indigo */
-    --accent-badge: #E77D3E;  /* Sunset orange */
-    --accent-progress: #6EE7B7;  /* Mint */
-    --accent-icon: #8B5CF6;  /* Violet */
-}
+:root.dark-mode.theme-rainbow,
+:root.dark-mode body.theme-rainbow,
+body.dark-mode.theme-rainbow {
+    --accent-fill-angle: 90deg;
+    --accent-fill: linear-gradient(
+      var(--accent-fill-angle),
+      #FB7185,
+      #F97316,
+      #FDBA74,
+      #34D399,
+      #38BDF8,
+      #818CF8,
+      #A78BFA
+    );
+    --accent-fill-gradient: var(--accent-fill);
+    --accent-badge-fill: var(--accent-fill);
 
+    --accent-stroke: #A5B4FC;
+    --accent: var(--accent-stroke);
+    --accent-hover: #C7D2FE;
+    --accent-muted: rgba(165, 180, 252, 0.18);
+    --accent-subtle: rgba(165, 180, 252, 0.10);
+    --shadow-glow: 0 0 24px rgba(165, 180, 252, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(165, 180, 252, 0.16);
+
+    /* Rainbow gradients include light stops; dark ink reads better across them */
+    --text-on-accent: rgba(8, 23, 39, 0.92);
+
+    --accent-button: var(--accent-stroke);
+    --accent-active: var(--accent-stroke);
+    --accent-border: var(--accent-stroke);
+    --accent-highlight: var(--accent-stroke);
+    --accent-link: var(--accent-stroke);
+    --accent-badge: var(--accent-stroke);
+    --accent-progress: var(--accent-stroke);
+    --accent-icon: var(--accent-stroke);
+}

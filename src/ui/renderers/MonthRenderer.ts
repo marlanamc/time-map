@@ -19,28 +19,11 @@ export const MonthRenderer = {
     const selected = State.viewingDate ? State.viewingDate.toDateString() : "";
     const monthTitle = escapeHtmlFn(`${CONFIG.MONTHS[month]} ${year}`);
 
-    const yearStart = new Date(year, 0, 1);
-    const yearEnd = new Date(year, 11, 31);
-    const visionGoals = Goals.getForRange(yearStart, yearEnd)
-      .filter(g => g.level === 'vision' && g.status !== 'done');
-    const primaryVision = visionGoals[0];
-
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
     const milestoneGoals = Goals.getForRange(monthStart, monthEnd)
       .filter(g => g.level === 'milestone' && g.status !== 'done');
     const primaryMilestone = milestoneGoals[0];
-
-    const getWeekendCount = () => {
-      // Heuristic: count Saturdays in the month as "# weekends".
-      let count = 0;
-      const cursor = new Date(monthStart);
-      while (cursor <= monthEnd) {
-        if (cursor.getDay() === 6) count += 1;
-        cursor.setDate(cursor.getDate() + 1);
-      }
-      return count;
-    };
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -60,41 +43,25 @@ export const MonthRenderer = {
     html += `
         <div class="month-view-header">
           <h2 class="month-view-title">${monthTitle}</h2>
+        </div>
+        <div class="month-milestone-banner year-vision-banner--pill">
           ${primaryMilestone ? `
-            <div class="month-milestone-card" aria-label="This month’s milestone">
-              <div class="month-milestone-card-body">
-                <div class="month-milestone-card-label">This month’s milestone</div>
-                <div class="month-milestone-card-title">${escapeHtmlFn(primaryMilestone.title)}</div>
-              </div>
-              <div class="month-milestone-card-right">
-                <div class="month-milestone-card-meta">${daysInMonth} days • ${getWeekendCount()} weekends</div>
-                <button type="button" class="month-milestone-card-action" data-goal-id="${primaryMilestone.id}">
-                  Edit
-                </button>
-              </div>
-            </div>
+            <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--milestone month-milestone-pill" data-goal-id="${primaryMilestone.id}">
+              <span class="year-vision-pill-label" aria-label="Milestone">
+                <span class="year-vision-pill-dot" aria-hidden="true"></span>
+                MILESTONE
+              </span>
+              <span class="year-vision-pill-title">${escapeHtmlFn(primaryMilestone.title)}</span>
+            </button>
           ` : `
-            <div class="month-milestone-card empty" aria-label="No milestone set">
-              <div class="month-milestone-card-body">
-                <div class="month-milestone-card-label">This month’s milestone</div>
-                <div class="month-milestone-card-title">No milestone set for this month</div>
-              </div>
-              <div class="month-milestone-card-right">
-                <!-- TODO: Wire to existing quick-add/create flow if available -->
-                <button type="button" class="month-milestone-card-action" disabled title="Coming soon">
-                  Add
-                </button>
-              </div>
-            </div>
+            <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--milestone year-vision-pill--empty month-milestone-pill month-milestone-pill--empty" data-action="add-milestone">
+              <span class="year-vision-pill-label" aria-label="Milestone">
+                <span class="year-vision-pill-dot" aria-hidden="true"></span>
+                MILESTONE
+              </span>
+              <span class="year-vision-pill-title">+ Add Milestone</span>
+            </button>
           `}
-          ${primaryVision ? `
-            <div class="month-view-context">
-              <button type="button" class="month-vision-chip" data-goal-id="${primaryVision.id}" title="${escapeHtmlFn(primaryVision.title)}">
-                ✨ ${escapeHtmlFn(primaryVision.title)}
-                ${visionGoals.length > 1 ? `<span class="month-vision-more">+${visionGoals.length - 1}</span>` : ""}
-              </button>
-            </div>
-          ` : ""}
         </div>
         <div class="month-calendar" role="grid" aria-label="Month calendar">
           <div class="month-calendar-header-row" role="row">
@@ -187,7 +154,7 @@ export const MonthRenderer = {
     });
 
     // Add click handlers for the milestone chip
-    container.querySelectorAll<HTMLElement>('.month-view-header [data-goal-id]').forEach((btn) => {
+    container.querySelectorAll<HTMLElement>('[data-goal-id]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const goalId = btn.dataset.goalId;
@@ -197,6 +164,20 @@ export const MonthRenderer = {
         }
       });
     });
+
+    const addMilestoneBtn = container.querySelector<HTMLButtonElement>(
+      '[data-action="add-milestone"]'
+    );
+    if (addMilestoneBtn) {
+      addMilestoneBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const event = new CustomEvent("open-goal-modal", {
+          detail: { level: "milestone", month, year },
+        });
+        container.dispatchEvent(event);
+      });
+    }
 
     container.querySelectorAll<HTMLButtonElement>('.month-week-focus-edit[data-goal-id]').forEach((btn) => {
       btn.addEventListener('click', (e) => {

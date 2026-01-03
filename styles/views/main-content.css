@@ -628,16 +628,16 @@
   padding: 0 var(--space-3);
   background: var(--accent-badge-fill);
   border-color: transparent;
-  color: rgba(255, 255, 255, 0.96);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45), 0 0 3px rgba(0, 0, 0, 0.85);
+  color: rgba(8, 23, 39, 0.92);
+  text-shadow: none;
   font-weight: 600;
 }
 
 .dark-mode .today-btn {
   background: var(--accent-badge-fill);
   border-color: transparent;
-  color: rgba(255, 255, 255, 0.96);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55), 0 0 1px rgba(0, 0, 0, 0.75);
+  color: rgba(8, 23, 39, 0.92);
+  text-shadow: none;
 }
 
 .dark-mode .today-btn:hover {

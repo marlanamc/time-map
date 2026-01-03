@@ -65,86 +65,21 @@
     color: var(--text-tertiary);
 }
 
-/* Week Focus Card (replaces focus chip strip) */
-.week-focus-card {
-    width: min(920px, 100%);
-    margin: var(--space-4) auto 0;
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border);
-    border-left: 3px solid #f59e0b;
-    background: var(--bg-surface);
-    box-shadow: var(--shadow-xs);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
+/* Week Focus Pill */
+.week-focus-banner {
+    justify-content: center;
+    margin-top: var(--space-2);
 }
 
-.week-focus-card-body {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    text-align: left;
+.week-focus-pill {
+    max-width: min(720px, 100%);
 }
 
-.week-focus-card-label {
-    font-size: var(--text-xs);
-    font-weight: 750;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-}
-
-.week-focus-card-title {
-    font-size: var(--text-base);
-    font-weight: 700;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.week-focus-card-right {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--space-2);
-    flex-shrink: 0;
-}
-
-.week-focus-card-meta {
-    font-size: var(--text-sm);
-    font-weight: 650;
-    color: var(--text-tertiary);
-    white-space: nowrap;
-}
-
-.week-focus-card-action {
-    appearance: none;
-    border: 1px solid rgba(245, 158, 11, 0.24);
-    background: rgba(245, 158, 11, 0.14);
-    color: var(--text-primary);
-    border-radius: var(--radius-full);
-    padding: 8px 12px;
-    font-size: var(--text-sm);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-out);
-    white-space: nowrap;
-}
-
-.week-focus-card-action:hover {
-    background: rgba(245, 158, 11, 0.20);
-    border-color: rgba(245, 158, 11, 0.34);
-    transform: translateY(-1px);
-}
-
-.week-focus-card-action:focus-visible {
-    outline: 2px solid #f59e0b;
-    outline-offset: 2px;
+.week-focus-pill .year-vision-pill-dot {
+    background: color-mix(in srgb, var(--accent-progress) 60%, transparent);
+    box-shadow:
+        0 0 10px color-mix(in srgb, var(--accent-progress) 34%, transparent),
+        0 0 14px color-mix(in srgb, var(--accent-border) 26%, transparent);
 }
 
 .week-view-title {
@@ -171,15 +106,8 @@
 }
 
 @media (max-width: 700px) {
-    .week-focus-card {
-        flex-direction: column;
-        align-items: stretch;
-        text-align: left;
-    }
-
-    .week-focus-card-right {
-        justify-content: flex-start;
-        flex-wrap: wrap;
+    .week-focus-banner {
+        margin-top: var(--space-3);
     }
 }
 

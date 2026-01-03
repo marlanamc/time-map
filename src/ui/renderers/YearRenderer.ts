@@ -34,9 +34,15 @@ export const YearRenderer = {
           </div>
           <div class="year-vision-goals">
             ${visionGoals.slice(0, 3).map(g => `
-              <button type="button" class="vision-card" data-goal-id="${g.id}">
-                <div class="vision-card-title">${escapeHtmlFn(g.title)}</div>
-                ${g.description ? `<div class="vision-card-desc">${escapeHtmlFn(g.description)}</div>` : ''}
+              <button type="button" class="cosmic-card cosmic-card--vision cosmic-card--mini" data-goal-id="${g.id}">
+                <div class="cosmic-card-header cosmic-card-header--mini">
+                  <div class="cosmic-card-label cosmic-card-label--mini">
+                    <span class="cosmic-card-label-text">Vision</span>
+                  </div>
+                </div>
+                <div class="cosmic-card-content cosmic-card-content--mini">
+                  <div class="cosmic-card-title">${escapeHtmlFn(g.title)}</div>
+                </div>
               </button>
             `).join('')}
           </div>

@@ -8,6 +8,7 @@ import { DragDropManager } from "./DragDropManager";
 import { haptics } from "../../utils/haptics";
 import { Goals } from "../../core/Goals";
 import type { Category } from "../../types";
+import { openCustomizationPanel, setupCustomizationPanel } from "./sidebar/CustomizationPanel";
 
 /**
  * Application configuration interface
@@ -52,6 +53,7 @@ export class DayViewController {
   private readonly boundHandleNativeDragOver: (e: DragEvent) => void;
   private readonly boundHandleNativeDrop: (e: DragEvent) => void;
   private swipeCleanup: (() => void) | null = null;
+  private customizationPanelSetup: boolean = false;
 
   // Options
   private options: DayViewOptions;
@@ -137,6 +139,7 @@ export class DayViewController {
       this.container.addEventListener("dragover", this.boundHandleNativeDragOver);
       this.container.addEventListener("drop", this.boundHandleNativeDrop);
       this.setupSwipeToComplete();
+      this.ensureCustomizationPanelSetup();
 
       // Set up resize observer to update on viewport changes
       if (typeof ResizeObserver !== "undefined") {
@@ -379,6 +382,14 @@ export class DayViewController {
   private handleClick(e: Event): void {
     const target = e.target as HTMLElement;
 
+    const customizeBtn = target.closest('[data-action="customize"], [data-action="add-intention"], [data-action="edit-intentions"]') as HTMLElement | null;
+    if (customizeBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      openCustomizationPanel(this.container);
+      return;
+    }
+
     // Handle card click
     const card = target.closest(".day-goal-card") as HTMLElement;
     if (card && !target.closest(".day-goal-checkbox") && !target.closest(".btn-zen-focus")) {
@@ -460,6 +471,15 @@ export class DayViewController {
     // Note: Removed "Plant something" button - users can add tasks via the main add button
   }
 
+  private ensureCustomizationPanelSetup(): void {
+    if (this.customizationPanelSetup) return;
+    this.customizationPanelSetup = true;
+    setupCustomizationPanel(this.container, () => {
+      if (!this.currentDate) return;
+      this.plannerRenderer.update(this.currentDate, this.currentGoals, this.currentContextGoals);
+    });
+  }
+
   private snapMinutesToInterval(mins: number, interval: number): number {
     return Math.round(mins / interval) * interval;
   }
@@ -492,7 +512,7 @@ export class DayViewController {
 
   private handleNativeDragStart(e: DragEvent): void {
     const target = e.target as HTMLElement | null;
-    const item = target?.closest(".common-intention-item") as HTMLElement | null;
+    const item = target?.closest(".intention-pill") as HTMLElement | null;
     if (!item) return;
     if (!e.dataTransfer) return;
 
@@ -511,7 +531,7 @@ export class DayViewController {
 
   private handleNativeDragEnd(e: DragEvent): void {
     const target = e.target as HTMLElement | null;
-    const item = target?.closest(".common-intention-item") as HTMLElement | null;
+    const item = target?.closest(".intention-pill") as HTMLElement | null;
     if (item) item.classList.remove("is-dragging");
     this.activeCommonTemplate = null;
     this.clearTimelineDropUi();

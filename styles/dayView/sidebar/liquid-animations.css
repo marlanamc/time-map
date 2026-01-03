@@ -1,0 +1,532 @@
+/**
+ * Liquid Animations - Shimmer, Ripple, Keyframes
+ * @remarks Core animations for liquid productivity aesthetic
+ */
+
+/* ===================================
+   Shimmer Effect (Iridescent Rainbow)
+   =================================== */
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+.shimmer-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--shimmer-gradient);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.has-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.has-shimmer:hover .shimmer-overlay {
+  animation: shimmer var(--liquid-shimmer-duration) ease-in-out infinite;
+}
+
+/* Reduce motion variant */
+@media (prefers-reduced-motion: reduce) {
+  .has-shimmer:hover .shimmer-overlay {
+    animation: none;
+    opacity: 0.15;
+  }
+}
+
+/* ===================================
+   Ripple Effect (Liquid Wave)
+   =================================== */
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+.liquid-ripple {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--ripple-color, rgba(255, 255, 255, 0.5));
+  pointer-events: none;
+  animation: ripple var(--liquid-ripple-duration) ease-out;
+  will-change: transform, opacity;
+}
+
+/* ===================================
+   Slide In/Out Animations
+   =================================== */
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-top {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-out-top {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-out-bottom {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Slide animation classes */
+.slide-in-right {
+  animation: slide-in-right var(--liquid-transition-smooth) ease-out;
+}
+
+.slide-in-left {
+  animation: slide-in-left var(--liquid-transition-smooth) ease-out;
+}
+
+.slide-in-top {
+  animation: slide-in-top var(--liquid-transition-smooth) ease-out;
+}
+
+.slide-in-bottom {
+  animation: slide-in-bottom var(--liquid-transition-smooth) ease-out;
+}
+
+.slide-out-right {
+  animation: slide-out-right var(--liquid-transition-smooth) ease-out;
+}
+
+.slide-out-left {
+  animation: slide-out-left var(--liquid-transition-smooth) ease-out;
+}
+
+.slide-out-top {
+  animation: slide-out-top var(--liquid-transition-smooth) ease-out;
+}
+
+.slide-out-bottom {
+  animation: slide-out-bottom var(--liquid-transition-smooth) ease-out;
+}
+
+/* ===================================
+   Fade In/Out Animations
+   =================================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fade-in var(--duration-normal) ease-out;
+}
+
+.fade-out {
+  animation: fade-out var(--duration-normal) ease-out;
+}
+
+/* ===================================
+   Scale Animations
+   =================================== */
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+.scale-in {
+  animation: scale-in var(--duration-normal) var(--ease-out);
+}
+
+.scale-out {
+  animation: scale-out var(--duration-normal) var(--ease-out);
+}
+
+/* ===================================
+   Bounce Animation
+   =================================== */
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.bounce {
+  animation: bounce 0.6s ease-in-out;
+}
+
+/* ===================================
+   Glow Effect
+   =================================== */
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 8px var(--glow-color, var(--liquid-glow)),
+                0 0 16px var(--glow-color, var(--liquid-glow));
+  }
+  50% {
+    box-shadow: 0 0 16px var(--glow-color, var(--liquid-glow)),
+                0 0 24px var(--glow-color, var(--liquid-glow));
+  }
+}
+
+.has-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .has-glow {
+    animation: none;
+    box-shadow: 0 0 8px var(--glow-color, var(--liquid-glow));
+  }
+}
+
+/* ===================================
+   Lift Effect (Hover Elevate)
+   =================================== */
+
+.has-lift {
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+  will-change: transform, box-shadow;
+}
+
+.has-lift:hover {
+  transform: translateY(var(--lift-offset, -2px));
+  box-shadow: var(--lift-shadow, var(--shadow-md));
+}
+
+.has-lift:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .has-lift:hover {
+    transform: none;
+  }
+}
+
+/* ===================================
+   Floating Particles
+   =================================== */
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-100vh) translateX(20px);
+  }
+}
+
+.floating-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--liquid-accent);
+  opacity: 0;
+  animation: float linear infinite;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-particle {
+    display: none;
+  }
+}
+
+/* ===================================
+   Liquid Glass Effect
+   =================================== */
+
+.liquid-glass {
+  background: var(--liquid-glass-bg);
+  backdrop-filter: blur(var(--liquid-glass-blur));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+  border: 1px solid var(--liquid-glass-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--liquid-glass-shine);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+@supports not (backdrop-filter: blur()) {
+  .liquid-glass {
+    background: var(--card-bg);
+  }
+}
+
+/* ===================================
+   Stagger Animation Utility
+   =================================== */
+
+.stagger-fade-in {
+  animation: fade-in var(--duration-normal) ease-out backwards;
+}
+
+.stagger-slide-in {
+  animation: slide-in-bottom var(--duration-normal) ease-out backwards;
+}
+
+/* ===================================
+   Pulse Animation
+   =================================== */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+  }
+}
+
+/* ===================================
+   Rotate Animation (For Loading)
+   =================================== */
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotate {
+  animation: rotate 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotate {
+    animation: none;
+  }
+}
+
+/* ===================================
+   Expand/Collapse Animation
+   =================================== */
+
+@keyframes expand {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 1000px;
+    opacity: 1;
+  }
+}
+
+@keyframes collapse {
+  from {
+    max-height: 1000px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
+.expand {
+  animation: expand var(--liquid-transition-smooth) ease-out;
+  overflow: hidden;
+}
+
+.collapse {
+  animation: collapse var(--liquid-transition-smooth) ease-out;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expand, .collapse {
+    animation: none;
+  }
+}
+
+/* ===================================
+   Shake Animation (For Errors)
+   =================================== */
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shake {
+    animation: none;
+  }
+}

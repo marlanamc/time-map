@@ -16,6 +16,22 @@
     margin-bottom: var(--space-5);
 }
 
+.month-milestone-banner {
+    justify-content: center;
+    margin-top: var(--space-2);
+}
+
+.month-milestone-pill {
+    max-width: min(720px, 100%);
+}
+
+.month-milestone-pill .year-vision-pill-dot {
+    background: color-mix(in srgb, var(--accent-progress) 60%, transparent);
+    box-shadow:
+        0 0 10px color-mix(in srgb, var(--accent-progress) 34%, transparent),
+        0 0 14px color-mix(in srgb, var(--accent-border) 26%, transparent);
+}
+
 .month-milestone-card {
     width: min(920px, 100%);
     display: flex;

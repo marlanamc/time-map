@@ -1,0 +1,347 @@
+/**
+ * Task List - Hybrid Compact/Expanded Display
+ * @remarks Smooth transitions between compact and expanded states
+ */
+
+/* ===================================
+   Task List Container
+   =================================== */
+
+.task-list-empty {
+  text-align: center;
+  padding: var(--space-4);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+/* ===================================
+   Task Item - Compact State
+   =================================== */
+
+.task-item {
+  position: relative;
+  background: var(--task-item-bg);
+  border: 1px solid var(--divider);
+  border-radius: var(--task-item-radius);
+  margin-bottom: var(--space-2);
+  overflow: hidden;
+  transition: all var(--liquid-transition-smooth);
+}
+
+.task-item.compact {
+  cursor: pointer;
+}
+
+.task-item.expanded {
+  background: var(--task-item-expanded-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.task-item.task-done {
+  opacity: 0.6;
+}
+
+.task-item.task-done .task-title {
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+}
+
+/* ===================================
+   Compact View
+   =================================== */
+
+.task-compact-view {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--task-item-padding);
+  transition: background var(--duration-fast);
+}
+
+.task-item.compact:hover .task-compact-view {
+  background: var(--bg-hover);
+}
+
+/* ===================================
+   Task Checkbox
+   =================================== */
+
+.task-checkbox {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--divider);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  color: var(--text-on-accent);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.task-checkbox:hover {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.task-checkbox.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.task-checkbox:active {
+  transform: scale(0.9);
+}
+
+/* ===================================
+   Task Content
+   =================================== */
+
+.task-emoji {
+  font-size: var(--text-base);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.task-title {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-time {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* ===================================
+   Expand Button
+   =================================== */
+
+.task-expand-btn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast);
+  color: var(--text-tertiary);
+}
+
+.task-expand-btn:hover {
+  background: var(--bg-active);
+  color: var(--text-primary);
+}
+
+.task-item.expanded .task-expand-btn {
+  transform: rotate(180deg);
+}
+
+/* ===================================
+   Expanded View
+   =================================== */
+
+.task-expanded-view {
+  padding: 0 var(--task-item-padding) var(--task-item-padding);
+  border-top: 1px solid var(--divider);
+  margin-top: 0;
+  overflow: hidden;
+  transition: all var(--liquid-transition-smooth);
+}
+
+.task-expanded-view[hidden] {
+  display: none;
+}
+
+/* Stagger animation for expanded content */
+.task-item.expanded .task-metadata,
+.task-item.expanded .task-description,
+.task-item.expanded .task-actions {
+  animation: fade-in var(--duration-normal) ease-out backwards;
+}
+
+.task-item.expanded .task-description {
+  animation-delay: 50ms;
+}
+
+.task-item.expanded .task-actions {
+  animation-delay: 100ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-item.expanded .task-metadata,
+  .task-item.expanded .task-description,
+  .task-item.expanded .task-actions {
+    animation: none;
+  }
+}
+
+/* ===================================
+   Task Metadata
+   =================================== */
+
+.task-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.task-meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.meta-icon {
+  font-size: var(--text-base);
+}
+
+.meta-label {
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 80px;
+}
+
+.meta-value {
+  color: var(--text-primary);
+}
+
+/* ===================================
+   Progress Bar
+   =================================== */
+
+.task-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin: 0 var(--space-2);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* ===================================
+   Task Description
+   =================================== */
+
+.task-description {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-3);
+  padding: var(--space-2);
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border-left: 2px solid var(--accent);
+}
+
+/* ===================================
+   Task Actions
+   =================================== */
+
+.task-actions {
+  display: flex;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.task-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.task-action-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.task-action-btn:active {
+  transform: translateY(0);
+}
+
+.task-action-btn span {
+  font-size: var(--text-base);
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+
+@media (max-width: 600px) {
+  .task-item {
+    margin-bottom: var(--space-3);
+  }
+
+  .task-compact-view {
+    padding: var(--space-3);
+  }
+
+  .task-expanded-view {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+
+  .task-actions {
+    flex-direction: column;
+  }
+
+  .task-action-btn {
+    width: 100%;
+  }
+}
+
+/* ===================================
+   Dark Mode
+   =================================== */
+
+:root.dark-mode .task-item {
+  background: var(--task-item-bg);
+  border-color: var(--glass-border);
+}
+
+:root.dark-mode .task-item.expanded {
+  background: var(--task-item-expanded-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+:root.dark-mode .task-checkbox {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+:root.dark-mode .task-checkbox:hover {
+  border-color: var(--accent);
+}

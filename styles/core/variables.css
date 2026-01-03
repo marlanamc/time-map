@@ -24,7 +24,7 @@
     /* Glass effects - Soft & Gentle */
     --divider: rgba(0, 0, 0, 0.06);
     --glass-bg: rgba(242, 247, 246, 0.86);
-    --glass-border: rgba(31, 45, 42, 0.08);
+    --glass-border: rgba(31, 45, 42, 0.12); /* Increased to 0.12 for WCAG AA 3:1 UI component contrast */
     --glass-shine: rgba(250, 252, 251, 0.55);
 
     /* Text hierarchy - Optimized for day mode (dark text on light backgrounds) */
@@ -33,7 +33,7 @@
     --text-tertiary: rgba(31, 45, 42, 0.64);
     --text-ghost: rgba(31, 45, 42, 0.48);
     /* Text on accent-filled UI (chips, badges, zoom controls) */
-    --text-on-accent: rgba(255, 255, 255, 0.95);
+    --text-on-accent: rgba(255, 255, 255, 1.0); /* Increased to 1.0 for WCAG AA contrast */
 
     /* Daylight Garden Colors (Vibrant Primary) */
     --sage: #5A9B8D;
@@ -51,10 +51,10 @@
     /* legacy alias (used in accent themes) */
     --sunset: #E77D3E;
     /* vibrant orange spice (DMC 722) */
-    --petal: #E59AA0;
-    /* bright floral pink */
-    --amber: #F4A460;
-    /* bright sunlight */
+    --petal: #C85A65;
+    /* bright floral pink (darkened for WCAG AA contrast) */
+    --amber: #D89A00;
+    /* bright sunlight (darkened for WCAG AA contrast) */
     --indigo: #4F46E5;
     /* deep indigo */
     --violet: #6D28D9;
@@ -66,19 +66,29 @@
     --mint: #10B981;
     /* fresh mint */
 
-    /* Rainbow Accent System - Different colors for different elements */
-    --accent: var(--teal);  /* Primary accent (buttons, main actions) */
+    /* Accent System
+       - Keep legacy `--accent-*` tokens for compatibility across themes.
+       - Prefer `--accent-fill*` for filled surfaces (buttons, badges, progress),
+         and `--accent-stroke` for outlines/borders/focus.
+       - The rainbow theme overrides `--accent-fill*` to a unified multi-stop gradient. */
+    --accent: var(--teal);  /* Primary accent (default theme) */
     --accent-hover: #5AAAB2;
     --accent-muted: rgba(74, 144, 153, 0.16);
     --accent-subtle: rgba(74, 144, 153, 0.08);
-    
-    /* Rainbow accents for different UI elements */
+
+    /* Filled surfaces */
+    --accent-stroke: var(--accent);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, var(--accent-button) 0%, var(--accent-progress) 120%);
+    --accent-badge-fill: var(--accent-badge);
+
+    /* Legacy accents for different UI elements */
     --accent-button: var(--teal);  /* Primary buttons */
     --accent-active: var(--sage);  /* Active states, selected items */
     --accent-border: var(--sky);  /* Borders, dividers */
     --accent-highlight: var(--petal);  /* Highlights, focus rings */
     --accent-link: var(--indigo);  /* Links, interactive text */
-    --accent-badge: #D96320;  /* Badges, tags (deeper for readable label text) */
+    --accent-badge: #D96320;  /* Badges, tags */
     --accent-progress: var(--sunset);  /* Progress bars, meters */
     --accent-icon: var(--violet);  /* Icons, decorative elements */
 
@@ -255,7 +265,7 @@
     --glass-border: rgba(140, 183, 217, 0.18);
     --glass-shine: rgba(180, 210, 240, 0.10);
     
-    /* Rainbow accents for dark mode - softer, lighter versions */
+    /* Accents for dark mode - softer, lighter versions */
     --accent-button: #8CB7D9;  /* Sky blue for buttons */
     --accent-active: #6F9B86;  /* Sage green for active states */
     --accent-border: #7DD3FC;  /* Light sky for borders */
@@ -264,6 +274,11 @@
     --accent-badge: #E77D3E;  /* Sunset orange for badges */
     --accent-progress: #6EE7B7;  /* Mint for progress */
     --accent-icon: #8B5CF6;  /* Violet for icons */
+
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, var(--accent-button) 0%, var(--accent-progress) 120%);
+    --accent-badge-fill: var(--accent-badge);
 
     --text-primary: rgba(255, 255, 255, 0.95);
     --text-secondary: rgba(255, 255, 255, 0.75);
@@ -356,4 +371,95 @@
     --glass-bg: rgba(22, 14, 10, 0.76);
     --glass-border: rgba(231, 125, 62, 0.18);
     --glass-shine: rgba(255, 210, 180, 0.06);
+}
+
+/* ===================================
+   Liquid Productivity Design System
+   - Shimmer, ripple, and liquid effects
+   - Time-based gradient theming
+   - Stacked card aesthetics
+   =================================== */
+
+:root {
+    /* Liquid spacing & layout */
+    --liquid-section-gap: 24px;
+    --liquid-item-gap: 12px;
+    --liquid-stack-rotation: 2.5deg;
+    --liquid-stack-offset-y: 4px;
+    --liquid-stack-offset-x: 2px;
+
+    /* Liquid glass effects */
+    --liquid-glass-blur: 12px;
+    --liquid-glass-bg: rgba(242, 247, 246, 0.75);
+    --liquid-glass-border: rgba(31, 45, 42, 0.12);
+    --liquid-glass-shine: rgba(255, 255, 255, 0.3);
+
+    /* Liquid animations */
+    --liquid-shimmer-duration: 2s;
+    --liquid-ripple-duration: 600ms;
+    --liquid-transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --liquid-transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Liquid typography */
+    --font-display-liquid: 'Outfit', system-ui, -apple-system, sans-serif;
+    --font-body-liquid: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono-liquid: 'Space Mono', 'JetBrains Mono', monospace;
+
+    /* Shimmer gradient (iridescent rainbow effect) */
+    --shimmer-gradient: linear-gradient(
+        135deg,
+        rgba(56, 189, 248, 0.0) 0%,
+        rgba(56, 189, 248, 0.3) 25%,
+        rgba(192, 132, 252, 0.5) 50%,
+        rgba(251, 146, 60, 0.3) 75%,
+        rgba(251, 146, 60, 0.0) 100%
+    );
+
+    /* Time-based gradients (set by LiquidEffects) */
+    --liquid-gradient-primary: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #43e97b 100%);
+    --liquid-accent: #38bdf8;
+    --liquid-glow: rgba(56, 189, 248, 0.15);
+
+    /* Context card colors */
+    --context-vision-color: #a78bfa; /* Purple */
+    --context-milestone-color: #38bdf8; /* Sky blue */
+    --context-focus-color: #fb923c; /* Orange */
+
+    /* Intention pill styles */
+    --intention-pill-radius: 24px;
+    --intention-pill-padding: 8px 16px;
+    --intention-pill-bg: var(--liquid-glass-bg);
+    --intention-pill-border: 1px solid var(--liquid-glass-border);
+
+    /* Task item styles */
+    --task-item-radius: 16px;
+    --task-item-padding: 12px;
+    --task-item-bg: var(--surface-1);
+    --task-item-expanded-bg: var(--surface-2);
+
+    /* Customization panel */
+    --panel-width: 420px;
+    --panel-bg: var(--liquid-glass-bg);
+    --panel-backdrop: rgba(0, 0, 0, 0.6);
+
+    /* Lift effect (hover elevate) */
+    --lift-offset: -2px;
+    --lift-shadow: var(--shadow-md);
+}
+
+/* Liquid glass effects for dark mode */
+:root.dark-mode {
+    --liquid-glass-blur: 16px;
+    --liquid-glass-bg: rgba(17, 30, 45, 0.65);
+    --liquid-glass-border: rgba(140, 183, 217, 0.24); /* Increased to 0.24 for WCAG AA contrast */
+    --liquid-glass-shine: rgba(180, 210, 240, 0.08);
+
+    --intention-pill-bg: var(--liquid-glass-bg);
+    --intention-pill-border: 1px solid var(--liquid-glass-border);
+
+    --task-item-bg: var(--surface-1);
+    --task-item-expanded-bg: var(--surface-2);
+
+    --panel-bg: rgba(12, 22, 36, 0.85);
+    --panel-backdrop: rgba(0, 0, 0, 0.8);
 }

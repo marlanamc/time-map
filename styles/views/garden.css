@@ -1,0 +1,313 @@
+/* ===================================
+   Garden View - Desktop Styles
+   =================================== */
+
+/* Import cosmic card component */
+@import '../components/cosmic-card.css';
+
+/* Desktop-only styles (2x2 grid layout) */
+@media (min-width: 901px) {
+  /* Container */
+  .garden-view-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-6);
+  }
+
+  /* Header */
+  .garden-view-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: var(--space-8);
+  }
+
+  .garden-view-title {
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 var(--space-3) 0;
+    letter-spacing: -0.04em;
+  }
+
+  .garden-view-subtitle {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    opacity: 0.9;
+    margin: 0;
+  }
+
+  /* 2x2 Grid Layout */
+  .garden-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    grid-template-areas:
+      "vision milestone"
+      "focus intention";
+  }
+
+  /* Position garden groups in grid */
+  .garden-group[data-level="vision"] {
+    grid-area: vision;
+  }
+
+  .garden-group[data-level="milestone"] {
+    grid-area: milestone;
+  }
+
+  .garden-group[data-level="focus"] {
+    grid-area: focus;
+  }
+
+  .garden-group[data-level="intention"] {
+    grid-area: intention;
+  }
+
+  /* Cosmic card containers (vision, milestone, focus, intention) */
+  .garden-group[data-level="vision"],
+  .garden-group[data-level="milestone"],
+  .garden-group[data-level="focus"],
+  .garden-group[data-level="intention"] {
+    min-height: 280px;
+  }
+
+  /* Group header */
+  .garden-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+  }
+
+  .garden-group-title {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .garden-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 12px;
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  /* Empty state */
+  .garden-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .garden-empty-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.4;
+  }
+
+  .garden-empty-message {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-6);
+    line-height: 1.6;
+    max-width: 300px;
+  }
+
+  .garden-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: var(--text-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .garden-add-btn:hover {
+    background: var(--accent-hover);
+    transform: scale(1.05);
+  }
+
+  .garden-add-btn:active {
+    transform: scale(0.98);
+  }
+
+  .garden-add-icon {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  /* Goal items list */
+  .garden-goals-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .garden-goal-item {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.85));
+    padding: var(--space-3) var(--space-4);
+    border-radius: 16px;
+    border: 1.5px solid var(--glass-border, rgba(255, 255, 255, 0.5));
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    font-weight: 500;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  /* Dark mode improvements */
+  html.dark-mode .garden-goal-item {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Left accent bar on hover */
+  .garden-goal-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 0;
+    background: var(--accent);
+    border-radius: 0 4px 4px 0;
+    transition: height 0.2s ease;
+  }
+
+  .garden-goal-item:hover::before {
+    height: 60%;
+  }
+
+  .garden-goal-item:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-color: var(--accent, rgba(255, 255, 255, 0.6));
+  }
+
+  html.dark-mode .garden-goal-item:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: var(--accent, rgba(255, 255, 255, 0.3));
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .garden-goal-item:active {
+    transform: translateY(0) scale(0.99);
+  }
+
+  /* Entrance animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .garden-group {
+    animation: fadeInUp 0.5s ease-out backwards;
+  }
+
+  /* Staggered delays based on position */
+  .garden-group[data-level="vision"] {
+    animation-delay: 0.1s;
+  }
+
+  .garden-group[data-level="milestone"] {
+    animation-delay: 0.2s;
+  }
+
+  .garden-group[data-level="focus"] {
+    animation-delay: 0.3s;
+  }
+
+  .garden-group[data-level="intention"] {
+    animation-delay: 0.4s;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .garden-group {
+      animation: none;
+    }
+
+    .garden-goal-item,
+    .garden-group {
+      transition: none;
+    }
+  }
+
+  /* Large desktop: more spacious */
+  @media (min-width: 1440px) {
+    .garden-group {
+      padding: var(--space-8);
+      min-height: 360px;
+    }
+
+    .garden-content {
+      gap: var(--space-8);
+    }
+  }
+
+  /* Small laptop: tighter spacing */
+  @media (min-width: 901px) and (max-width: 1200px) {
+    .garden-content {
+      gap: var(--space-5);
+    }
+
+    .garden-group {
+      padding: var(--space-6);
+      min-height: 280px;
+    }
+  }
+}
+
+/* Tablet and below: single column stack */
+@media (max-width: 900px) {
+  .garden-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  /* Reduce cosmic effects on mobile for performance */
+  .cosmic-card::before {
+    opacity: 0.6;
+  }
+
+  .cosmic-card::after {
+    opacity: calc(var(--cosmic-stars-opacity) * 0.6);
+  }
+}

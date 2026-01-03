@@ -6,3 +6,12 @@
 @import './dayView/simple.css';
 @import './dayView/planner.css';
 
+/* Liquid Productivity Sidebar */
+@import './dayView/sidebar/sidebar-liquid.css';
+@import './dayView/sidebar/liquid-animations.css';
+@import './dayView/sidebar/context-stack.css';
+@import './dayView/sidebar/intentions-grid.css';
+@import './dayView/sidebar/task-list.css';
+@import './dayView/sidebar/customization-panel.css';
+@import './dayView/sidebar/click-to-schedule.css';
+
