@@ -52,6 +52,8 @@ import type {
   Subtask,
 } from "../types";
 
+type QuickAddShowOptions = Parameters<QuickAddApi["show"]>[0];
+
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -790,8 +792,8 @@ export const UI = {
     });
   },
 
-  openQuickAdd() {
-    void this.ensureQuickAdd().then((qa) => qa?.show());
+  openQuickAdd(opts?: QuickAddShowOptions) {
+    void this.ensureQuickAdd().then((qa) => qa?.show(opts));
   },
 
   /**
@@ -1453,9 +1455,7 @@ export const UI = {
     this.renderCategoryFilters();
     this.renderUpcomingGoals();
     this.updateDateDisplay();
-    this.updateYearProgress();
-    Streaks.check();
-    this.updateStreakDisplay();
+    this.updateTimeDisplay();
     this.updateYearProgress();
     Streaks.check();
     this.updateStreakDisplay();
@@ -1551,7 +1551,15 @@ export const UI = {
           this.escapeHtml.bind(this),
           (goalId) => goalDetailModal.show(goalId),
           (level) =>
-            this.openGoalModal(level, State.viewingMonth, State.viewingYear)
+            this.openGoalModal(level, State.viewingMonth, State.viewingYear),
+          (opts) =>
+            this.openGoalModal(
+              opts.level,
+              opts.preselectedMonth ?? State.viewingMonth,
+              opts.preselectedYear ?? State.viewingYear,
+              { parentId: opts.parentId, parentLevel: opts.parentLevel },
+            ),
+          (opts) => this.openQuickAdd(opts),
         );
         break;
       default:
@@ -2485,9 +2493,10 @@ export const UI = {
   openGoalModal(
     level: GoalLevel = "milestone",
     preselectedMonth: number | null = null,
-    preselectedYear: number | null = null
+    preselectedYear: number | null = null,
+    link?: { parentId: string; parentLevel: GoalLevel } | null,
   ): void {
-    goalModal.openGoalModal(this, level, preselectedMonth, preselectedYear);
+    goalModal.openGoalModal(this, level, preselectedMonth, preselectedYear, link);
   },
 
   closeGoalModal() {
@@ -2547,8 +2556,12 @@ export const UI = {
       this.elements.nowContext.textContent = dayOfWeek;
     }
 
-    // Days and weeks left - based on current scope (day, week, month, year) when in home view
-    // Otherwise, default to year stats
+    // Time left calculations - different metrics for each view
+    const isHome = State.currentView === VIEWS.HOME;
+    const isGarden = State.currentView === VIEWS.GARDEN;
+    
+    // For HOME view, use the scope index to determine which view's metrics to show
+    // For other views, use the actual current view
     const homeScopeViews: ViewType[] = [
       VIEWS.DAY,
       VIEWS.WEEK,
@@ -2558,12 +2571,14 @@ export const UI = {
     const effectiveView: ViewType =
       State.currentView === VIEWS.HOME
         ? homeScopeViews[this._homeProgressScopeIndex] ?? VIEWS.YEAR
-        : VIEWS.YEAR; // Default to year stats when not in home view
+        : State.currentView === VIEWS.GARDEN
+          ? VIEWS.YEAR // Garden view shows year stats
+          : State.currentView;
 
-    const isHome = State.currentView === VIEWS.HOME;
-    const scopeYear = isHome ? now.getFullYear() : State.viewingYear;
-    const scopeMonth = isHome ? now.getMonth() : State.viewingMonth;
-    const scopeDate = isHome ? now : State.viewingDate;
+    // Use current date/year for HOME and GARDEN views, otherwise use State viewing values
+    const scopeYear = (isHome || isGarden) ? now.getFullYear() : State.viewingYear;
+    const scopeMonth = (isHome || isGarden) ? now.getMonth() : State.viewingMonth;
+    const scopeDate = (isHome || isGarden) ? now : State.viewingDate;
 
     let end: Date;
     let daysLeft: number;
@@ -2575,60 +2590,77 @@ export const UI = {
 
     switch (effectiveView) {
       case VIEWS.DAY: {
-        // Days/hours left in current day
+        // Hours left | Minutes left (in current day)
         end = new Date(scopeDate);
         end.setHours(23, 59, 59, 999);
-        const hoursLeft = Math.max(
-          0,
-          (end.getTime() - now.getTime()) / (1000 * 60 * 60)
-        );
-        daysLeft = hoursLeft > 0 ? 1 : 0; // Show 1 if any time left, 0 if day is over
-        weeksLeft = Math.ceil(hoursLeft);
-        daysLeftLabel = "Days Left";
-        weeksLeftLabel = "Hours Left";
-        daysAriaLabel = "Days left today";
-        weeksAriaLabel = "Hours left today";
+        const msLeft = Math.max(0, end.getTime() - now.getTime());
+        const hoursLeft = Math.floor(msLeft / (1000 * 60 * 60));
+        const minutesLeft = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+        daysLeft = hoursLeft;
+        weeksLeft = minutesLeft;
+        daysLeftLabel = "Hours Left";
+        weeksLeftLabel = "Minutes Left";
+        daysAriaLabel = "Hours left today";
+        weeksAriaLabel = "Minutes left today";
         break;
       }
       case VIEWS.WEEK: {
-        // Days left in current week
-        if (isHome) {
-          const wy = State.getWeekYear(now);
-          const wn = State.getWeekNumber(now);
+        // Days left (in week) | Weeks left (in month)
+        if (isHome || effectiveView === VIEWS.WEEK) {
+          const wy = State.getWeekYear(scopeDate);
+          const wn = State.getWeekNumber(scopeDate);
           end = State.getWeekStart(wy, wn);
           end.setDate(end.getDate() + 7);
         } else {
           end = State.getWeekStart(State.viewingYear, State.viewingWeek ?? 1);
           end.setDate(end.getDate() + 7);
         }
-        daysLeft = Math.max(
+        const daysInWeek = Math.max(
           0,
           Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         );
-        weeksLeft = 0;
+        
+        // Weeks left in current month
+        const monthEnd = new Date(scopeYear, scopeMonth + 1, 0, 23, 59, 59, 999);
+        const daysInMonth = Math.max(
+          0,
+          Math.ceil((monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        );
+        const weeksInMonth = Math.floor(daysInMonth / 7);
+        
+        daysLeft = daysInWeek;
+        weeksLeft = weeksInMonth;
         daysLeftLabel = "Days Left";
         weeksLeftLabel = "Weeks Left";
         daysAriaLabel = "Days left this week";
-        weeksAriaLabel = "Weeks left this week";
+        weeksAriaLabel = "Weeks left this month";
         break;
       }
       case VIEWS.MONTH: {
-        // Days/weeks left in current month
-        end = new Date(scopeYear, scopeMonth + 1, 1);
-        daysLeft = Math.max(
+        // Weeks left (in month) | Months left (in year)
+        const monthEnd = new Date(scopeYear, scopeMonth + 1, 0, 23, 59, 59, 999);
+        const daysInMonth = Math.max(
           0,
-          Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+          Math.ceil((monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         );
-        weeksLeft = Math.floor(daysLeft / 7);
-        daysLeftLabel = "Days Left";
-        weeksLeftLabel = "Weeks Left";
-        daysAriaLabel = "Days left this month";
-        weeksAriaLabel = "Weeks left this month";
+        const weeksInMonth = Math.floor(daysInMonth / 7);
+        
+        // Months left in current year (from end of the month being viewed)
+        // Formula: 12 - (monthIndex + 1) where monthIndex is 0-11
+        // January (0): 12 - 1 = 11 months left, December (11): 12 - 12 = 0 months left
+        const monthsInYear = Math.max(0, 12 - (scopeMonth + 1));
+        
+        daysLeft = weeksInMonth;
+        weeksLeft = monthsInYear;
+        daysLeftLabel = "Weeks Left";
+        weeksLeftLabel = "Months Left";
+        daysAriaLabel = "Weeks left this month";
+        weeksAriaLabel = "Months left this year";
         break;
       }
       case VIEWS.YEAR:
       default: {
-        // Days/weeks left in year
+        // Days left (in year) | Weeks left (in year)
         end = new Date(scopeYear, 11, 31, 23, 59, 59, 999);
         daysLeft = Math.max(
           0,

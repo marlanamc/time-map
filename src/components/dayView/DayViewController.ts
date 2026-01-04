@@ -468,6 +468,22 @@ export class DayViewController {
       return;
     }
 
+    // Handle unscheduled item click to show/hide buttons
+    const unscheduledItem = target.closest(".planner-unscheduled-item") as HTMLElement;
+    if (unscheduledItem && !target.closest(".unscheduled-task-actions") && !target.closest(".day-goal-checkbox")) {
+      e.stopPropagation();
+      // Toggle active state - close others first
+      const allItems = this.container.querySelectorAll(".planner-unscheduled-item");
+      allItems.forEach((item) => {
+        if (item !== unscheduledItem) {
+          item.classList.remove("active");
+        }
+      });
+      unscheduledItem.classList.toggle("active");
+      haptics.impact("light");
+      return;
+    }
+
     // Schedule unscheduled task
     const scheduleBtn = target.closest(".btn-schedule-task") as HTMLElement;
     if (scheduleBtn) {
@@ -482,6 +498,12 @@ export class DayViewController {
         }
       }
       return;
+    }
+
+    // Close unscheduled item buttons when clicking outside
+    if (!target.closest(".planner-unscheduled-item")) {
+      const allItems = this.container.querySelectorAll(".planner-unscheduled-item");
+      allItems.forEach((item) => item.classList.remove("active"));
     }
 
     // Note: Removed "Plant something" button - users can add tasks via the main add button

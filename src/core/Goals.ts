@@ -234,6 +234,8 @@ export const Goals = {
       startTime: goalData.startTime || null,
       endTime: goalData.endTime || null,
       tags,
+      parentId: goalData.parentId ?? null,
+      parentLevel: goalData.parentLevel ?? null,
     };
 
     if (!State.data) {

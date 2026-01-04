@@ -733,6 +733,280 @@
     margin: var(--space-4) 0;
 }
 
+.goal-title-help {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    line-height: 1.4;
+}
+
+.goal-title-badge {
+    margin-top: var(--space-2);
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 800;
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+html.dark-mode .goal-title-badge {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.field-help {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    line-height: 1.4;
+}
+
+.modal-inline-section {
+    margin-top: var(--space-3);
+}
+
+.modal-linkage .goal-linkage-help {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.goal-linkage-badge {
+    margin-top: var(--space-2);
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 800;
+    color: var(--text-secondary);
+    border: 1px dashed rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+html.dark-mode .goal-linkage-badge {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.modal-select {
+    width: 100%;
+    padding: var(--space-3) var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--divider);
+    background: var(--surface-1);
+    color: var(--text-primary);
+    font: inherit;
+}
+
+.modal-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.modal-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 8px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.modal-pill:hover {
+    border-color: rgba(111, 155, 134, 0.35);
+}
+
+.modal-pill.is-selected {
+    border-color: rgba(111, 155, 134, 0.6);
+    box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+html.dark-mode .modal-pill {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.modal-disclosure {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+html.dark-mode .modal-disclosure {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.modal-disclosure-toggle {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.modal-disclosure-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+.modal-disclosure-title {
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.modal-disclosure-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.modal-disclosure-body {
+    padding: 0 var(--space-3) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.modal-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.modal-chip {
+    padding: 8px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.modal-chip:hover {
+    border-color: rgba(111, 155, 134, 0.35);
+}
+
+html.dark-mode .modal-chip {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.modal-suggest-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.modal-suggest-label {
+    font-size: var(--text-xs);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.time-context {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+html.dark-mode .time-context {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.time-context-toggle {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.time-context-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+.time-context-title {
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.time-context-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.time-context-body {
+    padding: 0 var(--space-3) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.time-context-fact {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.time-context-reframes {
+    margin: 0;
+    padding-left: 1.1em;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+}
+
+.time-context-safety {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    line-height: 1.45;
+    padding-top: var(--space-2);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+html.dark-mode .time-context-safety {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
 .time-section {
     background: var(--accent-subtle);
     margin: calc(var(--space-4) * -1);
@@ -747,4 +1021,3 @@
     border: none;
     margin-bottom: 0;
 }
-

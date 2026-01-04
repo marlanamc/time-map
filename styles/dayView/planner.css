@@ -239,7 +239,7 @@
     position: relative;
     min-height: 900px;
     /* 14 hours * ~64px */
-    order: 1; /* Default: appears before unscheduled on desktop */
+    order: 2; /* Appears after unscheduled on desktop */
 }
 
 .planner-timeline-container.is-drop-target {
@@ -557,10 +557,13 @@
 
 /* Unscheduled section */
 .planner-unscheduled-section {
-    margin-top: var(--space-6);
-    padding-top: var(--space-6);
-    border-top: 1px solid var(--planner-border);
-    order: 2; /* Default: appears after timeline on desktop */
+    margin-top: 0;
+    margin-bottom: var(--space-6);
+    padding-top: 0;
+    padding-bottom: var(--space-6);
+    border-top: none;
+    border-bottom: 1px solid var(--planner-border);
+    order: 1; /* Appears before timeline on desktop */
 }
 
 .planner-unscheduled-header {
@@ -636,9 +639,21 @@
 }
 
 .unscheduled-task-actions {
-    display: flex;
+    display: none;
     gap: 0.5rem;
     flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.planner-unscheduled-item.active .unscheduled-task-actions {
+    display: flex;
+    opacity: 1;
+}
+
+.planner-unscheduled-item.active {
+    background: var(--bg-hover);
+    border-color: var(--accent);
 }
 
 .btn-schedule-task {
@@ -694,5 +709,86 @@
 
     .planner-timeline-container {
         order: 2; /* Appears after unscheduled on mobile */
+    }
+
+    /* Improve intention visibility on mobile */
+    .day-goal-card.planner-timed-task {
+        padding: 0.75rem 1rem;
+        min-height: 56px;
+        background: var(--bg-surface);
+        border: 1px solid var(--planner-border);
+        box-shadow: var(--shadow-md);
+    }
+
+    .timed-task-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.3;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+
+    .timed-task-emoji {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .timed-task-content {
+        gap: 0.875rem;
+    }
+
+    /* Sidebar items - improve visibility */
+    .sidebar-item-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.4;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+
+    .sidebar-item-emoji {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .day-goal-card.sidebar-item {
+        padding: 0.875rem 1rem;
+        min-height: 52px;
+        background: var(--bg-surface);
+        border: 1px solid var(--planner-border);
+    }
+
+    /* Unscheduled items - improve visibility */
+    .unscheduled-task-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.3;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+
+    .unscheduled-task-emoji {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .planner-unscheduled-item {
+        padding: 0.875rem 1rem;
+        min-height: 56px;
+        background: var(--bg-surface);
+        border: 1px solid var(--planner-border);
+        box-shadow: var(--shadow-sm);
     }
 }

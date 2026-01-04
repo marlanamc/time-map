@@ -6,7 +6,7 @@
     background: transparent;
     overflow-y: auto;
     overflow-x: visible;
-    padding: calc(var(--space-5) + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) calc(var(--mobile-tab-bar-height) + var(--space-6)) calc(var(--space-4) + env(safe-area-inset-left, 0px));
+    padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) calc(var(--space-3) + env(safe-area-inset-right, 0px)) calc(var(--mobile-tab-bar-height) + var(--space-3)) calc(var(--space-3) + env(safe-area-inset-left, 0px));
     -webkit-overflow-scrolling: touch;
     width: 100%;
     box-sizing: border-box;
@@ -16,8 +16,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: var(--space-4);
-    margin-bottom: var(--space-2);
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
 }
 
 #mobileHomeView .mobile-home-header .logo-text {
@@ -40,8 +40,8 @@
 #mobileHomeView .mobile-home-content {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    padding-bottom: var(--space-8);
+    gap: var(--space-2);
+    padding-bottom: var(--space-4);
     width: 100%;
     box-sizing: border-box;
     overflow: visible;
@@ -50,7 +50,7 @@
 #mobileHomeView .mobile-card {
     background: var(--bg-surface);
     border-radius: var(--radius-lg);
-    padding: var(--space-5);
+    padding: var(--space-3);
     border: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
@@ -75,12 +75,12 @@
 }
 
 #mobileHomeView .card-label {
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--text-tertiary);
     font-weight: 600;
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
     overflow: visible !important;
     text-overflow: clip;
     white-space: normal;
@@ -100,8 +100,8 @@
 /* Time Card */
 #mobileHomeView .time-card {
     overflow: visible !important;
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
 }
 
 #mobileHomeView .time-card .card-label,
@@ -118,10 +118,10 @@
 }
 
 #mobileHomeView .now-context-mobile {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-2);
     letter-spacing: -0.02em;
     overflow: visible;
     white-space: normal;
@@ -136,7 +136,7 @@
 #mobileHomeView .time-stats-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
+    gap: var(--space-3);
     margin-top: var(--space-1);
 }
 
@@ -146,16 +146,16 @@
 }
 
 #mobileHomeView .stat-value {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     letter-spacing: -0.03em;
 }
 
 #mobileHomeView .stat-label {
-    font-size: 13px;
+    font-size: 11px;
     color: var(--text-secondary);
     font-weight: 500;
 }
@@ -164,18 +164,18 @@
 #mobileHomeView .bloom-card {
     align-items: center;
     text-align: center;
-    min-height: 180px;
+    min-height: 120px;
     justify-content: center;
-    padding: var(--space-6) var(--space-5);
+    padding: var(--space-4) var(--space-3);
 }
 
 #mobileHomeView .garden-bloom-mobile {
-    height: 120px;
+    height: 80px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-2);
 }
 
 #mobileHomeView .bloom-stats-mobile {
@@ -192,12 +192,12 @@
 #mobileHomeView .affirmation-card {
     flex-direction: row;
     align-items: flex-start;
-    gap: var(--space-3);
-    padding: var(--space-4) var(--space-5);
+    gap: var(--space-2);
+    padding: var(--space-3);
 }
 
 #mobileHomeView .card-icon {
-    font-size: 20px;
+    font-size: 18px;
     flex-shrink: 0;
     margin-top: 2px;
 }
@@ -206,8 +206,8 @@
     font-style: italic;
     color: var(--text-secondary);
     font-weight: 400;
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 .dark-mode #mobileHomeView .affirmation-text-mobile {
@@ -228,16 +228,16 @@
 }
 
 #mobileHomeView .mobile-goal-item {
-    padding: var(--space-4);
+    padding: var(--space-3);
     background: var(--bg-elevated);
     border-radius: var(--radius-md);
     border: 1px solid var(--glass-border);
-    font-size: 15px;
+    font-size: 14px;
     color: var(--text-primary);
     font-weight: 500;
     transition: all 0.2s ease;
     cursor: pointer;
-    min-height: 52px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     touch-action: manipulation;
@@ -262,20 +262,20 @@
 #mobileHomeView .goals-by-level {
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
+    gap: var(--space-3);
 }
 
 #mobileHomeView .goals-level-section {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-2);
 }
 
 #mobileHomeView .goals-level-header {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -298,7 +298,7 @@
 #mobileHomeView .goals-level-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-1);
 }
 
 #mobileHomeView .goals-more {
@@ -318,13 +318,40 @@
 
 /* Responsive padding for small screens */
 @media (max-width: 375px) {
+    #mobileHomeView {
+        padding: calc(var(--space-2) + env(safe-area-inset-top, 0px)) calc(var(--space-2) + env(safe-area-inset-right, 0px)) calc(var(--mobile-tab-bar-height) + var(--space-2)) calc(var(--space-2) + env(safe-area-inset-left, 0px));
+    }
+    
     #mobileHomeView .mobile-card {
-        padding: var(--space-4);
+        padding: var(--space-2);
     }
     
     #mobileHomeView .time-card {
-        padding-left: var(--space-3);
-        padding-right: var(--space-3);
+        padding-left: var(--space-2);
+        padding-right: var(--space-2);
+    }
+    
+    #mobileHomeView .mobile-home-content {
+        gap: var(--space-1);
+    }
+    
+    #mobileHomeView .now-context-mobile {
+        font-size: 20px;
+        margin-bottom: var(--space-1);
+    }
+    
+    #mobileHomeView .stat-value {
+        font-size: 24px;
+    }
+    
+    #mobileHomeView .bloom-card {
+        min-height: 100px;
+        padding: var(--space-3) var(--space-2);
+    }
+    
+    #mobileHomeView .garden-bloom-mobile {
+        height: 60px;
+        margin-bottom: var(--space-1);
     }
 }
 

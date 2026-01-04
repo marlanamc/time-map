@@ -12,6 +12,7 @@ export const DB_STORES: {
   readonly ACHIEVEMENTS: 'achievements';
   readonly BRAIN_DUMP: 'brainDump';
   readonly TIME_LOGS: 'timeLogs';
+  readonly WEEK_REFLECTIONS: 'weekReflections';
   readonly BACKUP: 'backups';
 };
 

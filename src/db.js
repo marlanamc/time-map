@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'adhd-visionboard';
-const DB_VERSION = 2; // Upgraded for composite indexes
+const DB_VERSION = 3; // Added week reflections store
 
 const DB_STORES = {
   GOALS: 'goals',
@@ -9,6 +9,7 @@ const DB_STORES = {
   ACHIEVEMENTS: 'achievements',
   BRAIN_DUMP: 'brainDump',
   TIME_LOGS: 'timeLogs',
+  WEEK_REFLECTIONS: 'weekReflections',
   BACKUP: 'backups'
 };
 
@@ -77,6 +78,19 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
       }
 
       console.log('✓ Database upgraded to v2 with composite indexes');
+    }
+
+    // Version 3: Add week reflections (local-only prompts)
+    if (oldVersion < 3) {
+      console.log('Adding week reflections store...');
+      try {
+        const reflections = db.createObjectStore(DB_STORES.WEEK_REFLECTIONS, { keyPath: 'id' });
+        reflections.createIndex('byWeek', ['weekYear', 'weekNum']);
+        reflections.createIndex('byCreatedAt', 'createdAt');
+        console.log('✓ Week reflections store created');
+      } catch (e) {
+        console.error('Failed to create week reflections store:', e);
+      }
     }
   },
 });

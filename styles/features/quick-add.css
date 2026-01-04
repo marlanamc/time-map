@@ -76,6 +76,39 @@
     box-shadow: 0 0 0 3px var(--accent-muted);
 }
 
+.quick-add-secondary-label {
+    display: block;
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.quick-add-overlay input#quickAddTiny {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-1);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: var(--text-base);
+    outline: none;
+    box-shadow: inset 0 0 0 1px rgba(31, 45, 42, 0.06);
+}
+
+.dark-mode .quick-add-overlay input#quickAddTiny {
+    background: rgba(7, 17, 14, 0.45);
+    border: 1px solid rgba(140, 183, 217, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(140, 183, 217, 0.08);
+}
+
+.quick-add-overlay input#quickAddTiny:focus {
+    border-color: rgba(111, 155, 134, 0.55);
+    box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
 .quick-add-tip {
     margin-top: var(--space-3);
     font-size: var(--text-sm);

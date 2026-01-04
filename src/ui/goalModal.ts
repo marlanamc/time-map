@@ -19,6 +19,268 @@ export type GoalModalContext = {
   ) => string;
 };
 
+let pendingParentLink: { parentId: string; parentLevel: GoalLevel } | null = null;
+let visionTimeContextOpen = false;
+let milestoneTimeContextOpen = false;
+let focusTimeContextOpen = false;
+let suggestionsOpen = false;
+let focusEasyMode = false;
+
+let modalLinkSelection: { parentId: string; parentLevel: GoalLevel } | null = null;
+
+function formatTimeContextFact(selectedYear: number): { fact: string; bucketMonths: number } {
+  const now = new Date();
+  const end = new Date(selectedYear, 11, 31, 23, 59, 59, 999);
+
+  if (selectedYear > now.getFullYear()) {
+    return { fact: "This year hasn’t started yet.", bucketMonths: 12 };
+  }
+
+  if (selectedYear < now.getFullYear() || end.getTime() <= now.getTime()) {
+    return { fact: "This year is nearing its close.", bucketMonths: 0 };
+  }
+
+  const msLeft = end.getTime() - now.getTime();
+  const daysLeft = msLeft / 86400000;
+  const approxMonthsLeft = Math.max(0, Math.min(12, Math.round(daysLeft / 30.44)));
+  if (approxMonthsLeft < 1) return { fact: "This year is nearing its close.", bucketMonths: 0 };
+  return {
+    fact: `About ${approxMonthsLeft} month${approxMonthsLeft === 1 ? "" : "s"} remain in this year.`,
+    bucketMonths: approxMonthsLeft,
+  };
+}
+
+function getTimeContextReframes(bucketMonths: number): string[] {
+  if (bucketMonths >= 6) {
+    return [
+      "Small, steady steps have time to grow.",
+      "There’s room for experimentation, not perfection.",
+    ];
+  }
+  if (bucketMonths >= 2) {
+    return [
+      "Some people use this time to build gentle momentum.",
+      "Others use it to notice what matters before committing.",
+    ];
+  }
+  if (bucketMonths >= 1) {
+    return [
+      "Starting imperfectly now is allowed.",
+      "Reflecting now and carrying this forward is also allowed.",
+    ];
+  }
+  return [
+    "A Vision can begin quietly.",
+    "Noticing what matters is already meaningful.",
+  ];
+}
+
+function parseYmdLocal(ymd: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd.trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  if (!Number.isFinite(year) || !Number.isFinite(monthIndex) || !Number.isFinite(day)) return null;
+  const d = new Date(year, monthIndex, day);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function getOrCreateAfter(el: HTMLElement, id: string, className: string): HTMLElement {
+  const existing = document.getElementById(id);
+  if (existing) return existing;
+  const container = document.createElement("div");
+  container.id = id;
+  container.className = className;
+  el.insertAdjacentElement("afterend", container);
+  return container;
+}
+
+function setTitleHelp(text: string | null) {
+  const titleInput = document.getElementById("goalTitle") as HTMLInputElement | null;
+  if (!titleInput) return;
+  const container = titleInput.parentElement;
+  if (!container) return;
+  const existing = document.getElementById("goalTitleHelp");
+  if (!text) {
+    existing?.remove();
+    return;
+  }
+  const help = existing ?? document.createElement("div");
+  help.id = "goalTitleHelp";
+  help.className = "goal-title-help";
+  help.textContent = text;
+  if (!existing) container.appendChild(help);
+}
+
+function setInlineHelp(el: HTMLElement | null, id: string, text: string | null) {
+  if (!el) return;
+  const existing = document.getElementById(id);
+  if (!text) {
+    existing?.remove();
+    return;
+  }
+  const help = existing ?? document.createElement("div");
+  help.id = id;
+  help.className = "field-help";
+  help.textContent = text;
+  if (!existing) el.appendChild(help);
+}
+
+function focusTitleAtBlank(template: string) {
+  const input = document.getElementById("goalTitle") as HTMLInputElement | null;
+  if (!input) return;
+  input.value = template;
+  const idx = template.indexOf("___");
+  if (idx >= 0) {
+    const start = idx;
+    const end = idx + 3;
+    input.focus();
+    input.setSelectionRange(start, end);
+  } else {
+    input.focus();
+    input.setSelectionRange(template.length, template.length);
+  }
+}
+
+function renderDisclosure(opts: {
+  id: string;
+  title: string;
+  subtitle: string;
+  open: boolean;
+  bodyHtml: string;
+}): string {
+  const { id, title, subtitle, open, bodyHtml } = opts;
+  return `
+    <div class="modal-disclosure" id="${id}">
+      <button type="button" class="modal-disclosure-toggle" data-action="toggle-disclosure" data-target="${id}" aria-expanded="${open ? "true" : "false"}">
+        <div class="modal-disclosure-title">${title}</div>
+        <div class="modal-disclosure-subtitle">${subtitle}</div>
+      </button>
+      ${open ? `<div class="modal-disclosure-body">${bodyHtml}</div>` : ""}
+    </div>
+  `;
+}
+
+function renderLinkageSelector(opts: {
+  level: GoalLevel;
+  visions: { id: string; title: string }[];
+  milestones: { id: string; title: string }[];
+  focuses: { id: string; title: string }[];
+  selected: { parentId: string; parentLevel: GoalLevel } | null;
+}): string {
+  const { level, visions, milestones, focuses, selected } = opts;
+
+  if (level === "milestone") {
+    const usePills = visions.length > 0 && visions.length <= 6;
+    return `
+      <div class="form-group modal-linkage" id="goalLinkageGroup">
+        <label>Which Vision does this support?</label>
+        ${usePills
+          ? `<div class="modal-pill-row">
+              ${visions
+                .map((v) => {
+                  const isSelected = selected?.parentId === v.id && selected?.parentLevel === "vision";
+                  return `<button type="button" class="modal-pill${isSelected ? " is-selected" : ""}" data-action="select-link" data-parent-level="vision" data-parent-id="${v.id}">${v.title}</button>`;
+                })
+                .join("")}
+            </div>`
+          : `<select id="goalLinkSelect" class="modal-select">
+              <option value="" ${!selected ? "selected" : ""}>Select a Vision</option>
+              ${visions
+                .map((v) => {
+                  const isSelected = selected?.parentId === v.id && selected?.parentLevel === "vision";
+                  return `<option value="vision:${v.id}" ${isSelected ? "selected" : ""}>${v.title}</option>`;
+                })
+                .join("")}
+            </select>`}
+        <div class="goal-linkage-help" id="goalLinkageHelp" hidden>Choose a Vision so this milestone has an anchor.</div>
+      </div>
+    `;
+  }
+
+  if (level === "focus") {
+    const candidates = [...milestones.map((m) => ({ ...m, level: "milestone" as const })), ...visions.map((v) => ({ ...v, level: "vision" as const }))];
+    const usePills = candidates.length > 0 && candidates.length <= 6;
+    return `
+      <div class="form-group modal-linkage" id="goalLinkageGroup">
+        <label>What does this Focus support?</label>
+        ${usePills
+          ? `<div class="modal-pill-row">
+              ${candidates
+                .map((c) => {
+                  const isSelected = selected?.parentId === c.id && selected?.parentLevel === c.level;
+                  const prefix = c.level === "milestone" ? "Milestone" : "Vision";
+                  return `<button type="button" class="modal-pill${isSelected ? " is-selected" : ""}" data-action="select-link" data-parent-level="${c.level}" data-parent-id="${c.id}">${prefix}: ${c.title}</button>`;
+                })
+                .join("")}
+            </div>`
+          : `<select id="goalLinkSelect" class="modal-select">
+              <option value="" ${!selected ? "selected" : ""}>Select a Milestone or Vision</option>
+              ${milestones.length > 0 ? `<optgroup label="Milestones">${milestones.map((m) => `<option value="milestone:${m.id}" ${selected?.parentId === m.id && selected?.parentLevel === "milestone" ? "selected" : ""}>${m.title}</option>`).join("")}</optgroup>` : ""}
+              ${visions.length > 0 ? `<optgroup label="Visions">${visions.map((v) => `<option value="vision:${v.id}" ${selected?.parentId === v.id && selected?.parentLevel === "vision" ? "selected" : ""}>${v.title}</option>`).join("")}</optgroup>` : ""}
+            </select>`}
+        <div class="goal-linkage-help" id="goalLinkageHelp" hidden>Choose a Milestone or Vision so this focus has context.</div>
+      </div>
+    `;
+  }
+
+  // intention (optional)
+  if (level === "intention") {
+    const usePills = focuses.length + visions.length <= 6 && (focuses.length + visions.length) > 0;
+    const noneSelected = !selected;
+    return `
+      <div class="form-group modal-linkage" id="goalLinkageGroup">
+        <label>Link to something (optional)</label>
+        ${usePills
+          ? `<div class="modal-pill-row">
+              <button type="button" class="modal-pill${noneSelected ? " is-selected" : ""}" data-action="clear-link">None</button>
+              ${focuses
+                .map((f) => {
+                  const isSelected = selected?.parentId === f.id && selected?.parentLevel === "focus";
+                  return `<button type="button" class="modal-pill${isSelected ? " is-selected" : ""}" data-action="select-link" data-parent-level="focus" data-parent-id="${f.id}">Focus: ${f.title}</button>`;
+                })
+                .join("")}
+              ${visions
+                .map((v) => {
+                  const isSelected = selected?.parentId === v.id && selected?.parentLevel === "vision";
+                  return `<button type="button" class="modal-pill${isSelected ? " is-selected" : ""}" data-action="select-link" data-parent-level="vision" data-parent-id="${v.id}">Vision: ${v.title}</button>`;
+                })
+                .join("")}
+            </div>`
+          : `<select id="goalLinkSelect" class="modal-select">
+              <option value="" ${noneSelected ? "selected" : ""}>None (life task)</option>
+              ${focuses.length > 0 ? `<optgroup label="Focus">${focuses.map((f) => `<option value="focus:${f.id}" ${selected?.parentId === f.id && selected?.parentLevel === "focus" ? "selected" : ""}>${f.title}</option>`).join("")}</optgroup>` : ""}
+              ${visions.length > 0 ? `<optgroup label="Vision">${visions.map((v) => `<option value="vision:${v.id}" ${selected?.parentId === v.id && selected?.parentLevel === "vision" ? "selected" : ""}>${v.title}</option>`).join("")}</optgroup>` : ""}
+            </select>`}
+        <div class="goal-linkage-badge" id="goalLinkageBadge"${noneSelected ? "" : " hidden"}>Life task (still valid)</div>
+      </div>
+    `;
+  }
+
+  return "";
+}
+
+function getSelectedLinkFromUi(): { parentId: string; parentLevel: GoalLevel } | null {
+  const select = document.getElementById("goalLinkSelect") as HTMLSelectElement | null;
+  if (select) {
+    const raw = select.value?.trim();
+    if (!raw) return null;
+    const [level, id] = raw.split(":");
+    if (!id) return null;
+    if (level === "vision" || level === "milestone" || level === "focus") {
+      return { parentLevel: level as GoalLevel, parentId: id };
+    }
+    return null;
+  }
+  return modalLinkSelection;
+}
+
+function setLinkageHelpVisible(visible: boolean) {
+  const help = document.getElementById("goalLinkageHelp");
+  if (help) help.toggleAttribute("hidden", !visible);
+}
+
 export function setFieldVisibility(
   element: HTMLElement | null,
   visible: boolean,
@@ -31,6 +293,18 @@ export function closeGoalModal(ctx: GoalModalContext) {
   ctx.elements.goalModal?.classList.remove("active");
   ctx.elements.goalForm?.reset();
   ctx.goalModalYear = null;
+  pendingParentLink = null;
+  const help = document.getElementById("goalTitleHelp");
+  help?.remove();
+  document.getElementById("goalLinkageGroup")?.remove();
+  document.getElementById("goalSuggestionsGroup")?.remove();
+  document.getElementById("goalExtrasGroup")?.remove();
+  document.getElementById("goalTinyGroup")?.remove();
+  setInlineHelp(document.getElementById("milestoneDurationGroup"), "milestoneDurationHelp", null);
+  setLinkageHelpVisible(false);
+  suggestionsOpen = false;
+  focusEasyMode = false;
+  modalLinkSelection = null;
 }
 
 export function populateMonthSelect(
@@ -70,11 +344,15 @@ export function updateGoalModalTimeBreakdown(ctx: GoalModalContext) {
     breakdownContainer = document.createElement("div");
     breakdownContainer.id = "modalTimeBreakdown";
     breakdownContainer.className = "modal-time-breakdown";
-    const firstFormGroup = ctx.elements.goalForm?.querySelector(".form-group");
-    if (firstFormGroup) {
-      const parent = firstFormGroup.parentNode;
-      if (parent)
-        parent.insertBefore(breakdownContainer, firstFormGroup.nextSibling);
+    const form = ctx.elements.goalForm;
+    const anchor = (() => {
+      if (!form) return null;
+      if (level === "milestone") return document.getElementById("goalDurationRow");
+      if (level === "focus") return document.getElementById("goalScopeRow");
+      return form.querySelector(".form-group");
+    })();
+    if (anchor) {
+      anchor.insertAdjacentElement("afterend", breakdownContainer);
     }
   }
 
@@ -83,20 +361,108 @@ export function updateGoalModalTimeBreakdown(ctx: GoalModalContext) {
     ctx.goalModalYear ?? State.viewingYear ?? new Date().getFullYear();
 
   if (level === "intention") {
-    html = TimeBreakdown.generateHTML(0, currentYear, false, "intention");
+    html = "";
   } else if (level === "focus") {
-    html = TimeBreakdown.generateHTML(0, currentYear, false, "focus");
+    const startDateEl = document.getElementById("goalStartDate") as HTMLInputElement | null;
+    const startDate = startDateEl?.value ? parseYmdLocal(startDateEl.value) : null;
+    const d = startDate ?? (State.viewingDate ?? new Date());
+    const wkNum = State.getWeekNumber(d);
+    html = `
+      <div class="time-context">
+        <button type="button" class="time-context-toggle" id="timeContextToggle" aria-expanded="${focusTimeContextOpen ? "true" : "false"}">
+          <div class="time-context-title">Time context (optional)</div>
+          <div class="time-context-subtitle">A quiet orientation to this week.</div>
+        </button>
+        ${
+          focusTimeContextOpen
+            ? `
+              <div class="time-context-body">
+                <div class="time-context-fact">This focus is for Week ${wkNum} (Mon–Sun).</div>
+                <ul class="time-context-reframes">
+                  <li>One clear focus beats ten vague plans.</li>
+                </ul>
+                <div class="time-context-safety">This is here to help you orient, not to rush you.</div>
+              </div>
+            `
+            : ""
+        }
+      </div>
+    `;
   } else if (level === "vision") {
-    html = TimeBreakdown.generateHTML(0, currentYear, false, "vision");
+    const { fact, bucketMonths } = formatTimeContextFact(currentYear);
+    const reframes = getTimeContextReframes(bucketMonths);
+    html = `
+      <div class="time-context">
+        <button type="button" class="time-context-toggle" id="timeContextToggle" aria-expanded="${visionTimeContextOpen ? "true" : "false"}">
+          <div class="time-context-title">Time context (optional)</div>
+          <div class="time-context-subtitle">A quiet orientation to the year you’re in.</div>
+        </button>
+        ${
+          visionTimeContextOpen
+            ? `
+              <div class="time-context-body">
+                <div class="time-context-fact">${fact}</div>
+                <ul class="time-context-reframes">
+                  ${reframes.slice(0, 2).map((r) => `<li>${r}</li>`).join("")}
+                </ul>
+                <div class="time-context-safety">This is here to help you orient, not to rush you.</div>
+              </div>
+            `
+            : ""
+        }
+      </div>
+    `;
   } else if (level === "milestone") {
     const select = ctx.elements.goalMonth;
+    const durationEl = document.getElementById("milestoneDurationMonths") as HTMLSelectElement | null;
     if (!select) return;
     const selectedMonth = Number.parseInt(select.value, 10);
+    const durationMonths = Math.max(1, Math.floor(Number(durationEl?.value ?? 1)));
     if (!Number.isFinite(selectedMonth)) return;
-    html = TimeBreakdown.generateHTML(selectedMonth, currentYear, false, "milestone");
+    const start = new Date(currentYear, selectedMonth, 1);
+    const end = new Date(currentYear, selectedMonth + durationMonths, 0, 23, 59, 59, 999);
+    const days = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000) + 1);
+    const weeks = Math.max(1, Math.round(days / 7));
+    const fact = days <= 31 ? `This milestone spans about ${days} days.` : `This milestone spans about ${weeks} weeks.`;
+    html = `
+      <div class="time-context">
+        <button type="button" class="time-context-toggle" id="timeContextToggle" aria-expanded="${milestoneTimeContextOpen ? "true" : "false"}">
+          <div class="time-context-title">Time context (optional)</div>
+          <div class="time-context-subtitle">A quiet orientation to this chapter.</div>
+        </button>
+        ${
+          milestoneTimeContextOpen
+            ? `
+              <div class="time-context-body">
+                <div class="time-context-fact">${fact}</div>
+                <ul class="time-context-reframes">
+                  <li>This is a chapter, not the whole story.</li>
+                  <li>Progress here can be uneven.</li>
+                </ul>
+                <div class="time-context-safety">This is here to help you orient, not to rush you.</div>
+              </div>
+            `
+            : ""
+        }
+      </div>
+    `;
   }
 
   breakdownContainer.innerHTML = html;
+  breakdownContainer.toggleAttribute("hidden", !html);
+
+  if (level === "vision" || level === "milestone" || level === "focus") {
+    const toggle = breakdownContainer.querySelector<HTMLButtonElement>("#timeContextToggle");
+    if (toggle) {
+      toggle.onclick = (e) => {
+        e.preventDefault();
+        if (level === "vision") visionTimeContextOpen = !visionTimeContextOpen;
+        if (level === "milestone") milestoneTimeContextOpen = !milestoneTimeContextOpen;
+        if (level === "focus") focusTimeContextOpen = !focusTimeContextOpen;
+        updateGoalModalTimeBreakdown(ctx);
+      };
+    }
+  }
 }
 
 export function openGoalModal(
@@ -104,11 +470,22 @@ export function openGoalModal(
   level: GoalLevel = "milestone",
   preselectedMonth: number | null = null,
   preselectedYear: number | null = null,
+  link?: { parentId: string; parentLevel: GoalLevel } | null,
 ): void {
+  const isFreshOpen = !ctx.elements.goalModal?.classList.contains("active");
   haptics.impact("light");
   ctx.goalModalLevel = level;
   ctx.goalModalYear =
     preselectedYear ?? State.viewingYear ?? new Date().getFullYear();
+  pendingParentLink = link ?? null;
+  if (isFreshOpen) {
+    if (level === "vision") visionTimeContextOpen = false;
+    if (level === "milestone") milestoneTimeContextOpen = false;
+    if (level === "focus") focusTimeContextOpen = false;
+    suggestionsOpen = false;
+    focusEasyMode = false;
+    modalLinkSelection = null;
+  }
 
   const title = document.getElementById("goal-modal-title");
   const label = document.querySelector('label[for="goalTitle"]');
@@ -131,6 +508,16 @@ export function openGoalModal(
       label.textContent = "What is your intention for today?";
   }
 
+  setTitleHelp(
+    level === "vision"
+      ? "One sentence is enough. You can change this later."
+      : level === "focus"
+        ? "Aim for 1–3 Focus items. Smaller is okay."
+        : level === "intention"
+          ? "This can be small. Even a 2-minute task counts."
+          : null,
+  );
+
   const monthGroup = document.querySelector(
     'label[for="goalMonth"]',
   )?.parentElement as HTMLElement;
@@ -141,6 +528,9 @@ export function openGoalModal(
   const categoryGroup = document.querySelector(
     'label[for="goalCategory"]',
   )?.parentElement as HTMLElement;
+  const categoryLabel = document.querySelector(
+    'label[for="goalCategory"]',
+  ) as HTMLElement | null;
 
   const timeGroup = document
     .getElementById("goalStartTime")
@@ -148,6 +538,9 @@ export function openGoalModal(
   const priorityGroup = document.querySelector(
     'label[for="goalPriority"]',
   )?.parentElement as HTMLElement;
+  const priorityLabel = document.querySelector(
+    'label[for="goalPriority"]',
+  ) as HTMLElement | null;
   const yearGroup = document.getElementById("goalYearGroup") as HTMLElement | null;
   const yearInput = document.getElementById("goalYear") as HTMLInputElement | null;
   const startDateGroup = document.getElementById(
@@ -174,6 +567,7 @@ export function openGoalModal(
   const submitBtn = document.querySelector(
     '#goalForm button[type="submit"]',
   ) as HTMLElement;
+  const durationRow = document.getElementById("goalDurationRow") as HTMLElement | null;
 
   if (submitBtn) {
     if (level === "vision") submitBtn.textContent = "Create Vision";
@@ -187,6 +581,7 @@ export function openGoalModal(
   if (startDateGroup) startDateGroup.style.display = "none";
   if (milestoneDurationGroup) milestoneDurationGroup.style.display = "none";
   if (focusDurationGroup) focusDurationGroup.style.display = "none";
+  if (durationRow) durationRow.style.display = "flex";
 
   const toYmdLocal = (d: Date) => {
     const y = d.getFullYear();
@@ -209,13 +604,234 @@ export function openGoalModal(
     };
   }
 
+  // Linkage + suggestions containers (insert after title group).
+  const firstFormGroup = ctx.elements.goalForm?.querySelector(".form-group") as HTMLElement | null;
+  if (firstFormGroup) {
+    const visions = Goals.getForRange(
+      new Date((ctx.goalModalYear ?? new Date().getFullYear()), 0, 1),
+      new Date((ctx.goalModalYear ?? new Date().getFullYear()), 11, 31),
+    )
+      .filter((g) => g.level === "vision" && g.status !== "done")
+      .slice()
+      .sort((a, b) => a.title.localeCompare(b.title))
+      .map((g) => ({ id: g.id, title: g.title }));
+
+    const milestones = Goals.getAll()
+      .filter((g) => g.level === "milestone" && g.status !== "done")
+      .slice()
+      .sort((a, b) => a.title.localeCompare(b.title))
+      .map((g) => ({ id: g.id, title: g.title }));
+
+    const focuses = (() => {
+      const viewingDate = State.viewingDate ?? new Date();
+      const wk = State.getWeekNumber(viewingDate);
+      const wy = State.getWeekYear(viewingDate);
+      const ws = State.getWeekStart(wy, wk);
+      const we = new Date(ws);
+      we.setDate(we.getDate() + 6);
+      return Goals.getForRange(ws, we)
+        .filter((g) => g.level === "focus" && g.status !== "done")
+        .slice()
+        .sort((a, b) => a.title.localeCompare(b.title))
+        .map((g) => ({ id: g.id, title: g.title }));
+    })();
+
+    // Seed selection from context link (if compatible) only if user hasn't chosen yet.
+    if (!modalLinkSelection && pendingParentLink) {
+      if (level === "milestone" && pendingParentLink.parentLevel === "vision") modalLinkSelection = pendingParentLink;
+      if (level === "focus" && (pendingParentLink.parentLevel === "milestone" || pendingParentLink.parentLevel === "vision")) modalLinkSelection = pendingParentLink;
+      if (level === "intention" && (pendingParentLink.parentLevel === "focus" || pendingParentLink.parentLevel === "vision")) modalLinkSelection = pendingParentLink;
+    }
+
+    // Remove any previous containers
+    document.getElementById("goalLinkageGroup")?.remove();
+    document.getElementById("goalSuggestionsGroup")?.remove();
+    document.getElementById("goalExtrasGroup")?.remove();
+    document.getElementById("goalTinyGroup")?.remove();
+
+    // Suggestions (optional)
+    const suggestionChips = (() => {
+      if (level === "milestone") {
+        return [
+          "This month’s chapter is: ___",
+          "A realistic win for this month: ___",
+          "Make it easier to ___",
+          "By the end of this month, I want to have ___",
+          "Reduce friction around ___",
+          "Set up a system for ___",
+          "Follow through on ___",
+          "Close the loop on ___",
+        ];
+      }
+      if (level === "focus") {
+        const easy = ["Stabilize the basics", "Protect energy", "Minimum viable progress"];
+        const groups = [
+          { label: "Move one thing forward", items: ["Take one concrete step", "Reduce friction", "Make one decision I’ve been avoiding"] },
+          { label: "Build stability", items: ["Keep the basics steady", "Protect sleep", "Do the week on easy mode"] },
+          { label: "Clear a bottleneck", items: ["Follow up on one thing", "Schedule the appointment", "Handle the paperwork"] },
+          { label: "Make room", items: ["Create time for ___", "Declutter one surface", "Reset the space"] },
+        ];
+        return { easy, groups };
+      }
+      if (level === "intention") {
+        const groups = [
+          { label: "Admin / follow-through", items: ["Reply to one message", "Open the document", "Find the phone number", "Schedule it"] },
+          { label: "Home / reset", items: ["Put 5 items away", "Take out trash", "Clear one surface"] },
+          { label: "Body / basics", items: ["Drink water", "10-minute walk", "Prep something easy to eat"] },
+        ];
+        return { groups };
+      }
+      return null;
+    })();
+
+    const suggestionsBody = (() => {
+      if (!suggestionChips) return "";
+      if (level === "milestone" && Array.isArray(suggestionChips)) {
+        return `<div class="modal-chip-row">
+          ${suggestionChips
+            .map((t) => `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replaceAll("\"", "&quot;")}">${t}</button>`)
+            .join("")}
+        </div>`;
+      }
+      if (level === "focus" && typeof suggestionChips === "object" && "groups" in suggestionChips) {
+        const easy = focusEasyMode ? `
+          <div class="modal-suggest-group">
+            <div class="modal-suggest-label">Easy mode</div>
+            <div class="modal-chip-row">
+              ${suggestionChips.easy
+                .map((t) => `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replaceAll("\"", "&quot;")}">${t}</button>`)
+                .join("")}
+            </div>
+          </div>` : "";
+        return `
+          ${easy}
+          ${suggestionChips.groups
+            .map(
+              (g) => `
+                <div class="modal-suggest-group">
+                  <div class="modal-suggest-label">${g.label}</div>
+                  <div class="modal-chip-row">
+                    ${g.items
+                      .map((t) => `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replaceAll("\"", "&quot;")}">${t}</button>`)
+                      .join("")}
+                  </div>
+                </div>
+              `,
+            )
+            .join("")}
+        `;
+      }
+      if (level === "intention" && typeof suggestionChips === "object" && "groups" in suggestionChips) {
+        return `
+          ${suggestionChips.groups
+            .map(
+              (g) => `
+                <div class="modal-suggest-group">
+                  <div class="modal-suggest-label">${g.label}</div>
+                  <div class="modal-chip-row">
+                    ${g.items
+                      .map((t) => `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replaceAll("\"", "&quot;")}">${t}</button>`)
+                      .join("")}
+                  </div>
+                </div>
+              `,
+            )
+            .join("")}
+        `;
+      }
+      return "";
+    })();
+
+    const suggestionsGroup = getOrCreateAfter(
+      firstFormGroup,
+      "goalSuggestionsGroup",
+      "modal-inline-section",
+    );
+    if (level === "milestone" || level === "focus" || level === "intention") {
+      const titleText =
+        level === "focus" ? "Suggestions (optional)" : "Suggestions (optional)";
+      const subtitleText =
+        "Pick one, then edit it to sound like you.";
+      suggestionsGroup.innerHTML = renderDisclosure({
+        id: "goalSuggestionsDisclosure",
+        title: titleText,
+        subtitle: subtitleText,
+        open: suggestionsOpen,
+        bodyHtml: suggestionsBody,
+      });
+    } else {
+      suggestionsGroup.innerHTML = "";
+    }
+
+    // Linkage selector
+    if (level === "milestone" || level === "focus" || level === "intention") {
+      const linkageHtml = renderLinkageSelector({
+        level,
+        visions,
+        milestones,
+        focuses,
+        selected: modalLinkSelection,
+      });
+      if (linkageHtml) {
+        const linkageGroup = getOrCreateAfter(
+          suggestionsGroup,
+          "goalLinkageGroup",
+          "modal-inline-section",
+        );
+        linkageGroup.outerHTML = linkageHtml;
+      }
+    }
+
+    // Focus extras
+    if (level === "focus") {
+      const extras = getOrCreateAfter(
+        document.getElementById("goalLinkageGroup") ?? suggestionsGroup,
+        "goalExtrasGroup",
+        "modal-inline-section",
+      );
+      extras.innerHTML = `
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" id="focusEasyMode"${focusEasyMode ? " checked" : ""}>
+            Easy mode week
+          </label>
+          <div class="field-help">Lower the bar on purpose.</div>
+        </div>
+        <div class="form-group">
+          <label for="focusLowEnergy">Low-energy version (optional)</label>
+          <textarea id="focusLowEnergy" rows="2" placeholder="If the week gets messy, what’s the smallest version that still counts?"></textarea>
+          <div class="field-help">If the week gets messy, what’s the smallest version that still counts?</div>
+        </div>
+      `;
+    }
+
+    // Intention tiny version field
+    if (level === "intention") {
+      const tiny = getOrCreateAfter(
+        document.getElementById("goalLinkageGroup") ?? suggestionsGroup,
+        "goalTinyGroup",
+        "modal-inline-section",
+      );
+      tiny.innerHTML = `
+        <div class="form-group">
+          <label for="intentionTiny">Tiny version (optional)</label>
+          <input type="text" id="intentionTiny" placeholder="If this feels like too much, what’s the smallest version?">
+          <div class="field-help">If this feels like too much, what’s the smallest version?</div>
+        </div>
+      `;
+    }
+  }
+
   if (monthGroup && monthLabel && monthSelect) {
     if (level === "vision") {
       monthGroup.style.display = "none";
       setFieldVisibility(timeGroup, false);
-      if (priorityGroup) priorityGroup.style.display = "block";
+      // Vision is an anchor, not a ranked task.
+      if (priorityGroup) priorityGroup.style.display = "none";
       if (categoryGroup) categoryGroup.style.display = "block";
+      if (categoryLabel) categoryLabel.textContent = "Area of life (optional)";
       if (yearGroup) yearGroup.style.display = "block";
+      if (priorityLabel) priorityLabel.textContent = "Priority";
     } else if (level === "milestone") {
       monthGroup.style.display = "block";
       monthSelect.required = true;
@@ -224,14 +840,18 @@ export function openGoalModal(
       setFieldVisibility(timeGroup, false);
       if (priorityGroup) priorityGroup.style.display = "block";
       if (categoryGroup) categoryGroup.style.display = "block";
+      if (categoryLabel) categoryLabel.textContent = "Category (optional)";
       if (yearGroup) yearGroup.style.display = "block";
       if (milestoneDurationGroup) milestoneDurationGroup.style.display = "block";
       if (milestoneDurationSelect) milestoneDurationSelect.value = "1";
+      if (priorityLabel) priorityLabel.textContent = "Urgency (optional)";
+      setInlineHelp(milestoneDurationGroup, "milestoneDurationHelp", "You can adjust this later.");
     } else if (level === "focus") {
       monthGroup.style.display = "none";
       setFieldVisibility(timeGroup, false);
       if (priorityGroup) priorityGroup.style.display = "block";
       if (categoryGroup) categoryGroup.style.display = "block";
+      if (categoryLabel) categoryLabel.textContent = "Category (optional)";
       if (startDateGroup) startDateGroup.style.display = "block";
       if (startDateLabel) startDateLabel.textContent = "Week of";
       if (startDateInput) {
@@ -245,6 +865,7 @@ export function openGoalModal(
       }
       if (focusDurationGroup) focusDurationGroup.style.display = "block";
       if (focusDurationSelect) focusDurationSelect.value = "1";
+      if (priorityLabel) priorityLabel.textContent = "Urgency (optional)";
     } else if (level === "intention") {
       monthGroup.style.display = "none";
       setFieldVisibility(timeGroup, true);
@@ -254,12 +875,95 @@ export function openGoalModal(
       if (startDateLabel) startDateLabel.textContent = "Date";
       if (startDateInput)
         startDateInput.value = toYmdLocal(State.viewingDate ?? new Date());
+      if (priorityLabel) priorityLabel.textContent = "Priority";
     }
   }
 
   setTimeout(() => updateGoalModalTimeBreakdown(ctx), 0);
 
   ctx.elements.goalModal?.classList.add("active");
+
+  // Bind inline interactions (suggestions, linkage, easy mode).
+  const modal = ctx.elements.goalModal;
+  if (modal) {
+    modal.querySelectorAll<HTMLElement>("[data-action='toggle-disclosure']").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        suggestionsOpen = !suggestionsOpen;
+        openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
+      };
+    });
+
+    modal.querySelectorAll<HTMLElement>("[data-action='suggest-title']").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const template = (btn as HTMLElement).dataset.template ?? "";
+        if (!template) return;
+        focusTitleAtBlank(template);
+      };
+    });
+
+    modal.querySelectorAll<HTMLElement>("[data-action='select-link']").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const parentId = (btn as HTMLElement).dataset.parentId;
+        const parentLevel = (btn as HTMLElement).dataset.parentLevel as GoalLevel | undefined;
+        if (!parentId || !parentLevel) return;
+        modalLinkSelection = { parentId, parentLevel };
+        setLinkageHelpVisible(false);
+        openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
+      };
+    });
+
+    modal.querySelectorAll<HTMLElement>("[data-action='clear-link']").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        modalLinkSelection = null;
+        openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
+      };
+    });
+
+    const linkSelect = modal.querySelector<HTMLSelectElement>("#goalLinkSelect");
+    if (linkSelect) {
+      linkSelect.onchange = () => {
+        const raw = linkSelect.value?.trim();
+        if (!raw) {
+          modalLinkSelection = null;
+          openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
+          return;
+        }
+        const [parentLevel, parentId] = raw.split(":");
+        if (!parentId) return;
+        if (parentLevel === "vision" || parentLevel === "milestone" || parentLevel === "focus") {
+          modalLinkSelection = { parentLevel: parentLevel as GoalLevel, parentId };
+          setLinkageHelpVisible(false);
+        }
+        openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
+      };
+    }
+
+    const easyModeEl = modal.querySelector<HTMLInputElement>("#focusEasyMode");
+    if (easyModeEl) {
+      easyModeEl.onchange = () => {
+        focusEasyMode = !!easyModeEl.checked;
+        // Show a small badge near the title input when enabled.
+        const titleInput = document.getElementById("goalTitle") as HTMLInputElement | null;
+        const wrap = titleInput?.parentElement;
+        if (wrap) {
+          const existing = wrap.querySelector(".goal-title-badge") as HTMLElement | null;
+          if (focusEasyMode) {
+            const badge = existing ?? document.createElement("div");
+            badge.className = "goal-title-badge";
+            badge.textContent = "Easy mode";
+            if (!existing) wrap.appendChild(badge);
+          } else {
+            existing?.remove();
+          }
+        }
+        openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
+      };
+    }
+  }
 
   if (viewportManager.isMobileViewport()) {
     setTimeout(() => {
@@ -410,6 +1114,28 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     endTime = endTimeEl?.value || null;
   }
 
+  const selectedLink = getSelectedLinkFromUi() ?? pendingParentLink;
+
+  if (ctx.goalModalLevel === "milestone") {
+    if (!selectedLink || selectedLink.parentLevel !== "vision") {
+      setLinkageHelpVisible(true);
+      ctx.showToast("🧭", "Choose a Vision so this milestone has an anchor.");
+      return;
+    }
+  }
+
+  if (ctx.goalModalLevel === "focus") {
+    const ok =
+      !!selectedLink &&
+      (selectedLink.parentLevel === "milestone" ||
+        selectedLink.parentLevel === "vision");
+    if (!ok) {
+      setLinkageHelpVisible(true);
+      ctx.showToast("🧭", "Choose what this focus supports.");
+      return;
+    }
+  }
+
   const goalData: any = {
     title,
     level: ctx.goalModalLevel,
@@ -418,6 +1144,18 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     startTime,
     endTime,
   };
+
+  // Linkage (create-time)
+  if (ctx.goalModalLevel === "milestone" || ctx.goalModalLevel === "focus") {
+    goalData.parentId = selectedLink?.parentId ?? null;
+    goalData.parentLevel = selectedLink?.parentLevel ?? null;
+  }
+  if (ctx.goalModalLevel === "intention") {
+    if (selectedLink && (selectedLink.parentLevel === "focus" || selectedLink.parentLevel === "vision")) {
+      goalData.parentId = selectedLink.parentId;
+      goalData.parentLevel = selectedLink.parentLevel;
+    }
+  }
 
   if (ctx.goalModalLevel === "vision") {
     goalData.year = year;
@@ -432,10 +1170,17 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
   if (ctx.goalModalLevel === "focus") {
     if (startDate) goalData.startDate = startDate;
     if (Number.isFinite(durationWeeks)) goalData.durationWeeks = durationWeeks;
+    const lowEnergy = (document.getElementById("focusLowEnergy") as HTMLTextAreaElement | null)?.value?.trim() ?? "";
+    goalData.description = lowEnergy ? `Low-energy version: ${lowEnergy}` : "";
+    if (focusEasyMode) {
+      goalData.tags = ["__tm:easymode=1"];
+    }
   }
 
   if (ctx.goalModalLevel === "intention") {
     if (startDate) goalData.startDate = startDate;
+    const tiny = (document.getElementById("intentionTiny") as HTMLInputElement | null)?.value?.trim() ?? "";
+    goalData.description = tiny ? `Tiny version: ${tiny}` : "";
   }
 
   Goals.create(goalData);
@@ -444,4 +1189,3 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
   ctx.render();
   ctx.showToast("✨", `${ctx.getLevelLabel(ctx.goalModalLevel)} saved.`);
 }
-

@@ -142,6 +142,9 @@ export interface GoalData {
   dueDate?: string | null;
   startTime?: string | null;
   endTime?: string | null;
+  /** Optional parent linkage for hierarchy/alignment (Vision → Milestone → Focus → Intention). */
+  parentId?: string | null;
+  parentLevel?: GoalLevel | null;
   /**
    * For range-based levels (milestone/focus/intention), an explicit local-date start (YYYY-MM-DD).
    * This is used only at creation time; persisted shape remains month/year + dueDate.
@@ -192,6 +195,18 @@ export interface WeeklyReview {
   mood?: number;
   energyAvg?: string;
 }
+
+/**
+ * Lightweight week reflection (local-only)
+ * @remarks Used by Garden Weekly Alignment prompts; not synced.
+ */
+export type WeekReflection = {
+  id: string;
+  weekYear: number;
+  weekNum: number;
+  createdAt: number;
+  answers: { q1?: string; q2?: string; q3?: string };
+};
 
 /**
  * A brain dump entry for capturing quick thoughts
