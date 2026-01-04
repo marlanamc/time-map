@@ -8,6 +8,7 @@
  */
 export const DB_STORES: {
   readonly GOALS: 'goals';
+  readonly EVENTS: 'events';
   readonly SETTINGS: 'settings';
   readonly ACHIEVEMENTS: 'achievements';
   readonly BRAIN_DUMP: 'brainDump';

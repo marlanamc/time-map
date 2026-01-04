@@ -4,6 +4,8 @@
 import { State } from '../../core/State';
 import { Goals } from '../../core/Goals';
 import { CONFIG, VIEWS } from '../../config';
+import { expandEventsForRange } from '../../utils/recurrence';
+import { buildAccentAttributes, getInheritedAccent } from '../../utils/goalLinkage';
 import type { UIElements } from '../../types';
 
 export const WeekRenderer = {
@@ -37,6 +39,11 @@ export const WeekRenderer = {
       .slice();
     const primaryFocus = focusGoals[0];
 
+    const goalsById = new Map<string, any>();
+    (State.data?.goals ?? []).forEach((g) => goalsById.set(g.id, g));
+    const visionAccentAttrs = primaryVision ? buildAccentAttributes(getInheritedAccent(primaryVision, goalsById)) : { dataAttr: "", styleAttr: "" };
+    const focusAccentAttrs = primaryFocus ? buildAccentAttributes(getInheritedAccent(primaryFocus, goalsById)) : { dataAttr: "", styleAttr: "" };
+
     // Format date range with years if they differ
     const startYear = weekStart.getFullYear();
     const endYear = weekEnd.getFullYear();
@@ -52,13 +59,44 @@ export const WeekRenderer = {
     });
 
     const weekStartYmd = formatYmd(weekStart);
+    const eventsForWeek = State.data?.events
+      ? expandEventsForRange(State.data.events, weekStart, weekEnd)
+      : [];
+    const startOfDay = (d: Date) => {
+      const x = new Date(d);
+      x.setHours(0, 0, 0, 0);
+      return x;
+    };
+    const addDays = (d: Date, days: number) => {
+      const x = new Date(d);
+      x.setDate(x.getDate() + days);
+      return x;
+    };
+    const eventsByDay = new Map<string, { title: string; label: string }[]>();
+    for (const ev of eventsForWeek) {
+      const start = new Date(ev.startAt);
+      const end = ev.endAt ? new Date(ev.endAt) : start;
+      const startKey = formatYmd(start);
+      const startLabel = ev.allDay
+        ? "All day"
+        : start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      const dayCursorStart = startOfDay(start) < startOfDay(weekStart) ? startOfDay(weekStart) : startOfDay(start);
+      const dayCursorEnd = startOfDay(end) > startOfDay(weekEnd) ? startOfDay(weekEnd) : startOfDay(end);
+      for (let cursor = new Date(dayCursorStart); cursor <= dayCursorEnd; cursor = addDays(cursor, 1)) {
+        const key = formatYmd(cursor);
+        const label = key === startKey ? startLabel : "Continues";
+        const list = eventsByDay.get(key) ?? [];
+        list.push({ title: ev.title, label });
+        eventsByDay.set(key, list);
+      }
+    }
 
     let html = `<div class="week-view">
         <div class="week-view-header">
           <h2 class="week-view-title">Week ${weekNum}</h2>
           <p class="week-view-range">${startFormatted} - ${endFormatted}</p>
           ${primaryVision ? `
-            <div class="week-vision-strip" aria-label="Year vision">
+            <div class="week-vision-strip"${visionAccentAttrs.dataAttr}${visionAccentAttrs.styleAttr} aria-label="Year vision">
               <span class="week-vision-label">✨ Vision</span>
               <button type="button" class="week-vision-chip" data-goal-id="${primaryVision.id}" title="${escapeHtmlFn(primaryVision.title)}">
                 ${escapeHtmlFn(primaryVision.title)}
@@ -68,7 +106,7 @@ export const WeekRenderer = {
           ` : ""}
           <div class="week-focus-banner year-vision-banner--pill">
             ${primaryFocus ? `
-              <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--focus week-focus-pill" data-goal-id="${primaryFocus.id}">
+              <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--focus week-focus-pill"${focusAccentAttrs.dataAttr}${focusAccentAttrs.styleAttr} data-goal-id="${primaryFocus.id}">
                 <span class="year-vision-pill-label" aria-label="Focus">
                   <span class="year-vision-pill-dot" aria-hidden="true"></span>
                   FOCUS
@@ -98,6 +136,7 @@ export const WeekRenderer = {
         .filter((g) => g.level === "intention")
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title));
+      const dayEvents = eventsByDay.get(ymd) ?? [];
 
       html += `
           <div class="week-day-column ${isToday ? 'today' : ''}">
@@ -108,6 +147,16 @@ export const WeekRenderer = {
               </button>
               ${dayGoals.length > 0 ? `<div class="week-day-badge" aria-label="${dayGoals.length} intentions">${dayGoals.length}</div>` : ""}
             </div>
+            ${dayEvents.length > 0 ? `
+              <div class="week-day-events" aria-label="${dayEvents.length} events">
+                ${dayEvents.map((ev) => `
+                  <div class="week-event-item" role="note">
+                    <div class="week-event-title">${escapeHtmlFn(ev.title)}</div>
+                    <div class="week-event-meta">${escapeHtmlFn(ev.label)}</div>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ""}
             <div class="week-day-goals">
       `;
 
@@ -115,8 +164,9 @@ export const WeekRenderer = {
         dayGoals.forEach(g => {
           const cat = g.category ? (CONFIG.CATEGORIES[g.category] ?? null) : null;
           const completedClass = g.status === "done" ? "completed" : "";
+          const accentAttrs = buildAccentAttributes(getInheritedAccent(g, goalsById));
           html += `
-              <div class="week-goal-item ${completedClass}" data-goal-id="${g.id}" role="button" tabindex="0">
+              <div class="week-goal-item ${completedClass}"${accentAttrs.dataAttr}${accentAttrs.styleAttr} data-goal-id="${g.id}" role="button" tabindex="0">
                 <div class="week-goal-title">
                   ${g.status === "done" ? '<span class="goal-checkmark">✓</span>' : ""}
                   ${escapeHtmlFn(g.title)}

@@ -7,6 +7,7 @@ import { WeekReflections } from "../../core/WeekReflections";
 import { eventBus } from "../../core/EventBus";
 
 import type { Goal, GoalLevel, UIElements, WeekReflection } from "../../types";
+import { buildAccentAttributes, getVisionAccent } from "../../utils/goalLinkage";
 
 type QuickAddIntentOpts = {
   level: "intention";
@@ -39,6 +40,7 @@ let selectedMilestoneId: string | null = null;
 let selectedFocusId: string | null = null;
 let alignmentDetailsOpen = false;
 let reflectionOpen = false;
+let focusedVisionId: string | null = null;
 
 const reflectionCache = new Map<string, WeekReflection | null>();
 
@@ -135,6 +137,9 @@ export const GardenRenderer = {
       new Date(weekYear, 11, 31),
     ).filter((g) => g.level === "vision" && g.status !== "done");
 
+    // Keep focus selection valid.
+    if (focusedVisionId && !Goals.getById(focusedVisionId)) focusedVisionId = null;
+
     const milestonesToday = Goals.getForRange(viewDate, viewDate).filter(
       (g) => g.level === "milestone" && g.status !== "done",
     );
@@ -198,7 +203,8 @@ export const GardenRenderer = {
     if (selectedMilestoneId && !Goals.getById(selectedMilestoneId)) selectedMilestoneId = null;
     if (selectedFocusId && !Goals.getById(selectedFocusId)) selectedFocusId = null;
 
-    const selectedVision = selectedVisionId ? safeGetGoal(selectedVisionId) : null;
+    const effectiveSelectedVisionId = focusedVisionId ?? selectedVisionId;
+    const selectedVision = effectiveSelectedVisionId ? safeGetGoal(effectiveSelectedVisionId) : null;
     const selectedMilestone = selectedMilestoneId ? safeGetGoal(selectedMilestoneId) : null;
     const selectedFocus = selectedFocusId ? safeGetGoal(selectedFocusId) : null;
 
@@ -249,6 +255,27 @@ export const GardenRenderer = {
         <h2 class="week-view-title">Garden</h2>
         <p class="week-view-range">${weekRangeLabel}</p>
         <p class="garden-header-subtitle">A calm view of how your week connects to your year.</p>
+        ${
+          visions.length > 0
+            ? `
+              <div class="garden-vision-tabs" role="tablist" aria-label="Vision focus">
+                <button type="button" class="garden-tab${!focusedVisionId ? " is-active" : ""}" role="tab" aria-selected="${!focusedVisionId ? "true" : "false"}" data-action="tab-all">All</button>
+                ${visions
+                  .slice(0, 4)
+                  .map((v) => {
+                    const isActive = focusedVisionId === v.id;
+                    return `<button type="button" class="garden-tab${isActive ? " is-active" : ""}" role="tab" aria-selected="${isActive ? "true" : "false"}" data-action="tab-vision" data-vision-id="${escapeHtmlFn(v.id)}">${escapeHtmlFn(v.title)}</button>`;
+                  })
+                  .join("")}
+                ${
+                  visions.length > 4
+                    ? `<button type="button" class="garden-tab" role="tab" aria-selected="false" data-action="tab-more">More…</button>`
+                    : ""
+                }
+              </div>
+            `
+            : ""
+        }
       </div>
 
       <section class="garden-section" aria-label="Visions">
@@ -272,28 +299,30 @@ export const GardenRenderer = {
                 ${onAddGoal ? `<button type="button" class="btn btn-primary" data-action="add-vision">Create a Vision</button>` : ""}
               </div>
             `
-            : `
-              <div class="garden-vision-grid" role="list">
-                ${visions
-                  .map((v) => {
-                    const active = milestonesByVisionId.get(v.id) ?? [];
-                    const hasActive = active.length > 0;
-                    const selectedClass = selectedVisionId === v.id ? " is-selected" : "";
-                    const focusForVision = focusesByVisionId.get(v.id) ?? [];
-                    const anyFocusThisWeek =
-                      focusForVision.length > 0 ||
-                      active.some((m) => (focusesByMilestoneId.get(m.id) ?? []).length > 0);
-                    const linkedMilestonesCount = Goals.getAll().filter(
-                      (g) =>
-                        g.level === "milestone" &&
-                        g.status !== "done" &&
-                        g.parentId === v.id &&
-                        (g.parentLevel ?? "vision") === "vision",
-                    ).length;
-                    return `
-                      <button type="button" class="garden-vision-card cosmic-card cosmic-card--vision${selectedClass}" data-action="select-vision" data-vision-id="${escapeHtmlFn(v.id)}" role="listitem">
-                        <div class="garden-vision-card-title">${escapeHtmlFn(v.title)}</div>
-                        <div class="garden-vision-card-meta">
+            : focusedVisionId
+              ? (() => {
+                  const v = visions.find((x) => x.id === focusedVisionId) ?? null;
+                  if (!v) return "";
+                  const active = milestonesByVisionId.get(v.id) ?? [];
+                  const hasActive = active.length > 0;
+                  const focusForVision = focusesByVisionId.get(v.id) ?? [];
+                  const anyFocusThisWeek =
+                    focusForVision.length > 0 ||
+                    active.some((m) => (focusesByMilestoneId.get(m.id) ?? []).length > 0);
+                  const linkedMilestonesCount = Goals.getAll().filter(
+                    (g) =>
+                      g.level === "milestone" &&
+                      g.status !== "done" &&
+                      g.parentId === v.id &&
+                      (g.parentLevel ?? "vision") === "vision",
+                  ).length;
+                  const selectedClass = selectedVisionId === v.id ? " is-selected" : "";
+                  const accentAttrs = buildAccentAttributes(getVisionAccent(v));
+                  return `
+	                    <div class="garden-vision-grid garden-vision-grid--focused" role="list">
+	                      <div class="garden-vision-card cosmic-card cosmic-card--vision${selectedClass}"${accentAttrs.dataAttr}${accentAttrs.styleAttr} data-action="select-vision" data-vision-id="${escapeHtmlFn(v.id)}" role="button" tabindex="0">
+	                        <div class="garden-vision-card-title">${escapeHtmlFn(v.title)}</div>
+	                        <div class="garden-vision-card-meta">
                           <div class="garden-vision-card-label">Active chapter${active.length === 1 ? "" : "s"}</div>
                           <div class="garden-vision-card-chips">
                             ${
@@ -324,7 +353,64 @@ export const GardenRenderer = {
                               : ""
                           }
                         </div>
-                      </button>
+                      </div>
+                    </div>
+                  `;
+                })()
+            : `
+              <div class="garden-vision-grid" role="list">
+                ${visions
+                  .map((v) => {
+                    const active = milestonesByVisionId.get(v.id) ?? [];
+                    const hasActive = active.length > 0;
+                    const selectedClass = selectedVisionId === v.id ? " is-selected" : "";
+                    const focusForVision = focusesByVisionId.get(v.id) ?? [];
+                    const anyFocusThisWeek =
+                      focusForVision.length > 0 ||
+                      active.some((m) => (focusesByMilestoneId.get(m.id) ?? []).length > 0);
+                    const linkedMilestonesCount = Goals.getAll().filter(
+                      (g) =>
+                        g.level === "milestone" &&
+                        g.status !== "done" &&
+                        g.parentId === v.id &&
+                        (g.parentLevel ?? "vision") === "vision",
+                    ).length;
+                  const accentAttrs = buildAccentAttributes(getVisionAccent(v));
+                  return `
+                    <div class="garden-vision-card cosmic-card cosmic-card--vision${selectedClass}"${accentAttrs.dataAttr}${accentAttrs.styleAttr} data-action="select-vision" data-vision-id="${escapeHtmlFn(v.id)}" role="button" tabindex="0">
+                      <div class="garden-vision-card-title">${escapeHtmlFn(v.title)}</div>
+                      <div class="garden-vision-card-meta">
+                          <div class="garden-vision-card-label">Active chapter${active.length === 1 ? "" : "s"}</div>
+                          <div class="garden-vision-card-chips">
+                            ${
+                              hasActive
+                                ? active
+                                    .slice(0, 3)
+                                    .map(
+                                      (m) => `<button type="button" class="garden-pill garden-pill--soft" data-action="select-milestone" data-vision-id="${escapeHtmlFn(v.id)}" data-milestone-id="${escapeHtmlFn(m.id)}">${escapeHtmlFn(m.title)}</button>`,
+                                    )
+                                    .join("")
+                                : `<span class="garden-pill garden-pill--neutral">${systemState === "VISIONS_ONLY" ? "No milestone yet" : linkedMilestonesCount === 0 ? "No milestone yet" : "No active milestone right now"}</span>`
+                            }
+                            ${active.length > 3 ? `<span class="garden-pill garden-pill--neutral">+${active.length - 3}</span>` : ""}
+                          </div>
+                          ${
+                            !hasActive && onAddGoalLinked
+                              ? `<div class="garden-card-actions">
+                                  <button type="button" class="btn btn-primary btn-sm" data-action="add-milestone" data-vision-id="${escapeHtmlFn(v.id)}">Add milestone</button>
+                                </div>`
+                              : ""
+                          }
+                          ${
+                            hasActive && !anyFocusThisWeek && onAddGoalLinked
+                              ? `<div class="garden-card-actions">
+                                  <div class="garden-hint garden-hint--inline">No focus set for this week.</div>
+                                  <button type="button" class="btn btn-ghost btn-sm" data-action="add-focus" data-vision-id="${escapeHtmlFn(v.id)}" data-milestone-id="${escapeHtmlFn(active[0].id)}">Set weekly focus</button>
+                                </div>`
+                              : ""
+                          }
+                        </div>
+                      </div>
                     `;
                   })
                   .join("")}
@@ -365,7 +451,7 @@ export const GardenRenderer = {
         ${
           systemState === "NO_VISIONS"
             ? `<div class="garden-empty-card"><div class="garden-empty-title">Choose a Vision to see what supports it.</div></div>`
-              : !selectedVision
+            : !selectedVision
               ? `<div class="garden-empty-card"><div class="garden-empty-title">${
                   systemState === "VISIONS_ONLY"
                     ? "Tap a Vision to notice what could support it."
@@ -495,7 +581,7 @@ export const GardenRenderer = {
             ? `<div class="garden-empty-card"><div class="garden-empty-title">Add a Vision to make weekly alignment visible.</div></div>`
             : `
               <div class="garden-alignment-list" role="list">
-                ${visions
+                ${(focusedVisionId ? visions.filter((v) => v.id === focusedVisionId) : visions)
                   .map((v) => {
                     const touched = (visionTouchedThisWeek.get(v.id) ?? []).slice().sort((a, b) => a.title.localeCompare(b.title));
                     const isTouched = touched.length > 0;
@@ -632,6 +718,81 @@ export const GardenRenderer = {
       });
     });
 
+    container.querySelector<HTMLElement>("[data-action='tab-all']")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      focusedVisionId = null;
+      rerender();
+    });
+
+    container.querySelectorAll<HTMLElement>("[data-action='tab-vision']").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const id = (btn as HTMLElement).dataset.visionId;
+        if (!id) return;
+        focusedVisionId = id;
+        selectedVisionId = id; // keep explorer in sync when focusing
+        selectedMilestoneId = null;
+        selectedFocusId = null;
+        rerender();
+      });
+    });
+
+    const openMoreVisions = () => {
+      const rest = visions.slice(4);
+      if (rest.length === 0) return;
+      const overlay = document.createElement("div");
+      overlay.className = "garden-overlay";
+      overlay.innerHTML = `
+        <div class="garden-overlay-card" role="dialog" aria-modal="true" aria-label="More visions">
+          <div class="garden-overlay-header">
+            <div class="garden-overlay-title">More visions</div>
+            <div class="garden-overlay-subtitle">Pick one to focus this page.</div>
+          </div>
+          <div class="garden-overlay-list">
+            ${rest
+              .map(
+                (v) => `
+                  <button type="button" class="garden-overlay-item" data-action="pick-more-vision" data-vision-id="${escapeHtmlFn(v.id)}">
+                    ${escapeHtmlFn(v.title)}
+                  </button>
+                `,
+              )
+              .join("")}
+          </div>
+          <div class="garden-overlay-actions">
+            <button type="button" class="btn btn-ghost" data-action="close-overlay">Cancel</button>
+          </div>
+        </div>
+      `;
+      const close = () => overlay.remove();
+      overlay.addEventListener("click", (ev) => {
+        if (ev.target === overlay) close();
+      });
+      overlay.querySelector<HTMLElement>("[data-action='close-overlay']")?.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        close();
+      });
+      overlay.querySelectorAll<HTMLElement>("[data-action='pick-more-vision']").forEach((el) => {
+        el.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          const id = (el as HTMLElement).dataset.visionId;
+          if (!id) return;
+          focusedVisionId = id;
+          selectedVisionId = id;
+          selectedMilestoneId = null;
+          selectedFocusId = null;
+          close();
+          rerender();
+        });
+      });
+      document.body.appendChild(overlay);
+    };
+
+    container.querySelector<HTMLElement>("[data-action='tab-more']")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      openMoreVisions();
+    });
+
     container.querySelectorAll<HTMLElement>("[data-action='add-milestone']").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.preventDefault();
@@ -722,6 +883,13 @@ export const GardenRenderer = {
         selectedMilestoneId = null;
         selectedFocusId = null;
         rerender();
+      });
+
+      el.addEventListener("keydown", (e) => {
+        const ke = e as KeyboardEvent;
+        if (ke.key !== "Enter" && ke.key !== " ") return;
+        ke.preventDefault();
+        (el as HTMLElement).click();
       });
     });
 

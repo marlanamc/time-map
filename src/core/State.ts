@@ -172,6 +172,7 @@ export const State: AppState & {
   getDefaultData(): AppData {
     return {
       goals: [],
+      events: [],
       streak: { count: 0, lastDate: null },
       achievements: [],
       weeklyReviews: [],
@@ -273,6 +274,10 @@ export const State: AppState & {
 
     if (!Array.isArray(this.data.goals)) {
       this.data.goals = [];
+      changed = true;
+    }
+    if (!Array.isArray(this.data.events)) {
+      this.data.events = [];
       changed = true;
     }
     if (!Array.isArray(this.data.achievements)) {

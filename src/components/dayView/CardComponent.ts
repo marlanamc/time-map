@@ -1,5 +1,7 @@
 import type { Goal } from "../../types";
 import type { GoalVariant, RenderCardOptions } from "./types";
+import { State } from "../../core/State";
+import { getInheritedAccent } from "../../utils/goalLinkage";
 
 // Import CONFIG from app - we'll need to handle this carefully
 // For now, we'll pass it as a dependency
@@ -36,7 +38,13 @@ export class CardComponent {
 
     // Determine parent level color
     const parentLevel = goal.parentLevel ?? goal.level;
-    const parentColor = this.config.LEVELS[parentLevel]?.color || this.config.LEVELS.intention.color;
+    const goalsById = new Map<string, Goal>();
+    (State.data?.goals ?? []).forEach((g) => goalsById.set(g.id, g));
+    const inherited = getInheritedAccent(goal, goalsById);
+    const parentColor =
+      inherited?.color ||
+      this.config.LEVELS[parentLevel]?.color ||
+      this.config.LEVELS.intention.color;
 
     const variantClass = this.getVariantClass(variant);
     const parentLevelClass = ` parent-level-${parentLevel}`;
@@ -153,6 +161,17 @@ export class CardComponent {
     } else if (goal.priority === "medium" && priorityMeta) {
       priorityMeta.remove();
     }
+
+    // Update inherited/parent color (Vision accent)
+    const goalsById = new Map<string, Goal>();
+    (State.data?.goals ?? []).forEach((g) => goalsById.set(g.id, g));
+    const inherited = getInheritedAccent(goal, goalsById);
+    const parentLevel = goal.parentLevel ?? goal.level;
+    const parentColor =
+      inherited?.color ||
+      this.config.LEVELS[parentLevel]?.color ||
+      this.config.LEVELS.intention.color;
+    element.style.setProperty("--parent-color", parentColor);
 
     // Update progress bar
     const progressContainer = element.querySelector(".day-goal-progress");

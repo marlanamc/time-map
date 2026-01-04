@@ -182,6 +182,22 @@
     border-top: 1px solid var(--glass-border);
 }
 
+/* Event modal specifics (kept subtle) */
+.event-modal .event-weekdays {
+  flex-wrap: wrap;
+}
+
+.event-modal .event-delete-btn {
+  margin-left: auto;
+  color: rgba(239, 68, 68, 0.92);
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+.event-modal .event-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
 .dark-mode .modal-actions {
     border-top-color: rgba(140, 183, 217, 0.12);
 }

@@ -5,7 +5,7 @@
  * and limiting sync frequency, crucial for ADHD-friendly instant UI feedback.
  */
 
-import type { Analytics, BrainDumpEntry, Goal, Preferences, Streak } from '../types';
+import type { Analytics, BrainDumpEntry, CalendarEvent, Goal, Preferences, Streak } from '../types';
 import { SupabaseService } from '../services/SupabaseService';
 import { dirtyTracker } from '../services/DirtyTracker';
 import { syncQueue } from '../services/SyncQueue';
@@ -188,6 +188,33 @@ export const debouncedBrainDumpSync = debounce(async (entry: BrainDumpEntry) => 
     }
   }
 }, 1000); // Wait 1 second after last edit
+
+/**
+ * Debounced Event Sync - Waits 1 second after last edit before syncing to cloud
+ *
+ * Events are lightweight and may be edited quickly; keep delay short.
+ */
+export const debouncedEventSync = debounce(async (event: CalendarEvent) => {
+  try {
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'syncing' } }));
+    await SupabaseService.saveEvent(event);
+    dirtyTracker.markClean('event', event.id);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'synced' } }));
+  } catch (error) {
+    console.error('Failed to sync event to cloud:', error);
+    window.dispatchEvent(new CustomEvent('sync-status', { detail: { status: 'error' } }));
+
+    try {
+      syncQueue.enqueue({
+        type: 'update',
+        entity: 'event',
+        data: event
+      });
+    } catch (queueError) {
+      console.warn('Sync queue not available:', queueError);
+    }
+  }
+}, 1000);
 
 /**
  * Cancel all pending debounced syncs

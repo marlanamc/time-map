@@ -6,6 +6,7 @@ export async function warmCache(userId: string): Promise<void> {
   try {
     await Promise.allSettled([
       SupabaseService.getGoals(),
+      SupabaseService.getEvents(),
       SupabaseService.getPreferences(),
       SupabaseService.getAchievements(),
     ]);
@@ -14,4 +15,3 @@ export async function warmCache(userId: string): Promise<void> {
     console.warn("Cache warming failed (non-critical):", error);
   }
 }
-

@@ -112,3 +112,19 @@ export interface StreakRow {
   best_streak: number;
   updated_at: string;
 }
+
+/**
+ * Events table schema
+ */
+export interface EventRow {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  start_at: string;
+  end_at?: string;
+  all_day: boolean;
+  recurrence?: any;
+  created_at: string;
+  updated_at: string;
+}

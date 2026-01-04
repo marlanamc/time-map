@@ -1,10 +1,12 @@
 import { State } from "../core/State";
 import { Goals } from "../core/Goals";
 import { CONFIG } from "../config";
+import { ND_CONFIG } from "../config/ndConfig";
 import { TimeBreakdown } from "../utils/TimeBreakdown";
 import { viewportManager } from "./viewport/ViewportManager";
 import { haptics } from "../utils/haptics";
-import type { UIElements, GoalLevel, Category, Priority } from "../types";
+import { upsertInternalTag } from "../utils/goalLinkage";
+import type { UIElements, GoalLevel, Category, Priority, AccentTheme } from "../types";
 
 export type GoalModalContext = {
   elements: UIElements;
@@ -300,6 +302,7 @@ export function closeGoalModal(ctx: GoalModalContext) {
   document.getElementById("goalSuggestionsGroup")?.remove();
   document.getElementById("goalExtrasGroup")?.remove();
   document.getElementById("goalTinyGroup")?.remove();
+  document.getElementById("visionAccentGroup")?.remove();
   setInlineHelp(document.getElementById("milestoneDurationGroup"), "milestoneDurationHelp", null);
   setLinkageHelpVisible(false);
   suggestionsOpen = false;
@@ -820,6 +823,29 @@ export function openGoalModal(
         </div>
       `;
     }
+
+    // Vision accent selector (applies to linked milestones/focus/intentions)
+    if (level === "vision") {
+      const accentGroup = getOrCreateAfter(
+        suggestionsGroup,
+        "visionAccentGroup",
+        "modal-inline-section",
+      );
+      const options = Object.entries(ND_CONFIG.ACCENT_THEMES)
+        .filter(([key]) => key !== "rainbow")
+        .map(([key, meta]) => `<option value="${key}">${meta.label}</option>`)
+        .join("");
+      accentGroup.innerHTML = `
+        <div class="form-group">
+          <label for="visionAccent">Vision color (optional)</label>
+          <select id="visionAccent" class="modal-select">
+            <option value="">Default</option>
+            ${options}
+          </select>
+          <div class="field-help">This color carries through linked milestones, focus, and intentions.</div>
+        </div>
+      `;
+    }
   }
 
   if (monthGroup && monthLabel && monthSelect) {
@@ -1031,6 +1057,7 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     "goalStartTime",
   ) as HTMLInputElement | null;
   const endTimeEl = document.getElementById("goalEndTime") as HTMLInputElement | null;
+  const visionAccentEl = document.getElementById("visionAccent") as HTMLSelectElement | null;
 
   const title = titleEl?.value.trim() ?? "";
   if (!title) return;
@@ -1159,6 +1186,10 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
 
   if (ctx.goalModalLevel === "vision") {
     goalData.year = year;
+    const accentRaw = visionAccentEl?.value?.trim() ?? "";
+    if (accentRaw && (accentRaw as AccentTheme) in ND_CONFIG.ACCENT_THEMES) {
+      goalData.tags = upsertInternalTag([], "accent", accentRaw);
+    }
   }
 
   if (ctx.goalModalLevel === "milestone") {

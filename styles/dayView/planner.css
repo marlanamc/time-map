@@ -353,6 +353,11 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.day-goal-card.planner-timed-task.day-goal-variant-planter {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+}
+
 .day-goal-card.planner-timed-task::before {
     opacity: 0.4;
 }
@@ -502,6 +507,51 @@
     color: var(--accent);
     font-weight: bold;
     font-size: 1.2rem;
+}
+
+.btn-planner-event {
+    background: rgba(148, 163, 184, 0.16);
+    color: var(--text-secondary);
+}
+
+.btn-planner-event:hover {
+    border-color: rgba(148, 163, 184, 0.5);
+}
+
+.planner-event-item {
+    width: 100%;
+    appearance: none;
+    border: none;
+    background: var(--bg-surface);
+    border-radius: 20px;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: all 0.2s ease;
+    min-height: 44px;
+}
+
+.planner-event-item:hover {
+    transform: translateX(4px);
+    background: var(--bg-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.planner-event-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.planner-event-meta {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
 }
 
 .btn-planner-remove {

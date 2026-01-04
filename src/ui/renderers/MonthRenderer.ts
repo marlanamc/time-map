@@ -4,6 +4,8 @@
 import { State } from '../../core/State';
 import { Goals } from '../../core/Goals';
 import { CONFIG, VIEWS } from '../../config';
+import { expandEventsForRange } from '../../utils/recurrence';
+import { buildAccentAttributes, getInheritedAccent } from '../../utils/goalLinkage';
 import type { UIElements } from '../../types';
 
 export const MonthRenderer = {
@@ -24,6 +26,12 @@ export const MonthRenderer = {
     const milestoneGoals = Goals.getForRange(monthStart, monthEnd)
       .filter(g => g.level === 'milestone' && g.status !== 'done');
     const primaryMilestone = milestoneGoals[0];
+
+    const goalsById = new Map<string, any>();
+    (State.data?.goals ?? []).forEach((g) => goalsById.set(g.id, g));
+    const milestoneAccentAttrs = primaryMilestone
+      ? buildAccentAttributes(getInheritedAccent(primaryMilestone, goalsById))
+      : { dataAttr: "", styleAttr: "" };
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -46,7 +54,7 @@ export const MonthRenderer = {
         </div>
         <div class="month-milestone-banner year-vision-banner--pill">
           ${primaryMilestone ? `
-            <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--milestone month-milestone-pill" data-goal-id="${primaryMilestone.id}">
+            <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--milestone month-milestone-pill"${milestoneAccentAttrs.dataAttr}${milestoneAccentAttrs.styleAttr} data-goal-id="${primaryMilestone.id}">
               <span class="year-vision-pill-label" aria-label="Milestone">
                 <span class="year-vision-pill-dot" aria-hidden="true"></span>
                 MILESTONE
@@ -91,15 +99,42 @@ export const MonthRenderer = {
       cellDates.push(new Date(year, month + 1, i));
     }
 
+    const gridStart = cellDates.length > 0 ? new Date(cellDates[0]) : monthStart;
+    const gridEnd = cellDates.length > 0 ? new Date(cellDates[cellDates.length - 1]) : monthEnd;
+    const eventsForGrid = State.data?.events
+      ? expandEventsForRange(State.data.events, gridStart, gridEnd)
+      : [];
+    const startOfDay = (d: Date) => {
+      const x = new Date(d);
+      x.setHours(0, 0, 0, 0);
+      return x;
+    };
+    const addDays = (d: Date, days: number) => {
+      const x = new Date(d);
+      x.setDate(x.getDate() + days);
+      return x;
+    };
+    const eventCountByYmd = new Map<string, number>();
+    for (const ev of eventsForGrid) {
+      const start = new Date(ev.startAt);
+      const end = ev.endAt ? new Date(ev.endAt) : start;
+      for (let cursor = startOfDay(start); cursor <= startOfDay(end); cursor = addDays(cursor, 1)) {
+        const key = formatYmd(cursor);
+        eventCountByYmd.set(key, (eventCountByYmd.get(key) ?? 0) + 1);
+      }
+    }
+
     const renderDayCell = (date: Date) => {
       const isOtherMonth = date.getMonth() !== month || date.getFullYear() !== year;
       const isToday = date.toDateString() === today.toDateString();
       const isSelected = selected && date.toDateString() === selected;
       const ymd = formatYmd(date);
       const dayNum = date.getDate();
+      const eventCount = eventCountByYmd.get(ymd) ?? 0;
       return `
         <div class="month-day ${isOtherMonth ? "other-month" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}" data-date="${ymd}" role="gridcell" aria-label="${date.toDateString()}">
           <div class="month-day-number">${dayNum}</div>
+          ${eventCount > 0 ? `<div class="month-day-events-badge" aria-label="${eventCount} events">${eventCount}</div>` : ``}
           <div class="month-day-goals"></div>
         </div>
       `;

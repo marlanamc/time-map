@@ -13,7 +13,7 @@
 import { dirtyTracker } from './DirtyTracker';
 import { SupabaseService } from './SupabaseService';
 import DB, { DB_STORES } from '../db';
-import type { Goal, BrainDumpEntry } from '../types';
+import type { Goal, BrainDumpEntry, CalendarEvent } from '../types';
 
 class BatchSaveService {
   private interval: number | null = null;
@@ -85,6 +85,7 @@ class BatchSaveService {
       // Save each entity type in parallel
       await Promise.allSettled([
         this.saveDirtyGoals(),
+        this.saveDirtyEvents(),
         this.saveDirtyBrainDump()
       ]);
 
@@ -164,6 +165,27 @@ class BatchSaveService {
       console.log(`  ✓ Synced ${validEntries.length} brain dump entries`);
     } catch (error) {
       console.error('Failed to batch save brain dump:', error);
+    }
+  }
+
+  /**
+   * Save dirty events
+   */
+  private async saveDirtyEvents(): Promise<void> {
+    const dirtyEventIds = dirtyTracker.getItemsNeedingSave('event', 5000);
+    if (dirtyEventIds.length === 0) return;
+
+    try {
+      const eventsPromises = dirtyEventIds.map(id => DB.get(DB_STORES.EVENTS, id));
+      const events = await Promise.all(eventsPromises);
+      const validEvents = events.filter((e): e is CalendarEvent => e !== undefined && e !== null);
+      if (validEvents.length === 0) return;
+
+      await SupabaseService.saveEvents(validEvents);
+      validEvents.forEach((event) => dirtyTracker.markClean('event', event.id));
+      console.log(`  ✓ Synced ${validEvents.length} events`);
+    } catch (error) {
+      console.error('Failed to batch save events:', error);
     }
   }
 

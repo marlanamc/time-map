@@ -52,8 +52,19 @@ export class DayViewController {
   private readonly boundHandleNativeDragEnd: (e: DragEvent) => void;
   private readonly boundHandleNativeDragOver: (e: DragEvent) => void;
   private readonly boundHandleNativeDrop: (e: DragEvent) => void;
+  private readonly boundHandlePointerDown: (e: PointerEvent) => void;
   private swipeCleanup: (() => void) | null = null;
   private customizationPanelSetup: boolean = false;
+  private activeResize:
+    | {
+        goalId: string;
+        handle: "top" | "bottom";
+        startMin: number;
+        endMin: number;
+        pointerId: number;
+        dayBed: HTMLElement;
+      }
+    | null = null;
 
   // Options
   private options: DayViewOptions;
@@ -80,6 +91,7 @@ export class DayViewController {
     this.boundHandleNativeDragOver = (e: DragEvent) =>
       this.handleNativeDragOver(e);
     this.boundHandleNativeDrop = (e: DragEvent) => this.handleNativeDrop(e);
+    this.boundHandlePointerDown = (e: PointerEvent) => this.handlePointerDown(e);
 
     // Merge options with defaults
     this.options = {
@@ -138,6 +150,7 @@ export class DayViewController {
       this.container.addEventListener("dragend", this.boundHandleNativeDragEnd);
       this.container.addEventListener("dragover", this.boundHandleNativeDragOver);
       this.container.addEventListener("drop", this.boundHandleNativeDrop);
+      this.container.addEventListener("pointerdown", this.boundHandlePointerDown);
       this.setupSwipeToComplete();
       this.ensureCustomizationPanelSetup();
 
@@ -210,6 +223,9 @@ export class DayViewController {
     }
     if (this.boundHandleKeyDown) {
       this.container.removeEventListener("keydown", this.boundHandleKeyDown);
+    }
+    if (this.boundHandlePointerDown) {
+      this.container.removeEventListener("pointerdown", this.boundHandlePointerDown);
     }
     this.container.removeEventListener("dragstart", this.boundHandleNativeDragStart);
     this.container.removeEventListener("dragend", this.boundHandleNativeDragEnd);
@@ -363,6 +379,38 @@ export class DayViewController {
       });
     });
 
+    // Planner unscheduled items → draggable seeds (can be dropped onto timeline)
+    const unscheduledItems = this.container.querySelectorAll(".planner-unscheduled-item[data-goal-id]") as NodeListOf<HTMLElement>;
+    unscheduledItems.forEach((item) => {
+      const goalId = item.dataset.goalId;
+      if (!goalId) return;
+      const goal = this.currentGoals.find((g) => g.id === goalId);
+      if (!goal) return;
+      if (goal.status === "done") return;
+      this.dragDropManager.enableDraggable(item, {
+        goalId,
+        type: "seed",
+        originalStartTime: goal.startTime ?? undefined,
+        originalEndTime: goal.endTime ?? undefined,
+      });
+    });
+
+    // Planner timed tasks → draggable planters (drag to change start time)
+    const timedTasks = this.container.querySelectorAll(".planner-timed-task[data-goal-id]") as NodeListOf<HTMLElement>;
+    timedTasks.forEach((card) => {
+      const goalId = card.dataset.goalId;
+      if (!goalId) return;
+      const goal = this.currentGoals.find((g) => g.id === goalId);
+      if (!goal) return;
+      if (goal.status === "done") return;
+      this.dragDropManager.enableDraggable(card, {
+        goalId,
+        type: "planter",
+        originalStartTime: goal.startTime ?? undefined,
+        originalEndTime: goal.endTime ?? undefined,
+      });
+    });
+
     // Set up timeline as drop zone
     const dayBed = this.container.querySelector(".day-timeline") as HTMLElement;
     if (dayBed) {
@@ -387,6 +435,23 @@ export class DayViewController {
       e.preventDefault();
       e.stopPropagation();
       openCustomizationPanel(this.container);
+      return;
+    }
+
+    // Edit event (Day view)
+    const editEventBtn = target.closest('[data-action="edit-event"]') as HTMLElement | null;
+    if (editEventBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const eventId = editEventBtn.dataset.eventId;
+      const date = this.currentDate ?? new Date();
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      const event = new CustomEvent("open-event-modal", {
+        detail: { date: `${y}-${m}-${d}`, eventId },
+      });
+      this.container.dispatchEvent(event);
       return;
     }
 
@@ -436,6 +501,19 @@ export class DayViewController {
     // Sidebar Add Task
     if (target.classList.contains("btn-planner-add") || target.closest(".btn-planner-add")) {
       this.callbacks.onPlantSomething?.();
+      return;
+    }
+
+    // Sidebar Add Event
+    if (target.classList.contains("btn-planner-event") || target.closest(".btn-planner-event")) {
+      const date = this.currentDate ?? new Date();
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      const event = new CustomEvent("open-event-modal", {
+        detail: { date: `${y}-${m}-${d}` },
+      });
+      this.container.dispatchEvent(event);
       return;
     }
 
@@ -681,6 +759,160 @@ export class DayViewController {
     this.callbacks.onShowToast?.("🌱", `Added: ${payload.title}`);
     this.clearTimelineDropUi();
     this.render();
+  }
+
+  private handlePointerDown(e: PointerEvent): void {
+    const target = e.target as HTMLElement | null;
+    const handle = target?.closest(".planter-resize-handle") as HTMLElement | null;
+    if (!handle) return;
+
+    const card = handle.closest(".planner-timed-task[data-goal-id]") as HTMLElement | null;
+    const goalId = card?.dataset.goalId;
+    if (!card || !goalId) return;
+
+    const goal = this.currentGoals.find((g) => g.id === goalId);
+    if (!goal || goal.status === "done") return;
+
+    const dayBed = this.container.querySelector(".day-timeline") as HTMLElement | null;
+    if (!dayBed) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const startMinRaw = this.calculator.parseTimeToMinutes(goal.startTime) ?? this.options.timeWindowStart ?? 480;
+    const endMinRaw = this.calculator.parseTimeToMinutes(goal.endTime) ?? (startMinRaw + 60);
+    const startMin = this.calculator.clamp(startMinRaw, this.calculator.getPlotStartMin(), this.calculator.getPlotEndMin() - 15);
+    const endMin = this.calculator.clamp(endMinRaw, startMin + 15, this.calculator.getPlotEndMin());
+
+    const resizeType = (handle.dataset.resize === "top" ? "top" : "bottom") as "top" | "bottom";
+    this.activeResize = {
+      goalId,
+      handle: resizeType,
+      startMin,
+      endMin,
+      pointerId: e.pointerId,
+      dayBed,
+    };
+
+    handle.setPointerCapture(e.pointerId);
+    document.body.classList.add("is-resizing");
+    card.classList.add("is-resizing");
+    handle.classList.add("is-resizing");
+
+    const rect = dayBed.getBoundingClientRect();
+    const updatePreview = (minsStart: number, minsEnd: number) => {
+      const topPct = this.calculator.minutesToPercent(minsStart);
+      const durPct = ((minsEnd - minsStart) / this.calculator.getPlotRangeMin()) * 100;
+      card.style.top = `${topPct}%`;
+      card.style.height = `${Math.max(1, durPct)}%`;
+    };
+
+    const onMove = (ev: PointerEvent) => {
+      if (!this.activeResize) return;
+      if (ev.pointerId !== this.activeResize.pointerId) return;
+
+      const y = ev.clientY - rect.top;
+      const plotStart = this.calculator.getPlotStartMin();
+      const plotEnd = this.calculator.getPlotEndMin();
+      const plotRange = this.calculator.getPlotRangeMin();
+      const pct = rect.height > 0 ? y / rect.height : 0;
+      const rawFull = plotStart + pct * plotRange;
+      const raw =
+        this.activeResize.handle === "bottom"
+          ? rawFull
+          : this.calculator.yToMinutes(y, rect.height);
+      const snapped = this.calculator.snapToInterval(raw);
+      const minDur = 15;
+
+      if (this.activeResize.handle === "top") {
+        const nextStart = this.calculator.clamp(snapped, plotStart, this.activeResize.endMin - minDur);
+        this.activeResize.startMin = nextStart;
+      } else {
+        const nextEnd = this.calculator.clamp(snapped, this.activeResize.startMin + minDur, plotEnd);
+        this.activeResize.endMin = nextEnd;
+      }
+
+      updatePreview(this.activeResize.startMin, this.activeResize.endMin);
+    };
+
+    const onUp = (ev: PointerEvent) => {
+      if (!this.activeResize) return;
+      if (ev.pointerId !== this.activeResize.pointerId) return;
+      const active = this.activeResize;
+      this.activeResize = null;
+
+      try {
+        handle.releasePointerCapture(ev.pointerId);
+      } catch {
+        // ignore
+      }
+
+      card.classList.remove("is-resizing");
+      handle.classList.remove("is-resizing");
+      document.body.classList.remove("is-resizing");
+
+      const prevStartTime = goal.startTime;
+      const prevEndTime = goal.endTime;
+      const prevDueDate = goal.dueDate;
+      const prevMonth = goal.month;
+      const prevYear = goal.year;
+
+      const newStartTime = this.calculator.toTimeString(active.startMin);
+      const newEndTime = this.calculator.toTimeString(active.endMin);
+
+      const command: UpdateGoalTimeCommand = {
+        goalId,
+        prevStartTime,
+        prevEndTime,
+        prevDueDate,
+        prevMonth,
+        prevYear,
+        newStartTime,
+        newEndTime,
+        newDueDate: this.currentDate ? this.currentDate.toISOString() : (goal.dueDate ?? new Date().toISOString()),
+        newMonth: this.currentDate ? this.currentDate.getMonth() : goal.month,
+        newYear: this.currentDate ? this.currentDate.getFullYear() : goal.year,
+        description: "Resize task",
+        execute: () => {
+          this.callbacks.onGoalUpdate(goalId, {
+            startTime: newStartTime,
+            endTime: newEndTime,
+          });
+        },
+        undo: () => {
+          this.callbacks.onGoalUpdate(goalId, {
+            startTime: prevStartTime ?? undefined,
+            endTime: prevEndTime ?? undefined,
+            dueDate: prevDueDate,
+            month: prevMonth,
+            year: prevYear,
+          });
+        },
+      };
+
+      this.dragDropManager.executeCommand(command);
+      this.callbacks.onShowToast?.("⏱️", `${newStartTime}–${newEndTime}`);
+
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onCancel);
+    };
+
+    const onCancel = (ev: PointerEvent) => {
+      if (!this.activeResize) return;
+      if (ev.pointerId !== this.activeResize.pointerId) return;
+      this.activeResize = null;
+      card.classList.remove("is-resizing");
+      handle.classList.remove("is-resizing");
+      document.body.classList.remove("is-resizing");
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onCancel);
+    };
+
+    document.addEventListener("pointermove", onMove, { passive: true });
+    document.addEventListener("pointerup", onUp, { passive: true });
+    document.addEventListener("pointercancel", onCancel, { passive: true });
   }
 
   private handleKeyDown(e: KeyboardEvent): void {

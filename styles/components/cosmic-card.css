@@ -118,6 +118,19 @@
   --cosmic-border-gradient: linear-gradient(135deg, #10b981 0%, #6ee7b7 120%);
 }
 
+/* Inherited accent (Vision color) */
+.cosmic-card[data-link-accent="1"] {
+  --cosmic-color: var(--link-accent, var(--cosmic-color));
+  --cosmic-border-gradient: var(
+    --link-accent-gradient,
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--link-accent, var(--cosmic-color)) 92%, white 8%) 0%,
+      color-mix(in srgb, var(--link-accent, var(--cosmic-color)) 62%, white 38%) 120%
+    )
+  );
+}
+
 /* ===================================
    Internal Components
    =================================== */

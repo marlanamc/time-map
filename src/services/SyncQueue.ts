@@ -10,13 +10,13 @@
  * - Persists queue to localStorage
  */
 
-import type { Goal, BrainDumpEntry } from '../types';
+import type { Goal, BrainDumpEntry, CalendarEvent } from '../types';
 import { SupabaseService } from './SupabaseService';
 
 interface QueuedOperation {
   id: string;
   type: 'create' | 'update' | 'delete';
-  entity: 'goal' | 'brainDump' | 'achievement' | 'weeklyReview';
+  entity: 'goal' | 'event' | 'brainDump' | 'achievement' | 'weeklyReview';
   data: any;
   timestamp: number;
   retries: number;
@@ -280,6 +280,14 @@ class SyncQueue {
           await SupabaseService.saveGoal(op.data as Goal);
         } else if (op.type === 'delete') {
           await SupabaseService.deleteGoal(op.data.id);
+        }
+        break;
+
+      case 'event':
+        if (op.type === 'create' || op.type === 'update') {
+          await SupabaseService.saveEvent(op.data as CalendarEvent);
+        } else if (op.type === 'delete') {
+          await SupabaseService.deleteEvent(op.data.id);
         }
         break;
 

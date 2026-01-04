@@ -208,6 +208,29 @@ export type WeekReflection = {
   answers: { q1?: string; q2?: string; q3?: string };
 };
 
+export type EventRecurrence = {
+  freq: "daily" | "weekly" | "monthly" | "yearly";
+  interval?: number;
+  /** 0=Sun..6=Sat (weekly only). */
+  byWeekday?: number[];
+  /** Inclusive end date/time (ISO string). */
+  until?: string;
+  /** Max number of occurrences. */
+  count?: number;
+};
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  startAt: string; // ISO
+  endAt?: string | null; // ISO
+  allDay: boolean;
+  recurrence?: EventRecurrence | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /**
  * A brain dump entry for capturing quick thoughts
  * @remarks ADHD-friendly feature for getting thoughts out of your head
@@ -325,6 +348,7 @@ export interface Analytics {
  */
 export interface AppData {
   goals: Goal[];
+  events: CalendarEvent[];
   streak: Streak;
   achievements: string[];
   weeklyReviews: WeeklyReview[];

@@ -5,6 +5,7 @@ import { State } from '../../core/State';
 import { Goals } from '../../core/Goals';
 import { CONFIG } from '../../config';
 // import { TimeBreakdown } from '../../utils/TimeBreakdown'; // Unused for now
+import { buildAccentAttributes, getVisionAccent } from '../../utils/goalLinkage';
 import type { UIElements } from '../../types';
 
 export const YearRenderer = {
@@ -33,8 +34,11 @@ export const YearRenderer = {
             <h3>Vision</h3>
           </div>
           <div class="year-vision-goals">
-            ${visionGoals.slice(0, 3).map(g => `
-              <button type="button" class="cosmic-card cosmic-card--vision cosmic-card--mini" data-goal-id="${g.id}">
+            ${visionGoals.map(g => `
+              ${(() => {
+                const accentAttrs = buildAccentAttributes(getVisionAccent(g));
+                return `<button type="button" class="cosmic-card cosmic-card--vision cosmic-card--mini"${accentAttrs.dataAttr}${accentAttrs.styleAttr} data-goal-id="${g.id}">`;
+              })()}
                 <div class="cosmic-card-header cosmic-card-header--mini">
                   <div class="cosmic-card-label cosmic-card-label--mini">
                     <span class="cosmic-card-label-text">Vision</span>

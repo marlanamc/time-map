@@ -23,10 +23,12 @@ import { eventBus } from "../core/EventBus";
 import { viewportManager } from "./viewport/ViewportManager";
 import { goalDetailModal } from "./modals/GoalDetailModal";
 import { monthDetailModal } from "./modals/MonthDetailModal";
+import { eventModal } from "./modals/EventModal";
 import { isSupabaseConfigured } from "../supabaseClient";
 import { batchSaveService } from "../services/BatchSaveService";
 import { SupabaseService } from "../services/SupabaseService";
 import { syncQueue } from "../services/SyncQueue";
+import { buildAccentAttributes, getVisionAccent } from "../utils/goalLinkage";
 import { SwipeNavigator } from "./gestures/SwipeNavigator";
 import { haptics } from "../utils/haptics";
 import { createFeatureLoaders } from "./featureLoaders";
@@ -302,6 +304,16 @@ export const UI = {
       const month = ev.detail?.month ?? null;
       const year = ev.detail?.year ?? State.viewingYear;
       this.openGoalModal(level, month, year);
+    });
+
+    this.elements.calendarGrid?.addEventListener("open-event-modal", (e) => {
+      const ev = e as CustomEvent<{ date?: string; eventId?: string }>;
+      const raw = ev.detail?.date ?? "";
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw.trim());
+      const date = match
+        ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+        : (State.viewingDate ?? new Date());
+      eventModal.show({ date, eventId: ev.detail?.eventId });
     });
   },
 
@@ -1982,7 +1994,6 @@ export const UI = {
     const visionGoals = Goals.getForRange(yearStart, yearEnd).filter(
       (g) => g.level === "vision" && g.status !== "done"
     );
-    const primaryVision = visionGoals[0] ?? null;
 
     // Render year header + grid
     container.className = "year-view-container";
@@ -2000,25 +2011,24 @@ export const UI = {
     const visionWrap = document.createElement("div");
     visionWrap.className = "year-vision-banner year-vision-banner--pill";
 
-    if (primaryVision) {
-      visionWrap.innerHTML = `
-        <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--vision" data-goal-id="${
-          primaryVision.id
-        }">
-          <span class="year-vision-pill-label" aria-label="Vision">
-            <span class="year-vision-pill-dot" aria-hidden="true"></span>
-            VISION
-          </span>
-          <span class="year-vision-pill-title">${this.escapeHtml(primaryVision.title)}</span>
-        </button>
-      `;
+    if (visionGoals.length > 0) {
+      const visionPills = visionGoals
+        .map((vision) => {
+          const accentAttrs = buildAccentAttributes(getVisionAccent(vision));
+          return `
+            <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--vision"${accentAttrs.dataAttr}${accentAttrs.styleAttr} data-goal-id="${
+              vision.id
+            }" aria-label="Vision: ${this.escapeHtml(vision.title)}">
+              <span class="year-vision-pill-title">${this.escapeHtml(vision.title)}</span>
+            </button>
+          `;
+        })
+        .join("");
+
+      visionWrap.innerHTML = visionPills;
     } else {
       visionWrap.innerHTML = `
-        <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--vision year-vision-pill--empty year-add-vision-btn">
-          <span class="year-vision-pill-label" aria-label="Vision">
-            <span class="year-vision-pill-dot" aria-hidden="true"></span>
-            VISION
-          </span>
+        <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--vision year-vision-pill--empty year-add-vision-btn" aria-label="Add Vision">
           <span class="year-vision-pill-title">+ Add Vision</span>
         </button>
       `;
@@ -2036,18 +2046,18 @@ export const UI = {
       container.children.length
     );
 
-    const visionCard = yearView.querySelector<HTMLButtonElement>(
-      ".year-vision-card[data-goal-id]"
-    );
-    if (visionCard) {
-      visionCard.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const goalId = visionCard.dataset.goalId;
-        if (!goalId) return;
-        container.dispatchEvent(new CustomEvent("goal-click", { detail: { goalId } }));
-      });
-    }
+    visionWrap.addEventListener("click", (e) => {
+      const target = (e.target as HTMLElement | null)?.closest?.(
+        ".year-vision-pill[data-goal-id]"
+      ) as HTMLButtonElement | null;
+      if (!target) return;
+      if (target.classList.contains("year-add-vision-btn")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = target.dataset.goalId;
+      if (!goalId) return;
+      container.dispatchEvent(new CustomEvent("goal-click", { detail: { goalId } }));
+    });
 
     const addVisionBtn = yearView.querySelector<HTMLButtonElement>(
       ".year-add-vision-btn"

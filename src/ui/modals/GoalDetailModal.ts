@@ -13,7 +13,9 @@ import { Goals } from '../../core/Goals';
 import { State } from '../../core/State';
 import { CONFIG } from '../../config';
 import { TimeBreakdown } from '../../utils/TimeBreakdown';
-import type { GoalStatus } from '../../types';
+import { ND_CONFIG } from "../../config/ndConfig";
+import { getVisionAccent, upsertInternalTag } from "../../utils/goalLinkage";
+import type { AccentTheme, Goal, GoalStatus } from '../../types';
 
 export interface GoalDetailModalCallbacks {
   escapeHtml: (text: string) => string;
@@ -65,6 +67,14 @@ class GoalDetailModalManager {
     const levelLabel = this.getLevelLabel(goal.level);
     const cat = goal.category ? (CONFIG.CATEGORIES[goal.category] ?? null) : null;
     const status = CONFIG.STATUSES[goal.status];
+    const isVision = goal.level === "vision";
+    const currentAccent = isVision ? (getVisionAccent(goal)?.key ?? "") : "";
+    const accentOptions = isVision
+      ? Object.entries(ND_CONFIG.ACCENT_THEMES)
+          .filter(([key]) => key !== "rainbow")
+          .map(([key, meta]) => `<option value="${key}">${meta.label}</option>`)
+          .join("")
+      : "";
 
     const modal = document.createElement("div");
     modal.className = "modal-overlay active";
@@ -85,29 +95,60 @@ class GoalDetailModalManager {
                         </div>
                         <button class="modal-close" id="closeGoalDetail">×</button>
                     </div>
-                    <div class="modal-body">
-                        <h2 class="goal-detail-title">${callbacks.escapeHtml(goal.title)}</h2>
+	                    <div class="modal-body">
+	                        <div class="detail-section">
+	                          <div class="form-group">
+	                            <label for="goalTitleInput">${levelLabel} title</label>
+	                            <input id="goalTitleInput" type="text" value="${callbacks.escapeHtml(goal.title)}" />
+	                          </div>
+	                          <div class="form-group">
+	                            <label for="goalDescInput">Description (optional)</label>
+	                            <textarea id="goalDescInput" rows="2" placeholder="A short note to keep it grounded.">${callbacks.escapeHtml(goal.description ?? "")}</textarea>
+	                          </div>
+	                        </div>
 
-                        ${goal.description ? `<p class="goal-description">${callbacks.escapeHtml(goal.description)}</p>` : ""}
+	                        ${
+                            isVision
+                              ? `
+	                        <div class="detail-section">
+	                          <h3>Appearance</h3>
+	                          <div class="form-group">
+	                            <label for="visionAccentDetail">Vision color (optional)</label>
+	                            <select id="visionAccentDetail" class="modal-select">
+	                              <option value="">Default</option>
+	                              ${accentOptions}
+	                            </select>
+	                            <div class="field-help">This color carries through linked milestones, focus, and intentions.</div>
+	                          </div>
+	                        </div>
+	                        `
+                              : ""
+                          }
 
-                        <!-- Time Breakdown Section -->
-                        <div class="detail-section time-section">
-                            <h3>⏰ Time You Have</h3>
-                            ${TimeBreakdown.generateHTML(goal.month, goal.year, false, goal.level)}
-                        </div>
+	                        ${
+                            isVision
+                              ? ""
+                              : `
+	                        <!-- Time Breakdown Section -->
+	                        <div class="detail-section time-section">
+	                            <h3>⏰ Time You Have</h3>
+	                            ${TimeBreakdown.generateHTML(goal.month, goal.year, false, goal.level)}
+	                        </div>
 
-                        <!-- Progress Section -->
-                        <div class="detail-section">
-                            <h3>Progress</h3>
-                            <div class="progress-control">
-                                <div class="progress-bar-lg">
-                                    <div class="progress-fill-lg" style="width: ${goal.progress}%"></div>
-                                </div>
-                                <span class="progress-value">${goal.progress}%</span>
-                            </div>
-                            <input type="range" min="0" max="100" value="${goal.progress}"
-                                   class="progress-slider" id="progressSlider">
-                        </div>
+	                        <!-- Progress Section -->
+	                        <div class="detail-section">
+	                            <h3>Progress</h3>
+	                            <div class="progress-control">
+	                                <div class="progress-bar-lg">
+	                                    <div class="progress-fill-lg" style="width: ${goal.progress}%"></div>
+	                                </div>
+	                                <span class="progress-value">${goal.progress}%</span>
+	                            </div>
+	                            <input type="range" min="0" max="100" value="${goal.progress}"
+	                                   class="progress-slider" id="progressSlider">
+	                        </div>
+	                        `
+                          }
 
                         <!-- Status Section -->
                         <div class="detail-section">
@@ -185,14 +226,18 @@ class GoalDetailModalManager {
                             ${goal.completedAt ? `<span>Completed: ${callbacks.formatDate(goal.completedAt)}</span>` : ""}
                         </div>
                     </div>
-	                    <div class="modal-actions">
-	                        <button class="btn btn-danger" id="deleteGoalBtn">Remove ${levelLabel}</button>
-	                        <button class="btn btn-primary" id="saveGoalBtn">Save Changes</button>
-	                    </div>
-	                </div>
-	            `;
+		                    <div class="modal-actions">
+		                        <button class="btn btn-danger" id="deleteGoalBtn">Remove ${levelLabel}</button>
+		                        <button class="btn btn-primary" id="saveGoalBtn">Save Changes</button>
+		                    </div>
+		                </div>
+		            `;
 
     document.body.appendChild(modal);
+    if (isVision) {
+      const accentEl = modal.querySelector("#visionAccentDetail") as HTMLSelectElement | null;
+      if (accentEl) accentEl.value = currentAccent;
+    }
     this.bindEvents(modal, goalId);
   }
 
@@ -346,6 +391,33 @@ class GoalDetailModalManager {
 
     // Save changes
     modal.querySelector("#saveGoalBtn")?.addEventListener("click", () => {
+      const goal = Goals.getById(goalId);
+      if (goal) {
+        const title = (modal.querySelector("#goalTitleInput") as HTMLInputElement | null)?.value?.trim() ?? "";
+        const description =
+          (modal.querySelector("#goalDescInput") as HTMLTextAreaElement | null)?.value?.trim() ??
+          "";
+
+        const updates: Partial<Goal> = {};
+        if (title && title !== goal.title) updates.title = title;
+        updates.description = description;
+
+        if (goal.level === "vision") {
+          const accentRaw =
+            (modal.querySelector("#visionAccentDetail") as HTMLSelectElement | null)?.value?.trim() ??
+            "";
+          const accentValue = accentRaw as AccentTheme;
+          const prefix = "__tm:accent=";
+          let tags = goal.tags ? [...goal.tags] : [];
+          tags = tags.filter((t) => !t.startsWith(prefix));
+          if (accentRaw && (accentValue as any) in ND_CONFIG.ACCENT_THEMES) {
+            tags = upsertInternalTag(tags, "accent", accentRaw);
+          }
+          updates.tags = tags;
+        }
+
+        Goals.update(goalId, updates);
+      }
       modal.remove();
       State.selectedGoal = null;
       callbacks.onRender();

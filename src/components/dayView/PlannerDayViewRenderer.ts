@@ -5,6 +5,8 @@ import { TimelineGrid } from "./TimelineGrid";
 import { CONFIG } from "../../config/constants";
 import { renderIntentionsGrid } from "./sidebar/IntentionsGrid";
 import { renderCustomizationPanel } from "./sidebar/CustomizationPanel";
+import { State } from "../../core/State";
+import { expandEventsForRange } from "../../utils/recurrence";
 
 /**
  * Renderer for the Planner-style day view
@@ -22,7 +24,7 @@ export class PlannerDayViewRenderer {
    * @returns SVG markup as a string
    * @private
    */
-  private icon(name: "plus" | "eye" | "minus"): string {
+  private icon(name: "plus" | "eye" | "minus" | "calendar"): string {
     if (name === "plus") {
       return `
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -34,6 +36,14 @@ export class PlannerDayViewRenderer {
       return `
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      `;
+    }
+    if (name === "calendar") {
+      return `
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M16 2v4M8 2v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
       `;
     }
@@ -109,36 +119,79 @@ export class PlannerDayViewRenderer {
     const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
     const month = date.toLocaleDateString("en-US", { month: "long" });
     const day = date.getDate();
-    const ordinal = day % 10 === 1 && day !== 11 ? "st" :
-      day % 10 === 2 && day !== 12 ? "nd" :
-        day % 10 === 3 && day !== 13 ? "rd" : "th";
+    const ordinal =
+      day % 10 === 1 && day !== 11
+        ? "st"
+        : day % 10 === 2 && day !== 12
+          ? "nd"
+          : day % 10 === 3 && day !== 13
+            ? "rd"
+            : "th";
     const dayName = `${weekday}, ${month} ${day}${ordinal}`;
 
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+    const eventsToday = State.data?.events
+      ? expandEventsForRange(State.data.events, dayStart, dayEnd)
+      : [];
+    const formatEventTime = (iso: string, allDay: boolean) => {
+      if (allDay) return "All day";
+      const d = new Date(iso);
+      return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    };
+
     const html = `
-      <div class="day-view planner-day-view">
-        <aside class="planner-sidebar">
-          <div class="planner-sidebar-header">
-            <h3>${dayName}</h3>
-            <div class="planner-sidebar-actions">
-              <div class="planner-date-nav" role="group" aria-label="Day navigation">
-                <button class="btn-icon btn-planner-prev" type="button" aria-label="Previous day" title="Previous day">‹</button>
-                <button class="btn-icon btn-planner-next" type="button" aria-label="Next day" title="Next day">›</button>
+          <div class="day-view planner-day-view">
+            <aside class="planner-sidebar">
+              <div class="planner-sidebar-header">
+                <h3>${dayName}</h3>
+              <div class="planner-sidebar-actions">
+                <div class="planner-date-nav" role="group" aria-label="Day navigation">
+                  <button class="btn-icon btn-planner-prev" type="button" aria-label="Previous day" title="Previous day">‹</button>
+                  <button class="btn-icon btn-planner-next" type="button" aria-label="Next day" title="Next day">›</button>
+                </div>
+                <button class="btn-icon btn-planner-event" type="button" aria-label="Add event" title="Add event">
+                  ${this.icon("calendar")}
+                </button>
+                <button class="btn-icon btn-planner-add" type="button" aria-label="Add task" title="Add task">
+                  ${this.icon("plus")}
+                </button>
               </div>
-              <button class="btn-icon btn-planner-add" type="button" aria-label="Add task" title="Add task">
-                ${this.icon("plus")}
-              </button>
             </div>
-          </div>
 
-          ${contextGoals ? this.renderContextSection(contextGoals) : ''}
+            ${contextGoals ? this.renderContextSection(contextGoals) : ''}
 
-          <div class="planner-sidebar-section">
-            <div class="section-title">Today’s intentions</div>
-            <div class="sidebar-list">
-              ${todayIntentions.map(g => this.renderSidebarItem(g, Boolean(g.startTime))).join('')}
-              ${todayIntentions.length === 0 ? '<div class="empty-list">No intentions yet</div>' : ''}
+            <div class="planner-sidebar-section">
+              <div class="section-title">Today’s events</div>
+              <div class="sidebar-list">
+                ${
+                  eventsToday.length > 0
+                    ? eventsToday
+                        .slice(0, 8)
+                        .map(
+                          (ev) => `
+                            <button type="button" class="planner-event-item" data-action="edit-event" data-event-id="${ev.originalId}">
+                              <div class="planner-event-title">${ev.title}</div>
+                              <div class="planner-event-meta">${formatEventTime(ev.startAt, ev.allDay)}${ev.endAt && !ev.allDay ? `–${formatEventTime(ev.endAt, false)}` : ""}</div>
+                            </button>
+                          `,
+                        )
+                        .join("")
+                    : '<div class="empty-list">No events yet</div>'
+                }
+                ${eventsToday.length > 8 ? `<div class="empty-list">+${eventsToday.length - 8} more</div>` : ""}
+              </div>
             </div>
-          </div>
+
+            <div class="planner-sidebar-section">
+              <div class="section-title">Today’s intentions</div>
+              <div class="sidebar-list">
+                ${todayIntentions.map(g => this.renderSidebarItem(g, Boolean(g.startTime))).join('')}
+                ${todayIntentions.length === 0 ? '<div class="empty-list">No intentions yet</div>' : ''}
+              </div>
+            </div>
 
           <div class="planner-sidebar-section">
             <div class="sidebar-section-header">
@@ -281,9 +334,17 @@ export class PlannerDayViewRenderer {
 
     const emoji = goal.category ? this.getCategoryEmoji(goal.category) : '📍';
     const colorClass = goal.category ? `cat-${goal.category}` : 'cat-default';
+    const resizeHandles =
+      goal.status !== "done"
+        ? `
+          <div class="planter-resize-handle planter-resize-handle-top" data-resize="top"></div>
+          <div class="planter-resize-handle planter-resize-handle-bottom" data-resize="bottom"></div>
+        `
+        : "";
 
     return `
-        <div class="day-goal-card planner-timed-task ${colorClass}" style="top: ${top}%; height: ${durPct}%;" data-goal-id="${goal.id}">
+        <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" style="top: ${top}%; height: ${durPct}%;" data-goal-id="${goal.id}">
+        ${resizeHandles}
         <div class="day-goal-checkbox ${goal.status === 'done' ? 'checked' : ''}"></div>
         <div class="timed-task-content">
           <span class="timed-task-emoji">${emoji}</span>

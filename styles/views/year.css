@@ -185,6 +185,37 @@
   margin: 2px auto 10px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.year-vision-banner--pill .year-vision-pill {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+}
+
+.year-vision-banner--pill .year-vision-pill-title {
+  text-align: left;
+  font-size: 1.1rem;
+}
+
+.year-vision-banner--pill .year-vision-pill:not(.year-vision-pill--empty)::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-highlight) 60%, transparent);
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--accent-highlight) 34%, transparent),
+    0 0 14px color-mix(in srgb, var(--accent-border) 22%, transparent);
+}
+
+/* Backward-compat: hide per-pill label if present */
+.year-vision-banner--pill .year-vision-pill-label {
+  display: none;
 }
 
 .year-vision-card,
@@ -305,6 +336,24 @@
   --year-vision-glow-a: color-mix(in srgb, #f59e0b 42%, transparent);
   --year-vision-glow-b: color-mix(in srgb, #f59e0b 34%, transparent);
   --year-vision-glow-c: color-mix(in srgb, #f59e0b 28%, transparent);
+}
+
+/* Inherited accent (Vision color) */
+.year-vision-card--cosmic[data-link-accent="1"],
+.year-vision-pill--cosmic[data-link-accent="1"] {
+  --year-vision-border-gradient: var(
+    --link-accent-gradient,
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--link-accent) 92%, white 8%) 0%,
+      color-mix(in srgb, var(--link-accent) 62%, white 38%) 120%
+    )
+  );
+  --year-vision-surface-top: color-mix(in srgb, var(--glass-bg) 82%, var(--link-accent) 18%);
+  --year-vision-surface-bottom: color-mix(in srgb, var(--glass-bg) 92%, var(--link-accent) 8%);
+  --year-vision-glow-a: color-mix(in srgb, var(--link-accent) 42%, transparent);
+  --year-vision-glow-b: color-mix(in srgb, var(--link-accent) 34%, transparent);
+  --year-vision-glow-c: color-mix(in srgb, var(--link-accent) 28%, transparent);
 }
 
 .year-vision-pill {
@@ -689,5 +738,20 @@
     text-overflow: clip;
     word-wrap: break-word;
     hyphens: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .year-vision-banner--pill {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 6px 10px;
+    gap: 10px;
+  }
+
+  .year-vision-pill {
+    flex: 0 0 auto;
   }
 }

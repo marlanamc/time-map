@@ -1,10 +1,11 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'adhd-visionboard';
-const DB_VERSION = 3; // Added week reflections store
+const DB_VERSION = 4; // Added events store
 
 const DB_STORES = {
   GOALS: 'goals',
+  EVENTS: 'events',
   SETTINGS: 'settings',
   ACHIEVEMENTS: 'achievements',
   BRAIN_DUMP: 'brainDump',
@@ -90,6 +91,19 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
         console.log('✓ Week reflections store created');
       } catch (e) {
         console.error('Failed to create week reflections store:', e);
+      }
+    }
+
+    // Version 4: Add events (synced via Supabase)
+    if (oldVersion < 4) {
+      console.log('Adding events store...');
+      try {
+        const events = db.createObjectStore(DB_STORES.EVENTS, { keyPath: 'id' });
+        events.createIndex('byStartAt', 'startAt');
+        events.createIndex('byEndAt', 'endAt');
+        console.log('✓ Events store created');
+      } catch (e) {
+        console.error('Failed to create events store:', e);
       }
     }
   },
