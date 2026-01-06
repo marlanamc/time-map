@@ -1201,17 +1201,20 @@
     }
 
     /* Garden view container styles */
-    .garden-view-container {
+    body.mobile-garden-view .garden-view-container {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
     }
 
-    .garden-view-header {
-        display: none !important;
+
+    /* Garden header styling for mobile */
+    body.mobile-garden-view .week-view-header.garden-header {
+        margin: 0 0 var(--space-4);
+        text-align: center;
     }
 
-    .garden-view-title {
+    body.mobile-garden-view .garden-reflection .week-view-title {
         font-size: clamp(2rem, 5vw, 2.75rem);
         font-weight: 900;
         background: linear-gradient(135deg, 
@@ -1222,378 +1225,147 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin: 0 0 var(--space-3) 0;
+        margin: 0 0 var(--space-2) 0;
         letter-spacing: -0.04em;
         line-height: 1.1;
         filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
     }
 
-    .garden-view-subtitle {
+    body.mobile-garden-view .garden-header-subtitle {
         font-size: clamp(0.9375rem, 2.5vw, 1.125rem);
         color: var(--text-primary);
-        margin: 0;
+        margin: var(--space-2) 0 0;
         font-weight: 600;
         opacity: 0.85;
         line-height: 1.6;
-        max-width: 90%;
-        margin-left: auto;
-        margin-right: auto;
     }
 
-    .garden-content {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-6);
-        padding-bottom: var(--space-4);
-    }
-
-    /* Staggered entrance animations for garden groups */
-    .garden-group {
-        animation: slide-up-fade 0.5s ease-out backwards;
-    }
-
-    .garden-group:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .garden-group:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .garden-group:nth-child(3) {
-        animation-delay: 0.3s;
-    }
-
-    .garden-group:nth-child(4) {
-        animation-delay: 0.4s;
-    }
-
-    @keyframes slide-up-fade {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .garden-group {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-4);
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        padding: 0;
-        box-shadow: none;
-        transition: none;
-        position: relative;
-        overflow: visible;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-    }
-
-    .garden-group::before {
+    /* Disable cosmic card effects on mobile for performance */
+    body.mobile-garden-view .cosmic-card::before,
+    body.mobile-garden-view .cosmic-card::after {
         display: none;
     }
 
-    .garden-group::after {
-        display: none;
-    }
-
-    .garden-group-empty {
-        background: transparent;
-        border: none;
-    }
-
-    .garden-group-empty::after {
-        display: none;
-    }
-
-    .garden-group-has-items {
-        background: transparent;
-        border: none;
-    }
-
-    .garden-group-has-items:hover {
-        transform: none;
-        box-shadow: none;
-    }
-
-    .garden-group-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: var(--space-3);
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-primary);
-        padding-bottom: var(--space-4);
-        border-bottom: none;
-        position: relative;
-        z-index: 1;
-    }
-
-    .garden-group-title {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-2);
-        font-size: 12px;
-        font-weight: 900;
-        opacity: 0.95;
-    }
-
-    .garden-count {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-        color: white;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 800;
-        min-width: 32px;
-        text-align: center;
-        box-shadow: 
-            0 4px 12px rgba(74, 144, 226, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        letter-spacing: 0.02em;
-    }
-
-    .garden-goals-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3);
-    }
-
-    .garden-goal-item {
-        border: 1.5px solid rgba(255, 255, 255, 0.25);
-        border-radius: 16px;
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.20) 0%,
-            rgba(255, 255, 255, 0.15) 100%);
-        padding: var(--space-5) var(--space-6);
-        color: var(--text-primary);
-        font-weight: 700;
-        font-size: var(--text-base);
-        touch-action: manipulation;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 
-            0 4px 12px rgba(0, 0, 0, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .garden-goal-item::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: linear-gradient(180deg, var(--accent) 0%, var(--accent-hover) 100%);
-        opacity: 0;
-        transition: opacity 0.25s ease;
-    }
-
-    .dark-mode .garden-goal-item {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.15) 0%,
-            rgba(255, 255, 255, 0.10) 100%);
-    }
-
-    .garden-goal-item:active {
-        transform: scale(0.97);
-        box-shadow: 
-            0 2px 8px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-
-    .garden-goal-item:hover,
-    .garden-goal-item:focus {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.28) 0%,
-            rgba(255, 255, 255, 0.20) 100%);
-        border-color: rgba(255, 255, 255, 0.35);
-        transform: translateY(-2px);
-        box-shadow: 
-            0 8px 20px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    }
-
-    .garden-goal-item:hover::before,
-    .garden-goal-item:focus::before {
-        opacity: 1;
-    }
-
-    .garden-empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: var(--space-4) var(--space-5);
-        text-align: center;
-        gap: var(--space-3);
-        position: relative;
-        z-index: 1;
-    }
-
-    .garden-empty-icon {
-        display: none !important;
-    }
-
-    @keyframes gentle-pulse {
-        0%, 100% { 
-            transform: scale(1) rotate(0deg); 
-            opacity: 0.85; 
-        }
-        25% { 
-            transform: scale(1.08) rotate(-2deg); 
-            opacity: 0.95; 
-        }
-        50% { 
-            transform: scale(1.12) rotate(0deg); 
-            opacity: 1; 
-        }
-        75% { 
-            transform: scale(1.08) rotate(2deg); 
-            opacity: 0.95; 
-        }
-    }
-
-    .garden-empty-message {
-        display: none !important;
-    }
-
-    .garden-add-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-3);
-        padding: var(--space-4) var(--space-7);
-        background: linear-gradient(135deg, 
-            var(--accent) 0%, 
-            var(--accent-hover) 50%,
-            #7EC8A3 100%);
-        color: white;
-        border: none;
-        border-radius: 28px;
-        font-size: var(--text-base);
-        font-weight: 800;
-        cursor: pointer;
-        touch-action: manipulation;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 
-            0 6px 20px rgba(74, 144, 226, 0.35),
-            0 3px 10px rgba(74, 144, 226, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        margin-top: 0;
-        letter-spacing: 0.02em;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .garden-add-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, 
-            transparent, 
-            rgba(255, 255, 255, 0.3), 
-            transparent);
-        transition: left 0.5s ease;
-    }
-
-    .garden-add-btn:hover::before {
-        left: 100%;
-    }
-
-    .garden-add-btn:active {
-        transform: scale(0.96);
-        box-shadow: 
-            0 3px 12px rgba(74, 144, 226, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
-
-    .garden-add-btn:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 
-            0 10px 28px rgba(74, 144, 226, 0.4),
-            0 5px 14px rgba(74, 144, 226, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    }
-
-    .garden-add-icon {
-        font-size: 1.5rem;
-        font-weight: 300;
-        line-height: 1;
-        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-    }
-
-    /* Dark mode enhancements */
-    .dark-mode .garden-group {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.12) 0%,
-            rgba(255, 255, 255, 0.08) 50%,
-            rgba(255, 255, 255, 0.10) 100%);
-        border-color: rgba(255, 255, 255, 0.18);
-    }
-
-    .dark-mode .garden-group-empty {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.10) 0%,
-            rgba(255, 255, 255, 0.06) 50%,
-            rgba(255, 255, 255, 0.08) 100%);
-        border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .dark-mode .garden-group-has-items {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.14) 0%,
-            rgba(255, 255, 255, 0.10) 50%,
-            rgba(255, 255, 255, 0.12) 100%);
-    }
-
-    .dark-mode .garden-goal-item {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.12) 0%,
-            rgba(255, 255, 255, 0.08) 100%);
-        border-color: rgba(255, 255, 255, 0.18);
-    }
-
-    .dark-mode .garden-goal-item:hover {
-        background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.18) 0%,
-            rgba(255, 255, 255, 0.14) 100%);
-        border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    .dark-mode .garden-view-subtitle {
+    .dark-mode .garden-header-subtitle {
         color: var(--text-primary);
         opacity: 0.9;
     }
 
     /* Reduce motion for accessibility */
     @media (prefers-reduced-motion: reduce) {
-        .garden-view-title,
-        .garden-group::before,
-        .garden-empty-icon,
-        .garden-group-empty,
-        .garden-group {
+        body.mobile-garden-view .garden-reflection .week-view-title {
             animation: none;
         }
-        
-        .garden-group:hover,
-        .garden-goal-item:hover,
-        .garden-add-btn:hover {
-            transform: none;
+    }
+
+    /* ===================================
+       Mobile Garden: Simplified View
+       =================================== */
+
+    /* Hide sections on mobile - only show Linkage Explorer */
+    .garden-mobile-hidden {
+        display: none !important;
+    }
+
+    /* ===================================
+       Mobile Garden: Collapsible Sections
+       =================================== */
+
+    /* Section toggle button */
+    body.mobile-garden-view .garden-section-toggle {
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        text-align: left;
+        min-height: 56px;  /* Larger touch target */
+        transition: background 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.mobile-garden-view .garden-section-toggle:active {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    body.mobile-garden-view .dark-mode .garden-section-toggle:active {
+        background: rgba(0, 0, 0, 0.12);
+    }
+
+    body.mobile-garden-view .garden-section-toggle-icon {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: var(--text-secondary);
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+        margin-top: 2px;  /* Align with title */
+        line-height: 1;
+    }
+
+    body.mobile-garden-view .garden-section.collapsed .garden-section-toggle-icon {
+        transform: rotate(-90deg);
+    }
+
+    /* Section content collapsing */
+    body.mobile-garden-view .garden-section-content {
+        max-height: 5000px;  /* Large enough for content */
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.3s ease;
+        opacity: 1;
+    }
+
+    body.mobile-garden-view .garden-section.collapsed .garden-section-content {
+        max-height: 0;
+        opacity: 0;
+    }
+
+    /* Collapsed section styling */
+    body.mobile-garden-view .garden-section.collapsed {
+        background: rgba(255, 255, 255, 0.08);  /* Lighter when collapsed */
+        border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    body.mobile-garden-view .dark-mode .garden-section.collapsed {
+        background: rgba(0, 0, 0, 0.12);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Spacing between sections */
+    body.mobile-garden-view .garden-section + .garden-section {
+        margin-top: var(--space-4);
+    }
+
+    /* Make Weekly Alignment visually prominent when expanded */
+    body.mobile-garden-view .garden-section[data-section-id="garden-weekly-alignment"]:not(.collapsed) {
+        border-color: rgba(111, 155, 134, 0.28);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    body.mobile-garden-view .dark-mode .garden-section[data-section-id="garden-weekly-alignment"]:not(.collapsed) {
+        border-color: rgba(111, 155, 134, 0.35);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Focus indicator for keyboard navigation */
+    body.mobile-garden-view .garden-section-toggle:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: -3px;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+        body.mobile-garden-view .garden-section-content,
+        body.mobile-garden-view .garden-section-toggle-icon {
+            transition: none;
+        }
+
+        body.mobile-garden-view .garden-section.collapsed .garden-section-content {
+            display: none;  /* Instant instead of animated */
         }
     }
 

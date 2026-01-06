@@ -298,7 +298,11 @@ export const UI = {
     });
 
     this.elements.calendarGrid?.addEventListener("open-goal-modal", (e) => {
-      const ev = e as CustomEvent<{ level?: GoalLevel; month?: number | null; year?: number }>;
+      const ev = e as CustomEvent<{
+        level?: GoalLevel;
+        month?: number | null;
+        year?: number;
+      }>;
       const level = ev.detail?.level;
       if (!level) return;
       const month = ev.detail?.month ?? null;
@@ -312,7 +316,7 @@ export const UI = {
       const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw.trim());
       const date = match
         ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
-        : (State.viewingDate ?? new Date());
+        : State.viewingDate ?? new Date();
       eventModal.show({ date, eventId: ev.detail?.eventId });
     });
   },
@@ -1569,9 +1573,9 @@ export const UI = {
               opts.level,
               opts.preselectedMonth ?? State.viewingMonth,
               opts.preselectedYear ?? State.viewingYear,
-              { parentId: opts.parentId, parentLevel: opts.parentLevel },
+              { parentId: opts.parentId, parentLevel: opts.parentLevel }
             ),
-          (opts) => this.openQuickAdd(opts),
+          (opts) => this.openQuickAdd(opts)
         );
         break;
       default:
@@ -1737,22 +1741,22 @@ export const UI = {
     const timeWindowEnd = timeRangePrefs.endHour * 60;
 
     // Check if we need to recreate the controller due to time range change
-    const needsRecreate = this.dayViewController && this._lastTimeRange && (
-      this._lastTimeRange.start !== timeWindowStart ||
-      this._lastTimeRange.end !== timeWindowEnd
-    );
+    const needsRecreate =
+      this.dayViewController &&
+      this._lastTimeRange &&
+      (this._lastTimeRange.start !== timeWindowStart ||
+        this._lastTimeRange.end !== timeWindowEnd);
 
     if (needsRecreate) {
       // Destroy existing controller
       if (this.dayViewController) {
-        this.dayViewController.destroy?.();
+        this.dayViewController.unmount();
         this.dayViewController = null;
       }
     }
 
     // Initialize DayViewController if not already done
     if (!this.dayViewController) {
-
       this.dayViewController = new this._dayViewControllerCtor(
         container,
         {
@@ -1801,7 +1805,7 @@ export const UI = {
 
       // Mount the controller
       this.dayViewController.mount();
-      
+
       // Store the time range we used
       this._lastTimeRange = { start: timeWindowStart, end: timeWindowEnd };
     }
@@ -2009,29 +2013,37 @@ export const UI = {
     `;
 
     const visionWrap = document.createElement("div");
-    visionWrap.className = "year-vision-banner year-vision-banner--pill";
+    visionWrap.className = "year-vision-hero-container";
 
     if (visionGoals.length > 0) {
-      const visionPills = visionGoals
+      const visionIcons = visionGoals
         .map((vision) => {
           const accentAttrs = buildAccentAttributes(getVisionAccent(vision));
+          const icon = vision.icon || "✨";
           return `
-            <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--vision"${accentAttrs.dataAttr}${accentAttrs.styleAttr} data-goal-id="${
-              vision.id
-            }" aria-label="Vision: ${this.escapeHtml(vision.title)}">
-              <span class="year-vision-pill-title">${this.escapeHtml(vision.title)}</span>
-            </button>
+            <div class="year-vision-icon-only"
+               ${accentAttrs.dataAttr} 
+               ${accentAttrs.styleAttr} 
+               data-goal-id="${vision.id}" 
+               role="button" 
+               tabindex="0"
+               aria-label="Vision: ${this.escapeHtml(vision.title)}">
+               <span class="vision-icon-large">${icon}</span>
+            </div>
           `;
         })
         .join("");
 
-      visionWrap.innerHTML = visionPills;
+      const cardsContainer = document.createElement("div");
+      cardsContainer.className = "year-vision-icons-grid";
+      cardsContainer.innerHTML = visionIcons;
+      visionWrap.appendChild(cardsContainer);
     } else {
       visionWrap.innerHTML = `
-        <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--vision year-vision-pill--empty year-add-vision-btn" aria-label="Add Vision">
-          <span class="year-vision-pill-title">+ Add Vision</span>
-        </button>
-      `;
+      <button type="button" class="year-vision-hero-card year-vision-hero-card--empty year-add-vision-btn" aria-label="Add Vision for ${viewingYear}">
+        <span class="year-vision-hero-title">+ Add Vision</span>
+      </button>
+    `;
     }
 
     const grid = document.createElement("div");
@@ -2048,15 +2060,27 @@ export const UI = {
 
     visionWrap.addEventListener("click", (e) => {
       const target = (e.target as HTMLElement | null)?.closest?.(
-        ".year-vision-pill[data-goal-id]"
-      ) as HTMLButtonElement | null;
+        ".year-vision-icon-only[data-goal-id]"
+      ) as HTMLElement | null;
       if (!target) return;
-      if (target.classList.contains("year-add-vision-btn")) return;
       e.preventDefault();
       e.stopPropagation();
       const goalId = target.dataset.goalId;
       if (!goalId) return;
-      container.dispatchEvent(new CustomEvent("goal-click", { detail: { goalId } }));
+      container.dispatchEvent(
+        new CustomEvent("goal-click", { detail: { goalId } })
+      );
+    });
+
+    visionWrap.addEventListener("keydown", (e) => {
+      const ke = e as KeyboardEvent;
+      if (ke.key !== "Enter" && ke.key !== " ") return;
+      const target = (e.target as HTMLElement | null)?.closest?.(
+        ".year-vision-icon-only[data-goal-id]"
+      ) as HTMLElement | null;
+      if (!target) return;
+      ke.preventDefault();
+      (target as HTMLElement).click();
     });
 
     const addVisionBtn = yearView.querySelector<HTMLButtonElement>(
@@ -2250,13 +2274,19 @@ export const UI = {
           (goal.progress > 0 && goal.progress < 100);
 
         return `
-          <div class="goal-item goal-item--month-milestone ${statusClass}" data-goal-id="${goal.id}">
+          <div class="goal-item goal-item--month-milestone ${statusClass}" data-goal-id="${
+          goal.id
+        }">
             <div class="goal-content">
               <div class="month-goal-row">
                 <span class="month-goal-dot" style="--goal-dot-color: ${dotColor}" aria-hidden="true"></span>
                 <div class="goal-title">
-                  <span class="goal-level-emoji" aria-hidden="true">${level.emoji}</span>
-                  <span class="goal-title-text">${this.escapeHtml(goal.title)}</span>
+                  <span class="goal-level-emoji" aria-hidden="true">${
+                    level.emoji
+                  }</span>
+                  <span class="goal-title-text">${this.escapeHtml(
+                    goal.title
+                  )}</span>
                 </div>
                 ${
                   goal.status === "done"
@@ -2269,9 +2299,11 @@ export const UI = {
                   ? `<div class="month-goal-meta">
                       ${
                         cat
-                          ? `<span class="month-goal-meta-chip" style="color: ${cat.color}" title="${this.escapeHtml(
-                              cat.label
-                            )}">${cat.emoji}</span>`
+                          ? `<span class="month-goal-meta-chip" style="color: ${
+                              cat.color
+                            }" title="${this.escapeHtml(cat.label)}">${
+                              cat.emoji
+                            }</span>`
                           : ""
                       }
                       ${
@@ -2504,9 +2536,15 @@ export const UI = {
     level: GoalLevel = "milestone",
     preselectedMonth: number | null = null,
     preselectedYear: number | null = null,
-    link?: { parentId: string; parentLevel: GoalLevel } | null,
+    link?: { parentId: string; parentLevel: GoalLevel } | null
   ): void {
-    goalModal.openGoalModal(this, level, preselectedMonth, preselectedYear, link);
+    goalModal.openGoalModal(
+      this,
+      level,
+      preselectedMonth,
+      preselectedYear,
+      link
+    );
   },
 
   closeGoalModal() {
@@ -2569,7 +2607,7 @@ export const UI = {
     // Time left calculations - different metrics for each view
     const isHome = State.currentView === VIEWS.HOME;
     const isGarden = State.currentView === VIEWS.GARDEN;
-    
+
     // For HOME view, use the scope index to determine which view's metrics to show
     // For other views, use the actual current view
     const homeScopeViews: ViewType[] = [
@@ -2582,13 +2620,14 @@ export const UI = {
       State.currentView === VIEWS.HOME
         ? homeScopeViews[this._homeProgressScopeIndex] ?? VIEWS.YEAR
         : State.currentView === VIEWS.GARDEN
-          ? VIEWS.YEAR // Garden view shows year stats
-          : State.currentView;
+        ? VIEWS.YEAR // Garden view shows year stats
+        : State.currentView;
 
     // Use current date/year for HOME and GARDEN views, otherwise use State viewing values
-    const scopeYear = (isHome || isGarden) ? now.getFullYear() : State.viewingYear;
-    const scopeMonth = (isHome || isGarden) ? now.getMonth() : State.viewingMonth;
-    const scopeDate = (isHome || isGarden) ? now : State.viewingDate;
+    const scopeYear =
+      isHome || isGarden ? now.getFullYear() : State.viewingYear;
+    const scopeMonth = isHome || isGarden ? now.getMonth() : State.viewingMonth;
+    const scopeDate = isHome || isGarden ? now : State.viewingDate;
 
     let end: Date;
     let daysLeft: number;
@@ -2605,7 +2644,9 @@ export const UI = {
         end.setHours(23, 59, 59, 999);
         const msLeft = Math.max(0, end.getTime() - now.getTime());
         const hoursLeft = Math.floor(msLeft / (1000 * 60 * 60));
-        const minutesLeft = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const minutesLeft = Math.floor(
+          (msLeft % (1000 * 60 * 60)) / (1000 * 60)
+        );
         daysLeft = hoursLeft;
         weeksLeft = minutesLeft;
         daysLeftLabel = "Hours Left";
@@ -2629,15 +2670,25 @@ export const UI = {
           0,
           Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         );
-        
+
         // Weeks left in current month
-        const monthEnd = new Date(scopeYear, scopeMonth + 1, 0, 23, 59, 59, 999);
+        const monthEnd = new Date(
+          scopeYear,
+          scopeMonth + 1,
+          0,
+          23,
+          59,
+          59,
+          999
+        );
         const daysInMonth = Math.max(
           0,
-          Math.ceil((monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+          Math.ceil(
+            (monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+          )
         );
         const weeksInMonth = Math.floor(daysInMonth / 7);
-        
+
         daysLeft = daysInWeek;
         weeksLeft = weeksInMonth;
         daysLeftLabel = "Days Left";
@@ -2648,18 +2699,28 @@ export const UI = {
       }
       case VIEWS.MONTH: {
         // Weeks left (in month) | Months left (in year)
-        const monthEnd = new Date(scopeYear, scopeMonth + 1, 0, 23, 59, 59, 999);
+        const monthEnd = new Date(
+          scopeYear,
+          scopeMonth + 1,
+          0,
+          23,
+          59,
+          59,
+          999
+        );
         const daysInMonth = Math.max(
           0,
-          Math.ceil((monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+          Math.ceil(
+            (monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+          )
         );
         const weeksInMonth = Math.floor(daysInMonth / 7);
-        
+
         // Months left in current year (from end of the month being viewed)
         // Formula: 12 - (monthIndex + 1) where monthIndex is 0-11
         // January (0): 12 - 1 = 11 months left, December (11): 12 - 12 = 0 months left
         const monthsInYear = Math.max(0, 12 - (scopeMonth + 1));
-        
+
         daysLeft = weeksInMonth;
         weeksLeft = monthsInYear;
         daysLeftLabel = "Weeks Left";

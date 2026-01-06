@@ -165,7 +165,8 @@ body.hide-sidebar .canvas-zoom-controls {
 :root:not(.dark-mode) .year-view-title,
 :root:not(.dark-mode) .month-view-title,
 :root:not(.dark-mode) .week-view-title,
-:root:not(.dark-mode) .planner-sidebar-header h3 {
+:root:not(.dark-mode) .planner-sidebar-header h3,
+:root:not(.dark-mode) .garden-mobile-title {
     color: var(--text-primary) !important;
     text-shadow: none;
 }
@@ -219,7 +220,11 @@ body.hide-sidebar .canvas-zoom-controls {
 :root.dark-mode.time-dawn .week-view-title,
 :root.dark-mode.time-morning .week-view-title,
 :root.dark-mode.time-afternoon .week-view-title,
-:root.dark-mode.time-evening .week-view-title {
+:root.dark-mode.time-evening .week-view-title,
+:root.dark-mode.time-dawn .garden-mobile-title,
+:root.dark-mode.time-morning .garden-mobile-title,
+:root.dark-mode.time-afternoon .garden-mobile-title,
+:root.dark-mode.time-evening .garden-mobile-title {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
 }
 
@@ -237,7 +242,8 @@ body.hide-sidebar .canvas-zoom-controls {
     .month-view-title,
     .week-view-title,
     .day-view-title,
-    .planner-sidebar-header h3 {
+    .planner-sidebar-header h3,
+    .garden-mobile-title {
         background: linear-gradient(110deg,
                 var(--text-primary) 0%,
                 var(--accent) 65%,
@@ -254,7 +260,8 @@ body.hide-sidebar .canvas-zoom-controls {
     :root:not(.dark-mode) .year-view-title,
     :root:not(.dark-mode) .month-view-title,
     :root:not(.dark-mode) .week-view-title,
-    :root:not(.dark-mode) .planner-sidebar-header h3 {
+    :root:not(.dark-mode) .planner-sidebar-header h3,
+    :root:not(.dark-mode) .garden-mobile-title {
         background: linear-gradient(110deg,
                 var(--text-primary) 0%,
                 var(--accent) 65%,
@@ -301,7 +308,11 @@ body.hide-sidebar .canvas-zoom-controls {
     :root.time-dawn:not(.dark-mode) .week-view-title,
     :root.time-morning:not(.dark-mode) .week-view-title,
     :root.time-afternoon:not(.dark-mode) .week-view-title,
-    :root.time-evening:not(.dark-mode) .week-view-title {
+    :root.time-evening:not(.dark-mode) .week-view-title,
+    :root.time-dawn:not(.dark-mode) .garden-mobile-title,
+    :root.time-morning:not(.dark-mode) .garden-mobile-title,
+    :root.time-afternoon:not(.dark-mode) .garden-mobile-title,
+    :root.time-evening:not(.dark-mode) .garden-mobile-title {
         background: linear-gradient(110deg,
                 #0A1113 0%,
                 #1A2B2F 35%,

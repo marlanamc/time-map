@@ -430,6 +430,15 @@ export class DayViewController {
   private handleClick(e: Event): void {
     const target = e.target as HTMLElement;
 
+    const contextGoalBtn = target.closest(".year-vision-icon-only[data-goal-id]") as HTMLElement | null;
+    if (contextGoalBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = contextGoalBtn.dataset.goalId;
+      if (goalId) this.callbacks.onGoalClick(goalId);
+      return;
+    }
+
     const customizeBtn = target.closest('[data-action="customize"], [data-action="add-intention"], [data-action="edit-intentions"]') as HTMLElement | null;
     if (customizeBtn) {
       e.preventDefault();

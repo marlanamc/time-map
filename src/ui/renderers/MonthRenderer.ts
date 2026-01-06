@@ -1,12 +1,15 @@
 // ===================================
 // Month View Renderer
 // ===================================
-import { State } from '../../core/State';
-import { Goals } from '../../core/Goals';
-import { CONFIG, VIEWS } from '../../config';
-import { expandEventsForRange } from '../../utils/recurrence';
-import { buildAccentAttributes, getInheritedAccent } from '../../utils/goalLinkage';
-import type { UIElements } from '../../types';
+import { State } from "../../core/State";
+import { Goals } from "../../core/Goals";
+import { CONFIG, VIEWS } from "../../config";
+import { expandEventsForRange } from "../../utils/recurrence";
+import {
+  buildAccentAttributes,
+  getInheritedAccent,
+} from "../../utils/goalLinkage";
+import type { UIElements } from "../../types";
 
 export const MonthRenderer = {
   render(elements: UIElements, escapeHtmlFn: (text: string) => string) {
@@ -23,8 +26,9 @@ export const MonthRenderer = {
 
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
-    const milestoneGoals = Goals.getForRange(monthStart, monthEnd)
-      .filter(g => g.level === 'milestone' && g.status !== 'done');
+    const milestoneGoals = Goals.getForRange(monthStart, monthEnd).filter(
+      (g) => g.level === "milestone" && g.status !== "done"
+    );
     const primaryMilestone = milestoneGoals[0];
 
     const goalsById = new Map<string, any>();
@@ -53,28 +57,34 @@ export const MonthRenderer = {
           <h2 class="month-view-title">${monthTitle}</h2>
         </div>
         <div class="month-milestone-banner year-vision-banner--pill">
-          ${primaryMilestone ? `
-            <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--milestone month-milestone-pill"${milestoneAccentAttrs.dataAttr}${milestoneAccentAttrs.styleAttr} data-goal-id="${primaryMilestone.id}">
-              <span class="year-vision-pill-label" aria-label="Milestone">
-                <span class="year-vision-pill-dot" aria-hidden="true"></span>
-                MILESTONE
-              </span>
-              <span class="year-vision-pill-title">${escapeHtmlFn(primaryMilestone.title)}</span>
-            </button>
-          ` : `
-            <button type="button" class="year-vision-pill year-vision-pill--cosmic year-vision-pill--milestone year-vision-pill--empty month-milestone-pill month-milestone-pill--empty" data-action="add-milestone">
-              <span class="year-vision-pill-label" aria-label="Milestone">
-                <span class="year-vision-pill-dot" aria-hidden="true"></span>
-                MILESTONE
-              </span>
-              <span class="year-vision-pill-title">+ Add Milestone</span>
-            </button>
-          `}
+          ${(() => {
+            if (primaryMilestone) {
+              const icon = primaryMilestone.icon || "🎯";
+              return `
+                        <button type="button" class="year-vision-icon-only" ${
+                          milestoneAccentAttrs.dataAttr
+                        }${milestoneAccentAttrs.styleAttr} data-goal-id="${
+                  primaryMilestone.id
+                }" aria-label="${escapeHtmlFn(primaryMilestone.title)}">
+                          <span class="vision-icon-large">${icon}</span>
+                        </button>
+                      `;
+            } else {
+              return `
+                      <button type="button" class="year-vision-icon-only year-vision-icon-only--empty" data-action="add-milestone" aria-label="Add Milestone">
+                        <span class="vision-icon-large">+</span>
+                      </button>
+                    `;
+            }
+          })()}
         </div>
         <div class="month-calendar" role="grid" aria-label="Month calendar">
           <div class="month-calendar-header-row" role="row">
             ${dayNames
-              .map((name) => `<div class="month-calendar-header" role="columnheader">${name}</div>`)
+              .map(
+                (name) =>
+                  `<div class="month-calendar-header" role="columnheader">${name}</div>`
+              )
               .join("")}
           </div>
     `;
@@ -99,8 +109,12 @@ export const MonthRenderer = {
       cellDates.push(new Date(year, month + 1, i));
     }
 
-    const gridStart = cellDates.length > 0 ? new Date(cellDates[0]) : monthStart;
-    const gridEnd = cellDates.length > 0 ? new Date(cellDates[cellDates.length - 1]) : monthEnd;
+    const gridStart =
+      cellDates.length > 0 ? new Date(cellDates[0]) : monthStart;
+    const gridEnd =
+      cellDates.length > 0
+        ? new Date(cellDates[cellDates.length - 1])
+        : monthEnd;
     const eventsForGrid = State.data?.events
       ? expandEventsForRange(State.data.events, gridStart, gridEnd)
       : [];
@@ -118,23 +132,36 @@ export const MonthRenderer = {
     for (const ev of eventsForGrid) {
       const start = new Date(ev.startAt);
       const end = ev.endAt ? new Date(ev.endAt) : start;
-      for (let cursor = startOfDay(start); cursor <= startOfDay(end); cursor = addDays(cursor, 1)) {
+      for (
+        let cursor = startOfDay(start);
+        cursor <= startOfDay(end);
+        cursor = addDays(cursor, 1)
+      ) {
         const key = formatYmd(cursor);
         eventCountByYmd.set(key, (eventCountByYmd.get(key) ?? 0) + 1);
       }
     }
 
     const renderDayCell = (date: Date) => {
-      const isOtherMonth = date.getMonth() !== month || date.getFullYear() !== year;
+      const isOtherMonth =
+        date.getMonth() !== month || date.getFullYear() !== year;
       const isToday = date.toDateString() === today.toDateString();
       const isSelected = selected && date.toDateString() === selected;
       const ymd = formatYmd(date);
       const dayNum = date.getDate();
       const eventCount = eventCountByYmd.get(ymd) ?? 0;
       return `
-        <div class="month-day ${isOtherMonth ? "other-month" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}" data-date="${ymd}" role="gridcell" aria-label="${date.toDateString()}">
+        <div class="month-day ${isOtherMonth ? "other-month" : ""} ${
+        isToday ? "today" : ""
+      } ${
+        isSelected ? "selected" : ""
+      }" data-date="${ymd}" role="gridcell" aria-label="${date.toDateString()}">
           <div class="month-day-number">${dayNum}</div>
-          ${eventCount > 0 ? `<div class="month-day-events-badge" aria-label="${eventCount} events">${eventCount}</div>` : ``}
+          ${
+            eventCount > 0
+              ? `<div class="month-day-events-badge" aria-label="${eventCount} events">${eventCount}</div>`
+              : ``
+          }
           <div class="month-day-goals"></div>
         </div>
       `;
@@ -147,21 +174,32 @@ export const MonthRenderer = {
       const weekStart = new Date(weekDates[0]);
       const weekEnd = new Date(weekDates[6]);
 
-      const focusGoals = Goals.getForRange(weekStart, weekEnd)
-        .filter((g) => g.level === "focus" && g.status !== "done");
+      const focusGoals = Goals.getForRange(weekStart, weekEnd).filter(
+        (g) => g.level === "focus" && g.status !== "done"
+      );
       const primaryFocus = focusGoals[0];
 
       html += `
-        <div class="month-week-row${primaryFocus ? " has-focus" : ""}" role="row">
-          ${primaryFocus ? `
+        <div class="month-week-row${
+          primaryFocus ? " has-focus" : ""
+        }" role="row">
+          ${weekDates.map(renderDayCell).join("")}
+          ${
+            primaryFocus
+              ? `
             <div class="month-week-focus-banner" aria-label="This week focus">
-              <span class="month-week-focus-text">This week: ${escapeHtmlFn(primaryFocus.title)}</span>
-              <button type="button" class="month-week-focus-edit" data-goal-id="${primaryFocus.id}" aria-label="Edit focus">
+              <span class="month-week-focus-text">This week: ${escapeHtmlFn(
+                primaryFocus.title
+              )}</span>
+              <button type="button" class="month-week-focus-edit" data-goal-id="${
+                primaryFocus.id
+              }" aria-label="Edit focus">
                 Edit
               </button>
             </div>
-          ` : ""}
-          ${weekDates.map(renderDayCell).join("")}
+          `
+              : ""
+          }
         </div>
       `;
     }
@@ -174,27 +212,29 @@ export const MonthRenderer = {
     container.innerHTML = html;
 
     // Add click handlers for day cells
-    container.querySelectorAll<HTMLElement>(".month-day[data-date]").forEach((cell) => {
-      cell.addEventListener("click", () => {
-        const iso = cell.dataset.date;
-        if (!iso) return;
-        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-        if (!match) return;
-        const y = Number(match[1]);
-        const m = Number(match[2]) - 1;
-        const d = Number(match[3]);
-        State.goToDate(new Date(y, m, d));
-        State.setView(VIEWS.DAY);
+    container
+      .querySelectorAll<HTMLElement>(".month-day[data-date]")
+      .forEach((cell) => {
+        cell.addEventListener("click", () => {
+          const iso = cell.dataset.date;
+          if (!iso) return;
+          const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+          if (!match) return;
+          const y = Number(match[1]);
+          const m = Number(match[2]) - 1;
+          const d = Number(match[3]);
+          State.goToDate(new Date(y, m, d));
+          State.setView(VIEWS.DAY);
+        });
       });
-    });
 
     // Add click handlers for the milestone chip
-    container.querySelectorAll<HTMLElement>('[data-goal-id]').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+    container.querySelectorAll<HTMLElement>("[data-goal-id]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const goalId = btn.dataset.goalId;
         if (goalId) {
-          const event = new CustomEvent('goal-click', { detail: { goalId } });
+          const event = new CustomEvent("goal-click", { detail: { goalId } });
           container.dispatchEvent(event);
         }
       });
@@ -214,15 +254,19 @@ export const MonthRenderer = {
       });
     }
 
-    container.querySelectorAll<HTMLButtonElement>('.month-week-focus-edit[data-goal-id]').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const goalId = btn.dataset.goalId;
-        if (!goalId) return;
-        const event = new CustomEvent('goal-click', { detail: { goalId } });
-        container.dispatchEvent(event);
+    container
+      .querySelectorAll<HTMLButtonElement>(
+        ".month-week-focus-edit[data-goal-id]"
+      )
+      .forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const goalId = btn.dataset.goalId;
+          if (!goalId) return;
+          const event = new CustomEvent("goal-click", { detail: { goalId } });
+          container.dispatchEvent(event);
+        });
       });
-    });
-  }
+  },
 };

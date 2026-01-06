@@ -192,3 +192,5 @@ If you're still having issues:
 - RLS policies are critical - without them, nothing will work
 - The app will still work offline with localStorage, but cloud sync requires these migrations
 
+
+

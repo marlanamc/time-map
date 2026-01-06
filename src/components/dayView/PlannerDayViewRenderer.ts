@@ -380,45 +380,28 @@ export class PlannerDayViewRenderer {
    * @private
    */
   private renderContextSection(contextGoals: { vision: Goal[], milestone: Goal[], focus: Goal[] }): string {
-    const renderCosmicMini = (level: 'vision' | 'milestone' | 'focus', levelLabel: string, goals: Goal[]) => {
+    const renderIconOnly = (goals: Goal[], fallbackIcon: string) => {
       if (goals.length === 0) return '';
       const primary = goals[0];
       const remaining = Math.max(0, goals.length - 1);
-
+      const icon = primary.icon || fallbackIcon;
       return `
-        <div class="context-level">
-          <div class="context-goals context-goals--mini">
-            <button
-              type="button"
-              class="cosmic-card cosmic-card--${level} cosmic-card--mini"
-              data-goal-id="${primary.id}"
-              data-level="${level}"
-              title="${this.escapeHtml(primary.title)}"
-            >
-              <div class="cosmic-card-header cosmic-card-header--mini">
-                <div class="cosmic-card-label cosmic-card-label--mini">
-                  <span class="cosmic-card-label-text">${levelLabel.toUpperCase()}</span>
-                </div>
-              </div>
-              <div class="cosmic-card-content cosmic-card-content--mini">
-                <div class="cosmic-card-title">${this.escapeHtml(primary.title)}</div>
-              </div>
-            </button>
-            ${remaining > 0 ? `<span class="context-more">+${remaining}</span>` : ''}
-          </div>
-        </div>
+        <button type="button" class="year-vision-icon-only" data-goal-id="${primary.id}" aria-label="${this.escapeHtml(primary.title)}">
+          <span class="vision-icon-large">${icon}</span>
+          ${remaining > 0 ? `<span class="vision-icon-badge">+${remaining}</span>` : ""}
+        </button>
       `;
     };
 
-    const visionHtml = renderCosmicMini('vision', 'Vision', contextGoals.vision);
-    const milestoneHtml = renderCosmicMini('milestone', 'Milestone', contextGoals.milestone);
-    const focusHtml = renderCosmicMini('focus', 'Focus', contextGoals.focus);
+    const visionHtml = renderIconOnly(contextGoals.vision, '✨');
+    const milestoneHtml = renderIconOnly(contextGoals.milestone, '🎯');
+    const focusHtml = renderIconOnly(contextGoals.focus, '🌿');
 
     if (!visionHtml && !milestoneHtml && !focusHtml) return '';
 
     return `
       <div class="planner-sidebar-section planner-context-section">
-        <div class="context-levels">
+        <div class="planner-context-banner year-vision-banner--pill">
           ${visionHtml}
           ${milestoneHtml}
           ${focusHtml}

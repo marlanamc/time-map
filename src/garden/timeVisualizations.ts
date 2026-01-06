@@ -12,7 +12,7 @@ export class TimeVisualizations {
   /**
    * Get time range preferences from localStorage
    */
-  private static getTimeRangePreferences(): TimeRangePreferences {
+  public static getTimeRangePreferences(): TimeRangePreferences {
     try {
       const saved = localStorage.getItem("time-range-preferences");
       if (saved) {

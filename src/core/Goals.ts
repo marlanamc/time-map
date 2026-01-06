@@ -1,13 +1,22 @@
 // ===================================
 // Goal Management
 // ===================================
-import type { Goal, GoalData, GoalLevel, GoalStatus, Priority, Subtask, Note, TimeLogEntry } from '../types';
-import { State } from './State';
-import { CONFIG } from '../config';
-import { SupabaseService } from '../services/SupabaseService';
-import { dirtyTracker } from '../services/DirtyTracker';
-import { debouncedGoalSync } from '../utils/syncHelpers';
-import DB, { DB_STORES } from '../db';
+import type {
+  Goal,
+  GoalData,
+  GoalLevel,
+  GoalStatus,
+  Priority,
+  Subtask,
+  Note,
+  TimeLogEntry,
+} from "../types";
+import { State } from "./State";
+import { CONFIG } from "../config";
+import { SupabaseService } from "../services/SupabaseService";
+import { dirtyTracker } from "../services/DirtyTracker";
+import { debouncedGoalSync } from "../utils/syncHelpers";
+import DB, { DB_STORES } from "../db";
 
 const INTERNAL_TAG_PREFIX = "__tm:";
 
@@ -29,7 +38,11 @@ function parseYmdLocal(ymd: string): Date | null {
   const year = Number(match[1]);
   const monthIndex = Number(match[2]) - 1;
   const day = Number(match[3]);
-  if (!Number.isFinite(year) || !Number.isFinite(monthIndex) || !Number.isFinite(day)) {
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(monthIndex) ||
+    !Number.isFinite(day)
+  ) {
     return null;
   }
   const d = new Date(year, monthIndex, day);
@@ -52,14 +65,21 @@ function getLocalWeekStart(date: Date): Date {
   return d;
 }
 
-function getInternalTag(tags: string[] | undefined, key: string): string | undefined {
+function getInternalTag(
+  tags: string[] | undefined,
+  key: string
+): string | undefined {
   if (!tags || tags.length === 0) return undefined;
   const prefix = `${INTERNAL_TAG_PREFIX}${key}=`;
   const tag = tags.find((t) => t.startsWith(prefix));
   return tag ? tag.slice(prefix.length) : undefined;
 }
 
-function upsertInternalTag(tags: string[], key: string, value: string): string[] {
+function upsertInternalTag(
+  tags: string[],
+  key: string,
+  value: string
+): string[] {
   const prefix = `${INTERNAL_TAG_PREFIX}${key}=`;
   const next = tags.filter((t) => !t.startsWith(prefix));
   next.push(`${prefix}${value}`);
@@ -79,7 +99,9 @@ function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
     }
     case "milestone": {
       const start = startOfDay(new Date(goal.year, goal.month ?? 0, 1));
-      const end = goal.dueDate ? new Date(goal.dueDate) : endOfDay(new Date(goal.year, (goal.month ?? 0) + 1, 0));
+      const end = goal.dueDate
+        ? new Date(goal.dueDate)
+        : endOfDay(new Date(goal.year, (goal.month ?? 0) + 1, 0));
       return { start, end: end < start ? start : end };
     }
     case "focus": {
@@ -120,13 +142,13 @@ let callbacks: GoalsCallbacks = {};
 
 function persistGoalToIndexedDb(goal: Goal): void {
   void DB.update(DB_STORES.GOALS, goal).catch((err: unknown) => {
-    console.warn('[Goals] Failed to persist goal to IndexedDB:', err);
+    console.warn("[Goals] Failed to persist goal to IndexedDB:", err);
   });
 }
 
 function deleteGoalFromIndexedDb(goalId: string): void {
   void DB.delete(DB_STORES.GOALS, goalId).catch((err: unknown) => {
-    console.warn('[Goals] Failed to delete goal from IndexedDB:', err);
+    console.warn("[Goals] Failed to delete goal from IndexedDB:", err);
   });
 }
 
@@ -158,7 +180,9 @@ export const Goals = {
   create(goalData: GoalData): Goal {
     const now = new Date();
     const inputYear = goalData.year ?? now.getFullYear();
-    const inputMonth = Number.isFinite(goalData.month) ? (goalData.month as number) : now.getMonth();
+    const inputMonth = Number.isFinite(goalData.month)
+      ? (goalData.month as number)
+      : now.getMonth();
 
     let month = inputMonth;
     let year = inputYear;
@@ -179,7 +203,10 @@ export const Goals = {
         // Month(s): start month + duration in months.
         month = inputMonth;
         year = inputYear;
-        const durationMonths = Math.max(1, Math.floor(goalData.durationMonths ?? 1));
+        const durationMonths = Math.max(
+          1,
+          Math.floor(goalData.durationMonths ?? 1)
+        );
         const end = endOfDay(new Date(year, month + durationMonths, 0));
         dueDate = end.toISOString();
         break;
@@ -187,8 +214,13 @@ export const Goals = {
 
       case "focus": {
         // Week(s): start at week-start (Mon) of provided startDate (or today), end after N weeks.
-        const durationWeeks = Math.max(1, Math.floor(goalData.durationWeeks ?? 1));
-        const startBase = goalData.startDate ? parseYmdLocal(goalData.startDate) : null;
+        const durationWeeks = Math.max(
+          1,
+          Math.floor(goalData.durationWeeks ?? 1)
+        );
+        const startBase = goalData.startDate
+          ? parseYmdLocal(goalData.startDate)
+          : null;
         const start = getLocalWeekStart(startBase ?? now);
         const end = endOfDay(new Date(start));
         end.setDate(end.getDate() + durationWeeks * 7 - 1);
@@ -202,7 +234,9 @@ export const Goals = {
 
       case "intention": {
         // Single day: align to a specific day (default: today).
-        const day = goalData.startDate ? parseYmdLocal(goalData.startDate) : null;
+        const day = goalData.startDate
+          ? parseYmdLocal(goalData.startDate)
+          : null;
         const baseDate = day ?? now;
         month = baseDate.getMonth();
         year = baseDate.getFullYear();
@@ -236,6 +270,7 @@ export const Goals = {
       tags,
       parentId: goalData.parentId ?? null,
       parentLevel: goalData.parentLevel ?? null,
+      icon: goalData.icon,
     };
 
     if (!State.data) {
@@ -252,11 +287,12 @@ export const Goals = {
     (async () => {
       try {
         await SupabaseService.saveGoal(goal);
-        dirtyTracker.markClean('goal', goal.id);
+        dirtyTracker.markClean("goal", goal.id);
         console.log(`✓ Goal "${goal.title}" created and synced`);
-        if (callbacks.onUpdateSyncStatus) callbacks.onUpdateSyncStatus('synced');
+        if (callbacks.onUpdateSyncStatus)
+          callbacks.onUpdateSyncStatus("synced");
       } catch (error) {
-        console.error('Failed to sync new goal:', error);
+        console.error("Failed to sync new goal:", error);
         // Fallback to debounce if force fails
         debouncedGoalSync(goal);
       }
@@ -264,7 +300,7 @@ export const Goals = {
 
     // UI will update to 'synced' after successful cloud sync
     setTimeout(() => {
-      if (callbacks.onUpdateSyncStatus) callbacks.onUpdateSyncStatus('synced');
+      if (callbacks.onUpdateSyncStatus) callbacks.onUpdateSyncStatus("synced");
     }, 2100); // After debounce completes
 
     this.checkAchievements();
@@ -290,7 +326,9 @@ export const Goals = {
           newYear = now.getFullYear();
           newMonth = 0;
           newDueDate = endOfDay(new Date(newYear, 11, 31)).toISOString();
-          newTags = newTags.filter((t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`));
+          newTags = newTags.filter(
+            (t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`)
+          );
           break;
         }
 
@@ -298,8 +336,12 @@ export const Goals = {
           // Default to the current month (single-month).
           newYear = now.getFullYear();
           newMonth = now.getMonth();
-          newDueDate = endOfDay(new Date(newYear, newMonth + 1, 0)).toISOString();
-          newTags = newTags.filter((t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`));
+          newDueDate = endOfDay(
+            new Date(newYear, newMonth + 1, 0)
+          ).toISOString();
+          newTags = newTags.filter(
+            (t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`)
+          );
           break;
         }
 
@@ -320,7 +362,9 @@ export const Goals = {
           newYear = now.getFullYear();
           newMonth = now.getMonth();
           newDueDate = endOfDay(now).toISOString();
-          newTags = newTags.filter((t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`));
+          newTags = newTags.filter(
+            (t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`)
+          );
           break;
         }
       }
@@ -329,6 +373,11 @@ export const Goals = {
       updates.year = newYear;
       updates.dueDate = newDueDate;
       updates.tags = newTags;
+    }
+
+    // Ensure icon update is preserved if passed
+    if (updates.icon !== undefined) {
+      goal.icon = updates.icon;
     }
 
     Object.assign(goal, updates, { updatedAt: new Date().toISOString() });
@@ -347,7 +396,7 @@ export const Goals = {
     State.save();
     persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
-    dirtyTracker.markDirty('goal', goalId);
+    dirtyTracker.markDirty("goal", goalId);
     debouncedGoalSync(goal);
     if (callbacks.onScheduleRender) callbacks.onScheduleRender();
     return goal;
@@ -360,7 +409,9 @@ export const Goals = {
     deleteGoalFromIndexedDb(goalId);
     if (callbacks.onScheduleRender) callbacks.onScheduleRender();
     // Cloud Delete
-    SupabaseService.deleteGoal(goalId).catch(err => console.error('Failed to delete goal from cloud', err));
+    SupabaseService.deleteGoal(goalId).catch((err) =>
+      console.error("Failed to delete goal from cloud", err)
+    );
   },
 
   getById(goalId: string): Goal | undefined {
@@ -370,7 +421,10 @@ export const Goals = {
 
   getByMonth(month: number, year: number): Goal[] {
     if (!State.data) return [];
-    return this.getForRange(new Date(year, month, 1), new Date(year, month + 1, 0));
+    return this.getForRange(
+      new Date(year, month, 1),
+      new Date(year, month + 1, 0)
+    );
   },
 
   getAll(): Goal[] {
@@ -419,7 +473,7 @@ export const Goals = {
     State.save();
     persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
-    dirtyTracker.markDirty('goal', goalId);
+    dirtyTracker.markDirty("goal", goalId);
     debouncedGoalSync(goal);
     this.checkAchievements();
     if (callbacks.onScheduleRender) callbacks.onScheduleRender();
@@ -440,7 +494,11 @@ export const Goals = {
             return "Intention";
         }
       })();
-      callbacks.onCelebrate("✨", `${levelLabel} updated`, `"${goal.title}" marked done.`);
+      callbacks.onCelebrate(
+        "✨",
+        `${levelLabel} updated`,
+        `"${goal.title}" marked done.`
+      );
     }
   },
 
@@ -460,7 +518,7 @@ export const Goals = {
     State.save();
     persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
-    dirtyTracker.markDirty('goal', goalId);
+    dirtyTracker.markDirty("goal", goalId);
     debouncedGoalSync(goal);
 
     this.checkAchievements();
@@ -501,7 +559,7 @@ export const Goals = {
     State.save();
     persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
-    dirtyTracker.markDirty('goal', goalId);
+    dirtyTracker.markDirty("goal", goalId);
     debouncedGoalSync(goal);
 
     this.checkAchievements();
@@ -525,7 +583,7 @@ export const Goals = {
     State.save();
     persistGoalToIndexedDb(goal);
     // Mark dirty and debounce cloud sync
-    dirtyTracker.markDirty('goal', goalId);
+    dirtyTracker.markDirty("goal", goalId);
     debouncedGoalSync(goal);
   },
 
@@ -543,7 +601,7 @@ export const Goals = {
     if (!State.data) return;
     const totalGoals = State.data.goals.length;
     const completedGoals = State.data.goals.filter(
-      (g) => g.status === "done",
+      (g) => g.status === "done"
     ).length;
     const hasSubtasks = State.data.goals.some((g) => g.subtasks.length > 0);
     const hasNotes = State.data.goals.some((g) => g.notes.length > 0);
@@ -582,12 +640,17 @@ export const Goals = {
     State.data.achievements.push(achievementId);
     State.save();
 
-    const achievement = (CONFIG.ACHIEVEMENTS as Record<string, { emoji: string; symbol: string; label: string; desc: string }>)[achievementId];
+    const achievement = (
+      CONFIG.ACHIEVEMENTS as Record<
+        string,
+        { emoji: string; symbol: string; label: string; desc: string }
+      >
+    )[achievementId];
     if (callbacks.onCelebrate) {
       callbacks.onCelebrate(
         achievement.emoji,
         "Achievement Unlocked!",
-        achievement.label,
+        achievement.label
       );
     }
   },

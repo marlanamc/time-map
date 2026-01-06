@@ -131,3 +131,5 @@ COMMENT ON TABLE achievements IS 'Unlocked achievements by user';
 COMMENT ON TABLE weekly_reviews IS 'Weekly review and reflection entries';
 COMMENT ON TABLE body_double_sessions IS 'Body double session tracking';
 
+
+

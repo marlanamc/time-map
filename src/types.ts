@@ -4,7 +4,7 @@
  */
 
 /** Available view types in the application */
-export type ViewType = 'year' | 'month' | 'week' | 'day' | 'home' | 'garden';
+export type ViewType = "year" | "month" | "week" | "day" | "home" | "garden";
 
 /** Goal hierarchy levels from highest to lowest */
 export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
@@ -16,9 +16,25 @@ export type GoalStatus = "not-started" | "in-progress" | "done" | "blocked";
 export type Priority = "low" | "medium" | "high" | "urgent";
 
 /** Main category types for organizing goals */
-export type Category = "career" | "health" | "finance" | "personal" | "creative" | null;
+export type Category =
+  | "career"
+  | "health"
+  | "finance"
+  | "personal"
+  | "creative"
+  | null;
 /** Available accent theme colors for the UI */
-export type AccentTheme = "rose" | "coral" | "amber" | "mint" | "sage" | "sky" | "teal" | "indigo" | "violet" | "rainbow";
+export type AccentTheme =
+  | "rose"
+  | "coral"
+  | "amber"
+  | "mint"
+  | "sage"
+  | "sky"
+  | "teal"
+  | "indigo"
+  | "violet"
+  | "rainbow";
 
 /** Break reminder frequency options for ADHD support */
 export type BreakReminder = "pomodoro" | "gentle" | "hyperfocus" | "off";
@@ -27,7 +43,11 @@ export type BreakReminder = "pomodoro" | "gentle" | "hyperfocus" | "off";
 export type FeedbackStyle = "subtle" | "moderate" | "celebration" | "minimal";
 
 /** Task visibility limits based on energy level (ADHD support) */
-export type MaxVisibleTasks = "overwhelmed" | "low_energy" | "normal" | "high_energy";
+export type MaxVisibleTasks =
+  | "overwhelmed"
+  | "low_energy"
+  | "normal"
+  | "high_energy";
 
 /** Font options including dyslexia-friendly choices */
 export type FontChoice = "default" | "dyslexia" | "mono" | "readable";
@@ -36,7 +56,11 @@ export type FontChoice = "default" | "dyslexia" | "mono" | "readable";
 export type TextSpacing = "compact" | "normal" | "relaxed" | "dyslexia";
 
 /** Color blind accessibility modes */
-export type ColorBlindMode = "none" | "deuteranopia" | "protanopia" | "tritanopia";
+export type ColorBlindMode =
+  | "none"
+  | "deuteranopia"
+  | "protanopia"
+  | "tritanopia";
 
 /**
  * Time breakdown analysis result
@@ -121,10 +145,12 @@ export interface Goal {
   startTime?: string | null;
   endTime?: string | null;
   tags: string[];
-  /** ID of parent goal (for visual hierarchy) */
+  /** Optional parent linkage for hierarchy/alignment (Vision → Milestone → Focus → Intention). */
   parentId?: string | null;
   /** Cached parent level for quick color access */
   parentLevel?: GoalLevel | null;
+  /** Optional icon/emoji for the goal (primarily for Visions) */
+  icon?: string;
 }
 
 /**
@@ -155,6 +181,8 @@ export interface GoalData {
   /** Focus duration in whole weeks (>= 1). */
   durationWeeks?: number;
   tags?: string[];
+  /** Optional icon/emoji for the goal */
+  icon?: string;
 }
 
 /**

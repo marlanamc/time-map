@@ -93,6 +93,11 @@
     gap: 0.75rem;
 }
 
+ .planner-context-banner {
+    justify-content: flex-start;
+    margin: 0;
+ }
+
 .common-intentions {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
