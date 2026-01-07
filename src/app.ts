@@ -67,8 +67,8 @@ declare global {
 // UI Rendering
 // ============================================
 
-// Import UI Manager
-import { UI } from './ui/UIManager';
+// Import UI Manager (bridge for gradual migration)
+import { UI } from './ui/UIBridge';
 
 // Import Liquid Effects for sidebar animations
 import { initLiquidEffects } from './components/dayView/sidebar/LiquidEffects';
@@ -119,6 +119,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   UI.init();
+
+  // Initialize modular components
+  void UI.initModular();
 
   // Initialize liquid effects (time theming, shimmer, ripple)
   initLiquidEffects();

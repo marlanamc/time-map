@@ -1,14 +1,6 @@
-declare global {
-  interface Window {
-    __GARDEN_FENCE_ENV?: {
-      SUPABASE_URL?: string;
-      SUPABASE_ANON_KEY?: string;
-    };
-  }
-}
-
-const PROJECT_URL = window.__GARDEN_FENCE_ENV?.SUPABASE_URL || '';
-const SUPABASE_KEY = window.__GARDEN_FENCE_ENV?.SUPABASE_ANON_KEY || '';
+// Use Vite's secure environment variables (only available at build time)
+const PROJECT_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = Boolean(PROJECT_URL && SUPABASE_KEY);
 

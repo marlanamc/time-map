@@ -3,7 +3,7 @@ module.exports = {
   clearMocks: true,
   restoreMocks: true,
   testEnvironment: 'jsdom',
-  testMatch: ['<rootDir>/tests/unit/**/*.test.ts'],
+  testMatch: ['<rootDir>/tests/**/*.test.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],

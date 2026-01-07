@@ -67,10 +67,10 @@ export class IOSPWAFixes {
   private static fixScrollBehavior(): void {
     // Disable elastic scrolling for better ADHD focus
     document.body.style.overflow = 'auto';
-    document.body.style.webkitOverflowScrolling = 'touch';
+    (document.body.style as any).webkitOverflowScrolling = 'touch';
     
     // Add momentum scrolling for natural feel
-    document.body.style.webkitOverflowScrolling = 'touch';
+    (document.body.style as any).webkitOverflowScrolling = 'touch';
     
     // Prevent overscroll bounce for better focus
     document.body.style.overscrollBehavior = 'none';
@@ -93,8 +93,8 @@ export class IOSPWAFixes {
     // Add touch feedback for all interactive elements
     const interactiveElements = document.querySelectorAll('button, a, .clickable, .swipeable');
     interactiveElements.forEach(element => {
-      element.addEventListener('touchstart', this.addTouchFeedback);
-      element.addEventListener('touchend', this.removeTouchFeedback);
+      element.addEventListener('touchstart', this.addTouchFeedback as EventListener);
+      element.addEventListener('touchend', this.removeTouchFeedback as EventListener);
     });
   }
 
@@ -266,7 +266,7 @@ export class IOSPWAFixes {
       indicator = document.createElement('div');
       indicator.className = 'pull-to-refresh-indicator';
       indicator.innerHTML = '↓ Pull to Refresh';
-      indicator.style.cssText = `
+      (indicator as HTMLElement).style.cssText = `
         position: fixed;
         top: -50px;
         left: 50%;

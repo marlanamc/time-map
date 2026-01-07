@@ -37,21 +37,25 @@ async function main() {
   const fileEnv = await readEnvFile(path.join(root, ".env.local"));
 
   const forceEmpty = hasFlag("--force-empty") || hasFlag("--empty");
-  const supabaseUrl = forceEmpty ? "" : process.env.SUPABASE_URL || fileEnv.SUPABASE_URL || "";
+  const supabaseUrl = forceEmpty ? "" : process.env.VITE_SUPABASE_URL || fileEnv.VITE_SUPABASE_URL || "";
   const supabaseAnonKey = forceEmpty
     ? ""
-    : process.env.SUPABASE_ANON_KEY || fileEnv.SUPABASE_ANON_KEY || "";
+    : process.env.VITE_SUPABASE_ANON_KEY || fileEnv.VITE_SUPABASE_ANON_KEY || "";
 
-  const payload = {
-    SUPABASE_URL: supabaseUrl,
-    SUPABASE_ANON_KEY: supabaseAnonKey,
-  };
+  // Validate required environment variables
+  if (!forceEmpty && (!supabaseUrl || !supabaseAnonKey)) {
+    console.warn("⚠️  Warning: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY should be set for cloud sync features");
+    console.warn("   The app will run in local-only mode without these variables");
+  }
 
-  const out = `// Generated at build time. Do not edit.\nwindow.__GARDEN_FENCE_ENV = ${JSON.stringify(
-    payload
-  )};\n`;
+  // Create a minimal env.js file for backwards compatibility (but without secrets)
+  const out = `// Generated at build time. Environment variables are handled by Vite.
+// This file is kept for backwards compatibility only.
+window.__GARDEN_FENCE_ENV = {};
+`;
 
   await fs.writeFile(path.join(root, "env.js"), out, "utf8");
+  console.log("✓ Environment configuration validated");
 }
 
 main().catch((err) => {
