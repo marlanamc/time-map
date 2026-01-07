@@ -178,7 +178,7 @@ function renderMobileGardenPlots(
     return `
       <article class="garden-plot" style="${accentStyle}" data-vision-id="${escapeHtmlFn(v.id)}">
         <header class="garden-plot-header">
-          <h3 class="garden-plot-title" data-action="open-goal" data-goal-id="${escapeHtmlFn(v.id)}">${visionIcon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${visionIcon}</span>` : ""}<span class="garden-plot-title-text">${escapeHtmlFn(v.title)}</span></h3>
+          <h3 class="garden-plot-title" data-action="open-goal" data-goal-id="${escapeHtmlFn(v.id)}">${visionIcon ? `<span class="garden-emoji" aria-hidden="true">${visionIcon}</span>` : ""}<span class="garden-plot-title-text">${escapeHtmlFn(v.title)}</span></h3>
         </header>
         
         <div class="garden-plot-content">
@@ -186,7 +186,7 @@ function renderMobileGardenPlots(
             <div class="garden-plot-section garden-plot-milestone">
               <span class="garden-plot-label">Milestone</span>
               <button type="button" class="garden-plot-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(activeMilestone.id)}">
-                ${activeMilestone.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(activeMilestone.icon)}</span>` : ""}<span class="garden-plot-item-text">${escapeHtmlFn(activeMilestone.title)}</span>
+                ${activeMilestone.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(activeMilestone.icon)}</span>` : ""}<span class="garden-plot-item-text">${escapeHtmlFn(activeMilestone.title)}</span>
               </button>
             </div>
           ` : ""}
@@ -195,7 +195,7 @@ function renderMobileGardenPlots(
             <div class="garden-plot-section garden-plot-focus">
               <span class="garden-plot-label">Focus</span>
               <button type="button" class="garden-plot-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(weeklyFocus.id)}">
-                ${weeklyFocus.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(weeklyFocus.icon)}</span>` : ""}<span class="garden-plot-item-text">${escapeHtmlFn(weeklyFocus.title)}</span>
+                ${weeklyFocus.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(weeklyFocus.icon)}</span>` : ""}<span class="garden-plot-item-text">${escapeHtmlFn(weeklyFocus.title)}</span>
               </button>
             </div>
           ` : ""}
@@ -236,7 +236,7 @@ function renderMobileGardenPlots(
   `;
 }
 
-function renderCollapsibleSection(
+function _renderCollapsibleSection(
   id: string,
   title: string,
   subtitle: string,
@@ -435,7 +435,7 @@ export const GardenRenderer = {
       );
 
       // Event handlers for mobile plots
-      const rerender = () => {
+      const _rerender = () => {
         eventBus.emit("view:changed", { transition: false });
       };
 
