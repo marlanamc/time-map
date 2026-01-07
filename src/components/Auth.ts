@@ -30,8 +30,10 @@ export class AuthComponent {
   }
 
   render() {
-    const env = window.__GARDEN_FENCE_ENV;
-    const isConfigured = Boolean(env?.SUPABASE_URL && env?.SUPABASE_ANON_KEY);
+    // Use Vite's import.meta.env instead of window.__GARDEN_FENCE_ENV
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    const isConfigured = Boolean(supabaseUrl && supabaseKey);
 
     if (!isConfigured) {
       this.container.innerHTML = `
@@ -45,7 +47,7 @@ export class AuthComponent {
             <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary, #1A2B2F);">Fix on Vercel</div>
             <ol style="margin: 0; padding-left: 18px; color: var(--text-secondary, #455C61); line-height: 1.6;">
               <li>Go to <b>Project Settings → Environment Variables</b></li>
-              <li>Add <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code></li>
+              <li>Add <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code></li>
               <li>Redeploy</li>
             </ol>
           </div>
