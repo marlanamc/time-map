@@ -1118,25 +1118,55 @@
   color: #0A1113;
  }
 
- :root.dark-mode.time-afternoon .year-view-container .month-card {
-  color: #0D1517;
+ :root.dark-mode.time-dawn .year-view-container .month-card,
+ :root.dark-mode.time-morning .year-view-container .month-card,
+ :root.dark-mode.time-afternoon .year-view-container .month-card,
+ :root.dark-mode.time-evening .year-view-container .month-card {
+  color: #0D1517 !important;
  }
 
+ :root.dark-mode.time-dawn .year-view-container .month-card .month-name,
+ :root.dark-mode.time-morning .year-view-container .month-card .month-name,
  :root.dark-mode.time-afternoon .year-view-container .month-card .month-name,
+ :root.dark-mode.time-evening .year-view-container .month-card .month-name,
+ :root.dark-mode.time-dawn .year-view-container .month-card .goal-title,
+ :root.dark-mode.time-morning .year-view-container .month-card .goal-title,
  :root.dark-mode.time-afternoon .year-view-container .month-card .goal-title,
- :root.dark-mode.time-afternoon .year-view-container .month-card .goal-title-text {
-  color: #0D1517;
+ :root.dark-mode.time-evening .year-view-container .month-card .goal-title,
+ :root.dark-mode.time-dawn .year-view-container .month-card .goal-title-text,
+ :root.dark-mode.time-morning .year-view-container .month-card .goal-title-text,
+ :root.dark-mode.time-afternoon .year-view-container .month-card .goal-title-text,
+ :root.dark-mode.time-evening .year-view-container .month-card .goal-title-text {
+  color: #0D1517 !important;
  }
 
+ :root.dark-mode.time-dawn .year-view-container .month-card .month-context,
+ :root.dark-mode.time-morning .year-view-container .month-card .month-context,
  :root.dark-mode.time-afternoon .year-view-container .month-card .month-context,
+ :root.dark-mode.time-evening .year-view-container .month-card .month-context,
+ :root.dark-mode.time-dawn .year-view-container .month-card .month-time-detail,
+ :root.dark-mode.time-morning .year-view-container .month-card .month-time-detail,
  :root.dark-mode.time-afternoon .year-view-container .month-card .month-time-detail,
+ :root.dark-mode.time-evening .year-view-container .month-card .month-time-detail,
+ :root.dark-mode.time-dawn .year-view-container .month-card .month-progress-label,
+ :root.dark-mode.time-morning .year-view-container .month-card .month-progress-label,
  :root.dark-mode.time-afternoon .year-view-container .month-card .month-progress-label,
+ :root.dark-mode.time-evening .year-view-container .month-card .month-progress-label,
+ :root.dark-mode.time-dawn .year-view-container .month-card .month-meta,
+ :root.dark-mode.time-morning .year-view-container .month-card .month-meta,
  :root.dark-mode.time-afternoon .year-view-container .month-card .month-meta,
- :root.dark-mode.time-afternoon .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta {
-  color: #2D3F44;
+ :root.dark-mode.time-evening .year-view-container .month-card .month-meta,
+ :root.dark-mode.time-dawn .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta,
+ :root.dark-mode.time-morning .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta,
+ :root.dark-mode.time-afternoon .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta,
+ :root.dark-mode.time-evening .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta {
+  color: #2D3F44 !important;
  }
 
- :root.dark-mode.time-afternoon .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta-chip {
+ :root.dark-mode.time-dawn .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta-chip,
+ :root.dark-mode.time-morning .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta-chip,
+ :root.dark-mode.time-afternoon .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta-chip,
+ :root.dark-mode.time-evening .year-view-container .goal-item.goal-item--month-milestone .month-goal-meta-chip {
   background: rgba(10, 17, 19, 0.10);
  }
 
