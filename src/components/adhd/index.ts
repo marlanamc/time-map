@@ -8,6 +8,7 @@ export { FlowStateSupport } from './FlowStateSupport';
 export { EmotionalRegulation } from './EmotionalRegulation';
 export { DopamineDrivenFeatures } from './DopamineDrivenFeatures';
 export { DataInsights } from '../DataInsights';
+export { IOSPWAFixes } from '../../services/adhd/ios-pwa-fixes';
 
 // Type exports
 export type { 

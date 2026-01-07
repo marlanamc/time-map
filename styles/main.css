@@ -16,6 +16,7 @@
 @import './views/adhd/flow-state.css';
 @import './views/adhd/emotional-regulation.css';
 @import './views/adhd/dopamine-features.css';
+@import './views/adhd/ios-pwa-fixes.css';
 @import './day-planner.css';
 @import './features.css';
 @import './themes.css';
