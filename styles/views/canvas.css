@@ -26,9 +26,9 @@
 }
 
 .canvas-zoom-controls {
-    position: fixed;
+    position: fixed !important;
     left: calc(280px + (var(--space-4) * 2));
-    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)) !important;
     z-index: 1400;
     width: fit-content;
     padding: 2px 6px;
@@ -38,10 +38,12 @@
     box-shadow: var(--shadow-sm);
 }
 
-/* Hide zoom controls when modal is open */
+/* Hide zoom controls when modal is open or in day/planner view */
 body:has(.modal-overlay.active) .canvas-zoom-controls,
 body:has(.delete-confirmation-dialog[data-dialog-visible="true"]) .canvas-zoom-controls,
-body:has(.delete-confirmation-dialog.visible) .canvas-zoom-controls {
+body:has(.delete-confirmation-dialog.visible) .canvas-zoom-controls,
+body:has(.day-view-container) .canvas-zoom-controls,
+body:has(.planner-day-view) .canvas-zoom-controls {
     display: none !important;
 }
 
