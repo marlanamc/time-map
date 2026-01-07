@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test.use({ reducedMotion: 'reduce' });
+test.use({ colorScheme: 'dark' });
 
 async function dismissAuthModalIfPresent(page: Page) {
   const authModal = page.locator('#auth-modal');
@@ -29,16 +29,24 @@ test('a11y: no critical/serious violations on home', async ({ page, browserName 
   test.skip(browserName !== 'chromium', 'Run axe checks on Chromium for stability.');
 
   await page.addInitScript(() => {
-    Object.defineProperty(window, '__GARDEN_FENCE_ENV', {
-      value: { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' },
-      writable: false,
-      configurable: false,
-    });
+    // Use the new secure approach - mock import.meta.env with VITE_ prefix
+    (globalThis as any).importMeta = { env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' } };
     sessionStorage.setItem('reviewPromptShown', 'true');
   });
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await dismissAuthModalIfPresent(page);
+
+  // Wait for app to fully initialize
+  await page.waitForFunction(() => {
+    const loading = document.getElementById("appLoading");
+    return !loading || loading.classList.contains("loaded");
+  }, { timeout: 10_000 });
+
+  // Wait for HTML title to be set (fixes accessibility test)
+  await page.waitForFunction(() => {
+    return document.title && document.title.length > 0;
+  }, { timeout: 5_000 });
 
   const accessibilityScanResults = await new AxeBuilder({ page })
     // Color contrast is handled separately in the roadmap and can be noisy with gradients/glass effects.

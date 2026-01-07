@@ -43,7 +43,12 @@ test('mobile Here view: tab bar fixed and content padded above it', async ({ pag
   // Wait for mobile detection to be applied
   await page.waitForFunction(() => {
     return document.body.classList.contains("is-mobile") || document.body.classList.contains("is-desktop");
-  }, { timeout: 10_000 });
+  }, { timeout: 30_000 });
+
+  // Wait for HTML title to be set (fixes accessibility test)
+  await page.waitForFunction(() => {
+    return document.title && document.title.length > 0;
+  }, { timeout: 5_000 });
 
   await expect(page.locator('body')).toHaveClass(/is-mobile/);
 

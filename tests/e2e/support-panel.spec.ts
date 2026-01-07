@@ -54,6 +54,12 @@ test('support panel time range selects stay readable in dark-mode + morning them
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
+  // Wait for theme system to initialize
+  await page.waitForFunction(() => {
+    const html = document.documentElement;
+    return html.classList.contains("dark-mode") || html.classList.contains("light-mode");
+  }, { timeout: 10_000 });
+
   await expect(page.locator('html')).toHaveClass(/dark-mode/);
 
   // Wait for app loading overlay to disappear and viewport to be set up
