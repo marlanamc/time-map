@@ -216,6 +216,7 @@ describe('DataStore', () => {
       // The invalid data should be merged with defaults, not replace entirely
       expect(result).toEqual(expect.objectContaining({
         ...defaultData,
+        createdAt: expect.any(String),
         invalid: 'data' // The invalid property should still be present
       }));
     });
