@@ -12,21 +12,18 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run test:serve',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
+    command: 'npx serve dist -l 4173 --single',
+    port: 4173,
     timeout: 120_000,
   },
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      browserName: 'chromium',
     },
     {
       name: 'webkit-iphone',
       use: { ...devices['iPhone 13'] },
-      browserName: 'webkit',
     },
   ],
 });

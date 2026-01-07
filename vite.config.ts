@@ -13,6 +13,8 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
       },
       output: {
+        // Use ESM format for import.meta.env to work correctly
+        format: 'es',
         // Ensure consistent file names for caching
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',

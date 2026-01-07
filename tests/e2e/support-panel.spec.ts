@@ -44,11 +44,8 @@ test('support panel time range selects stay readable in dark-mode + morning them
 }) => {
   await page.addInitScript(() => {
     // Force "offline mode" regardless of what `env.js` contains (and avoid needing Supabase creds in CI).
-    Object.defineProperty(window, '__GARDEN_FENCE_ENV', {
-      value: { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' },
-      writable: false,
-      configurable: false,
-    });
+    // Use the new secure approach - mock import.meta.env with VITE_ prefix
+    (globalThis as any).importMeta = { env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' } };
 
     localStorage.setItem('gardenFence.theme', 'night');
     localStorage.removeItem('gardenFence.devTimeOverride');
@@ -58,6 +55,17 @@ test('support panel time range selects stay readable in dark-mode + morning them
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('html')).toHaveClass(/dark-mode/);
+
+  // Wait for app loading overlay to disappear and viewport to be set up
+  await page.waitForFunction(() => {
+    const loading = document.getElementById("appLoading");
+    return !loading || loading.classList.contains("loaded");
+  }, { timeout: 20_000 });
+
+  // Wait for mobile detection to be applied
+  await page.waitForFunction(() => {
+    return document.body.classList.contains("is-mobile") || document.body.classList.contains("is-desktop");
+  }, { timeout: 20_000 });
 
   // Simulate the "problem state": dark-mode enabled, but time-of-day is not night.
   await page.evaluate(() => {

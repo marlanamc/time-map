@@ -26,16 +26,24 @@ test('mobile Here view: tab bar fixed and content padded above it', async ({ pag
   test.skip(browserName !== 'webkit', 'Mobile layout regression check runs only on iPhone/WebKit.');
 
   await page.addInitScript(() => {
-    Object.defineProperty(window, '__GARDEN_FENCE_ENV', {
-      value: { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' },
-      writable: false,
-      configurable: false,
-    });
+    // Use the new secure approach - mock import.meta.env with VITE_ prefix
+    (globalThis as any).importMeta = { env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' } };
     sessionStorage.setItem('reviewPromptShown', 'true');
   });
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await dismissAuthModalIfPresent(page);
+
+  // Wait for app loading overlay to disappear and viewport to be set up
+  await page.waitForFunction(() => {
+    const loading = document.getElementById("appLoading");
+    return !loading || loading.classList.contains("loaded");
+  }, { timeout: 10_000 });
+
+  // Wait for mobile detection to be applied
+  await page.waitForFunction(() => {
+    return document.body.classList.contains("is-mobile") || document.body.classList.contains("is-desktop");
+  }, { timeout: 10_000 });
 
   await expect(page.locator('body')).toHaveClass(/is-mobile/);
 
