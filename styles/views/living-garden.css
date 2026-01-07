@@ -1,0 +1,665 @@
+/* ===================================
+   Living Garden - A Unified Ecosystem Design
+   =================================== */
+
+.living-garden {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafb 0%, #e8f5e8 50%, #f0f9ff 100%);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1a202c;
+}
+
+html.dark-mode .living-garden {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  color: #f8fafc;
+}
+
+.living-garden-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+/* ===================================
+   Garden Header
+   =================================== */
+.living-garden-header {
+  text-align: center;
+  margin-bottom: var(--space-12);
+  padding: var(--space-8) 0;
+}
+
+.living-garden-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin: 0 0 var(--space-4);
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.living-garden-subtitle {
+  font-size: var(--text-xl);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-4);
+  font-weight: 500;
+}
+
+.living-garden-summary {
+  font-size: var(--text-base);
+  color: var(--text-tertiary);
+  padding: var(--space-3) var(--space-6);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-full);
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+html.dark-mode .living-garden-summary {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ===================================
+   Empty Garden State
+   =================================== */
+.living-garden-empty {
+  text-align: center;
+  padding: var(--space-16) var(--space-8);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.living-garden-empty-icon {
+  font-size: 6rem;
+  margin-bottom: var(--space-6);
+  opacity: 0.8;
+}
+
+.living-garden-empty h2 {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  margin: 0 0 var(--space-4);
+  color: var(--text-primary);
+}
+
+.living-garden-empty p {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-8);
+  line-height: 1.6;
+}
+
+/* ===================================
+   Garden Ecosystem
+   =================================== */
+.living-garden-ecosystem {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
+}
+
+.living-garden-plot {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
+  padding: var(--space-8);
+  border: 2px solid transparent;
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  min-height: 400px;
+}
+
+.living-garden-plot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--garden-accent-gradient, linear-gradient(135deg, var(--garden-accent, #10b981) 0%, transparent 70%));
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.living-garden-plot:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-color: var(--garden-accent, #10b981);
+}
+
+html.dark-mode .living-garden-plot {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .living-garden-plot:hover {
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.living-garden-plot.is-thriving {
+  border-color: var(--garden-accent, #10b981);
+}
+
+.living-garden-plot.is-dormant {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+/* ===================================
+   Vision Tree Structure
+   =================================== */
+.living-garden-tree {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.living-garden-trunk {
+  margin-bottom: var(--space-6);
+}
+
+.living-garden-vision {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+html.dark-mode .living-garden-vision {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.living-garden-vision-text {
+  line-height: 1.2;
+}
+
+/* ===================================
+   Branches (Milestones, Focus, Intentions)
+   =================================== */
+.living-garden-branches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.living-garden-branch {
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+html.dark-mode .living-garden-branch {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.living-garden-branch--milestones {
+  border-left: 4px solid #3b82f6;
+}
+
+.living-garden-branch--focuses {
+  border-left: 4px solid #8b5cf6;
+}
+
+.living-garden-branch--intentions {
+  border-left: 4px solid #10b981;
+}
+
+.living-garden-branch-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.living-garden-branch-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.living-garden-branch-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+html.dark-mode .living-garden-branch-item {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.living-garden-branch-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateX(4px);
+}
+
+html.dark-mode .living-garden-branch-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.living-garden-branch-item.is-complete {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.living-garden-emoji {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* ===================================
+   Dormant State
+   =================================== */
+.living-garden-dormant-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+.living-garden-dormant-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-4);
+  opacity: 0.6;
+}
+
+.living-garden-dormant-state p {
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-6);
+  line-height: 1.5;
+}
+
+/* ===================================
+   Garden Actions
+   =================================== */
+.living-garden-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-6) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: var(--space-8);
+}
+
+html.dark-mode .living-garden-actions {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.living-garden-actions-left,
+.living-garden-actions-right {
+  display: flex;
+  gap: var(--space-4);
+}
+
+/* ===================================
+   Garden Buttons
+   =================================== */
+.living-garden-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.living-garden-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.living-garden-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+html.dark-mode .living-garden-btn-secondary {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.living-garden-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+html.dark-mode .living-garden-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.living-garden-btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: var(--space-2);
+  transition: color 0.2s ease;
+}
+
+.living-garden-btn-ghost:hover {
+  color: var(--text-primary);
+}
+
+.living-garden-btn-icon {
+  font-size: 1.1em;
+}
+
+/* ===================================
+   Reflection Panel
+   =================================== */
+.living-garden-reflection {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: var(--space-6);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  margin-bottom: var(--space-8);
+}
+
+html.dark-mode .living-garden-reflection {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.living-garden-reflection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.living-garden-reflection-header h3 {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.living-garden-reflection-close {
+  background: none;
+  border: none;
+  font-size: var(--text-2xl);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.living-garden-reflection-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
+.living-garden-reflection-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.living-garden-reflection-question h4 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin: 0 0 var(--space-4);
+  color: var(--text-primary);
+}
+
+.living-garden-reflection-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.living-garden-reflection-option {
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+html.dark-mode .living-garden-reflection-option {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.living-garden-reflection-option:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+}
+
+html.dark-mode .living-garden-reflection-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.living-garden-reflection-option.is-selected {
+  background: var(--garden-accent, #10b981);
+  color: white;
+  border-color: var(--garden-accent, #10b981);
+}
+
+.living-garden-reflection-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+html.dark-mode .living-garden-reflection-actions {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.living-garden-reflection-note {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+/* ===================================
+   Mobile Responsive
+   =================================== */
+@media (max-width: 768px) {
+  .living-garden-container {
+    padding: var(--space-4);
+  }
+  
+  .living-garden-ecosystem {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  
+  .living-garden-plot {
+    padding: var(--space-6);
+    min-height: 300px;
+  }
+  
+  .living-garden-actions {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .living-garden-actions-left,
+  .living-garden-actions-right {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .living-garden-reflection-options {
+    flex-direction: column;
+  }
+  
+  .living-garden-reflection-option {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ===================================
+   Mobile Garden Plots (Simplified)
+   =================================== */
+.living-garden--mobile .living-garden-plots {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.living-garden-plot {
+  position: relative;
+  border-radius: 16px;
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--garden-accent, #10b981);
+}
+
+html.dark-mode .living-garden-plot {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.living-garden-plot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.living-garden-plot-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.living-garden-plot-life {
+  font-size: 1.5rem;
+  opacity: 0.8;
+}
+
+.living-garden-plot-growth {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.living-garden-sprouts,
+.living-garden-buds,
+.living-garden-leaves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.living-garden-sprout,
+.living-garden-bud,
+.living-garden-leaf {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+html.dark-mode .living-garden-sprout,
+html.dark-mode .living-garden-bud,
+html.dark-mode .living-garden-leaf {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.living-garden-sprout:hover,
+.living-garden-bud:hover,
+.living-garden-leaf:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+}
+
+html.dark-mode .living-garden-sprout:hover,
+html.dark-mode .living-garden-bud:hover,
+html.dark-mode .living-garden-leaf:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.living-garden-leaf.is-bloomed {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.living-garden-more {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+}
+
+.living-garden-plot-dormant {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: var(--space-4);
+}
+
+.living-garden-plot-dormant p {
+  margin: 0 0 var(--space-4);
+  line-height: 1.5;
+}

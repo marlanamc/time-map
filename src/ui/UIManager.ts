@@ -15,7 +15,7 @@ import {
   MonthRenderer,
   WeekRenderer,
   MobileHereRenderer,
-  GardenRenderer,
+  LivingGardenRenderer,
 } from "./renderers";
 import type { DayViewController } from "../components/dayView/DayViewController";
 import { ThemeManager } from "../theme/ThemeManager";
@@ -1562,7 +1562,7 @@ export const UI = {
         // Do nothing for main grid, overlay is handled in render()
         break;
       case VIEWS.GARDEN:
-        GardenRenderer.render(
+        LivingGardenRenderer.render(
           this.elements,
           this.escapeHtml.bind(this),
           (goalId) => goalDetailModal.show(goalId),
@@ -1574,8 +1574,7 @@ export const UI = {
               opts.preselectedMonth ?? State.viewingMonth,
               opts.preselectedYear ?? State.viewingYear,
               { parentId: opts.parentId, parentLevel: opts.parentLevel }
-            ),
-          (opts) => this.openQuickAdd(opts)
+            )
         );
         break;
       default:

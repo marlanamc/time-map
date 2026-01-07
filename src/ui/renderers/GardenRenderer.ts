@@ -112,10 +112,6 @@ function formatWeekRangeLong(weekStart: Date, weekEnd: Date): string {
   return `${startFormatted} - ${endFormatted}`;
 }
 
-function renderUnlinkedPill(label: string = "Unlinked (still valid)"): string {
-  return `<span class="garden-pill garden-pill--neutral">${label}</span>`;
-}
-
 // ===================================
 // Mobile Garden Plot Renderer
 // Each Vision is its own "plot" with active milestone, focus, and intentions
@@ -207,7 +203,7 @@ function renderMobileGardenPlots(
                 ${intentions.slice(0, 5).map((i) => `
                   <button type="button" class="garden-plot-intention" data-action="open-goal" data-goal-id="${escapeHtmlFn(i.id)}">
                     <span class="garden-plot-intention-status ${i.status === "done" ? "is-done" : ""}"></span>
-                    ${i.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(i.icon)}</span>` : ""}
+                    ${i.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(i.icon)}</span>` : ""}
                     <span class="garden-plot-intention-title">${escapeHtmlFn(i.title)}</span>
                   </button>
                 `).join("")}
@@ -435,10 +431,6 @@ export const GardenRenderer = {
       );
 
       // Event handlers for mobile plots
-      const _rerender = () => {
-        eventBus.emit("view:changed", { transition: false });
-      };
-
       container.querySelectorAll<HTMLElement>("[data-action='add-vision']").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
@@ -463,7 +455,6 @@ export const GardenRenderer = {
     // DESKTOP: Original View with Sections
     // ===================================
 
-    const focusedVision = focusedVisionId ? visions.find((v) => v.id === focusedVisionId) ?? null : null;
     container.className = "garden-view-container garden-reflection";
     container.innerHTML = `
       <div class="week-view-header garden-header">
@@ -471,33 +462,27 @@ export const GardenRenderer = {
         <p class="week-view-range">${weekRangeLabel}</p>
         <p class="garden-header-subtitle">A calm view of how your week connects to your year.</p>
         ${
-          visions.length > 0
+          visions.length > 0 && visions.length <= 3
             ? `
-              <div class="garden-vision-tabs" role="tablist" aria-label="Vision focus">
-                <button type="button" class="garden-tab${!focusedVisionId ? " is-active" : ""}" role="tab" aria-selected="${!focusedVisionId ? "true" : "false"}" data-action="tab-all">Overview</button>
+              <div class="garden-vision-tabs-simple" role="tablist" aria-label="Vision focus">
+                <button type="button" class="garden-tab-simple${!focusedVisionId ? " is-active" : ""}" role="tab" aria-selected="${!focusedVisionId ? "true" : "false"}" data-action="tab-all">All Visions</button>
                 ${visions
-                  .slice(0, 4)
                   .map((v) => {
                     const isActive = focusedVisionId === v.id;
                     const icon = v.icon ? escapeHtmlFn(v.icon) : "";
-                    return `<button type="button" class="garden-tab${isActive ? " is-active" : ""}" role="tab" aria-selected="${isActive ? "true" : "false"}" data-action="tab-vision" data-vision-id="${escapeHtmlFn(v.id)}">${icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${icon}</span>` : ""}<span class="garden-tab-text">${escapeHtmlFn(v.title)}</span></button>`;
+                    return `<button type="button" class="garden-tab-simple${isActive ? " is-active" : ""}" role="tab" aria-selected="${isActive ? "true" : "false"}" data-action="tab-vision" data-vision-id="${escapeHtmlFn(v.id)}">${icon ? `<span class="garden-emoji" aria-hidden="true">${icon}</span>` : ""}<span class="garden-tab-text">${escapeHtmlFn(v.title)}</span></button>`;
                   })
                   .join("")}
-                ${
-                  visions.length > 4
-                    ? `<button type="button" class="garden-tab" role="tab" aria-selected="false" data-action="tab-more">More…</button>`
-                    : ""
-                }
-              </div>
-              <div class="garden-focus-note${focusedVision ? " garden-focus-note--focused" : " garden-focus-note--overview"}" aria-live="polite">
-                ${
-                  focusedVision
-                    ? `<span class="garden-focus-note-label">Focused on:</span> <span class="garden-focus-note-value">${focusedVision.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(focusedVision.icon)}</span>` : ""}<span class="garden-focus-note-text">${escapeHtmlFn(focusedVision.title)}</span></span>`
-                    : `<span class="garden-focus-note-label">Overview:</span> <span class="garden-focus-note-value">All visions</span>`
-                }
               </div>
             `
-            : ""
+            : visions.length > 3
+              ? `
+                <div class="garden-vision-tabs-simple" role="tablist" aria-label="Vision focus">
+                  <button type="button" class="garden-tab-simple${!focusedVisionId ? " is-active" : ""}" role="tab" aria-selected="${!focusedVisionId ? "true" : "false"}" data-action="tab-all">All Visions</button>
+                  <button type="button" class="garden-tab-simple" role="tab" aria-selected="false" data-action="tab-more">Focus on a Vision…</button>
+                </div>
+              `
+              : ""
         }
       </div>
 
@@ -545,7 +530,7 @@ export const GardenRenderer = {
                   return `
 	                    <div class="garden-vision-grid garden-vision-grid--focused" role="list">
 	                      <div class="garden-vision-card cosmic-card cosmic-card--vision${selectedClass}"${accentAttrs.dataAttr}${accentAttrs.styleAttr} data-action="select-vision" data-vision-id="${escapeHtmlFn(v.id)}" role="button" tabindex="0">
-	                        <div class="garden-vision-card-title">${icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${icon}</span>` : ""}<span class="garden-vision-card-title-text">${escapeHtmlFn(v.title)}</span></div>
+	                        <div class="garden-vision-card-title">${icon ? `<span class="garden-emoji" aria-hidden="true">${icon}</span>` : ""}<span class="garden-vision-card-title-text">${escapeHtmlFn(v.title)}</span></div>
 	                        <div class="garden-vision-card-meta">
                           <div class="garden-vision-card-label">Active chapter${active.length === 1 ? "" : "s"}</div>
                           <div class="garden-vision-card-chips">
@@ -556,7 +541,7 @@ export const GardenRenderer = {
                                     .map(
                                       (m) => `${(() => {
                                         const mi = m.icon ? escapeHtmlFn(m.icon) : "";
-                                        return `<button type=\"button\" class=\"garden-pill garden-pill--soft\" data-action=\"select-milestone\" data-vision-id=\"${escapeHtmlFn(v.id)}\" data-milestone-id=\"${escapeHtmlFn(m.id)}\">${mi ? `<span class=\\\"garden-emoji\\\" aria-hidden=\\\"true\\\">${mi}</span>` : ""}<span class=\"garden-pill-text\">${escapeHtmlFn(m.title)}</span></button>`;
+                                        return `<button type="button" class="garden-pill garden-pill--soft" data-action="select-milestone" data-vision-id="${escapeHtmlFn(v.id)}" data-milestone-id="${escapeHtmlFn(m.id)}">${mi ? `<span class=\\"garden-emoji\\" aria-hidden=\\"true\\">${mi}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(m.title)}</span></button>`;
                                       })()}`,
                                     )
                                     .join("")
@@ -606,7 +591,7 @@ export const GardenRenderer = {
                   const icon = v.icon ? escapeHtmlFn(v.icon) : "";
                   return `
                     <div class="garden-vision-card cosmic-card cosmic-card--vision${selectedClass}"${accentAttrs.dataAttr}${accentAttrs.styleAttr} data-action="select-vision" data-vision-id="${escapeHtmlFn(v.id)}" role="button" tabindex="0">
-                      <div class="garden-vision-card-title">${icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${icon}</span>` : ""}<span class="garden-vision-card-title-text">${escapeHtmlFn(v.title)}</span></div>
+                      <div class="garden-vision-card-title">${icon ? `<span class="garden-emoji" aria-hidden="true">${icon}</span>` : ""}<span class="garden-vision-card-title-text">${escapeHtmlFn(v.title)}</span></div>
                       <div class="garden-vision-card-meta">
                           <div class="garden-vision-card-label">Active chapter${active.length === 1 ? "" : "s"}</div>
                           <div class="garden-vision-card-chips">
@@ -617,7 +602,7 @@ export const GardenRenderer = {
                                     .map(
                                       (m) => `${(() => {
                                         const mi = m.icon ? escapeHtmlFn(m.icon) : "";
-                                        return `<button type=\"button\" class=\"garden-pill garden-pill--soft\" data-action=\"select-milestone\" data-vision-id=\"${escapeHtmlFn(v.id)}\" data-milestone-id=\"${escapeHtmlFn(m.id)}\">${mi ? `<span class=\\\"garden-emoji\\\" aria-hidden=\\\"true\\\">${mi}</span>` : ""}<span class=\"garden-pill-text\">${escapeHtmlFn(m.title)}</span></button>`;
+                                        return `<button type="button" class="garden-pill garden-pill--soft" data-action="select-milestone" data-vision-id="${escapeHtmlFn(v.id)}" data-milestone-id="${escapeHtmlFn(m.id)}">${mi ? `<span class=\\"garden-emoji\\" aria-hidden=\\"true\\">${mi}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(m.title)}</span></button>`;
                                       })()}`,
                                     )
                                     .join("")
@@ -655,27 +640,11 @@ export const GardenRenderer = {
         }
       </section>
 
-      <section class="garden-section garden-section--linkage" aria-label="Linkage Explorer">
+      <section class="garden-section garden-section--linkage-simple" aria-label="Vision Connections">
         <div class="garden-section-header">
           <div>
-            <h2 class="garden-section-title"><span class="garden-section-icon" aria-hidden="true">🔗</span>Linkage Explorer</h2>
+            <h2 class="garden-section-title"><span class="garden-section-icon" aria-hidden="true">🔗</span>Vision Connections</h2>
             <p class="garden-section-subtitle">Tap a Vision to see what supports it this week.</p>
-          </div>
-          <div class="garden-section-actions">
-            ${
-              selectedVision || selectedMilestone || selectedFocus
-                ? `<button type="button" class="btn btn-ghost" data-action="clear-explorer">Clear selection</button>`
-                : ""
-            }
-            ${
-              selectedFocus
-                ? `<button type="button" class="btn btn-ghost" data-action="open-goal" data-goal-id="${escapeHtmlFn(selectedFocus.id)}">Open</button>`
-                : selectedMilestone
-                  ? `<button type="button" class="btn btn-ghost" data-action="open-goal" data-goal-id="${escapeHtmlFn(selectedMilestone.id)}">Open</button>`
-                  : selectedVision
-                    ? `<button type="button" class="btn btn-ghost" data-action="open-goal" data-goal-id="${escapeHtmlFn(selectedVision.id)}">Open</button>`
-                    : ""
-            }
           </div>
         </div>
 
@@ -689,177 +658,115 @@ export const GardenRenderer = {
                     : "Tap a Vision to see what supports it this week."
                 }</div></div>`
               : `
-                <div class="garden-explorer">
-                  <div class="garden-explorer-main">
-                    <div class="garden-chain-pill" role="list" aria-label="Selected path">
-                      <span class="garden-chain-pill-label">Selected path</span>
-                      <div class="garden-chain-pill-items">
-                        <span class="garden-pill garden-pill--soft garden-pill--static">${selectedVision.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(selectedVision.icon)}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(selectedVision.title)}</span></span>
-                        <span class="garden-chain-pill-arrow" aria-hidden="true">→</span>
-                        ${
-                          selectedMilestone
-                            ? `<span class="garden-pill garden-pill--soft garden-pill--static">${selectedMilestone.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(selectedMilestone.icon)}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(selectedMilestone.title)}</span></span>`
-                            : renderUnlinkedPill("Milestone (optional)")
-                        }
-                        <span class="garden-chain-pill-arrow" aria-hidden="true">→</span>
-                        ${
-                          selectedFocus
-                            ? `<span class="garden-pill garden-pill--soft garden-pill--static">${selectedFocus.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(selectedFocus.icon)}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(selectedFocus.title)}</span></span>`
-                            : renderUnlinkedPill("Focus (optional)")
-                        }
-                      </div>
+                <div class="garden-explorer-simple">
+                  <div class="garden-selected-vision">
+                    <div class="garden-selected-vision-header">
+                      <span class="garden-selected-vision-label">Selected Vision</span>
+                      <button type="button" class="btn btn-ghost btn-sm" data-action="clear-explorer">Clear</button>
                     </div>
-
-                    <div class="garden-explorer-block">
-                      <div class="garden-related-label">Active milestones</div>
-                      <div class="garden-related-list">
-                        ${
-                          explorerActiveMilestones.length > 0
-                            ? explorerActiveMilestones
-                                .slice(0, 8)
-                                .map(
-                                  (m) =>
-                                    `<button type="button" class="garden-pill${selectedMilestoneId === m.id ? " is-selected" : ""}" data-action="select-milestone" data-vision-id="${escapeHtmlFn(selectedVision.id)}" data-milestone-id="${escapeHtmlFn(m.id)}">${m.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(m.icon)}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(m.title)}</span></button>`,
-                                )
-                                .join("")
-                            : `<span class="garden-pill garden-pill--neutral">${
-                                systemState === "VISIONS_ONLY" ? "No milestone yet" : "No active milestones right now"
-                              }</span>`
-                        }
-                        ${
-                          explorerActiveMilestones.length === 0 && onAddGoalLinked
-                            ? `<button type="button" class="btn btn-primary btn-sm" data-action="add-milestone" data-vision-id="${escapeHtmlFn(selectedVision.id)}">Add milestone</button>`
-                            : ""
-                        }
-                      </div>
-                    </div>
-
-                    <div class="garden-explorer-block">
-                      <div class="garden-related-label">Focus (this week)</div>
-                      <div class="garden-related-list">
-                        ${
-                          explorerFocuses.length > 0
-                            ? explorerFocuses
-                                .slice(0, 8)
-                                .map(
-                                  (f) =>
-                                    `<button type="button" class="garden-pill${selectedFocusId === f.id ? " is-selected" : ""}" data-action="select-focus" data-focus-id="${escapeHtmlFn(f.id)}">${f.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(f.icon)}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(f.title)}</span></button>`,
-                                )
-                                .join("")
-                            : `<span class="garden-pill garden-pill--neutral">No focus set for this week</span>`
-                        }
-                        ${
-                          explorerFocuses.length === 0 && onAddGoalLinked && (selectedMilestone || explorerActiveMilestones[0])
-                            ? `<button type="button" class="btn btn-ghost btn-sm" data-action="add-focus" data-vision-id="${escapeHtmlFn(selectedVision.id)}" data-milestone-id="${escapeHtmlFn((selectedMilestone ?? explorerActiveMilestones[0]).id)}">Set weekly focus</button>`
-                            : ""
-                        }
-                      </div>
-                    </div>
-
-                    <div class="garden-explorer-block">
-                      <div class="garden-related-label">Intentions (this week)</div>
-                      <div class="garden-related-list">
-                        ${
-                          explorerIntentions.length > 0
-                            ? explorerIntentions
-                                .slice(0, 12)
-                                .map(
-                                  (i) =>
-                                    `<button type="button" class="garden-pill" data-action="open-goal" data-goal-id="${escapeHtmlFn(i.id)}">${i.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(i.icon)}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(i.title)}</span></button>`,
-                                )
-                                .join("")
-                            : `<span class="garden-pill garden-pill--neutral">No linked intentions yet this week</span>`
-                        }
-                      </div>
+                    <div class="garden-selected-vision-content">
+                      ${selectedVision.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(selectedVision.icon)}</span>` : ""}
+                      <span class="garden-selected-vision-title">${escapeHtmlFn(selectedVision.title)}</span>
                     </div>
                   </div>
 
-                  <aside class="garden-explorer-aside">
-                    <div class="garden-related">
-                      <div class="garden-related-label">What to try next</div>
-                      <div class="garden-related-empty">
+                  <div class="garden-connections">
+                    ${explorerActiveMilestones.length > 0 ? `
+                      <div class="garden-connection-group">
+                        <div class="garden-connection-label">Active Milestones</div>
+                        <div class="garden-connection-items">
+                          ${explorerActiveMilestones
+                            .slice(0, 4)
+                            .map(
+                              (m) => `<button type="button" class="garden-connection-item${selectedMilestoneId === m.id ? " is-selected" : ""}" data-action="select-milestone" data-vision-id="${escapeHtmlFn(selectedVision.id)}" data-milestone-id="${escapeHtmlFn(m.id)}">${m.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(m.icon)}</span>` : ""}<span class="garden-connection-item-text">${escapeHtmlFn(m.title)}</span></button>`,
+                            )
+                            .join("")}
+                          ${explorerActiveMilestones.length > 4 ? `<span class="garden-connection-more">+${explorerActiveMilestones.length - 4} more</span>` : ""}
+                        </div>
+                      </div>
+                    ` : ""}
+
+                    ${explorerFocuses.length > 0 ? `
+                      <div class="garden-connection-group">
+                        <div class="garden-connection-label">Weekly Focus</div>
+                        <div class="garden-connection-items">
+                          ${explorerFocuses
+                            .slice(0, 4)
+                            .map(
+                              (f) => `<button type="button" class="garden-connection-item${selectedFocusId === f.id ? " is-selected" : ""}" data-action="select-focus" data-focus-id="${escapeHtmlFn(f.id)}">${f.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(f.icon)}</span>` : ""}<span class="garden-connection-item-text">${escapeHtmlFn(f.title)}</span></button>`,
+                            )
+                            .join("")}
+                          ${explorerFocuses.length > 4 ? `<span class="garden-connection-more">+${explorerFocuses.length - 4} more</span>` : ""}
+                        </div>
+                      </div>
+                    ` : ""}
+
+                    ${explorerIntentions.length > 0 ? `
+                      <div class="garden-connection-group">
+                        <div class="garden-connection-label">This Week's Intentions</div>
+                        <div class="garden-connection-items">
+                          ${explorerIntentions
+                            .slice(0, 6)
+                            .map(
+                              (i) => `<button type="button" class="garden-connection-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(i.id)}">${i.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(i.icon)}</span>` : ""}<span class="garden-connection-item-text">${escapeHtmlFn(i.title)}</span></button>`,
+                            )
+                            .join("")}
+                          ${explorerIntentions.length > 6 ? `<span class="garden-connection-more">+${explorerIntentions.length - 6} more</span>` : ""}
+                        </div>
+                      </div>
+                    ` : ""}
+
+                    ${explorerActiveMilestones.length === 0 && explorerFocuses.length === 0 && explorerIntentions.length === 0 ? `
+                      <div class="garden-empty-connections">
+                        <p>No active connections this week.</p>
                         ${
                           systemState === "VISIONS_ONLY"
-                            ? "Milestones help make the path clearer when you want structure."
+                            ? "<p>Consider adding a milestone to create structure.</p>"
                             : systemState === "VISIONS_WITH_MILESTONES"
-                              ? "A weekly focus can make your intentions feel more intentional."
-                              : "You can keep this quiet—use it when you want orientation."
+                              ? "<p>Consider setting a weekly focus.</p>"
+                              : "<p>You can keep this quiet—use it when you want orientation.</p>"
                         }
                       </div>
-                    </div>
-                  </aside>
+                    ` : ""}
+                  </div>
                 </div>
               `
         }
       </section>
 
-      <section class="garden-section garden-section--primary garden-section--alignment" aria-label="Weekly Alignment">
+      <section class="garden-section garden-section--alignment-simple" aria-label="Weekly Check-in">
         <div class="garden-section-header">
           <div>
-            <div class="garden-section-title-row">
-              <h2 class="garden-section-title"><span class="garden-section-icon" aria-hidden="true">◌</span>Weekly Alignment</h2>
-              <span class="garden-section-tag">Optional reflection</span>
-            </div>
-            <p class="garden-section-subtitle">Week ${weekNum}: what did you touch, and what didn’t you touch?</p>
+            <h2 class="garden-section-title"><span class="garden-section-icon" aria-hidden="true">◌</span>Weekly Check-in</h2>
+            <p class="garden-section-subtitle">Quick overview of what you touched this week.</p>
           </div>
-          <button type="button" class="btn btn-ghost" data-action="toggle-alignment-details" aria-pressed="${alignmentDetailsOpen ? "true" : "false"}">
-            ${alignmentDetailsOpen ? "Hide details" : "Details"}
-          </button>
         </div>
 
         ${
           visions.length === 0
-            ? `<div class="garden-empty-card"><div class="garden-empty-title">Add a Vision to make weekly alignment visible.</div></div>`
+            ? `<div class="garden-empty-card"><div class="garden-empty-title">Add a Vision to see weekly check-in.</div></div>`
             : `
-              <div class="garden-alignment-list" role="list">
+              <div class="garden-checkin-grid">
                 ${(focusedVisionId ? visions.filter((v) => v.id === focusedVisionId) : visions)
                   .map((v) => {
                     const touched = (visionTouchedThisWeek.get(v.id) ?? []).slice().sort((a, b) => a.title.localeCompare(b.title));
                     const isTouched = touched.length > 0;
                     const indicator = isTouched
-                      ? `<span class="garden-presence garden-presence--touched" aria-label="Touched this week">◉</span>`
-                      : `<span class="garden-presence garden-presence--not" aria-label="Not touched this week">○</span>`;
-                    const addTinyBtn = !isTouched && onQuickAddIntention
-                      ? `<button type="button" class="btn btn-primary btn-sm" data-action="add-tiny-intention" data-vision-id="${escapeHtmlFn(v.id)}">Add one tiny intention</button>`
-                      : "";
-                    const linkExistingBtn =
-                      !isTouched && unlinkedIntentionsThisWeek.length > 0
-                        ? `<button type="button" class="btn btn-ghost btn-sm" data-action="link-existing-intention" data-vision-id="${escapeHtmlFn(v.id)}">Link an existing intention</button>`
-                        : "";
-
+                      ? `<span class="garden-checkin-indicator garden-checkin-indicator--touched" aria-label="Touched this week">✓</span>`
+                      : `<span class="garden-checkin-indicator garden-checkin-indicator--not" aria-label="Not touched this week">○</span>`;
+                    
                     return `
-                      <div class="garden-alignment-row" role="listitem">
-                        <div class="garden-alignment-main">
+                      <div class="garden-checkin-card">
+                        <div class="garden-checkin-header">
                           ${indicator}
-                          <button type="button" class="garden-alignment-vision" data-action="select-vision" data-vision-id="${escapeHtmlFn(v.id)}">${v.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(v.icon)}</span>` : ""}<span class="garden-alignment-vision-text">${escapeHtmlFn(v.title)}</span></button>
+                          <button type="button" class="garden-checkin-vision" data-action="select-vision" data-vision-id="${escapeHtmlFn(v.id)}">${v.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(v.icon)}</span>` : ""}<span class="garden-checkin-vision-text">${escapeHtmlFn(v.title)}</span></button>
                         </div>
-                        <div class="garden-alignment-meta">
-                          <div class="garden-alignment-status">${isTouched ? "Touched this week" : "Not touched this week"}</div>
-                          ${addTinyBtn}
-                          ${linkExistingBtn}
+                        <div class="garden-checkin-status">
+                          ${isTouched ? `${touched.length} intention${touched.length === 1 ? "" : "s"} this week` : "No intentions this week"}
                         </div>
-                        ${
-                          alignmentDetailsOpen
-                            ? `
-                              <div class="garden-alignment-details">
-                                <div class="garden-alignment-details-label">${touched.length} intention${touched.length === 1 ? "" : "s"} linked this week</div>
-                                <div class="garden-alignment-details-list">
-                                  ${
-                                    touched.length > 0
-                                      ? touched
-                                          .slice(0, 8)
-                                          .map(
-                                            (i) => `<button type="button" class="garden-pill" data-action="open-goal" data-goal-id="${escapeHtmlFn(i.id)}">${i.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(i.icon)}</span>` : ""}<span class="garden-pill-text">${escapeHtmlFn(i.title)}</span></button>`,
-                                          )
-                                          .join("")
-                                      : `<span class="garden-pill garden-pill--neutral">None</span>`
-                                  }
-                                  ${touched.length > 8 ? `<span class="garden-pill garden-pill--neutral">+${touched.length - 8}</span>` : ""}
-                                </div>
-                              </div>
-                            `
-                            : ""
-                        }
+                        ${!isTouched && onQuickAddIntention ? `
+                          <button type="button" class="btn btn-primary btn-sm" data-action="add-tiny-intention" data-vision-id="${escapeHtmlFn(v.id)}">Add one tiny intention</button>
+                        ` : ""}
                       </div>
                     `;
                   })
@@ -867,7 +774,7 @@ export const GardenRenderer = {
               </div>
               ${
                 intentionsInWeek.length === 0
-                  ? `<div class="garden-hint">No linked intentions yet this week. If you want, you can add one tiny intention for a Vision you care about.</div>`
+                  ? `<div class="garden-hint">No linked intentions yet this week. Add one tiny intention for a Vision you care about.</div>`
                   : ""
               }
               ${
@@ -875,65 +782,60 @@ export const GardenRenderer = {
                   ? `<div class="garden-hint">No linked intentions yet this week.</div>`
                   : ""
               }
-              ${
-                systemState === "VISIONS_ONLY"
-                  ? `<div class="garden-hint">Intentions can link directly to Visions. Milestones help make the path clearer when you want it.</div>`
-                  : ""
-              }
-
-              <div class="garden-reflection-block">
-                <button type="button" class="garden-reflection-toggle" data-action="toggle-reflection" aria-expanded="${reflectionOpen ? "true" : "false"}">
-                  <span class="garden-reflection-toggle-title">Reflection (optional)</span>
-                  <span class="garden-reflection-toggle-subtitle">A few gentle prompts — no journaling required.</span>
-                </button>
-                ${
-                  reflectionOpen
-                    ? `
-                      <div class="garden-reflection-body">
-                        <div class="garden-reflection-q">
-                          <div class="garden-reflection-q-title">Anything you want to adjust next week?</div>
-                          <div class="garden-reflection-chips" data-ref-q="q1">
-                            ${["Make it smaller", "More recovery", "Clarify the next step", "Keep it the same"]
-                              .map((opt) => {
-                                const selected = cachedReflection?.answers?.q1 === opt;
-                                return `<button type="button" class="garden-pill${selected ? " is-selected" : ""}" data-action="set-reflection" data-q="q1" data-value="${escapeHtmlFn(opt)}">${escapeHtmlFn(opt)}</button>`;
-                              })
-                              .join("")}
-                          </div>
-                        </div>
-                        <div class="garden-reflection-q">
-                          <div class="garden-reflection-q-title">Anything you avoided because it felt too big?</div>
-                          <div class="garden-reflection-chips" data-ref-q="q2">
-                            ${["A conversation", "Admin / logistics", "Creative work", "Body care", "Not sure"]
-                              .map((opt) => {
-                                const selected = cachedReflection?.answers?.q2 === opt;
-                                return `<button type="button" class="garden-pill${selected ? " is-selected" : ""}" data-action="set-reflection" data-q="q2" data-value="${escapeHtmlFn(opt)}">${escapeHtmlFn(opt)}</button>`;
-                              })
-                              .join("")}
-                          </div>
-                        </div>
-                        <div class="garden-reflection-q">
-                          <div class="garden-reflection-q-title">What support would help?</div>
-                          <div class="garden-reflection-chips" data-ref-q="q3">
-                            ${["Time block", "Ask for help", "Change the environment", "Lower the bar", "Rest first"]
-                              .map((opt) => {
-                                const selected = cachedReflection?.answers?.q3 === opt;
-                                return `<button type="button" class="garden-pill${selected ? " is-selected" : ""}" data-action="set-reflection" data-q="q3" data-value="${escapeHtmlFn(opt)}">${escapeHtmlFn(opt)}</button>`;
-                              })
-                              .join("")}
-                          </div>
-                        </div>
-                        <div class="garden-reflection-actions">
-                          <span class="garden-reflection-meta">Saved locally for this week.</span>
-                          <button type="button" class="btn btn-ghost btn-sm" data-action="clear-reflection">Clear</button>
-                        </div>
-                      </div>
-                    `
-                    : ""
-                }
-              </div>
             `
         }
+
+        <div class="garden-reflection-simple">
+          <button type="button" class="garden-reflection-toggle-simple" data-action="toggle-reflection" aria-expanded="${reflectionOpen ? "true" : "false"}">
+            <span class="garden-reflection-toggle-title">Weekly Reflection (optional)</span>
+            <span class="garden-reflection-toggle-subtitle">A few gentle prompts — no journaling required.</span>
+          </button>
+          ${
+            reflectionOpen
+              ? `
+                <div class="garden-reflection-body-simple">
+                  <div class="garden-reflection-q">
+                    <div class="garden-reflection-q-title">Anything you want to adjust next week?</div>
+                    <div class="garden-reflection-chips" data-ref-q="q1">
+                      ${["Make it smaller", "More recovery", "Clarify the next step", "Keep it the same"]
+                        .map((opt) => {
+                          const selected = cachedReflection?.answers?.q1 === opt;
+                          return `<button type="button" class="garden-pill${selected ? " is-selected" : ""}" data-action="set-reflection" data-q="q1" data-value="${escapeHtmlFn(opt)}">${escapeHtmlFn(opt)}</button>`;
+                        })
+                        .join("")}
+                    </div>
+                  </div>
+                  <div class="garden-reflection-q">
+                    <div class="garden-reflection-q-title">Anything you avoided because it felt too big?</div>
+                    <div class="garden-reflection-chips" data-ref-q="q2">
+                      ${["A conversation", "Admin / logistics", "Creative work", "Body care", "Not sure"]
+                        .map((opt) => {
+                          const selected = cachedReflection?.answers?.q2 === opt;
+                          return `<button type="button" class="garden-pill${selected ? " is-selected" : ""}" data-action="set-reflection" data-q="q2" data-value="${escapeHtmlFn(opt)}">${escapeHtmlFn(opt)}</button>`;
+                        })
+                        .join("")}
+                    </div>
+                  </div>
+                  <div class="garden-reflection-q">
+                    <div class="garden-reflection-q-title">What support would help?</div>
+                    <div class="garden-reflection-chips" data-ref-q="q3">
+                      ${["Time block", "Ask for help", "Change the environment", "Lower the bar", "Rest first"]
+                        .map((opt) => {
+                          const selected = cachedReflection?.answers?.q3 === opt;
+                          return `<button type="button" class="garden-pill${selected ? " is-selected" : ""}" data-action="set-reflection" data-q="q3" data-value="${escapeHtmlFn(opt)}">${escapeHtmlFn(opt)}</button>`;
+                        })
+                        .join("")}
+                    </div>
+                  </div>
+                  <div class="garden-reflection-actions">
+                    <span class="garden-reflection-meta">Saved locally for this week.</span>
+                    <button type="button" class="btn btn-ghost btn-sm" data-action="clear-reflection">Clear</button>
+                  </div>
+                </div>
+              `
+              : ""
+          }
+        </div>
       </section>
     `;
 
@@ -984,7 +886,7 @@ export const GardenRenderer = {
               .map(
                 (v) => `
                   <button type="button" class="garden-overlay-item" data-action="pick-more-vision" data-vision-id="${escapeHtmlFn(v.id)}">
-                    ${v.icon ? `<span class=\"garden-emoji\" aria-hidden=\"true\">${escapeHtmlFn(v.icon)}</span>` : ""}
+                    ${v.icon ? `<span class="garden-emoji" aria-hidden="true">${escapeHtmlFn(v.icon)}</span>` : ""}
                     <span class="garden-overlay-item-text">${escapeHtmlFn(v.title)}</span>
                   </button>
                 `,
