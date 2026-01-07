@@ -562,7 +562,12 @@ export const UI = {
   setupEventBusListeners() {
     // Listen for view changes from State
     eventBus.on("view:changed", (data) => {
-      this.scheduleRender(data);
+      // Enable smooth transitions for view changes
+      const transitionOptions = {
+        transition: true,
+        ...data
+      };
+      this.scheduleRender(transitionOptions);
     });
 
     // Listen for view button sync requests
@@ -1407,13 +1412,32 @@ export const UI = {
         startViewTransition?: (cb: () => void) => void;
       };
 
+      // Use View Transition API for smoother navigation
       if (useViewTransition && typeof doc.startViewTransition === "function") {
-        doc.startViewTransition(() => {
-          this.render();
-        });
-        return;
+        try {
+          doc.startViewTransition(() => {
+            // Add transitioning class for custom animations
+            const calendarGrid = this.elements.calendarGrid;
+            if (calendarGrid) {
+              calendarGrid.classList.add('view-transitioning');
+            }
+            
+            this.render();
+            
+            // Remove transitioning class after render
+            requestAnimationFrame(() => {
+              if (calendarGrid) {
+                calendarGrid.classList.remove('view-transitioning');
+              }
+            });
+          });
+          return;
+        } catch (error) {
+          console.warn('View transition failed, falling back to regular render:', error);
+        }
       }
 
+      // Fallback to regular render with optimizations
       this.render();
     });
   },
@@ -1466,55 +1490,130 @@ export const UI = {
       }
     }
 
-    this.renderCurrentView();
-    this.renderLevelContextBar();
-    this.renderCategoryFilters();
-    this.renderUpcomingGoals();
-    this.updateDateDisplay();
-    this.updateTimeDisplay();
-    this.updateYearProgress();
-    Streaks.check();
-    this.updateStreakDisplay();
+    // Batch DOM updates to prevent layout thrashing
+    this.batchRenderUpdates(shouldResetScroll);
+  },
 
-    // Mobile Home ("Here") uses the desktop sidebar layout.
-    // Garden view also uses sidebar-like layout on mobile
+  /**
+   * Batch DOM updates to prevent flashing during tab switches
+   */
+  batchRenderUpdates(shouldResetScroll: boolean) {
+    // Use document fragment for batch DOM operations
+    const updates: (() => void)[] = [];
+
+    // Show loading state for main content during navigation
+    const calendarGrid = this.elements.calendarGrid;
+    if (calendarGrid && shouldResetScroll) {
+      calendarGrid.classList.add('loading');
+    }
+
+    // Collect all DOM updates
+    updates.push(() => this.renderCurrentView());
+    updates.push(() => this.renderLevelContextBar());
+    updates.push(() => this.renderCategoryFilters());
+    updates.push(() => this.renderUpcomingGoals());
+    updates.push(() => this.updateDateDisplay());
+    updates.push(() => this.updateTimeDisplay());
+    updates.push(() => this.updateYearProgress());
+    
+    updates.push(() => {
+      Streaks.check();
+      this.updateStreakDisplay();
+    });
+
+    // Mobile view updates
     const isMobile = viewportManager.isMobileViewport();
     const isMobileHome = isMobile && State.currentView === VIEWS.HOME;
     const isMobileGarden = isMobile && State.currentView === VIEWS.GARDEN;
-    document.body.classList.toggle("mobile-home-view", isMobileHome);
-    document.body.classList.toggle("mobile-garden-view", isMobileGarden);
+    
+    updates.push(() => {
+      document.body.classList.toggle("mobile-home-view", isMobileHome);
+      document.body.classList.toggle("mobile-garden-view", isMobileGarden);
+    });
+
     if (this.elements.mobileHomeView) {
-      // Legacy overlay is no longer used.
-      this.elements.mobileHomeView.setAttribute("hidden", "");
-    }
-    if (isMobileHome) {
-      this.updateMobileHomeView();
-    }
-
-    viewportManager.updateMobileLayoutVars();
-    this.syncAddButtonLabel();
-
-    if (shouldResetScroll) {
-      if (this._scrollResetRaf !== null) {
-        cancelAnimationFrame(this._scrollResetRaf);
-      }
-
-      this._scrollResetRaf = requestAnimationFrame(() => {
-        this._scrollResetRaf = null;
-        const canvasContainer = this.elements.canvasContainer;
-        if (canvasContainer) {
-          canvasContainer.scrollTop = 0;
-          canvasContainer.scrollLeft = 0;
-        }
-
-        const appEl = document.querySelector(".app") as HTMLElement | null;
-        if (appEl) appEl.scrollTop = 0;
-
-        const scrollingElement =
-          document.scrollingElement as HTMLElement | null;
-        if (scrollingElement) scrollingElement.scrollTop = 0;
+      updates.push(() => {
+        this.elements.mobileHomeView!.setAttribute("hidden", "");
       });
     }
+
+    if (isMobileHome) {
+      updates.push(() => this.updateMobileHomeView());
+    }
+
+    updates.push(() => viewportManager.updateMobileLayoutVars());
+    updates.push(() => this.syncAddButtonLabel());
+
+    // Execute all updates in a single frame
+    requestAnimationFrame(() => {
+      // Execute all DOM updates
+      updates.forEach(update => {
+        try {
+          update();
+        } catch (error) {
+          console.error('Error during render update:', error);
+        }
+      });
+
+      // Remove loading state with smooth transition
+      if (calendarGrid && shouldResetScroll) {
+        requestAnimationFrame(() => {
+          calendarGrid.classList.remove('loading');
+          calendarGrid.classList.add('view-transitioning');
+          
+          // Remove transitioning class after animation
+          setTimeout(() => {
+            calendarGrid.classList.remove('view-transitioning');
+          }, 200);
+        });
+      }
+
+      // Handle scroll reset
+      if (shouldResetScroll) {
+        this.handleScrollReset();
+      }
+    });
+  },
+
+  /**
+   * Handle scroll reset with proper timing
+   */
+  handleScrollReset() {
+    if (this._scrollResetRaf !== null) {
+      cancelAnimationFrame(this._scrollResetRaf);
+    }
+
+    this._scrollResetRaf = requestAnimationFrame(() => {
+      this._scrollResetRaf = null;
+      
+      // Batch scroll operations
+      const scrollOperations: (() => void)[] = [];
+      
+      const canvasContainer = this.elements.canvasContainer;
+      if (canvasContainer) {
+        scrollOperations.push(() => {
+          canvasContainer.scrollTop = 0;
+          canvasContainer.scrollLeft = 0;
+        });
+      }
+
+      const appEl = document.querySelector(".app") as HTMLElement | null;
+      if (appEl) {
+        scrollOperations.push(() => {
+          appEl.scrollTop = 0;
+        });
+      }
+
+      const scrollingElement = document.scrollingElement as HTMLElement | null;
+      if (scrollingElement) {
+        scrollOperations.push(() => {
+          scrollingElement.scrollTop = 0;
+        });
+      }
+
+      // Execute all scroll operations
+      scrollOperations.forEach(op => op());
+    });
   },
 
   updateMobileHomeView() {

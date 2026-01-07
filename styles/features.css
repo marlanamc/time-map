@@ -11,3 +11,4 @@
 @import './features/keyboard-modal.css';
 @import './features/auth-modal.css';
 @import './features/time-viz.css';
+@import '../components/improved-modals.css';

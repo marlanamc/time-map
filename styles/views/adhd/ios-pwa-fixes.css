@@ -2,10 +2,6 @@
    iOS Safari PWA Fixes - ADHD Enhancement System
    =================================== */
 
-/* ===================================
-   iOS Viewport and Safe Area Fixes
-   =================================== */
-
 /* Fix viewport height issues on iOS */
 :root {
   --vh: 1vh;
@@ -534,29 +530,6 @@
   100% {
     transform: scale(1);
   }
-}
-
-/* ===================================
-   iOS Debug Information
-   =================================== */
-
-/* Development only - remove in production */
-.ios .debug-info {
-  position: fixed;
-  top: var(--safe-area-top);
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 8px;
-  font-size: 12px;
-  text-align: center;
-  z-index: 9998;
-}
-
-.ios .debug-info .info-item {
-  display: inline-block;
-  margin: 0 8px;
 }
 
 /* ===================================

@@ -359,7 +359,7 @@ export class DataInsights {
     }
 
     // Task completion insights
-    if (metrics.taskCompletionRate < 0.7) {
+    if (metrics.taskCompletionRate < 0.8) {
       insights.push({
         id: "low-completion-rate",
         category: "motivation",
@@ -370,7 +370,7 @@ export class DataInsights {
         data: {
           current: metrics.taskCompletionRate,
           baseline: 0.8,
-          trend: -0.1,
+          trend: -0.05,
           confidence: 0.9
         },
         suggestions: [

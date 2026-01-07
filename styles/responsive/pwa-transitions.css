@@ -1,0 +1,188 @@
+/* ===================================
+   PWA View Transition Optimizations
+   =================================== */
+
+/* Prevent layout shifts during view changes */
+.calendar-grid {
+  /* Create a stacking context to prevent layout shifts */
+  transform: translateZ(0);
+  /* Enable hardware acceleration */
+  will-change: transform, opacity;
+  /* Ensure smooth transitions */
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+/* Optimize app container for smooth transitions */
+.app {
+  /* Prevent layout shifts */
+  overflow: hidden;
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  /* Smooth height transitions */
+  transition: height 0.2s ease-out;
+}
+
+/* Canvas container optimizations */
+.canvas-container {
+  /* Prevent scroll jumps */
+  scroll-behavior: smooth;
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  /* Contain paint operations */
+  contain: layout paint;
+}
+
+/* Mobile tab bar optimizations */
+.mobile-tab-bar {
+  /* Prevent layout shifts */
+  position: fixed;
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  /* Smooth transitions */
+  transition: transform 0.2s ease-out;
+}
+
+/* Tab transition states */
+.mobile-tab {
+  /* Prevent layout shifts during transitions */
+  position: relative;
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  /* Smooth color transitions */
+  transition: color 0.15s ease-out, transform 0.1s ease-out;
+}
+
+.mobile-tab:active {
+  /* Subtle feedback for touch */
+  transform: scale(0.95);
+}
+
+/* View transition animations */
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes viewFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Apply view transitions */
+.calendar-grid.view-transitioning {
+  animation: viewFadeIn 0.2s ease-out;
+}
+
+/* Loading states to prevent flashing */
+.calendar-grid.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.calendar-grid.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Prevent content jump during loading */
+.skeleton-loading {
+  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-hover) 50%, var(--bg-surface) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Optimize for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .calendar-grid,
+  .app,
+  .mobile-tab-bar,
+  .mobile-tab {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .calendar-grid.view-transitioning {
+    animation: none !important;
+  }
+  
+  .mobile-tab:active {
+    transform: none !important;
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 600px) {
+  /* Prevent viewport shifts on mobile */
+  .calendar-grid {
+    min-height: calc(100vh - var(--mobile-tab-bar-height) - var(--header-height));
+  }
+  
+  /* Smooth tab transitions */
+  .mobile-tab {
+    /* Prevent layout shifts */
+    flex-basis: 0;
+    /* Ensure consistent sizing */
+    flex-grow: 1;
+    /* Smooth transitions */
+    transition: color 0.1s ease-out;
+  }
+  
+  /* Prevent content flash during navigation */
+  .view-content {
+    /* Create stacking context */
+    position: relative;
+    /* Enable hardware acceleration */
+    transform: translateZ(0);
+    /* Contain layout operations */
+    contain: layout style paint;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .calendar-grid,
+  .mobile-tab-bar {
+    /* Improve rendering on high DPI displays */
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Memory-constrained device optimizations */
+@media (max-memory: 4gb) {
+  .calendar-grid {
+    /* Reduce GPU memory usage on low-memory devices */
+    will-change: auto;
+    transform: none;
+  }
+}

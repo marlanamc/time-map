@@ -804,3 +804,36 @@ select:focus {
 .btn {
     font-family: var(--font-sans) !important;
 }
+
+/* ===================================
+   Animation Accessibility for Garden Theme
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+    .support-panel-overlay,
+    .support-panel,
+    .modal-overlay,
+    .modal,
+    .btn-primary,
+    .btn-ghost,
+    .support-panel-item,
+    .affirmation-panel,
+    .achievement-badge {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .support-panel::before,
+    .modal::before,
+    .btn-primary::before,
+    .support-panel-item::before {
+        display: none !important;
+    }
+
+    .support-panel-item:hover,
+    .btn-primary:hover,
+    .btn-ghost:hover,
+    .affirmation-panel:hover {
+        transform: none !important;
+    }
+}

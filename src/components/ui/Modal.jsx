@@ -57,15 +57,18 @@ const Modal = ({
     
     document.addEventListener('keydown', handleKeyDown);
     
-    // Focus first element when modal opens
-    if (firstElement) {
-      firstElement.focus();
-    } else {
-      modalRef.current?.focus();
-    }
+    // Focus first element when modal opens with slight delay for animation
+    const focusTimeout = setTimeout(() => {
+      if (firstElement && isOpen) {
+        firstElement.focus();
+      } else if (modalRef.current && isOpen) {
+        modalRef.current.focus();
+      }
+    }, 100);
     
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(focusTimeout);
     };
   }, [isOpen, onClose]);
   

@@ -1,6 +1,8 @@
 /* ===================================
    Responsive Design
    =================================== */
+@import './pwa-transitions.css';
+
 @media (max-width: 1200px) {
     .calendar-grid {
         grid-template-columns: repeat(3, minmax(240px, 1fr));

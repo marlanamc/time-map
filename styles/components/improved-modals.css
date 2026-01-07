@@ -1,0 +1,193 @@
+/* ===================================
+   Improved Modal Components
+   =================================== */
+
+/* Schedule Form Styles */
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  transition: all var(--duration-fast) var(--ease-out);
+  min-height: 44px;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.dark-mode .form-input,
+.dark-mode .form-select {
+  background: rgba(10, 22, 18, 0.5);
+  border-color: rgba(140, 183, 217, 0.15);
+}
+
+.dark-mode .form-input:focus,
+.dark-mode .form-select:focus {
+  background: rgba(10, 22, 18, 0.7);
+  border-color: rgba(140, 183, 217, 0.4);
+  box-shadow: 0 0 0 3px rgba(140, 183, 217, 0.15);
+}
+
+/* Duration Control */
+.duration-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--bg-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+}
+
+.duration-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-muted);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.duration-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.05);
+}
+
+.duration-btn:active {
+  transform: scale(0.95);
+}
+
+.duration-input {
+  width: 80px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  min-height: 44px;
+}
+
+.duration-unit {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  font-weight: 500;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Schedule Preview */
+.schedule-preview {
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-muted);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.preview-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.preview-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.preview-time {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.preview-duration {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+/* Field Help Text */
+.field-help {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: 1.4;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  .schedule-form {
+    gap: var(--space-3);
+  }
+
+  .duration-control {
+    padding: var(--space-3);
+  }
+
+  .duration-btn {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    font-size: var(--text-xl);
+  }
+
+  .duration-input {
+    width: 100px;
+    font-size: var(--text-xl);
+  }
+
+  .schedule-preview {
+    padding: var(--space-3);
+  }
+
+  .preview-time {
+    font-size: var(--text-base);
+  }
+}
+
+/* Animation Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .duration-btn,
+  .form-input,
+  .form-select {
+    transition: none !important;
+  }
+
+  .duration-btn:hover,
+  .duration-btn:active {
+    transform: none !important;
+  }
+}

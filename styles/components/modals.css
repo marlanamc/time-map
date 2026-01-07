@@ -74,8 +74,8 @@
 }
 
 .modal-close {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -86,6 +86,8 @@
     font-size: 1.25rem;
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-out);
+    min-width: 44px;
+    min-height: 44px;
 }
 
 .modal-close:hover {
@@ -173,6 +175,7 @@
     gap: var(--space-4);
 }
 
+/* Modal Actions - Ensure 44px minimum touch targets */
 .modal-actions {
     display: flex;
     gap: var(--space-3);
@@ -180,6 +183,31 @@
     margin-top: var(--space-5);
     padding-top: var(--space-5);
     border-top: 1px solid var(--glass-border);
+}
+
+.modal-actions .btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: var(--space-3) var(--space-4);
+}
+
+/* Touch-friendly interactive elements */
+.modal-pill,
+.modal-chip,
+.status-btn,
+.subtask-delete {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subtask-checkbox {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
 }
 
 /* Event modal specifics (kept subtle) */
@@ -607,8 +635,98 @@
 }
 
 /* ===================================
-   Time Breakdown
+   Mobile Bottom Sheet Pattern
    =================================== */
+@media (max-width: 600px) {
+    .modal-overlay {
+        align-items: flex-end;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 24px 24px 0 0;
+        max-height: 85vh;
+        transform: translateY(100%);
+        transition: transform var(--duration-normal) var(--ease-out);
+    }
+
+    .modal-overlay.active .modal {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        padding: var(--space-4) var(--space-4) var(--space-3);
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .modal-title {
+        font-size: var(--text-lg);
+        font-weight: 600;
+    }
+
+    .modal-close {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .modal-body {
+        max-height: 60vh;
+        padding: var(--space-4);
+    }
+
+    .modal-actions {
+        padding: var(--space-4);
+        gap: var(--space-2);
+        flex-direction: column-reverse;
+    }
+
+    .modal-actions .btn {
+        width: 100%;
+        min-height: 48px;
+        font-size: var(--text-base);
+    }
+}
+
+/* ===================================
+   Animation Accessibility
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+    .modal-overlay,
+    .modal,
+    .modal-close,
+    .modal-actions .btn,
+    .modal-pill,
+    .modal-chip,
+    .status-btn {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .modal-overlay.active .modal {
+        transform: none !important;
+    }
+}
+
+/* ===================================
+   Screen Reader Only Content
+   =================================== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
 .time-breakdown {
     background: var(--bg-surface);
     border-radius: var(--radius-lg);
