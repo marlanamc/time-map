@@ -1,0 +1,528 @@
+/* ===================================
+   Flow State Support - ADHD Micro-Interactions & Sensory Optimization
+   =================================== */
+
+/* Focus Mode Styles */
+.focus-mode-hidden-ui {
+  /* Hide non-essential UI elements */
+}
+
+.focus-mode-hidden-ui .sidebar,
+.focus-mode-hidden-ui .navigation,
+.focus-mode-hidden-ui .header-secondary,
+.focus-mode-hidden-ui .controls-secondary {
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.focus-mode-block-notifications {
+  /* Block notification display */
+}
+
+.focus-mode-block-notifications .notification,
+.focus-mode-block-notifications .toast,
+.focus-mode-block-notifications .alert {
+  display: none !important;
+}
+
+/* Deep Focus Mode */
+.focus-mode-deep-focus {
+  background: var(--focus-bg-color, #1a1a1a);
+  color: var(--focus-text-color, #ffffff);
+  font-size: var(--focus-font-size, 20px);
+}
+
+.focus-mode-deep-focus .task-item {
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.focus-mode-deep-focus .task-item:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Calm Focus Mode */
+.focus-mode-calm-focus {
+  background: var(--focus-bg-color, #f8fafb);
+  color: var(--focus-text-color, #334155);
+  font-size: var(--focus-font-size, 16px);
+}
+
+.focus-mode-calm-focus .task-item {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  padding: 16px;
+  margin: 8px 0;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.focus-mode-calm-focus .task-item:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+/* Creative Flow Mode */
+.focus-mode-creative-flow {
+  background: var(--focus-bg-color, #fef3c7);
+  color: var(--focus-text-color, #78350f);
+  font-size: var(--focus-font-size, 16px);
+}
+
+.focus-mode-creative-flow .task-item {
+  border: 1px dashed rgba(120, 53, 15, 0.3);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 18px;
+  margin: 12px 0;
+  border-radius: 16px;
+  transition: all 0.4s ease;
+}
+
+.focus-mode-creative-flow .task-item:hover {
+  border-color: rgba(120, 53, 15, 0.5);
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-3px) rotate(-1deg);
+}
+
+/* ===================================
+   Gesture Interactions
+   =================================== */
+
+/* Swipe Gestures */
+.swipeable-task {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.swipeable-task::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(16, 185, 129, 0.1) 0%, 
+    transparent 50%, 
+    rgba(239, 68, 68, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.swipeable-task.swiping-left::before {
+  opacity: 1;
+  background: linear-gradient(90deg, 
+    rgba(16, 185, 129, 0.3) 0%, 
+    transparent 50%, 
+    transparent 100%);
+}
+
+.swipeable-task.swiping-right::before {
+  opacity: 1;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    transparent 50%, 
+    rgba(239, 68, 68, 0.3) 100%);
+}
+
+.swipeable-task.swipe-complete {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.swipeable-task.swipe-postpone {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+/* Drag and Drop */
+.draggable-task {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.draggable-task:active {
+  cursor: grabbing;
+}
+
+.draggable-task.dragging {
+  opacity: 0.8;
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.drop-zone {
+  border: 2px dashed transparent;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 10px 0;
+  transition: all 0.2s ease;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+
+.drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(111, 155, 134, 0.1);
+  color: var(--accent);
+}
+
+/* Long Press */
+.long-pressable {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.long-pressable::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(111, 155, 134, 0.3);
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.long-pressable.long-pressing::after {
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+}
+
+.long-pressable.long-pressing {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+/* ===================================
+   Haptic Feedback Visual Indicators
+   =================================== */
+
+.haptic-pulse {
+  position: relative;
+  overflow: hidden;
+}
+
+.haptic-pulse::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent), transparent);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.haptic-pulse.pulsing::before {
+  animation: haptic-pulse 0.3s ease-out;
+}
+
+@keyframes haptic-pulse {
+  0% {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+  }
+  100% {
+    width: 60px;
+    height: 60px;
+    opacity: 0;
+  }
+}
+
+/* ===================================
+   Voice Recognition UI
+   =================================== */
+
+.voice-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(111, 155, 134, 0.3);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.voice-indicator:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(111, 155, 134, 0.4);
+}
+
+.voice-indicator.listening {
+  animation: voice-listening 1.5s ease-in-out infinite;
+}
+
+.voice-indicator.processing {
+  animation: voice-processing 0.5s ease-in-out infinite;
+}
+
+@keyframes voice-listening {
+  0%, 100% {
+    transform: scale(1);
+    background: var(--accent);
+  }
+  50% {
+    transform: scale(1.1);
+    background: var(--accent-hover);
+  }
+}
+
+@keyframes voice-processing {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.voice-feedback {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  max-width: 200px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.voice-feedback.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===================================
+   Animation Speed Controls
+   =================================== */
+
+:root {
+  --animation-speed-multiplier: 1;
+  --transition-speed-multiplier: 1;
+  --haptic-sensitivity-multiplier: 1;
+  --animation-intensity: 1;
+}
+
+/* Reduced Motion Support */
+.reduced-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Animation Intensity Adjustments */
+.low-intensity {
+  --border-width: 1px;
+  --shadow-opacity: 0.1;
+  --animation-intensity: 0.5;
+}
+
+.medium-intensity {
+  --border-width: 2px;
+  --shadow-opacity: 0.2;
+  --animation-intensity: 1;
+}
+
+.high-intensity {
+  --border-width: 3px;
+  --shadow-opacity: 0.3;
+  --animation-intensity: 1.5;
+}
+
+/* ===================================
+   Sensory Optimization
+   =================================== */
+
+/* Color Contrast Adjustments */
+.low-contrast {
+  --text-contrast-ratio: 3;
+  --border-contrast: 0.3;
+}
+
+.medium-contrast {
+  --text-contrast-ratio: 4.5;
+  --border-contrast: 0.5;
+}
+
+.high-contrast {
+  --text-contrast-ratio: 7;
+  --border-contrast: 0.8;
+}
+
+/* Font Size Adjustments */
+.small-text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.medium-text {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.large-text {
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+/* ===================================
+   Touch Optimizations
+   =================================== */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Touch device optimizations */
+  .task-item {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+  
+  .button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 16px;
+  }
+  
+  .swipeable-task {
+    touch-action: pan-x pan-y;
+  }
+  
+  .voice-indicator {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+}
+
+/* ===================================
+   Mobile Gesture Feedback
+   =================================== */
+
+@media (max-width: 768px) {
+  .swipeable-task {
+    margin: 8px 0;
+  }
+  
+  .voice-indicator {
+    bottom: 16px;
+    right: 16px;
+  }
+  
+  .voice-feedback {
+    bottom: 104px;
+    right: 16px;
+    max-width: 160px;
+  }
+  
+  .focus-mode-deep-focus .task-item,
+  .focus-mode-calm-focus .task-item,
+  .focus-mode-creative-flow .task-item {
+    margin: 6px 0;
+  }
+}
+
+/* ===================================
+   Accessibility Enhancements
+   =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .swipeable-task,
+  .draggable-task,
+  .long-pressable,
+  .haptic-pulse,
+  .voice-indicator {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Focus Management */
+.focus-mode-deep-focus *:focus,
+.focus-mode-calm-focus *:focus,
+.focus-mode-creative-flow *:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Screen Reader Support */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===================================
+   Performance Optimizations
+   =================================== */
+
+/* GPU Acceleration for animations */
+.swipeable-task,
+.draggable-task,
+.long-pressable,
+.haptic-pulse,
+.voice-indicator {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Contain paint operations */
+.task-list,
+.timeline-container {
+  contain: layout style paint;
+}
+
+/* Optimize for 60fps */
+@media (min-width: 1200px) {
+  .swipeable-task,
+  .draggable-task {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}

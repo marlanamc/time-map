@@ -1,0 +1,795 @@
+/* ===================================
+   Emotional Regulation - ADHD Anxiety Reduction & Self-Compassion
+   =================================== */
+
+/* Calm Mode Styles */
+.calm-mode-simple {
+  /* Simplified UI elements */
+}
+
+.calm-mode-simple .sidebar,
+.calm-mode-simple .navigation-secondary,
+.calm-mode-simple .controls-secondary {
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.calm-mode-simple .task-item {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.4);
+  padding: 16px;
+  margin: 8px 0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.calm-mode-simple .task-item:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.calm-mode-quiet {
+  /* Reduced notifications */
+}
+
+.calm-mode-quiet .notification,
+.calm-mode-quiet .toast,
+.calm-mode-quiet .alert {
+  display: none !important;
+}
+
+/* Gentle Care Mode */
+.calm-mode-gentle-care {
+  background: var(--calm-bg-color, #f8fafb);
+  color: var(--calm-text-color, #64748b);
+}
+
+.calm-mode-gentle-care .task-item {
+  border: 1px solid rgba(100, 116, 139, 0.1);
+  background: rgba(248, 250, 251, 0.8);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 12px 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.calm-mode-gentle-care .task-item:hover {
+  border-color: rgba(100, 116, 139, 0.2);
+  background: rgba(248, 250, 251, 0.9);
+}
+
+/* Calm Focus Mode */
+.calm-mode-calm-focus {
+  background: var(--calm-bg-color, #fef3c7);
+  color: var(--calm-text-color, #92400e);
+}
+
+.calm-mode-calm-focus .task-item {
+  border: 1px solid rgba(146, 64, 14, 0.1);
+  background: rgba(254, 243, 199, 0.8);
+  border-radius: 14px;
+  padding: 18px;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.calm-mode-calm-focus .task-item:hover {
+  border-color: rgba(146, 64, 14, 0.2);
+  background: rgba(254, 243, 199, 0.9);
+}
+
+/* Emergency Calm Mode */
+.calm-mode-emergency-calm {
+  background: var(--calm-bg-color, #f0fdf4);
+  color: var(--calm-text-color, #166534);
+}
+
+.calm-mode-emergency-calm .task-item {
+  border: 1px solid rgba(22, 101, 52, 0.1);
+  background: rgba(240, 253, 244, 0.8);
+  border-radius: 20px;
+  padding: 24px;
+  margin: 16px 0;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.calm-mode-emergency-calm .task-item:hover {
+  border-color: rgba(22, 101, 52, 0.2);
+  background: rgba(240, 253, 244, 0.9);
+}
+
+/* ===================================
+   Anxiety Reduction Techniques
+   =================================== */
+
+.anxiety-technique-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.anxiety-technique-overlay.active {
+  opacity: 1;
+}
+
+.anxiety-technique-container {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.anxiety-technique-overlay.active .anxiety-technique-container {
+  transform: scale(1);
+}
+
+.anxiety-technique-header {
+  margin-bottom: 24px;
+}
+
+.anxiety-technique-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 8px 0;
+}
+
+.anxiety-technique-description {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.anxiety-technique-content {
+  margin-bottom: 24px;
+}
+
+.anxiety-technique-instructions {
+  text-align: left;
+  margin: 0 0 24px 0;
+}
+
+.anxiety-technique-instructions ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.anxiety-technique-instructions li {
+  padding: 12px 0;
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.6;
+  position: relative;
+  padding-left: 32px;
+}
+
+.anxiety-technique-instructions li::before {
+  content: attr(data-step);
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.anxiety-technique-visual {
+  margin: 24px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+}
+
+/* Breathing Circle */
+.breathing-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #10b981, #059669);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  animation: breathing 4s ease-in-out infinite;
+}
+
+@keyframes breathing {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Progress Ring */
+.progress-ring {
+  width: 120px;
+  height: 120px;
+  position: relative;
+}
+
+.progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progress-ring circle {
+  fill: none;
+  stroke: #e5e7eb;
+  stroke-width: 8;
+}
+
+.progress-ring .progress {
+  fill: none;
+  stroke: #10b981;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 339.292;
+  stroke-dashoffset: 339.292;
+  animation: progress 3s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% {
+    stroke-dashoffset: 339.292;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Countdown Timer */
+.countdown-timer {
+  font-size: 48px;
+  font-weight: 700;
+  color: #10b981;
+  font-variant-numeric: tabular-nums;
+  animation: countdown 4s ease-in-out infinite;
+}
+
+@keyframes countdown {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Grounding Exercise */
+.grounding-exercise {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.grounding-item {
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.grounding-item.completed {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.grounding-item-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 8px;
+}
+
+.grounding-item-text {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+/* Body Outline */
+.body-outline {
+  width: 200px;
+  height: 300px;
+  position: relative;
+  margin: 24px auto;
+}
+
+.body-outline svg {
+  width: 100%;
+  height: 100%;
+}
+
+.body-outline .muscle-group {
+  fill: rgba(16, 185, 129, 0.2);
+  stroke: #10b981;
+  stroke-width: 2;
+  transition: all 0.3s ease;
+}
+
+.body-outline .muscle-group.active {
+  fill: rgba(16, 185, 129, 0.4);
+  stroke: #059669;
+}
+
+/* Cloud Animation */
+.cloud-animation {
+  width: 300px;
+  height: 200px;
+  position: relative;
+  margin: 24px auto;
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  opacity: 0;
+  animation: cloud-float 8s ease-in-out infinite;
+}
+
+.cloud-1 {
+  width: 60px;
+  height: 40px;
+  top: 20px;
+  left: 20px;
+  animation-delay: 0s;
+}
+
+.cloud-2 {
+  width: 80px;
+  height: 50px;
+  top: 60px;
+  right: 20px;
+  animation-delay: 2s;
+}
+
+.cloud-3 {
+  width: 70px;
+  height: 45px;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 4s;
+}
+
+@keyframes cloud-float {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px);
+    opacity: 1;
+  }
+}
+
+/* ===================================
+   Self-Compassion Messages
+   =================================== */
+
+.compassion-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1500;
+  max-width: 400px;
+  width: 90%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.9);
+  transition: all 0.3s ease;
+}
+
+.compassion-popup.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.compassion-content {
+  position: relative;
+}
+
+.compassion-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.compassion-gentle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.compassion-encouraging {
+  font-size: 16px;
+  color: #475569;
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.compassion-actionable {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.compassion-action-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.compassion-action-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.compassion-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #64748b;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.compassion-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ===================================
+   Overwhelm Prevention
+   =================================== */
+
+.overwhelm-indicator {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.overwhelm-indicator::before {
+  content: "⚠️";
+  font-size: 18px;
+}
+
+.collapsed-items {
+  margin: 16px 0;
+}
+
+.load-more-btn {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.load-more-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.simplified-items {
+  opacity: 0.7;
+}
+
+.simplified-items .task-item {
+  padding: 12px;
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+/* ===================================
+   Gentle Language
+   =================================== */
+
+.gentle-language .error-message,
+.gentle-language .warning-message,
+.gentle-language .failed {
+  color: #64748b;
+  background: rgba(100, 116, 139, 0.1);
+  border-color: rgba(100, 116, 139, 0.2);
+}
+
+.gentle-language .error-message::before,
+.gentle-language .warning-message::before,
+.gentle-language .failed::before {
+  content: "💚";
+}
+
+.gentle-language .success-message {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #059669;
+}
+
+.gentle-language .success-message::before {
+  content: "✨";
+}
+
+/* ===================================
+   Emergency Calm Down
+   =================================== */
+
+.emergency-calm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(240, 253, 244, 0.95);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.emergency-calm.active {
+  opacity: 1;
+}
+
+.emergency-calm-content {
+  text-align: center;
+  padding: 32px;
+}
+
+.emergency-calm-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.emergency-calm-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #166534;
+  margin: 0 0 16px 0;
+}
+
+.emergency-calm-message {
+  font-size: 18px;
+  color: #15803d;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.emergency-calm-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.emergency-calm-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emergency-calm-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.emergency-calm-btn-secondary {
+  background: rgba(255, 255, 255, 0.8);
+  color: #166534;
+  border: 1px solid rgba(22, 101, 52, 0.3);
+}
+
+.emergency-calm-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(22, 101, 52, 0.5);
+}
+
+/* ===================================
+   Mobile Responsive
+   =================================== */
+
+@media (max-width: 768px) {
+  .anxiety-technique-container {
+    padding: 24px;
+    margin: 16px;
+  }
+  
+  .anxiety-technique-title {
+    font-size: 20px;
+  }
+  
+  .anxiety-technique-description {
+    font-size: 14px;
+  }
+  
+  .compassion-popup {
+    padding: 20px;
+    margin: 16px;
+  }
+  
+  .compassion-icon {
+    font-size: 36px;
+  }
+  
+  .compassion-gentle {
+    font-size: 16px;
+  }
+  
+  .compassion-encouraging {
+    font-size: 14px;
+  }
+  
+  .breathing-circle,
+  .progress-ring,
+  .countdown-timer {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .breathing-circle {
+    font-size: 16px;
+  }
+  
+  .countdown-timer {
+    font-size: 36px;
+  }
+  
+  .grounding-exercise {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 12px;
+  }
+  
+  .grounding-item {
+    padding: 12px;
+  }
+  
+  .grounding-item-number {
+    font-size: 20px;
+  }
+  
+  .grounding-item-text {
+    font-size: 12px;
+  }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .anxiety-technique-overlay,
+  .compassion-popup,
+  .compassion-close,
+  .compassion-action-btn,
+  .load-more-btn,
+  .overwhelm-indicator {
+    transition: none;
+    animation: none;
+  }
+  
+  .breathing-circle,
+  .progress-ring,
+  .countdown-timer,
+  .cloud {
+    animation: none;
+  }
+}
+
+/* Focus Management */
+.anxiety-technique-container:focus,
+.compassion-popup:focus,
+.compassion-close:focus,
+.compassion-action-btn:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Screen Reader Support */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===================================
+   Performance Optimizations
+   =================================== */
+
+.anxiety-technique-overlay,
+.compassion-popup {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.breathing-circle,
+.progress-ring,
+.countdown-timer {
+  will-change: transform;
+}
+
+/* Contain paint operations */
+.anxiety-technique-container,
+.compassion-content {
+  contain: layout style paint;
+}

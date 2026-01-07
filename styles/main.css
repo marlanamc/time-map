@@ -13,6 +13,9 @@
 @import './views/garden-redesign.css';
 @import './views/garden-reflection.css';
 @import './views/living-garden.css';
+@import './views/adhd/flow-state.css';
+@import './views/adhd/emotional-regulation.css';
+@import './views/adhd/dopamine-features.css';
 @import './day-planner.css';
 @import './features.css';
 @import './themes.css';

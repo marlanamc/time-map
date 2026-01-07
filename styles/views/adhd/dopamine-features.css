@@ -1,0 +1,876 @@
+/* ===================================
+   Dopamine-Driven Features - ADHD Instant Gratification & Motivation
+   =================================== */
+
+/* ===================================
+   Instant Feedback Visual Effects
+   =================================== */
+
+.dopamine-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Pulse Effect */
+.dopamine-pulse {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.8), transparent);
+  animation: dopamine-pulse 0.3s ease-out;
+}
+
+@keyframes dopamine-pulse {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* Glow Effect */
+.dopamine-glow {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.8), transparent);
+  animation: dopamine-glow 0.5s ease-out;
+}
+
+@keyframes dopamine-glow {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Bounce Effect */
+.dopamine-bounce {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.8), transparent);
+  animation: dopamine-bounce 0.4s ease-out;
+}
+
+@keyframes dopamine-bounce {
+  0% {
+    transform: scale(0) translateY(0);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.2) translateY(-20px);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.8) translateY(0);
+    opacity: 0.8;
+  }
+  75% {
+    transform: scale(1) translateY(-10px);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(0) translateY(0);
+    opacity: 0;
+  }
+}
+
+/* Sparkle Effect */
+.dopamine-sparkle {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  animation: dopamine-sparkle 0.6s ease-out;
+}
+
+.dopamine-sparkle::before,
+.dopamine-sparkle::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(251, 191, 36, 0.8);
+  border-radius: 50%;
+}
+
+.dopamine-sparkle::before {
+  top: 20%;
+  left: 20%;
+  animation: sparkle-move 0.6s ease-out;
+}
+
+.dopamine-sparkle::after {
+  top: 60%;
+  left: 60%;
+  animation: sparkle-move 0.6s ease-out 0.1s;
+}
+
+@keyframes dopamine-sparkle {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle-move {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(20px, -20px);
+    opacity: 0;
+  }
+}
+
+/* Confetti Effect */
+.dopamine-confetti {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  animation: dopamine-confetti 1s ease-out;
+}
+
+.dopamine-confetti::before,
+.dopamine-confetti::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.dopamine-confetti::before {
+  background: linear-gradient(45deg, #10b981, #fbbf24, #ef4444, #8b5cf6);
+  top: 10%;
+  left: 10%;
+  animation: confetti-fall 1s ease-out;
+}
+
+.dopamine-confetti::after {
+  background: linear-gradient(45deg, #f59e0b, #ec4899, #06b6d4, #84cc16);
+  top: 20%;
+  left: 80%;
+  animation: confetti-fall 1s ease-out 0.2s;
+}
+
+@keyframes dopamine-confetti {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(30px, 100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ===================================
+   Achievement Notifications
+   =================================== */
+
+.achievement-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1500;
+  max-width: 350px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+}
+
+.achievement-notification.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.achievement-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+}
+
+.achievement-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.achievement-info {
+  flex: 1;
+}
+
+.achievement-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.achievement-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.achievement-points {
+  font-size: 14px;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.achievement-close {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  font-size: 20px;
+  color: #64748b;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.achievement-close:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: #1a202c;
+}
+
+/* ===================================
+   Reward Notifications
+   =================================== */
+
+.reward-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(251, 191, 36, 0.3);
+  z-index: 1500;
+  max-width: 300px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+}
+
+.reward-notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reward-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.reward-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.reward-info {
+  flex: 1;
+}
+
+.reward-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.reward-description {
+  font-size: 13px;
+  color: #b45309;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.reward-close {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: rgba(146, 64, 14, 0.2);
+  border: none;
+  font-size: 16px;
+  color: #92400e;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.reward-close:hover {
+  background: rgba(146, 64, 14, 0.3);
+  color: #78350f;
+}
+
+/* ===================================
+   Level Up Notifications
+   =================================== */
+
+.level-up-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(16, 185, 129, 0.4);
+  z-index: 2000;
+  max-width: 400px;
+  text-align: center;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.level-up-notification.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.level-up-content {
+  position: relative;
+}
+
+.level-up-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: level-up-bounce 0.6s ease-out;
+}
+
+@keyframes level-up-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.level-up-info {
+  color: white;
+}
+
+.level-up-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.level-up-description {
+  font-size: 16px;
+  margin: 0;
+  opacity: 0.9;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.level-up-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.level-up-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===================================
+   Progress Visualization
+   =================================== */
+
+.dopamine-progress {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+}
+
+.dopamine-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dopamine-progress-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.dopamine-progress-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.dopamine-progress-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dopamine-progress-stat-value {
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.dopamine-progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.dopamine-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.dopamine-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes progress-shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.dopamine-achievements {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.dopamine-achievement {
+  text-align: center;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafb;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.dopamine-achievement.unlocked {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.dopamine-achievement:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dopamine-achievement-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.dopamine-achievement-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.dopamine-achievement.unlocked .dopamine-achievement-title {
+  color: #059669;
+}
+
+/* ===================================
+   Streak Visualization
+   =================================== */
+
+.dopamine-streaks {
+  display: flex;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.dopamine-streak {
+  flex: 1;
+  text-align: center;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafb;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.dopamine-streak.active {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.dopamine-streak-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 4px;
+}
+
+.dopamine-streak.active .dopamine-streak-number {
+  color: #d97706;
+}
+
+.dopamine-streak-label {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dopamine-streak.active .dopamine-streak-label {
+  color: #92400e;
+}
+
+/* ===================================
+   Reward Display
+   =================================== */
+
+.dopamine-rewards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.dopamine-reward {
+  text-align: center;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafb;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.dopamine-reward.unlocked {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.dopamine-reward.custom {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.dopamine-reward:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dopamine-reward-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.dopamine-reward-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.dopamine-reward.unlocked .dopamine-reward-title {
+  color: #d97706;
+}
+
+.dopamine-reward.custom .dopamine-reward-title {
+  color: #7c3aed;
+}
+
+.dopamine-reward-description {
+  font-size: 10px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.dopamine-reward.locked {
+  opacity: 0.6;
+  filter: grayscale(0.8);
+}
+
+.dopamine-reward.locked::before {
+  content: '🔒';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+}
+
+/* ===================================
+   Mobile Responsive
+   =================================== */
+
+@media (max-width: 768px) {
+  .achievement-notification,
+  .reward-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .achievement-content {
+    gap: 12px;
+  }
+  
+  .achievement-icon {
+    font-size: 24px;
+  }
+  
+  .achievement-title {
+    font-size: 16px;
+  }
+  
+  .achievement-description {
+    font-size: 13px;
+  }
+  
+  .reward-content {
+    gap: 10px;
+  }
+  
+  .reward-icon {
+    font-size: 20px;
+  }
+  
+  .reward-title {
+    font-size: 14px;
+  }
+  
+  .reward-description {
+    font-size: 12px;
+  }
+  
+  .level-up-notification {
+    padding: 24px;
+    margin: 16px;
+  }
+  
+  .level-up-icon {
+    font-size: 36px;
+  }
+  
+  .level-up-title {
+    font-size: 20px;
+  }
+  
+  .level-up-description {
+    font-size: 14px;
+  }
+  
+  .dopamine-achievements {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 8px;
+  }
+  
+  .dopamine-achievement {
+    padding: 8px;
+  }
+  
+  .dopamine-achievement-icon {
+    font-size: 20px;
+  }
+  
+  .dopamine-achievement-title {
+    font-size: 10px;
+  }
+  
+  .dopamine-streaks {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .dopamine-rewards {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  
+  .dopamine-reward {
+    padding: 12px;
+  }
+  
+  .dopamine-reward-icon {
+    font-size: 24px;
+  }
+  
+  .dopamine-reward-title {
+    font-size: 11px;
+  }
+  
+  .dopamine-reward-description {
+    font-size: 9px;
+  }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .dopamine-feedback,
+  .achievement-notification,
+  .reward-notification,
+  .level-up-notification,
+  .dopamine-achievement,
+  .dopamine-reward,
+  .dopamine-streak {
+    transition: none;
+    animation: none;
+  }
+  
+  .dopamine-progress-fill::after {
+    animation: none;
+  }
+  
+  .level-up-icon {
+    animation: none;
+  }
+}
+
+/* Focus Management */
+.achievement-notification:focus,
+.reward-notification:focus,
+.level-up-notification:focus,
+.dopamine-achievement:focus,
+.dopamine-reward:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Screen Reader Support */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===================================
+   Performance Optimizations
+   =================================== */
+
+.dopamine-feedback,
+.achievement-notification,
+.reward-notification,
+.level-up-notification {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.dopamine-achievement,
+.dopamine-reward {
+  will-change: transform;
+}
+
+/* Contain paint operations */
+.dopamine-progress,
+.dopamine-achievements,
+.dopamine-streaks,
+.dopamine-rewards {
+  contain: layout style paint;
+}
