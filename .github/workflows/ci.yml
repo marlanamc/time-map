@@ -32,6 +32,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Build
+        run: npm run build
+
       - name: Unit + E2E tests
         run: npm run test:all
         # Note: Visual regression snapshots are OS-specific

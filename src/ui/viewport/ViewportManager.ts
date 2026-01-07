@@ -52,6 +52,7 @@ class ViewportManager {
     const apply = () => {
       const isMobile = this.isMobileViewport();
       document.body.classList.toggle("is-mobile", isMobile);
+      document.body.classList.toggle("is-desktop", !isMobile);
       this.syncMobileDateNavPlacement(isMobile);
 
       // Show/hide mobile support panel button
