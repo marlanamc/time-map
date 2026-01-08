@@ -21,9 +21,9 @@ import type { DayViewController } from "../components/dayView/DayViewController"
 import { ThemeManager } from "../theme/ThemeManager";
 import { eventBus } from "../core/EventBus";
 import { viewportManager } from "./viewport/ViewportManager";
-import { goalDetailModal } from "./modals/GoalDetailModal";
-import { monthDetailModal } from "./modals/MonthDetailModal";
-import { eventModal } from "./modals/EventModal";
+import { goalDetailModal } from "../components/modals/GoalDetailModal";
+import { monthDetailModal } from "../components/modals/MonthDetailModal";
+import { eventModal } from "../components/modals/EventModal";
 import { isSupabaseConfigured } from "../supabaseClient";
 import { batchSaveService } from "../services/BatchSaveService";
 import { SupabaseService } from "../services/SupabaseService";

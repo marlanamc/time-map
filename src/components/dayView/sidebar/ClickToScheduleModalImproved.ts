@@ -4,7 +4,7 @@
  */
 
 import { UI } from '../../../ui/UIManager';
-import { BaseModal, ModalOptions, ModalA11yOptions } from '../../../ui/modals/BaseModal';
+import { BaseModal, ModalOptions, ModalA11yOptions } from '../../modals/BaseModal';
 
 export interface ScheduleData {
   title: string;
