@@ -37,6 +37,7 @@ import { SupportPanel } from "./panels/SupportPanel";
 import { DateNavigator } from "./navigation/DateNavigator";
 import { ViewNavigator } from "./navigation/ViewNavigator";
 import { RenderCoordinator } from "./rendering/RenderCoordinator";
+import { UIStateManager } from "./state/UIStateManager";
 import type {
   FeatureLoaders,
   NDSupportApi,
@@ -51,7 +52,6 @@ import * as keyboardShortcuts from "./keyboardShortcuts";
 import * as syncIssues from "./syncIssues";
 import type {
   UIElements,
-  FilterDocListeners,
   ViewType,
   Goal,
   GoalLevel,
@@ -64,21 +64,14 @@ export const UI = {
   els: {}, // Shortcut reference for elements
   elements: {} as UIElements, // Will be populated by cacheElements
   dayViewController: null as DayViewController | null, // New day view controller
-  _lastTimeRange: null as { start: number; end: number } | null, // Track last time range used
-  _dayViewControllerCtor: null as
-    | (new (...args: any[]) => DayViewController)
-    | null,
-  _dayViewControllerLoading: null as Promise<void> | null,
+  _uiState: new UIStateManager(),
   _featureLoaders: null as FeatureLoaders | null,
-  _filterDocListeners: null as FilterDocListeners | null, // For managing document event listeners
   _focusRevealSetup: false, // Whether focus reveal has been initialized
   _focusRevealHideTimer: null as ReturnType<typeof setTimeout> | null, // Timer for hiding focus reveal
-  _homeProgressScopeIndex: 3 as number, // 0=day,1=week,2=month,3=year
   _installPromptHandler: null as InstallPromptHandler | null,
   _touchHandler: null as TouchHandler | null,
   _supportPanel: null as SupportPanel | null,
   _renderCoordinator: null as RenderCoordinator | null,
-  _rendererEventListenersSetup: false,
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
 
@@ -340,8 +333,8 @@ export const UI = {
   },
 
   setupRendererEventListeners() {
-    if (this._rendererEventListenersSetup) return;
-    this._rendererEventListenersSetup = true;
+    if (this._uiState.rendererEventListenersSetup) return;
+    this._uiState.rendererEventListenersSetup = true;
 
     this.elements.calendarGrid?.addEventListener("goal-click", (e) => {
       const ev = e as CustomEvent<{ goalId?: string }>;
@@ -442,7 +435,7 @@ export const UI = {
     window.addEventListener("time-range-changed", () => {
       if (State.currentView === VIEWS.DAY) {
         // Reset the last time range so day view will be recreated with new range
-        this._lastTimeRange = null;
+        this._uiState.lastTimeRange = null;
         this.renderDayView();
       }
     });
@@ -822,7 +815,8 @@ export const UI = {
 
   cycleHomeProgressScope() {
     // Day → Week → Month → Year
-    this._homeProgressScopeIndex = (this._homeProgressScopeIndex + 1) % 4;
+    this._uiState.homeProgressScopeIndex =
+      (this._uiState.homeProgressScopeIndex + 1) % 4;
     this.updateYearProgress();
     this.updateTimeDisplay(); // Update stats when scope changes
   },
@@ -1187,7 +1181,7 @@ export const UI = {
     const container = this.elements.calendarGrid;
     if (!container) return;
 
-    if (!this._dayViewControllerCtor) {
+    if (!this._uiState.dayViewControllerCtor) {
       container.innerHTML = `
         <div class="mobile-card" style="max-width: 520px; margin: 0 auto;">
           <div class="card-label">Loading…</div>
@@ -1212,9 +1206,9 @@ export const UI = {
     // Check if we need to recreate the controller due to time range change
     const needsRecreate =
       this.dayViewController &&
-      this._lastTimeRange &&
-      (this._lastTimeRange.start !== timeWindowStart ||
-        this._lastTimeRange.end !== timeWindowEnd);
+      this._uiState.lastTimeRange &&
+      (this._uiState.lastTimeRange.start !== timeWindowStart ||
+        this._uiState.lastTimeRange.end !== timeWindowEnd);
 
     if (needsRecreate) {
       // Destroy existing controller
@@ -1226,7 +1220,7 @@ export const UI = {
 
     // Initialize DayViewController if not already done
     if (!this.dayViewController) {
-      this.dayViewController = new this._dayViewControllerCtor(
+      this.dayViewController = new this._uiState.dayViewControllerCtor(
         container,
         {
           onGoalUpdate: (goalId: string, updates: Partial<Goal>) => {
@@ -1276,7 +1270,10 @@ export const UI = {
       this.dayViewController.mount();
 
       // Store the time range we used
-      this._lastTimeRange = { start: timeWindowStart, end: timeWindowEnd };
+      this._uiState.lastTimeRange = {
+        start: timeWindowStart,
+        end: timeWindowEnd,
+      };
     }
 
     // Gather context goals (Vision/Milestone/Focus)
@@ -1287,24 +1284,25 @@ export const UI = {
   },
 
   async ensureDayViewControllerCtor(): Promise<void> {
-    if (this._dayViewControllerCtor) return;
-    if (this._dayViewControllerLoading) return this._dayViewControllerLoading;
+    if (this._uiState.dayViewControllerCtor) return;
+    if (this._uiState.dayViewControllerLoading)
+      return this._uiState.dayViewControllerLoading;
 
-    this._dayViewControllerLoading = import(
+    this._uiState.dayViewControllerLoading = import(
       "../components/dayView/DayViewController"
     )
       .then((mod) => {
-        this._dayViewControllerCtor = mod.DayViewController as any;
+        this._uiState.dayViewControllerCtor = mod.DayViewController as any;
       })
       .catch((err) => {
         console.error("Failed to load DayViewController:", err);
         this.showToast("⚠️", "Couldn’t load Day view");
       })
       .finally(() => {
-        this._dayViewControllerLoading = null;
+        this._uiState.dayViewControllerLoading = null;
       });
 
-    return this._dayViewControllerLoading;
+    return this._uiState.dayViewControllerLoading;
   },
 
   // Render a single goal card for day view
@@ -1872,16 +1870,16 @@ export const UI = {
       )?.focus?.();
     };
 
-    if (this._filterDocListeners) {
+    if (this._uiState.filterDocListeners) {
       document.removeEventListener(
         "click",
-        this._filterDocListeners.onDocClick
+        this._uiState.filterDocListeners.onDocClick
       );
       document.removeEventListener(
         "keydown",
-        this._filterDocListeners.onDocKeydown
+        this._uiState.filterDocListeners.onDocKeydown
       );
-      this._filterDocListeners = null;
+      this._uiState.filterDocListeners = null;
     }
 
     trigger.addEventListener("click", () => {
@@ -1910,7 +1908,7 @@ export const UI = {
 
     document.addEventListener("click", onDocClick);
     document.addEventListener("keydown", onDocKeydown);
-    this._filterDocListeners = { onDocClick, onDocKeydown };
+    this._uiState.filterDocListeners = { onDocClick, onDocKeydown };
 
     menu.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
@@ -2087,7 +2085,7 @@ export const UI = {
     ];
     const effectiveView: ViewType =
       State.currentView === VIEWS.HOME
-        ? homeScopeViews[this._homeProgressScopeIndex] ?? VIEWS.YEAR
+        ? homeScopeViews[this._uiState.homeProgressScopeIndex] ?? VIEWS.YEAR
         : State.currentView === VIEWS.GARDEN
         ? VIEWS.YEAR // Garden view shows year stats
         : State.currentView;
@@ -2249,7 +2247,7 @@ export const UI = {
     ];
     const effectiveView: ViewType =
       State.currentView === VIEWS.HOME
-        ? homeScopeViews[this._homeProgressScopeIndex] ?? VIEWS.YEAR
+        ? homeScopeViews[this._uiState.homeProgressScopeIndex] ?? VIEWS.YEAR
         : State.currentView;
 
     const isHome = State.currentView === VIEWS.HOME;
