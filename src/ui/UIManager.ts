@@ -70,8 +70,22 @@ export const UI = {
   _touchHandler: null as TouchHandler | null,
   _supportPanel: null as SupportPanel | null,
   _renderCoordinator: null as RenderCoordinator | null,
-  goalModalYear: null as number | null, // Year selected in goal modal
-  goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
+
+  get goalModalYear(): number | null {
+    return this._uiState.goalModalYear;
+  },
+
+  set goalModalYear(value: number | null) {
+    this._uiState.goalModalYear = value;
+  },
+
+  get goalModalLevel(): GoalLevel {
+    return this._uiState.goalModalLevel;
+  },
+
+  set goalModalLevel(value: GoalLevel) {
+    this._uiState.goalModalLevel = value;
+  },
 
   getFeatureLoaders(): FeatureLoaders {
     if (this._featureLoaders) return this._featureLoaders;
