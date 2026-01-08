@@ -13,6 +13,11 @@ import {
   setTitleHelp,
 } from "./domHelpers";
 import { parseYmdLocal } from "./dateUtils";
+import {
+  getSelectedLinkFromUi,
+  setFieldVisibility,
+  setLinkageHelpVisible,
+} from "./linkageHelpers";
 import { renderDisclosure, renderLinkageSelector } from "./renderers";
 import { formatTimeContextFact, getTimeContextReframes } from "./timeContext";
 import type {
@@ -44,34 +49,6 @@ let suggestionsOpen = false;
 let focusEasyMode = false;
 
 let modalLinkSelection: { parentId: string; parentLevel: GoalLevel } | null = null;
-
-function getSelectedLinkFromUi(): { parentId: string; parentLevel: GoalLevel } | null {
-  const select = document.getElementById("goalLinkSelect") as HTMLSelectElement | null;
-  if (select) {
-    const raw = select.value?.trim();
-    if (!raw) return null;
-    const [level, id] = raw.split(":");
-    if (!id) return null;
-    if (level === "vision" || level === "milestone" || level === "focus") {
-      return { parentLevel: level as GoalLevel, parentId: id };
-    }
-    return null;
-  }
-  return modalLinkSelection;
-}
-
-function setLinkageHelpVisible(visible: boolean) {
-  const help = document.getElementById("goalLinkageHelp");
-  if (help) help.toggleAttribute("hidden", !visible);
-}
-
-export function setFieldVisibility(
-  element: HTMLElement | null,
-  visible: boolean,
-) {
-  if (!element) return;
-  element.style.display = visible ? "grid" : "none";
-}
 
 export function closeGoalModal(ctx: GoalModalContext) {
   ctx.elements.goalModal?.classList.remove("active");
@@ -923,7 +900,7 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     endTime = endTimeEl?.value || null;
   }
 
-  const selectedLink = getSelectedLinkFromUi() ?? pendingParentLink;
+  const selectedLink = getSelectedLinkFromUi(modalLinkSelection) ?? pendingParentLink;
 
   if (ctx.goalModalLevel === "milestone") {
     if (!selectedLink || selectedLink.parentLevel !== "vision") {
