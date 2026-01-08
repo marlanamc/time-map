@@ -6,6 +6,12 @@ import { TimeBreakdown } from "../../../utils/TimeBreakdown";
 import { viewportManager } from "../../../ui/viewport/ViewportManager";
 import { haptics } from "../../../utils/haptics";
 import { upsertInternalTag } from "../../../utils/goalLinkage";
+import {
+  focusTitleAtBlank,
+  getOrCreateAfter,
+  setInlineHelp,
+  setTitleHelp,
+} from "./domHelpers";
 import { formatTimeContextFact, getTimeContextReframes } from "./timeContext";
 import type {
   UIElements,
@@ -46,63 +52,6 @@ function parseYmdLocal(ymd: string): Date | null {
   if (!Number.isFinite(year) || !Number.isFinite(monthIndex) || !Number.isFinite(day)) return null;
   const d = new Date(year, monthIndex, day);
   return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function getOrCreateAfter(el: HTMLElement, id: string, className: string): HTMLElement {
-  const existing = document.getElementById(id);
-  if (existing) return existing;
-  const container = document.createElement("div");
-  container.id = id;
-  container.className = className;
-  el.insertAdjacentElement("afterend", container);
-  return container;
-}
-
-function setTitleHelp(text: string | null) {
-  const titleInput = document.getElementById("goalTitle") as HTMLInputElement | null;
-  if (!titleInput) return;
-  const container = titleInput.parentElement;
-  if (!container) return;
-  const existing = document.getElementById("goalTitleHelp");
-  if (!text) {
-    existing?.remove();
-    return;
-  }
-  const help = existing ?? document.createElement("div");
-  help.id = "goalTitleHelp";
-  help.className = "goal-title-help";
-  help.textContent = text;
-  if (!existing) container.appendChild(help);
-}
-
-function setInlineHelp(el: HTMLElement | null, id: string, text: string | null) {
-  if (!el) return;
-  const existing = document.getElementById(id);
-  if (!text) {
-    existing?.remove();
-    return;
-  }
-  const help = existing ?? document.createElement("div");
-  help.id = id;
-  help.className = "field-help";
-  help.textContent = text;
-  if (!existing) el.appendChild(help);
-}
-
-function focusTitleAtBlank(template: string) {
-  const input = document.getElementById("goalTitle") as HTMLInputElement | null;
-  if (!input) return;
-  input.value = template;
-  const idx = template.indexOf("___");
-  if (idx >= 0) {
-    const start = idx;
-    const end = idx + 3;
-    input.focus();
-    input.setSelectionRange(start, end);
-  } else {
-    input.focus();
-    input.setSelectionRange(template.length, template.length);
-  }
 }
 
 function renderDisclosure(opts: {
