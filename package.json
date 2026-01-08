@@ -5,7 +5,6 @@
   "main": "index.html",
   "scripts": {
     "dev": "node scripts/generate-env.js && vite",
-    "dev:legacy": "node scripts/generate-env.js && node scripts/sync-css-links.js && npm run compile && node scripts/serve-static.js",
     "preview": "vite preview",
     "sync-css": "node scripts/sync-css-links.js",
     "serve": "node scripts/serve-static.js",
@@ -16,7 +15,6 @@
     "build:purge": "node scripts/generate-env.js && PURGE_CSS=1 vite build && npm run copy-static",
     "copy-static": "cp env.js dist/ && cp sw.js dist/ && cp manifest.webmanifest dist/ && cp -r icons dist/",
     "images:optimize": "python3 scripts/optimize-pngs.py",
-    "build:legacy": "node scripts/clean-build.js && npm run compile && npm run minify-js && npm run minify-css && npm run optimize-html && node scripts/generate-env.js && node scripts/prepare-public.js",
     "minify-js": "terser dist/app.js -o app.min.js --compress --mangle",
     "concat-css": "node scripts/concat-css.js",
     "minify-css": "npm run concat-css && cleancss -o styles.bundle.min.css styles.bundle.css",

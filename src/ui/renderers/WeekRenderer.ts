@@ -319,7 +319,5 @@ export const WeekRenderer = {
           }
         });
       });
-
-    // (legacy) week-vision-chip no longer used
   },
 };

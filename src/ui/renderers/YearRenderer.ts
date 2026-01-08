@@ -4,7 +4,6 @@
 import { State } from '../../core/State';
 import { Goals } from '../../core/Goals';
 import { CONFIG } from '../../config';
-// import { TimeBreakdown } from '../../utils/TimeBreakdown'; // Unused for now
 import { buildAccentAttributes, getVisionAccent } from '../../utils/goalLinkage';
 import type { UIElements } from '../../types';
 

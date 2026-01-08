@@ -994,14 +994,6 @@ export const UI = {
       this.closeSupportPanel();
     });
 
-    // Legacy year navigation (fallback)
-    document
-      .getElementById("prevYear")
-      ?.addEventListener("click", () => this.changeYear(-1));
-    document
-      .getElementById("nextYear")
-      ?.addEventListener("click", () => this.changeYear(1));
-
     // Add Goal Button
     document
       .getElementById("addGoalBtn")
