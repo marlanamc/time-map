@@ -12,6 +12,7 @@ import {
   setInlineHelp,
   setTitleHelp,
 } from "./domHelpers";
+import { parseYmdLocal } from "./dateUtils";
 import { formatTimeContextFact, getTimeContextReframes } from "./timeContext";
 import type {
   UIElements,
@@ -42,17 +43,6 @@ let suggestionsOpen = false;
 let focusEasyMode = false;
 
 let modalLinkSelection: { parentId: string; parentLevel: GoalLevel } | null = null;
-
-function parseYmdLocal(ymd: string): Date | null {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd.trim());
-  if (!match) return null;
-  const year = Number(match[1]);
-  const monthIndex = Number(match[2]) - 1;
-  const day = Number(match[3]);
-  if (!Number.isFinite(year) || !Number.isFinite(monthIndex) || !Number.isFinite(day)) return null;
-  const d = new Date(year, monthIndex, day);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
 
 function renderDisclosure(opts: {
   id: string;
