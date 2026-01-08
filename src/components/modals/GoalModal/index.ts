@@ -12,7 +12,7 @@ import {
   setInlineHelp,
   setTitleHelp,
 } from "./domHelpers";
-import { parseYmdLocal } from "./dateUtils";
+import { parseYmdLocal, toYmdLocal } from "./dateUtils";
 import {
   getSelectedLinkFromUi,
   setFieldVisibility,
@@ -345,13 +345,6 @@ export function openGoalModal(
   if (milestoneDurationGroup) milestoneDurationGroup.style.display = "none";
   if (focusDurationGroup) focusDurationGroup.style.display = "none";
   if (durationRow) durationRow.style.display = "flex";
-
-  const toYmdLocal = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
 
   if (yearInput) {
     yearInput.value = String(ctx.goalModalYear);
