@@ -33,6 +33,7 @@ import { SwipeNavigator } from "./gestures/SwipeNavigator";
 import { haptics } from "../utils/haptics";
 import { createFeatureLoaders } from "./featureLoaders";
 import { InstallPromptHandler } from "./interactions/InstallPromptHandler";
+import { KeyboardHandler } from "./interactions/KeyboardHandler";
 import { DateNavigator } from "./navigation/DateNavigator";
 import { ViewNavigator } from "./navigation/ViewNavigator";
 import type {
@@ -3106,99 +3107,30 @@ export const UI = {
   },
 
   handleKeyboard(e: KeyboardEvent) {
-    // Don't trigger shortcuts when typing in inputs
-    const target = e.target as HTMLElement | null;
-    if (
-      target?.tagName === "INPUT" ||
-      target?.tagName === "TEXTAREA" ||
-      !!target?.isContentEditable
-    ) {
-      // Only allow Escape in inputs
-      if (e.key !== "Escape") return;
-    }
-
-    // Escape to close modals
-    if (e.key === "Escape") {
-      document.querySelectorAll(".modal-overlay.active").forEach((modal) => {
-        modal.remove();
-      });
-      this.closeGoalModal();
-      this.closeCelebration();
-    }
-
-    // View switching: 1 = Year, 2 = Month, 3 = Week, 4 = Day
-    if (e.key === "1" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.YEAR);
-      this.syncViewButtons();
-      this.showToast("", "Year view");
-    }
-    if (e.key === "2" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.MONTH);
-      this.syncViewButtons();
-      this.showToast("", "Month view");
-    }
-    if (e.key === "3" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.WEEK);
-      this.syncViewButtons();
-      this.showToast("", "Week view");
-    }
-    if (e.key === "4" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.DAY);
-      this.syncViewButtons();
-      this.showToast("", "Day view");
-    }
-    if (e.key === "g" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.GARDEN);
-      this.syncViewButtons();
-      this.showToast("🌿", "Garden view");
-    }
-
-    // Arrow key navigation
-    if (e.key === "ArrowLeft" && !e.ctrlKey && !e.metaKey) {
-      State.navigate(-1);
-    }
-    if (e.key === "ArrowRight" && !e.ctrlKey && !e.metaKey) {
-      State.navigate(1);
-    }
-
-    // T for Today
-    if (e.key === "t" && !e.ctrlKey && !e.metaKey) {
-      State.goToDate(new Date());
-      this.render();
-      this.showToast("", "Jumped to today");
-    }
-
-    // Ctrl/Cmd + N for new item (based on view)
-    if ((e.ctrlKey || e.metaKey) && e.key === "n") {
-      e.preventDefault();
-      this.openGoalModal(
-        this.getCurrentLevel(),
-        State.viewingMonth,
-        State.viewingYear
-      );
-    }
-
-    // Ctrl/Cmd + F for focus mode
-    if ((e.ctrlKey || e.metaKey) && e.key === "f" && !e.shiftKey) {
-      e.preventDefault();
-      this.toggleFocusMode();
-    }
-
-    // B for brain dump
-    if (e.key === "b" && !e.ctrlKey && !e.metaKey) {
-      void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal());
-    }
-
-    // I for Quick-Add Intention
-    if (e.key === "i" && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      void this.ensureQuickAdd().then((qa) => qa?.show());
-    }
-
-    // ? for keyboard shortcuts help
-    if (e.key === "?" || (e.shiftKey && e.key === "/")) {
-      this.showKeyboardShortcuts();
-    }
+    KeyboardHandler.handleKeyDown(e, {
+      closeModals: () => {
+        document.querySelectorAll(".modal-overlay.active").forEach((modal) => {
+          modal.remove();
+        });
+        this.closeGoalModal();
+        this.closeCelebration();
+      },
+      syncViewButtons: () => this.syncViewButtons(),
+      showToast: (iconOrMessage, messageOrType) =>
+        this.showToast(iconOrMessage, messageOrType ?? ""),
+      render: () => this.render(),
+      openNewItem: () =>
+        this.openGoalModal(
+          this.getCurrentLevel(),
+          State.viewingMonth,
+          State.viewingYear
+        ),
+      toggleFocusMode: () => this.toggleFocusMode(),
+      showBrainDumpModal: () =>
+        this.ensureNDSupport().then((nd) => nd.showBrainDumpModal()),
+      showQuickAdd: () => this.ensureQuickAdd().then((qa) => qa?.show()),
+      showKeyboardShortcuts: () => this.showKeyboardShortcuts(),
+    });
   },
 
   // Show keyboard shortcuts help
