@@ -1,6 +1,6 @@
 import { State } from "../core/State";
-import { viewportManager } from "./viewport/ViewportManager";
-import type { UIStateManager } from "./state/UIStateManager";
+import { viewportManager } from "../ui/viewport/ViewportManager";
+import type { UIStateManager } from "../ui/state/UIStateManager";
 
 export type FocusModeContext = {
   _uiState: UIStateManager;

@@ -29,11 +29,12 @@ import { batchSaveService } from "../services/BatchSaveService";
 import { SupabaseService } from "../services/SupabaseService";
 import { syncQueue } from "../services/SyncQueue";
 import { buildAccentAttributes, getVisionAccent } from "../utils/goalLinkage";
-import { createFeatureLoaders } from "./featureLoaders";
+import { createFeatureLoaders } from "../features/featureLoaders";
 import { InstallPromptHandler } from "./interactions/InstallPromptHandler";
 import { KeyboardHandler } from "./interactions/KeyboardHandler";
 import { TouchHandler } from "./interactions/TouchHandler";
 import { SupportPanel } from "./panels/SupportPanel";
+import { SettingsPanel } from "./panels/SettingsPanel";
 import { DateNavigator } from "./navigation/DateNavigator";
 import { ViewNavigator } from "./navigation/ViewNavigator";
 import { RenderCoordinator } from "./rendering/RenderCoordinator";
@@ -44,12 +45,12 @@ import type {
   AppSettingsApi,
   ZenFocusApi,
   QuickAddApi,
-} from "./featureLoaders";
+} from "../features/featureLoaders";
 import * as goalModal from "../components/modals/GoalModal";
-import * as weeklyReview from "./weeklyReview";
-import * as focusMode from "./focusMode";
+import * as weeklyReview from "../features/weeklyReview";
+import * as focusMode from "../features/focusMode";
 import * as keyboardShortcuts from "./keyboardShortcuts";
-import * as syncIssues from "./syncIssues";
+import * as syncIssues from "../features/syncIssues";
 import type {
   UIElements,
   ViewType,
@@ -70,6 +71,7 @@ export const UI = {
   _touchHandler: null as TouchHandler | null,
   _supportPanel: null as SupportPanel | null,
   _renderCoordinator: null as RenderCoordinator | null,
+  _settingsPanel: null as SettingsPanel | null,
 
   get goalModalYear(): number | null {
     return this._uiState.goalModalYear;
@@ -118,7 +120,7 @@ export const UI = {
       onShowNDSettings: () =>
         this.ensureNDSupport().then((nd) => nd.showSettingsPanel()),
       onShowSettings: () =>
-        this.ensureAppSettings().then((s) => s.showPanel()),
+        this.showSettingsPanel(),
       onForceCloudSync: () => this.forceCloudSync(),
       onPromptInstall: () => this.promptInstall(),
       onShowSyncIssues: () => {
@@ -137,6 +139,18 @@ export const UI = {
     });
 
     return this._supportPanel;
+  },
+
+  getSettingsPanel(): SettingsPanel {
+    if (this._settingsPanel) return this._settingsPanel;
+    this._settingsPanel = new SettingsPanel({
+      ensureAppSettings: () => this.ensureAppSettings(),
+    });
+    return this._settingsPanel;
+  },
+
+  showSettingsPanel() {
+    this.getSettingsPanel().show();
   },
 
   getRenderCoordinator(): RenderCoordinator {
@@ -637,6 +651,7 @@ export const UI = {
     });
 
     this.getSupportPanel().bindEvents();
+    this.getSettingsPanel().bindEvents();
 
     // Handle collapsible section toggles
     document.addEventListener("click", (e) => {
@@ -737,14 +752,6 @@ export const UI = {
       State.save();
       this.applyLayoutVisibility();
     });
-
-    // Settings
-    document
-      .getElementById("appSettingsBtn")
-      ?.addEventListener(
-        "click",
-        () => void this.ensureAppSettings().then((s) => s.showPanel())
-      );
 
     // Affirmation click
     document

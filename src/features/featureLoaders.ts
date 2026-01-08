@@ -1,7 +1,7 @@
-export type NDSupportApi = typeof import("../features/NDSupport")["NDSupport"];
-export type AppSettingsApi = typeof import("../features/AppSettings")["AppSettings"];
-export type ZenFocusApi = typeof import("../features/ZenFocus")["zenFocus"];
-export type QuickAddApi = typeof import("../features/QuickAdd")["quickAdd"];
+export type NDSupportApi = typeof import("./NDSupport")["NDSupport"];
+export type AppSettingsApi = typeof import("./AppSettings")["AppSettings"];
+export type ZenFocusApi = typeof import("./ZenFocus")["zenFocus"];
+export type QuickAddApi = typeof import("./QuickAdd")["quickAdd"];
 
 type ToastFn = (iconOrMessage: string, messageOrType?: string) => void;
 
@@ -40,7 +40,7 @@ export function createFeatureLoaders(opts: {
     if (ndSupport) return ndSupport;
     if (ndSupportLoading) return ndSupportLoading;
 
-    ndSupportLoading = import("../features/NDSupport")
+    ndSupportLoading = import("./NDSupport")
       .then((mod) => {
         ndSupport = mod.NDSupport;
         return mod.NDSupport;
@@ -61,7 +61,7 @@ export function createFeatureLoaders(opts: {
     if (appSettings) return appSettings;
     if (appSettingsLoading) return appSettingsLoading;
 
-    appSettingsLoading = import("../features/AppSettings")
+    appSettingsLoading = import("./AppSettings")
       .then((mod) => {
         if (opts.appSettingsCallbacks) {
           mod.AppSettings.setCallbacks(opts.appSettingsCallbacks);
@@ -85,7 +85,7 @@ export function createFeatureLoaders(opts: {
     if (zenFocus) return zenFocus;
     if (zenFocusLoading) return zenFocusLoading;
 
-    zenFocusLoading = import("../features/ZenFocus")
+      zenFocusLoading = import("./ZenFocus")
       .then((mod) => {
         zenFocus = mod.zenFocus;
         return mod.zenFocus;
@@ -106,7 +106,7 @@ export function createFeatureLoaders(opts: {
     if (quickAdd) return quickAdd;
     if (quickAddLoading) return quickAddLoading;
 
-    quickAddLoading = import("../features/QuickAdd")
+      quickAddLoading = import("./QuickAdd")
       .then((mod) => {
         quickAdd = mod.quickAdd;
         return mod.quickAdd;
