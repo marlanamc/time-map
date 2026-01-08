@@ -32,6 +32,7 @@ import { buildAccentAttributes, getVisionAccent } from "../utils/goalLinkage";
 import { SwipeNavigator } from "./gestures/SwipeNavigator";
 import { haptics } from "../utils/haptics";
 import { createFeatureLoaders } from "./featureLoaders";
+import { InstallPromptHandler } from "./interactions/InstallPromptHandler";
 import type {
   FeatureLoaders,
   NDSupportApi,
@@ -56,11 +57,6 @@ import type {
 
 type QuickAddShowOptions = Parameters<QuickAddApi["show"]>[0];
 
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
-};
-
 export const UI = {
   els: {}, // Shortcut reference for elements
   elements: {} as UIElements, // Will be populated by cacheElements
@@ -80,7 +76,7 @@ export const UI = {
   _pendingViewTransition: false,
   _scrollResetRaf: null as number | null,
   _homeProgressScopeIndex: 3 as number, // 0=day,1=week,2=month,3=year
-  _deferredInstallPrompt: null as BeforeInstallPromptEvent | null,
+  _installPromptHandler: null as InstallPromptHandler | null,
   _rendererEventListenersSetup: false,
   _swipeNavigator: null as SwipeNavigator | null,
   _pullToRefreshCleanup: null as (() => void) | null,
@@ -661,115 +657,25 @@ export const UI = {
   },
 
   setupInstallPrompt() {
-    const installBtn = document.getElementById("installAppBtn");
-    if (!installBtn) return;
+    if (!this._installPromptHandler) {
+      this._installPromptHandler = new InstallPromptHandler({
+        elements: this.elements,
+        onSyncIssuesBadge: () => this.syncSyncIssuesBadge(),
+      });
+    }
 
-    const supportPanelToggleBtn = document.getElementById(
-      "supportPanelToggleBtn"
-    );
-    const supportPanelToggleBtnMobile = document.getElementById(
-      "supportPanelToggleBtnMobile"
-    );
-    const supportPanelBtn = document.getElementById("supportPanelBtn");
-    const toggleBtns = [
-      supportPanelToggleBtn,
-      supportPanelToggleBtnMobile,
-      supportPanelBtn,
-    ].filter(Boolean) as HTMLElement[];
-
-    const INSTALL_TOAST_LAST_SHOWN_KEY = "gardenFence.install.toastShownAt";
-    const INSTALL_PROMPT_DISMISSED_AT_KEY = "gardenFence.install.dismissedAt";
-    const INSTALL_TOAST_COOLDOWN_MS = 1000 * 60 * 60 * 24; // 24h
-
-    const readNumber = (key: string) => {
-      try {
-        const raw = localStorage.getItem(key);
-        const parsed = raw ? Number.parseInt(raw, 10) : NaN;
-        return Number.isFinite(parsed) ? parsed : 0;
-      } catch {
-        return 0;
-      }
-    };
-
-    const writeNow = (key: string) => {
-      try {
-        localStorage.setItem(key, String(Date.now()));
-      } catch {
-        // ignore
-      }
-    };
-
-    const setInstallAvailable = (available: boolean) => {
-      installBtn.classList.toggle("install-available", available);
-      toggleBtns.forEach((btn) =>
-        btn.classList.toggle("install-available", available)
-      );
-
-      if (available) installBtn.removeAttribute("hidden");
-      else installBtn.setAttribute("hidden", "");
-    };
-
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      this._deferredInstallPrompt = e as BeforeInstallPromptEvent;
-      setInstallAvailable(true);
-
-      const lastToastAt = readNumber(INSTALL_TOAST_LAST_SHOWN_KEY);
-      const dismissedAt = readNumber(INSTALL_PROMPT_DISMISSED_AT_KEY);
-      const now = Date.now();
-      const canToast =
-        now - lastToastAt > INSTALL_TOAST_COOLDOWN_MS &&
-        now - dismissedAt > INSTALL_TOAST_COOLDOWN_MS;
-      if (canToast) {
-        Toast.show(
-          this.elements,
-          "📲",
-          "Install is available in Support Tools."
-        );
-        writeNow(INSTALL_TOAST_LAST_SHOWN_KEY);
-      }
-    });
-
-    window.addEventListener("appinstalled", () => {
-      this._deferredInstallPrompt = null;
-      setInstallAvailable(false);
-      Toast.show(this.elements, "✅", "App installed.");
-    });
-
-    this.syncSyncIssuesBadge();
+    this._installPromptHandler.setup();
   },
 
   async promptInstall() {
-    const installBtn = document.getElementById("installAppBtn");
-    const deferred = this._deferredInstallPrompt;
-    if (!deferred) {
-      Toast.show(this.elements, "ℹ️", "Install isn’t available right now.");
-      return;
+    if (!this._installPromptHandler) {
+      this._installPromptHandler = new InstallPromptHandler({
+        elements: this.elements,
+        onSyncIssuesBadge: () => this.syncSyncIssuesBadge(),
+      });
     }
 
-    try {
-      await deferred.prompt();
-      const choice = await deferred.userChoice.catch(() => null);
-      if (choice?.outcome === "accepted") {
-        Toast.show(this.elements, "✅", "Installing…");
-      } else if (choice?.outcome === "dismissed") {
-        try {
-          localStorage.setItem(
-            "gardenFence.install.dismissedAt",
-            String(Date.now())
-          );
-        } catch {
-          // ignore
-        }
-        Toast.show(this.elements, "👍", "Not now.");
-      }
-    } catch (error) {
-      console.error("Install prompt failed:", error);
-      Toast.show(this.elements, "⚠️", "Install failed.");
-    } finally {
-      this._deferredInstallPrompt = null;
-      installBtn?.setAttribute("hidden", "");
-    }
+    await this._installPromptHandler.promptInstall();
   },
 
   /**
