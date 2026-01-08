@@ -8,8 +8,8 @@ import { Streaks } from "../core/Streaks";
 import { CONFIG, VIEWS } from "../config";
 import { TimeBreakdown } from "../utils/TimeBreakdown";
 import { cacheElements } from "./elements/UIElements";
-import { Toast } from "./feedback/Toast";
-import { Celebration } from "./feedback/Celebration";
+import { Toast } from "../components/feedback/Toast";
+import { Celebration } from "../components/feedback/Celebration";
 import { TimeVisualizations } from "../garden/timeVisualizations";
 import {
   MonthRenderer,

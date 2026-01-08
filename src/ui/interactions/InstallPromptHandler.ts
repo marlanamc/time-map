@@ -1,4 +1,4 @@
-import { Toast } from "../feedback/Toast";
+import { Toast } from "../../components/feedback/Toast";
 import type { UIElements } from "../../types";
 
 type BeforeInstallPromptEvent = Event & {
