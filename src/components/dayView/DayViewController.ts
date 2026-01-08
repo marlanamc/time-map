@@ -8,7 +8,7 @@ import { DragDropManager } from "./DragDropManager";
 import { haptics } from "../../utils/haptics";
 import { Goals } from "../../core/Goals";
 import type { Category } from "../../types";
-import { openCustomizationPanel, setupCustomizationPanel } from "./sidebar/CustomizationPanel";
+import { openCustomizationPanel, setupCustomizationPanel } from "./CustomizationPanel";
 
 /**
  * Application configuration interface

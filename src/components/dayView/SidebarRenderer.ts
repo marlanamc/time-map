@@ -3,7 +3,7 @@
  * @remarks Coordinates all sidebar sections and rendering
  */
 
-import type { Goal } from '../../../types';
+import type { Goal } from "../../types";
 import type { ContextGoals } from './types';
 import { renderSidebarSection, getSectionState } from './SidebarSection';
 import { renderTaskList } from './TaskList';

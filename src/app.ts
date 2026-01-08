@@ -71,7 +71,7 @@ declare global {
 import { UI } from './ui/UIBridge';
 
 // Import Liquid Effects for sidebar animations
-import { initLiquidEffects } from './components/dayView/sidebar/LiquidEffects';
+import { initLiquidEffects } from './components/dayView/LiquidEffects';
 
 
 // ============================================

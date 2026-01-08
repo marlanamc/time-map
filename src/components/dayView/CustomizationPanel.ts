@@ -3,10 +3,10 @@
  * @remarks Provides CRUD interface for managing user's custom intentions
  */
 
-import type { CustomIntention, Category } from '../../../types';
-import { IntentionsManager } from '../../../core/IntentionsManager';
-import { CONFIG } from '../../../config/constants';
-import { UI } from '../../../ui/UIManager';
+import type { CustomIntention, Category } from "../../types";
+import { IntentionsManager } from "../../core/IntentionsManager";
+import { CONFIG } from "../../config/constants";
+import { UI } from "../../ui/UIManager";
 
 /**
  * Escape HTML to prevent XSS

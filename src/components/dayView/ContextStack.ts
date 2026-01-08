@@ -3,8 +3,8 @@
  * @remarks Renders context goals with rotation and depth effects
  */
 
-import type { Goal } from '../../../types';
-import { CONFIG } from '../../../config/constants';
+import type { Goal } from "../../types";
+import { CONFIG } from "../../config/constants";
 
 /**
  * Escape HTML to prevent XSS

@@ -3,8 +3,8 @@
  * Mobile-friendly time picker for scheduling with proper accessibility
  */
 
-import { UI } from '../../../ui/UIManager';
-import { BaseModal, ModalOptions, ModalA11yOptions } from '../../modals/BaseModal';
+import { UI } from "../../ui/UIManager";
+import { BaseModal, ModalOptions, ModalA11yOptions } from "../modals/BaseModal";
 
 export interface ScheduleData {
   title: string;

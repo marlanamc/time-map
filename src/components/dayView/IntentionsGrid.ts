@@ -3,9 +3,9 @@
  * @remarks Renders intention templates with edit mode
  */
 
-import type { CustomIntention } from '../../../types';
-import { IntentionsManager } from '../../../core/IntentionsManager';
-import { CONFIG } from '../../../config/constants';
+import type { CustomIntention } from "../../types";
+import { IntentionsManager } from "../../core/IntentionsManager";
+import { CONFIG } from "../../config/constants";
 
 /**
  * Get emoji for a category, with fallback

@@ -3,8 +3,8 @@ import { CardComponent } from "./CardComponent";
 import { TimeSlotCalculator } from "./TimeSlotCalculator";
 import { TimelineGrid } from "./TimelineGrid";
 import { CONFIG } from "../../config/constants";
-import { renderIntentionsGrid } from "./sidebar/IntentionsGrid";
-import { renderCustomizationPanel } from "./sidebar/CustomizationPanel";
+import { renderIntentionsGrid } from "./IntentionsGrid";
+import { renderCustomizationPanel } from "./CustomizationPanel";
 import { State } from "../../core/State";
 import { expandEventsForRange } from "../../utils/recurrence";
 

@@ -3,8 +3,8 @@
  * @remarks Renders tasks in compact mode with expand-on-click functionality
  */
 
-import type { Goal } from '../../../types';
-import { CONFIG } from '../../../config/constants';
+import type { Goal } from "../../types";
+import { CONFIG } from "../../config/constants";
 
 /**
  * Get emoji for a category

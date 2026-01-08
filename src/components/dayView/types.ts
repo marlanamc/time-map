@@ -1,4 +1,4 @@
-import type { Goal } from "../../types";
+import type { Goal, CustomIntention } from "../../types";
 
 export interface DayViewOptions {
   timeWindowStart?: number; // Minutes from midnight (default: 480 = 8 AM)
@@ -100,4 +100,27 @@ export interface TimeSlot {
 export interface LaneEndTime {
   lane: number;
   endMin: number;
+}
+
+export interface SidebarSectionProps {
+  id: string;
+  title: string;
+  isCollapsed: boolean;
+  onToggle: () => void;
+  iconEmoji?: string;
+  badge?: number;
+}
+
+export interface ContextGoals {
+  vision: Goal[];
+  milestone: Goal[];
+  focus: Goal[];
+}
+
+export interface SidebarCallbacks {
+  onGoalClick?: (goalId: string) => void;
+  onIntentionDrag?: (intention: CustomIntention) => void;
+  onTaskClick?: (taskId: string) => void;
+  onTaskExpand?: (taskId: string, expanded: boolean) => void;
+  onCustomizeIntentions?: () => void;
 }
