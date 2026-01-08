@@ -1,12 +1,18 @@
-import { State } from "../core/State";
-import { Goals } from "../core/Goals";
-import { CONFIG } from "../config";
-import { ND_CONFIG } from "../config/ndConfig";
-import { TimeBreakdown } from "../utils/TimeBreakdown";
-import { viewportManager } from "./viewport/ViewportManager";
-import { haptics } from "../utils/haptics";
-import { upsertInternalTag } from "../utils/goalLinkage";
-import type { UIElements, GoalLevel, Category, Priority, AccentTheme } from "../types";
+import { State } from "../../../core/State";
+import { Goals } from "../../../core/Goals";
+import { CONFIG } from "../../../config";
+import { ND_CONFIG } from "../../../config/ndConfig";
+import { TimeBreakdown } from "../../../utils/TimeBreakdown";
+import { viewportManager } from "../../../ui/viewport/ViewportManager";
+import { haptics } from "../../../utils/haptics";
+import { upsertInternalTag } from "../../../utils/goalLinkage";
+import type {
+  UIElements,
+  GoalLevel,
+  Category,
+  Priority,
+  AccentTheme,
+} from "../../../types";
 
 export type GoalModalContext = {
   elements: UIElements;

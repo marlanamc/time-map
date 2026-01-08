@@ -45,7 +45,7 @@ import type {
   ZenFocusApi,
   QuickAddApi,
 } from "./featureLoaders";
-import * as goalModal from "./goalModal";
+import * as goalModal from "../components/modals/GoalModal";
 import * as weeklyReview from "./weeklyReview";
 import * as focusMode from "./focusMode";
 import * as keyboardShortcuts from "./keyboardShortcuts";
