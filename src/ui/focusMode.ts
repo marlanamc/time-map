@@ -1,9 +1,9 @@
 import { State } from "../core/State";
 import { viewportManager } from "./viewport/ViewportManager";
+import type { UIStateManager } from "./state/UIStateManager";
 
 export type FocusModeContext = {
-  _focusRevealSetup: boolean;
-  _focusRevealHideTimer: ReturnType<typeof setTimeout> | null;
+  _uiState: UIStateManager;
   showToast: (iconOrMessage: string, messageOrType?: string) => void;
   applyLayoutVisibility: () => void;
   applySidebarVisibility: () => void;
@@ -130,8 +130,8 @@ export function updateFocusLayoutVars() {
 }
 
 export function setupFocusHoverReveal(ctx: FocusModeContext) {
-  if (ctx._focusRevealSetup) return;
-  ctx._focusRevealSetup = true;
+  if (ctx._uiState.focusRevealSetup) return;
+  ctx._uiState.focusRevealSetup = true;
 
   const revealTop = document.getElementById("focusRevealTop");
   const revealLeft = document.getElementById("focusRevealLeft");
@@ -149,12 +149,14 @@ export function setupFocusHoverReveal(ctx: FocusModeContext) {
   const reveal = () => {
     if (!State.focusMode) return;
     document.body.classList.add("focus-ui-revealed");
-    if (ctx._focusRevealHideTimer) clearTimeout(ctx._focusRevealHideTimer);
+    if (ctx._uiState.focusRevealHideTimer)
+      clearTimeout(ctx._uiState.focusRevealHideTimer);
   };
 
   const scheduleHide = () => {
-    if (ctx._focusRevealHideTimer) clearTimeout(ctx._focusRevealHideTimer);
-    ctx._focusRevealHideTimer = setTimeout(() => {
+    if (ctx._uiState.focusRevealHideTimer)
+      clearTimeout(ctx._uiState.focusRevealHideTimer);
+    ctx._uiState.focusRevealHideTimer = setTimeout(() => {
       if (!State.focusMode) return;
       document.body.classList.remove("focus-ui-revealed");
     }, 500);

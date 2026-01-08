@@ -10,4 +10,6 @@ export class UIStateManager {
   rendererEventListenersSetup = false;
   filterDocListeners: FilterDocListeners | null = null;
   homeProgressScopeIndex = 3; // 0=day,1=week,2=month,3=year
+  focusRevealSetup = false;
+  focusRevealHideTimer: ReturnType<typeof setTimeout> | null = null;
 }

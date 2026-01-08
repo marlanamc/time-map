@@ -66,8 +66,6 @@ export const UI = {
   dayViewController: null as DayViewController | null, // New day view controller
   _uiState: new UIStateManager(),
   _featureLoaders: null as FeatureLoaders | null,
-  _focusRevealSetup: false, // Whether focus reveal has been initialized
-  _focusRevealHideTimer: null as ReturnType<typeof setTimeout> | null, // Timer for hiding focus reveal
   _installPromptHandler: null as InstallPromptHandler | null,
   _touchHandler: null as TouchHandler | null,
   _supportPanel: null as SupportPanel | null,
