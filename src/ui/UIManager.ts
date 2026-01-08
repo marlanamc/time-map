@@ -5,7 +5,7 @@ import { State } from "../core/State";
 import { Goals } from "../core/Goals";
 import { Planning } from "../core/Planning";
 import { Streaks } from "../core/Streaks";
-import { CONFIG, ND_CONFIG, VIEWS } from "../config";
+import { CONFIG, VIEWS } from "../config";
 import { TimeBreakdown } from "../utils/TimeBreakdown";
 import { cacheElements } from "./elements/UIElements";
 import { Toast } from "./feedback/Toast";
@@ -33,6 +33,7 @@ import { createFeatureLoaders } from "./featureLoaders";
 import { InstallPromptHandler } from "./interactions/InstallPromptHandler";
 import { KeyboardHandler } from "./interactions/KeyboardHandler";
 import { TouchHandler } from "./interactions/TouchHandler";
+import { SupportPanel } from "./panels/SupportPanel";
 import { DateNavigator } from "./navigation/DateNavigator";
 import { ViewNavigator } from "./navigation/ViewNavigator";
 import type {
@@ -53,7 +54,6 @@ import type {
   ViewType,
   Goal,
   GoalLevel,
-  AccentTheme,
   Subtask,
 } from "../types";
 
@@ -72,7 +72,6 @@ export const UI = {
   _filterDocListeners: null as FilterDocListeners | null, // For managing document event listeners
   _focusRevealSetup: false, // Whether focus reveal has been initialized
   _focusRevealHideTimer: null as ReturnType<typeof setTimeout> | null, // Timer for hiding focus reveal
-  _supportPanelHideTimer: null as ReturnType<typeof setTimeout> | null,
   _lastNavKey: null as string | null,
   _renderRaf: null as number | null,
   _pendingViewTransition: false,
@@ -80,6 +79,7 @@ export const UI = {
   _homeProgressScopeIndex: 3 as number, // 0=day,1=week,2=month,3=year
   _installPromptHandler: null as InstallPromptHandler | null,
   _touchHandler: null as TouchHandler | null,
+  _supportPanel: null as SupportPanel | null,
   _rendererEventListenersSetup: false,
   goalModalYear: null as number | null, // Year selected in goal modal
   goalModalLevel: "milestone" as GoalLevel, // Level of goal being created in goal modal
@@ -101,6 +101,39 @@ export const UI = {
       },
     });
     return this._featureLoaders;
+  },
+
+  getSupportPanel(): SupportPanel {
+    if (this._supportPanel) return this._supportPanel;
+    this._supportPanel = new SupportPanel({
+      onShowBrainDump: () =>
+        this.ensureNDSupport().then((nd) => nd.showBrainDumpModal()),
+      onShowBodyDouble: () =>
+        this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal()),
+      onShowQuickWins: () =>
+        this.ensureNDSupport().then((nd) => nd.showDopamineMenu()),
+      onShowNDSettings: () =>
+        this.ensureNDSupport().then((nd) => nd.showSettingsPanel()),
+      onShowSettings: () =>
+        this.ensureAppSettings().then((s) => s.showPanel()),
+      onForceCloudSync: () => this.forceCloudSync(),
+      onPromptInstall: () => this.promptInstall(),
+      onShowSyncIssues: () => {
+        syncIssues.showSyncIssuesModal({
+          showToast: (iconOrMessage, messageOrType) =>
+            this.showToast(iconOrMessage, messageOrType ?? ""),
+          updateSyncStatus: (status) => this.updateSyncStatus(status),
+        });
+        this.syncSyncIssuesBadge();
+      },
+      onHandleLogout: () => this.handleLogout(),
+      onToggleFocusMode: () => this.toggleFocusMode(),
+      onApplyAccessibilityPreferences: () => this.applyAccessibilityPreferences(),
+      onApplyTimeOfDayOverride: (timeOfDay) =>
+        this.applyTimeOfDayOverride(timeOfDay),
+    });
+
+    return this._supportPanel;
   },
 
   getLevelLabel(
@@ -576,85 +609,7 @@ export const UI = {
       this.cycleHomeProgressScope();
     });
 
-    // Support tools side panel (drawer)
-    document
-      .getElementById("supportPanelBtn")
-      ?.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.openSupportPanel();
-      });
-
-    // Support panel toggle buttons (desktop and mobile)
-    const supportPanelToggleBtn = document.getElementById(
-      "supportPanelToggleBtn"
-    );
-    const supportPanelToggleBtnMobile = document.getElementById(
-      "supportPanelToggleBtnMobile"
-    );
-
-    supportPanelToggleBtn?.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.openSupportPanel();
-    });
-
-    supportPanelToggleBtnMobile?.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.openSupportPanel();
-    });
-    document
-      .getElementById("supportPanelClose")
-      ?.addEventListener("click", () => this.closeSupportPanel());
-    document
-      .getElementById("supportPanelOverlay")
-      ?.addEventListener("click", (e) => {
-        if (e.target === e.currentTarget) this.closeSupportPanel();
-      });
-    document.getElementById("supportPanel")?.addEventListener("click", (e) => {
-      const target = e.target as Element | null;
-      const actionEl = target?.closest("[data-action]") as HTMLElement | null;
-      const action = actionEl?.dataset.action;
-      if (!action) return;
-
-      this.closeSupportPanel();
-
-      switch (action) {
-        case "brainDump":
-          void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal());
-          break;
-        case "bodyDouble":
-          void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal());
-          break;
-        case "quickWins":
-          void this.ensureNDSupport().then((nd) => nd.showDopamineMenu());
-          break;
-        case "ndSettings":
-          void this.ensureNDSupport().then((nd) => nd.showSettingsPanel());
-          break;
-        case "settings":
-          void this.ensureAppSettings().then((s) => s.showPanel());
-          break;
-        case "syncNow":
-          this.forceCloudSync();
-          break;
-        case "install":
-          void this.promptInstall();
-          break;
-        case "syncIssues":
-          syncIssues.showSyncIssuesModal({
-            showToast: (iconOrMessage, messageOrType) =>
-              this.showToast(iconOrMessage, messageOrType ?? ""),
-            updateSyncStatus: (status) => this.updateSyncStatus(status),
-          });
-          this.syncSyncIssuesBadge();
-          break;
-        case "logout":
-          this.handleLogout();
-          break;
-      }
-    });
+    this.getSupportPanel().bindEvents();
 
     // Handle collapsible section toggles
     document.addEventListener("click", (e) => {
@@ -670,13 +625,6 @@ export const UI = {
         toggle.setAttribute("aria-expanded", String(!isExpanded));
         content.classList.toggle("expanded");
       }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-      const overlay = document.getElementById("supportPanelOverlay");
-      if (!overlay || overlay.hasAttribute("hidden")) return;
-      this.closeSupportPanel();
     });
 
     // Add Goal Button
@@ -741,67 +689,6 @@ export const UI = {
     document
       .getElementById("focusToggle")
       ?.addEventListener("click", () => this.toggleFocusMode());
-    document
-      .getElementById("supportPanelFocusToggle")
-      ?.addEventListener("click", () => this.toggleFocusMode());
-
-    // Support panel appearance controls
-    document
-      .getElementById("supportPanelThemeToggle")
-      ?.addEventListener("click", () => {
-        if (!State.data) return;
-        const current = ThemeManager.resolveTheme(State.data.preferences.theme);
-        const next = current === "night" ? "day" : "night";
-        State.data.preferences.theme = next;
-        ThemeManager.applyFromPreference(next);
-        State.save();
-        this.syncSupportPanelAppearanceControls();
-      });
-
-    const supportPanelThemePicker = document.getElementById(
-      "supportPanelThemePicker"
-    );
-    supportPanelThemePicker?.addEventListener("click", (e) => {
-      const target = e.target as Element | null;
-      const swatch = target?.closest(".theme-swatch") as HTMLElement | null;
-      if (!swatch || !supportPanelThemePicker.contains(swatch)) return;
-      const selectedTheme = swatch.dataset.theme as AccentTheme | undefined;
-      if (!selectedTheme || !State.data) return;
-
-      State.data.preferences.nd = {
-        ...State.data.preferences.nd,
-        accentTheme: selectedTheme,
-      };
-      State.save();
-      void this.applyAccessibilityPreferences();
-      this.syncSupportPanelAppearanceControls();
-    });
-
-    // Time Theme Picker (Developer Tool)
-    const timeThemePicker = document.getElementById("timeThemePicker");
-    timeThemePicker?.addEventListener("click", (e) => {
-      const target = e.target as Element | null;
-      const btn = target?.closest(".time-theme-btn") as HTMLElement | null;
-      if (!btn || !timeThemePicker.contains(btn)) return;
-      const selectedTime = btn.dataset.time;
-      if (!selectedTime) return;
-
-      // Store the override in localStorage for dev purposes
-      if (selectedTime === "auto") {
-        localStorage.removeItem("gardenFence.devTimeOverride");
-      } else {
-        localStorage.setItem("gardenFence.devTimeOverride", selectedTime);
-      }
-
-      // Update all buttons
-      timeThemePicker.querySelectorAll(".time-theme-btn").forEach((b) => {
-        b.setAttribute("aria-checked", "false");
-      });
-      btn.setAttribute("aria-checked", "true");
-
-      // Apply the time of day override
-      this.applyTimeOfDayOverride(selectedTime);
-    });
 
     // Layout visibility shortcuts
     document.getElementById("hideSidebarBtn")?.addEventListener("click", () => {
@@ -919,31 +806,11 @@ export const UI = {
   },
 
   openSupportPanel() {
-    const overlay = document.getElementById("supportPanelOverlay");
-    if (!overlay) return;
-    if (this._supportPanelHideTimer) {
-      clearTimeout(this._supportPanelHideTimer);
-      this._supportPanelHideTimer = null;
-    }
-    this.syncSupportPanelAppearanceControls();
-    overlay.removeAttribute("hidden");
-    overlay.classList.add("active");
-    document.body.classList.add("support-panel-open");
-    (
-      document.getElementById("supportPanelClose") as HTMLElement | null
-    )?.focus();
+    this.getSupportPanel().open();
   },
 
   closeSupportPanel() {
-    const overlay = document.getElementById("supportPanelOverlay");
-    if (!overlay) return;
-    overlay.classList.remove("active");
-    document.body.classList.remove("support-panel-open");
-    if (this._supportPanelHideTimer) clearTimeout(this._supportPanelHideTimer);
-    this._supportPanelHideTimer = setTimeout(() => {
-      overlay.setAttribute("hidden", "");
-      this._supportPanelHideTimer = null;
-    }, 220);
+    this.getSupportPanel().close();
   },
 
   async handleLogout() {
@@ -2731,73 +2598,7 @@ export const UI = {
   },
 
   syncSupportPanelAppearanceControls() {
-    if (!State.data) return;
-
-    const themeToggle = document.getElementById("supportPanelThemeToggle");
-    if (themeToggle) {
-      const isNight =
-        ThemeManager.resolveTheme(State.data.preferences.theme) === "night";
-      themeToggle.classList.toggle("active", isNight);
-      themeToggle.setAttribute("aria-checked", String(isNight));
-    }
-
-    const themePicker = document.getElementById("supportPanelThemePicker");
-    if (!themePicker) return;
-
-    const accentThemes = ND_CONFIG.ACCENT_THEMES as Record<
-      AccentTheme,
-      { label: string; emoji: string; color: string }
-    >;
-
-    if (themePicker.childElementCount === 0) {
-      themePicker.innerHTML = Object.entries(accentThemes)
-        .map(
-          ([key, theme]) => `
-              <button
-                class="theme-swatch"
-                data-theme="${key}"
-                title="${theme.label}"
-                aria-label="${theme.label}"
-                role="radio"
-                aria-checked="false"
-                ${
-                  key === "rainbow"
-                    ? `style="--swatch-color: #0EA5E9"`
-                    : `style="--swatch-color: ${theme.color}"`
-                }
-                type="button"
-              >
-                <span class="swatch-color" ${
-                  key === "rainbow"
-                    ? `style="background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)"`
-                    : ""
-                }></span>
-                <span class="swatch-emoji">${theme.emoji}</span>
-              </button>
-            `
-        )
-        .join("");
-    }
-
-    const activeTheme = State.data.preferences.nd.accentTheme || "sage";
-    themePicker.querySelectorAll<HTMLElement>(".theme-swatch").forEach((s) => {
-      const isActive = s.dataset.theme === activeTheme;
-      s.classList.toggle("active", isActive);
-      s.setAttribute("aria-checked", String(isActive));
-    });
-
-    // Sync Time Theme Picker (Developer Tool)
-    const timeThemePicker = document.getElementById("timeThemePicker");
-    if (timeThemePicker) {
-      const devTimeOverride =
-        localStorage.getItem("gardenFence.devTimeOverride") || "auto";
-      timeThemePicker
-        .querySelectorAll<HTMLElement>(".time-theme-btn")
-        .forEach((btn) => {
-          const isActive = btn.dataset.time === devTimeOverride;
-          btn.setAttribute("aria-checked", String(isActive));
-        });
-    }
+    this.getSupportPanel().syncAppearanceControls();
   },
 
   applyThemePreference() {

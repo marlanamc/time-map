@@ -1,0 +1,272 @@
+import { State } from "../../core/State";
+import { ND_CONFIG } from "../../config";
+import { ThemeManager } from "../../theme/ThemeManager";
+import type { AccentTheme } from "../../types";
+
+type SupportPanelCallbacks = {
+  onShowBrainDump: () => void | Promise<void>;
+  onShowBodyDouble: () => void | Promise<void>;
+  onShowQuickWins: () => void | Promise<void>;
+  onShowNDSettings: () => void | Promise<void>;
+  onShowSettings: () => void | Promise<void>;
+  onForceCloudSync: () => void;
+  onPromptInstall: () => void | Promise<void>;
+  onShowSyncIssues: () => void;
+  onHandleLogout: () => void | Promise<void>;
+  onToggleFocusMode: () => void;
+  onApplyAccessibilityPreferences: () => Promise<void>;
+  onApplyTimeOfDayOverride: (timeOfDay: string) => void;
+};
+
+export class SupportPanel {
+  private hideTimer: ReturnType<typeof setTimeout> | null = null;
+  private callbacks: SupportPanelCallbacks;
+
+  constructor(callbacks: SupportPanelCallbacks) {
+    this.callbacks = callbacks;
+  }
+
+  bindEvents() {
+    // Support tools side panel (drawer)
+    document
+      .getElementById("supportPanelBtn")
+      ?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.open();
+      });
+
+    const supportPanelToggleBtn = document.getElementById(
+      "supportPanelToggleBtn"
+    );
+    const supportPanelToggleBtnMobile = document.getElementById(
+      "supportPanelToggleBtnMobile"
+    );
+
+    supportPanelToggleBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.open();
+    });
+
+    supportPanelToggleBtnMobile?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.open();
+    });
+
+    document
+      .getElementById("supportPanelClose")
+      ?.addEventListener("click", () => this.close());
+    document
+      .getElementById("supportPanelOverlay")
+      ?.addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) this.close();
+      });
+    document.getElementById("supportPanel")?.addEventListener("click", (e) => {
+      const target = e.target as Element | null;
+      const actionEl = target?.closest("[data-action]") as HTMLElement | null;
+      const action = actionEl?.dataset.action;
+      if (!action) return;
+
+      this.close();
+
+      switch (action) {
+        case "brainDump":
+          void this.callbacks.onShowBrainDump();
+          break;
+        case "bodyDouble":
+          void this.callbacks.onShowBodyDouble();
+          break;
+        case "quickWins":
+          void this.callbacks.onShowQuickWins();
+          break;
+        case "ndSettings":
+          void this.callbacks.onShowNDSettings();
+          break;
+        case "settings":
+          void this.callbacks.onShowSettings();
+          break;
+        case "syncNow":
+          this.callbacks.onForceCloudSync();
+          break;
+        case "install":
+          void this.callbacks.onPromptInstall();
+          break;
+        case "syncIssues":
+          this.callbacks.onShowSyncIssues();
+          break;
+        case "logout":
+          void this.callbacks.onHandleLogout();
+          break;
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const overlay = document.getElementById("supportPanelOverlay");
+      if (!overlay || overlay.hasAttribute("hidden")) return;
+      this.close();
+    });
+
+    document
+      .getElementById("supportPanelFocusToggle")
+      ?.addEventListener("click", () => this.callbacks.onToggleFocusMode());
+
+    // Support panel appearance controls
+    document
+      .getElementById("supportPanelThemeToggle")
+      ?.addEventListener("click", () => {
+        if (!State.data) return;
+        const current = ThemeManager.resolveTheme(State.data.preferences.theme);
+        const next = current === "night" ? "day" : "night";
+        State.data.preferences.theme = next;
+        ThemeManager.applyFromPreference(next);
+        State.save();
+        this.syncAppearanceControls();
+      });
+
+    const supportPanelThemePicker = document.getElementById(
+      "supportPanelThemePicker"
+    );
+    supportPanelThemePicker?.addEventListener("click", (e) => {
+      const target = e.target as Element | null;
+      const swatch = target?.closest(".theme-swatch") as HTMLElement | null;
+      if (!swatch || !supportPanelThemePicker.contains(swatch)) return;
+      const selectedTheme = swatch.dataset.theme as AccentTheme | undefined;
+      if (!selectedTheme || !State.data) return;
+
+      State.data.preferences.nd = {
+        ...State.data.preferences.nd,
+        accentTheme: selectedTheme,
+      };
+      State.save();
+      void this.callbacks.onApplyAccessibilityPreferences();
+      this.syncAppearanceControls();
+    });
+
+    // Time Theme Picker (Developer Tool)
+    const timeThemePicker = document.getElementById("timeThemePicker");
+    timeThemePicker?.addEventListener("click", (e) => {
+      const target = e.target as Element | null;
+      const btn = target?.closest(".time-theme-btn") as HTMLElement | null;
+      if (!btn || !timeThemePicker.contains(btn)) return;
+      const selectedTime = btn.dataset.time;
+      if (!selectedTime) return;
+
+      // Store the override in localStorage for dev purposes
+      if (selectedTime === "auto") {
+        localStorage.removeItem("gardenFence.devTimeOverride");
+      } else {
+        localStorage.setItem("gardenFence.devTimeOverride", selectedTime);
+      }
+
+      // Update all buttons
+      timeThemePicker.querySelectorAll(".time-theme-btn").forEach((b) => {
+        b.setAttribute("aria-checked", "false");
+      });
+      btn.setAttribute("aria-checked", "true");
+
+      // Apply the time of day override
+      this.callbacks.onApplyTimeOfDayOverride(selectedTime);
+    });
+  }
+
+  open() {
+    const overlay = document.getElementById("supportPanelOverlay");
+    if (!overlay) return;
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer);
+      this.hideTimer = null;
+    }
+    this.syncAppearanceControls();
+    overlay.removeAttribute("hidden");
+    overlay.classList.add("active");
+    document.body.classList.add("support-panel-open");
+    (
+      document.getElementById("supportPanelClose") as HTMLElement | null
+    )?.focus();
+  }
+
+  close() {
+    const overlay = document.getElementById("supportPanelOverlay");
+    if (!overlay) return;
+    overlay.classList.remove("active");
+    document.body.classList.remove("support-panel-open");
+    if (this.hideTimer) clearTimeout(this.hideTimer);
+    this.hideTimer = setTimeout(() => {
+      overlay.setAttribute("hidden", "");
+      this.hideTimer = null;
+    }, 220);
+  }
+
+  syncAppearanceControls() {
+    if (!State.data) return;
+
+    const themeToggle = document.getElementById("supportPanelThemeToggle");
+    if (themeToggle) {
+      const isNight =
+        ThemeManager.resolveTheme(State.data.preferences.theme) === "night";
+      themeToggle.classList.toggle("active", isNight);
+      themeToggle.setAttribute("aria-checked", String(isNight));
+    }
+
+    const themePicker = document.getElementById("supportPanelThemePicker");
+    if (!themePicker) return;
+
+    const accentThemes = ND_CONFIG.ACCENT_THEMES as Record<
+      AccentTheme,
+      { label: string; emoji: string; color: string }
+    >;
+
+    if (themePicker.childElementCount === 0) {
+      themePicker.innerHTML = Object.entries(accentThemes)
+        .map(
+          ([key, theme]) => `
+              <button
+                class="theme-swatch"
+                data-theme="${key}"
+                title="${theme.label}"
+                aria-label="${theme.label}"
+                role="radio"
+                aria-checked="false"
+                ${
+                  key === "rainbow"
+                    ? `style="--swatch-color: #0EA5E9"`
+                    : `style="--swatch-color: ${theme.color}"`
+                }
+                type="button"
+              >
+                <span class="swatch-color" ${
+                  key === "rainbow"
+                    ? `style="background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)"`
+                    : ""
+                }></span>
+                <span class="swatch-emoji">${theme.emoji}</span>
+              </button>
+            `
+        )
+        .join("");
+    }
+
+    const activeTheme = State.data.preferences.nd.accentTheme || "sage";
+    themePicker.querySelectorAll<HTMLElement>(".theme-swatch").forEach((s) => {
+      const isActive = s.dataset.theme === activeTheme;
+      s.classList.toggle("active", isActive);
+      s.setAttribute("aria-checked", String(isActive));
+    });
+
+    // Sync Time Theme Picker (Developer Tool)
+    const timeThemePicker = document.getElementById("timeThemePicker");
+    if (timeThemePicker) {
+      const devTimeOverride =
+        localStorage.getItem("gardenFence.devTimeOverride") || "auto";
+      timeThemePicker
+        .querySelectorAll<HTMLElement>(".time-theme-btn")
+        .forEach((btn) => {
+          const isActive = btn.dataset.time === devTimeOverride;
+          btn.setAttribute("aria-checked", String(isActive));
+        });
+    }
+  }
+}
