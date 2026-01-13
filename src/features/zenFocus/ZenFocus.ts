@@ -8,9 +8,9 @@
  * - Allow marking goal as complete
  */
 
-import { Goals } from '../core/Goals';
-import { State } from '../core/State';
-import { CONFIG } from '../config';
+import { Goals } from '../../core/Goals';
+import { State } from '../../core/State';
+import { CONFIG } from '../../config';
 
 export interface ZenFocusCallbacks {
   escapeHtml: (text: string) => string;

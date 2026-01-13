@@ -1,5 +1,5 @@
-import { syncQueue } from "../services/SyncQueue";
-import { isSupabaseConfigured } from "../supabaseClient";
+import { syncQueue }  from "../../services/SyncQueue";
+import { isSupabaseConfigured }  from "../../supabaseClient";
 
 export type SyncIssuesContext = {
   showToast: (iconOrMessage: string, messageOrType?: string) => void;

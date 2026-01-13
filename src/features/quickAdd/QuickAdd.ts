@@ -7,8 +7,8 @@
  * - Provide keyboard shortcuts (Enter to save, Esc to cancel)
  */
 
-import { Goals } from '../core/Goals';
-import type { GoalLevel } from "../types";
+import { Goals } from '../../core/Goals';
+import type { GoalLevel }  from "../../types";
 
 export interface QuickAddCallbacks {
   onRender: () => void;

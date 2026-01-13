@@ -1,4 +1,4 @@
-import { Planning } from "../core/Planning";
+import { Planning }  from "../../core/Planning";
 
 export type WeeklyReviewContext = {
   showToast: (iconOrMessage: string, messageOrType?: string) => void;

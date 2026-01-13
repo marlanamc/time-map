@@ -1,1 +1,2 @@
-export { FocusMode } from "./FocusMode";
+export { toggleFocusMode, setFocusMode, applySavedUIState, updateFocusLayoutVars, setupFocusHoverReveal } from "./FocusMode";
+export type { FocusModeContext } from "./FocusMode";
