@@ -4,7 +4,7 @@
 import { DataStore } from './DataStore';
 import { SyncService, type SyncStatus } from './SyncService';
 import { VIEWS } from '../config';
-import { SupabaseService } from '../services/SupabaseService';
+import { SupabaseService } from '../services/supabase';
 import { batchSaveService } from '../services/BatchSaveService';
 import { cacheService } from '../services/CacheService';
 import { warmCache } from '../services/cacheWarmup';

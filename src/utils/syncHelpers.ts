@@ -6,7 +6,7 @@
  */
 
 import type { Analytics, BrainDumpEntry, CalendarEvent, Goal, Preferences, Streak } from '../types';
-import { SupabaseService } from '../services/SupabaseService';
+import { SupabaseService } from '../services/supabase';
 import { dirtyTracker } from '../services/DirtyTracker';
 import { syncQueue } from '../services/SyncQueue';
 

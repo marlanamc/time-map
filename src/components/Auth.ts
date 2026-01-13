@@ -1,5 +1,5 @@
 
-import { SupabaseService } from '../services/SupabaseService';
+import { SupabaseService } from '../services/supabase';
 
 const AUTH_MODAL_DONT_SHOW_KEY = 'gardenFence.authModal.dontShow';
 

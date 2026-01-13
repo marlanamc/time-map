@@ -2,10 +2,10 @@ import { State } from "../../core/State";
 import { VIEWS } from "../../config";
 import { viewportManager } from "../viewport/ViewportManager";
 import type { UIElements } from "../../types";
+import { MonthRenderer, WeekRenderer, LivingGardenRenderer } from "../renderers";
+import { goalDetailModal } from "../../components/modals/GoalDetailModal";
 
 type RenderCoordinatorCallbacks = {
-  renderCurrentView: () => void;
-  renderLevelContextBar: () => void;
   renderCategoryFilters: () => void;
   renderUpcomingGoals: () => void;
   updateDateDisplay: () => void;
@@ -14,6 +14,12 @@ type RenderCoordinatorCallbacks = {
   updateStreaks: () => void;
   updateMobileHomeView: () => void;
   syncAddButtonLabel: () => void;
+  syncViewButtons: () => void;
+  renderDayView: () => void;
+  renderCalendar: () => void;
+  openGoalModal: (level: any, month: number, year: number, options?: any) => void;
+  escapeHtml: (text: string) => string;
+  dayViewController: any;
 };
 
 type RenderCoordinatorOptions = {
@@ -146,8 +152,8 @@ export class RenderCoordinator {
     }
 
     // Collect all DOM updates
-    updates.push(() => this.callbacks.renderCurrentView());
-    updates.push(() => this.callbacks.renderLevelContextBar());
+    updates.push(() => this.renderCurrentView());
+    updates.push(() => this.renderLevelContextBar());
     updates.push(() => this.callbacks.renderCategoryFilters());
     updates.push(() => this.callbacks.renderUpcomingGoals());
     updates.push(() => this.callbacks.updateDateDisplay());
@@ -251,5 +257,83 @@ export class RenderCoordinator {
       // Execute all scroll operations
       scrollOperations.forEach((op) => op());
     });
+  }
+
+  /**
+   * Render based on current view
+   */
+  renderCurrentView() {
+    const container = this.elements.calendarGrid;
+    if (!container) {
+      console.error(
+        "renderCurrentView: calendarGrid element not found! Current view:",
+        State.currentView
+      );
+      return;
+    }
+    console.log("renderCurrentView: rendering view", State.currentView);
+
+    // Update view button states
+    this.callbacks.syncViewButtons();
+
+    if (State.currentView !== VIEWS.DAY && this.callbacks.dayViewController) {
+      this.callbacks.dayViewController.unmount();
+      this.callbacks.dayViewController = null;
+    }
+
+    switch (State.currentView) {
+      case VIEWS.YEAR:
+        this.callbacks.renderCalendar();
+        break;
+      case VIEWS.MONTH:
+        this.renderMonthView();
+        break;
+      case VIEWS.WEEK:
+        this.renderWeekView();
+        break;
+      case VIEWS.DAY:
+        this.callbacks.renderDayView();
+        break;
+      case VIEWS.HOME:
+        // Do nothing for main grid, overlay is handled in render()
+        break;
+      case VIEWS.GARDEN:
+        LivingGardenRenderer.render(
+          this.elements,
+          this.callbacks.escapeHtml.bind(this),
+          (goalId) => goalDetailModal.show(goalId),
+          (level) =>
+            this.callbacks.openGoalModal(level, State.viewingMonth, State.viewingYear),
+          (opts) =>
+            this.callbacks.openGoalModal(
+              opts.level,
+              opts.preselectedMonth ?? State.viewingMonth,
+              opts.preselectedYear ?? State.viewingYear,
+              { parentId: opts.parentId, parentLevel: opts.parentLevel }
+            )
+        );
+        break;
+      default:
+        this.callbacks.renderCalendar();
+    }
+  }
+
+  renderLevelContextBar() {
+    const container = this.elements.levelContextBar;
+    if (!container) return;
+
+    // Level context bar is no longer needed - always hide it
+    container.innerHTML = "";
+    container.setAttribute("hidden", "");
+    container.style.display = "none";
+    return;
+  }
+
+  renderMonthView() {
+    MonthRenderer.render(this.elements, this.callbacks.escapeHtml.bind(this));
+  }
+
+  renderWeekView() {
+    WeekRenderer.render(this.elements, this.callbacks.escapeHtml.bind(this));
   }
 }

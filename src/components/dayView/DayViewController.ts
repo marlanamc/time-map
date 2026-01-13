@@ -6,21 +6,9 @@ import { TimelineGrid } from "./TimelineGrid";
 import { PlannerDayViewRenderer } from "./PlannerDayViewRenderer";
 import { DragDropManager } from "./DragDropManager";
 import { DayViewState } from "./DayViewState";
-import { renderCurrent, updateCurrent, updateGoal } from "./renderers";
-import { EventDeps, handleClick, handleKeyDown } from "./events";
-import {
-  TimelineDeps,
-  TimelineRuntimeState,
-  createTimelineRuntimeState,
-  setupDragAndDrop,
-  handleNativeDragStart,
-  handleNativeDragEnd,
-  handleNativeDragOver,
-  handleNativeDrop,
-  handlePointerDown,
-  setupSwipeToComplete,
-  clearTimelineDropUi,
-} from "./timeline";
+import { DayViewRenderer } from "./DayViewRenderer";
+import { DayViewEvents } from "./DayViewEvents";
+import { DayViewTimeline } from "./DayViewTimeline";
 import { setupCustomizationPanel } from "./CustomizationPanel";
 
 interface AppConfig {
@@ -40,13 +28,16 @@ export class DayViewController {
   private plannerRenderer: PlannerDayViewRenderer;
   private dragDropManager: DragDropManager;
 
+  private renderer: DayViewRenderer;
+  private events: DayViewEvents;
+  private timeline: DayViewTimeline;
+
   private resizeObserver: ResizeObserver | null = null;
   private timeUpdateInterval: number | null = null;
   private isMounted: boolean = false;
   private customizationPanelSetup: boolean = false;
 
   private state = new DayViewState();
-  private timelineState: TimelineRuntimeState = createTimelineRuntimeState();
 
   private readonly boundHandleClick: (e: Event) => void;
   private readonly boundHandleKeyDown: (e: KeyboardEvent) => void;
@@ -100,6 +91,24 @@ export class DayViewController {
       onDragStart: (data) => this.handleDragStart(data),
       onDragEnd: (data, clientX, clientY) => this.handleDragEnd(data, clientX, clientY),
     });
+
+    // Initialize new class-based modules
+    this.renderer = new DayViewRenderer(this.plannerRenderer, this.state);
+    this.events = new DayViewEvents(
+      container,
+      this.callbacks,
+      this.state,
+      () => this.undo(),
+      () => this.redo()
+    );
+    this.timeline = new DayViewTimeline(
+      container,
+      this.calculator,
+      this.dragDropManager,
+      this.options,
+      this.callbacks,
+      this.state
+    );
 
     this.boundHandleClick = (e) => handleClick(e, this.eventDeps);
     this.boundHandleKeyDown = (e) => handleKeyDown(e, this.eventDeps);
@@ -171,7 +180,7 @@ export class DayViewController {
         if (!currentDate) return;
         const today = new Date();
         if (currentDate.toDateString() === today.toDateString()) {
-          renderCurrent(this.rendererDeps);
+          this.renderer.renderCurrent();
         } else {
           const gridEl = this.container.querySelector(".day-bed-grid") as
             | HTMLElement
@@ -218,10 +227,10 @@ export class DayViewController {
     this.state.setGoals(date, goals, contextGoals);
 
     if (!this.isMounted) {
-      renderCurrent(this.rendererDeps);
+      this.renderer.renderCurrent();
       setupDragAndDrop(this.timelineDeps);
     } else {
-      updateCurrent(this.rendererDeps);
+      this.renderer.updateCurrent();
       setupDragAndDrop(this.timelineDeps);
     }
   }
@@ -232,7 +241,7 @@ export class DayViewController {
   }
 
   updateGoal(goalId: string, goal: Goal): void {
-    updateGoal(this.rendererDeps, goalId, goal);
+    this.renderer.updateGoal(goalId, goal);
   }
 
   undo(): boolean {
@@ -273,7 +282,7 @@ export class DayViewController {
     this.customizationPanelSetup = true;
     setupCustomizationPanel(this.container, () => {
       if (!this.state.currentDate) return;
-      renderCurrent(this.rendererDeps);
+      this.renderer.renderCurrent();
     });
   }
 

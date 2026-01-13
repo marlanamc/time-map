@@ -3,13 +3,13 @@
 // ===================================
 import type { AppState, AppData, ViewType } from '../types';
 import { CONFIG, VIEWS } from '../config';
-import { SupabaseService } from '../services/SupabaseService';
+import { SupabaseService } from '../services/supabase';
 import { AuthComponent } from '../components/Auth';
 import { batchSaveService } from '../services/BatchSaveService';
 import { cacheService } from '../services/CacheService';
 import { warmCache } from '../services/cacheWarmup';
 import { syncQueue } from '../services/SyncQueue';
-import { throttledPreferencesAndAnalyticsSync, throttledStreakSync } from '../utils/syncHelpers';
+import { throttledPreferencesAndAnalyticsSync, throttledStreakSync } from '../services/sync/syncHelpers';
 import { eventBus } from './EventBus';
 import { isSupabaseConfigured } from '../supabaseClient';
 

@@ -1017,6 +1017,41 @@ html.dark-mode .modal-disclosure {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    animation: slideDown 200ms var(--ease-out);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.options-disclosure-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* Time fields grid inside disclosure */
+.options-disclosure-content .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+}
+
+/* Prevent double-spacing for nested sections */
+.options-disclosure-content .modal-inline-section {
+    margin-top: 0;
+}
+
+/* Nested disclosure inside options */
+.options-disclosure-content .modal-disclosure {
+    margin-top: 0;
 }
 
 .modal-chip-row {

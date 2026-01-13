@@ -3,9 +3,9 @@
 // ===================================
 import type { CalendarEvent, EventRecurrence } from "../types";
 import { State } from "./State";
-import { SupabaseService } from "../services/SupabaseService";
+import { SupabaseService } from "../services/supabase";
 import { dirtyTracker } from "../services/DirtyTracker";
-import { debouncedEventSync } from "../utils/syncHelpers";
+import { debouncedEventSync } from "../services/sync/syncHelpers";
 import DB, { DB_STORES } from "../db";
 
 function startOfDay(date: Date): Date {

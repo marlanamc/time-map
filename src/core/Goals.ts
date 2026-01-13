@@ -13,9 +13,10 @@ import type {
 } from "../types";
 import { State } from "./State";
 import { CONFIG } from "../config";
-import { SupabaseService } from "../services/SupabaseService";
+import { SupabaseService } from "../services/supabase";
 import { dirtyTracker } from "../services/DirtyTracker";
-import { debouncedGoalSync } from "../utils/syncHelpers";
+import { debouncedGoalSync } from "../services/sync/syncHelpers";
+import { upsertInternalTag } from "../utils/goalLinkage";
 import DB, { DB_STORES } from "../db";
 
 const INTERNAL_TAG_PREFIX = "__tm:";
@@ -75,16 +76,6 @@ function getInternalTag(
   return tag ? tag.slice(prefix.length) : undefined;
 }
 
-function upsertInternalTag(
-  tags: string[],
-  key: string,
-  value: string
-): string[] {
-  const prefix = `${INTERNAL_TAG_PREFIX}${key}=`;
-  const next = tags.filter((t) => !t.startsWith(prefix));
-  next.push(`${prefix}${value}`);
-  return Array.from(new Set(next));
-}
 
 function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
   // Default fallbacks: treat as month-scoped.

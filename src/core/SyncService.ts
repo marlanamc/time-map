@@ -1,9 +1,9 @@
 // ===================================
 // Sync Service - Handles all data synchronization
 // ===================================
-import { SupabaseService } from '../services/SupabaseService';
+import { SupabaseService } from '../services/supabase';
 import { isSupabaseConfigured } from '../supabaseClient';
-import { throttledPreferencesAndAnalyticsSync, throttledStreakSync } from '../utils/syncHelpers';
+import { throttledPreferencesAndAnalyticsSync, throttledStreakSync } from '../services/sync/syncHelpers';
 import type { AppData } from '../types';
 
 export interface SyncStatus {

@@ -3,7 +3,7 @@
 // ===================================
 import { State } from '../core/State';
 import { CONFIG, VIEWS } from '../config';
-import { NDSupport } from './NDSupport';
+import { NDSupport } from './ndSupport';
 import type { AppData, ViewType, Goal, WeeklyReview, BrainDumpEntry, BodyDoubleSession } from '../types';
 
 // Callback interface for UI interactions

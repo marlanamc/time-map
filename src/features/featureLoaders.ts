@@ -1,7 +1,7 @@
-export type NDSupportApi = typeof import("./NDSupport")["NDSupport"];
-export type AppSettingsApi = typeof import("./AppSettings")["AppSettings"];
-export type ZenFocusApi = typeof import("./ZenFocus")["zenFocus"];
-export type QuickAddApi = typeof import("./QuickAdd")["quickAdd"];
+export type NDSupportApi = typeof import("./ndSupport")["NDSupport"];
+export type AppSettingsApi = typeof import("./appSettings")["AppSettings"];
+export type ZenFocusApi = typeof import("./zenFocus")["ZenFocus"];
+export type QuickAddApi = typeof import("./quickAdd")["QuickAdd"];
 
 type ToastFn = (iconOrMessage: string, messageOrType?: string) => void;
 
@@ -40,7 +40,7 @@ export function createFeatureLoaders(opts: {
     if (ndSupport) return ndSupport;
     if (ndSupportLoading) return ndSupportLoading;
 
-    ndSupportLoading = import("./NDSupport")
+    ndSupportLoading = import("./ndSupport")
       .then((mod) => {
         ndSupport = mod.NDSupport;
         return mod.NDSupport;
@@ -61,7 +61,7 @@ export function createFeatureLoaders(opts: {
     if (appSettings) return appSettings;
     if (appSettingsLoading) return appSettingsLoading;
 
-    appSettingsLoading = import("./AppSettings")
+    appSettingsLoading = import("./appSettings")
       .then((mod) => {
         if (opts.appSettingsCallbacks) {
           mod.AppSettings.setCallbacks(opts.appSettingsCallbacks);
@@ -85,7 +85,7 @@ export function createFeatureLoaders(opts: {
     if (zenFocus) return zenFocus;
     if (zenFocusLoading) return zenFocusLoading;
 
-      zenFocusLoading = import("./ZenFocus")
+      zenFocusLoading = import("./zenFocus")
       .then((mod) => {
         zenFocus = mod.zenFocus;
         return mod.zenFocus;
@@ -106,7 +106,7 @@ export function createFeatureLoaders(opts: {
     if (quickAdd) return quickAdd;
     if (quickAddLoading) return quickAddLoading;
 
-      quickAddLoading = import("./QuickAdd")
+      quickAddLoading = import("./quickAdd")
       .then((mod) => {
         quickAdd = mod.quickAdd;
         return mod.quickAdd;

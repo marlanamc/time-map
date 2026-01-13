@@ -11,7 +11,7 @@
  */
 
 import { dirtyTracker } from './DirtyTracker';
-import { SupabaseService } from './SupabaseService';
+import { SupabaseService } from './supabase';
 import DB, { DB_STORES } from '../db';
 import type { Goal, BrainDumpEntry, CalendarEvent } from '../types';
 

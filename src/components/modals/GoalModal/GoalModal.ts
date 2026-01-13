@@ -48,6 +48,7 @@ let milestoneTimeContextOpen = false;
 let focusTimeContextOpen = false;
 let suggestionsOpen = false;
 let focusEasyMode = false;
+let intentionOptionsOpen = false;
 
 let modalLinkSelection: { parentId: string; parentLevel: GoalLevel } | null = null;
 
@@ -63,10 +64,12 @@ export function closeGoalModal(ctx: GoalModalContext) {
   document.getElementById("goalExtrasGroup")?.remove();
   document.getElementById("goalTinyGroup")?.remove();
   document.getElementById("visionAccentGroup")?.remove();
+  document.getElementById("goalOptionsDisclosure")?.remove();
   setInlineHelp(document.getElementById("milestoneDurationGroup"), "milestoneDurationHelp", null);
   setLinkageHelpVisible(false);
   suggestionsOpen = false;
   focusEasyMode = false;
+  intentionOptionsOpen = false;
   modalLinkSelection = null;
 }
 
@@ -247,6 +250,7 @@ export function openGoalModal(
     if (level === "focus") focusTimeContextOpen = false;
     suggestionsOpen = false;
     focusEasyMode = false;
+    intentionOptionsOpen = false;
     modalLinkSelection = null;
   }
 
@@ -562,7 +566,7 @@ export function openGoalModal(
       if (priorityLabel) priorityLabel.textContent = "Urgency (optional)";
     } else if (level === "intention") {
       monthGroup.style.display = "none";
-      setFieldVisibility(timeGroup, true);
+      setFieldVisibility(timeGroup, false); // Hide time fields - they'll be in "More options"
       if (priorityGroup) priorityGroup.style.display = "none";
       if (categoryGroup) categoryGroup.style.display = "none";
       if (startDateGroup) startDateGroup.style.display = "block";
@@ -570,6 +574,85 @@ export function openGoalModal(
       if (startDateInput)
         startDateInput.value = toYmdLocal(State.viewingDate ?? new Date());
       if (priorityLabel) priorityLabel.textContent = "Priority";
+
+      // Create "More options" disclosure that wraps optional fields
+      if (startDateGroup) {
+        const optionsDisclosure = getOrCreateAfter(
+          startDateGroup,
+          "goalOptionsDisclosure",
+          "modal-inline-section",
+        );
+
+      // Build the disclosure body HTML with time fields
+      const timeFieldsHtml = `
+        <div class="form-row">
+          <div class="form-group">
+            <label for="goalStartTime">Start Time</label>
+            <input type="time" id="goalStartTimeClone" />
+          </div>
+          <div class="form-group">
+            <label for="goalEndTime">End Time</label>
+            <input type="time" id="goalEndTimeClone" />
+          </div>
+        </div>
+      `;
+
+      // Create containers for sections that will be moved inside
+      const bodyContent = `
+        <div class="options-disclosure-content">
+          ${timeFieldsHtml}
+          <div id="goalOptionsTimeFields"></div>
+          <div id="goalOptionsSuggestions"></div>
+          <div id="goalOptionsLinkage"></div>
+          <div id="goalOptionsTiny"></div>
+        </div>
+      `;
+
+      optionsDisclosure.innerHTML = renderDisclosure({
+        id: "goalOptionsDisclosure",
+        title: "More options",
+        subtitle: "Time, suggestions, and connections",
+        open: intentionOptionsOpen,
+        bodyHtml: bodyContent,
+      });
+
+      // Move existing sections into the disclosure
+      const suggestionsGroup = document.getElementById("goalSuggestionsGroup");
+      const linkageGroup = document.getElementById("goalLinkageGroup");
+      const tinyGroup = document.getElementById("goalTinyGroup");
+      const suggestionsdest = document.getElementById("goalOptionsSuggestions");
+      const linkageDest = document.getElementById("goalOptionsLinkage");
+      const tinyDest = document.getElementById("goalOptionsTiny");
+
+      if (suggestionsGroup && suggestionsdest) {
+        suggestionsdest.appendChild(suggestionsGroup);
+      }
+      if (linkageGroup && linkageDest) {
+        linkageDest.appendChild(linkageGroup);
+      }
+      if (tinyGroup && tinyDest) {
+        tinyDest.appendChild(tinyGroup);
+      }
+
+      // Sync time field values from original fields to cloned fields
+      const originalStartTime = document.getElementById("goalStartTime") as HTMLInputElement | null;
+      const originalEndTime = document.getElementById("goalEndTime") as HTMLInputElement | null;
+      const clonedStartTime = document.getElementById("goalStartTimeClone") as HTMLInputElement | null;
+      const clonedEndTime = document.getElementById("goalEndTimeClone") as HTMLInputElement | null;
+
+      if (originalStartTime && clonedStartTime) {
+        clonedStartTime.value = originalStartTime.value;
+        clonedStartTime.oninput = () => {
+          if (originalStartTime) originalStartTime.value = clonedStartTime.value;
+        };
+      }
+      if (originalEndTime && clonedEndTime) {
+        clonedEndTime.value = originalEndTime.value;
+        clonedEndTime.oninput = () => {
+          if (originalEndTime) originalEndTime.value = clonedEndTime.value;
+        };
+      }
+      }
     }
   }
 
@@ -583,7 +666,12 @@ export function openGoalModal(
     modal.querySelectorAll<HTMLElement>("[data-action='toggle-disclosure']").forEach((btn) => {
       btn.onclick = (e) => {
         e.preventDefault();
-        suggestionsOpen = !suggestionsOpen;
+        const target = (btn as HTMLElement).dataset.target;
+        if (target === "goalOptionsDisclosure") {
+          intentionOptionsOpen = !intentionOptionsOpen;
+        } else if (target === "goalSuggestionsDisclosure") {
+          suggestionsOpen = !suggestionsOpen;
+        }
         openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
       };
     });

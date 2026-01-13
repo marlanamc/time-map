@@ -1,4 +1,4 @@
-import { SupabaseService } from "./SupabaseService";
+import { SupabaseService } from "./supabase";
 
 export async function warmCache(userId: string): Promise<void> {
   console.log(`🔥 Warming cache for user: ${userId}`);

@@ -9,7 +9,7 @@ import '../styles/main.css';
 // Most types are now used by the imported modules rather than app.ts directly
 import type { GardenEngine } from './garden/gardenEngine';
 import { State, Goals, Planning, Analytics } from './core';
-import { SupabaseService } from './services/SupabaseService';
+import { SupabaseService } from './services/supabase';
 import { VIEWS } from './config';
 import { getSupabaseClient, isSupabaseConfigured } from './supabaseClient';
 

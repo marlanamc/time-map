@@ -11,7 +11,7 @@
  */
 
 import type { Goal, BrainDumpEntry, CalendarEvent } from '../types';
-import { SupabaseService } from './SupabaseService';
+import { SupabaseService } from './supabase';
 
 interface QueuedOperation {
   id: string;

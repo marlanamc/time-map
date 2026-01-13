@@ -1,4 +1,4 @@
-jest.mock("../../src/services/SupabaseService", () => ({
+jest.mock("../../src/services/supabase", () => ({
   SupabaseService: {
     saveGoal: jest.fn(),
     savePreferences: jest.fn(),
@@ -26,7 +26,7 @@ import {
   throttledPreferencesSync,
   forceGoalSync,
 } from "../../src/utils/syncHelpers";
-import { SupabaseService } from "../../src/services/SupabaseService";
+import { SupabaseService } from "../../src/services/supabase";
 import { dirtyTracker } from "../../src/services/DirtyTracker";
 import { syncQueue } from "../../src/services/SyncQueue";
 

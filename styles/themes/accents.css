@@ -453,9 +453,7 @@ body.dark-mode.theme-rainbow {
     --shadow-glow-sm: 0 0 12px rgba(165, 180, 252, 0.16);
 
     /* Rainbow gradients include light stops; dark ink reads better across them */
-    --text-on-accent: rgba(8, 23, 39, 0.92);
-
-    --accent-button: var(--accent-stroke);
+    --text-on-accent: rgba(8, 23, 39, 0.92);    --accent-button: var(--accent-stroke);
     --accent-active: var(--accent-stroke);
     --accent-border: var(--accent-stroke);
     --accent-highlight: var(--accent-stroke);
