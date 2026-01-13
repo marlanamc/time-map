@@ -260,7 +260,7 @@ export const UI = {
       },
       onRenderRequired: () => {
         // Re-render current view to adjust to new dimensions
-        this.renderCurrentView();
+        this.render();
       },
     });
 
