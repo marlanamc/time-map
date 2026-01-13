@@ -7,8 +7,8 @@
 
 import type { Analytics, BrainDumpEntry, CalendarEvent, Goal, Preferences, Streak } from '../../types';
 import { SupabaseService } from '../supabase';
-import { dirtyTracker } from './DirtyTracker';
-import { syncQueue } from './SyncQueue';
+import { dirtyTracker } from '../DirtyTracker';
+import { syncQueue } from '../SyncQueue';
 
 type DebouncedFunction<T extends any[] = any[]> = (...args: T) => void;
 
