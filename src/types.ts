@@ -23,6 +23,20 @@ export type Category =
   | "personal"
   | "creative"
   | null;
+
+/**
+ * Custom intention template for the Day View intentions grid
+ * @remarks User-editable templates stored locally
+ */
+export interface CustomIntention {
+  id: string;
+  title: string;
+  category: Category;
+  duration: number;
+  emoji?: string;
+  order: number;
+  createdAt: string;
+}
 /** Available accent theme colors for the UI */
 export type AccentTheme =
   | "rose"

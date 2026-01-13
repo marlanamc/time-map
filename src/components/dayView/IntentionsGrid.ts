@@ -184,6 +184,17 @@ export function setupIntentionsGrid(
  * @param container - Container element to update
  */
 export function refreshIntentionsGrid(container: HTMLElement): void {
+  // Try to find the intentions grid in the planner sidebar
+  const intentionsGrid = container.querySelector('.intentions-grid');
+
+  if (intentionsGrid) {
+    // Update the existing grid
+    const intentions = IntentionsManager.getSorted();
+    intentionsGrid.outerHTML = renderIntentionsGrid(intentions);
+    return;
+  }
+
+  // Fallback: try the old selector
   const gridContainer = container.querySelector('.section-content');
   if (!gridContainer) return;
 

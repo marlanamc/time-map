@@ -7,6 +7,7 @@ import type { CustomIntention, Category } from "../../types";
 import { IntentionsManager } from "../../core/IntentionsManager";
 import { CONFIG } from "../../config/constants";
 import { UI } from "../../ui/UIManager";
+import { refreshIntentionsGrid } from "./IntentionsGrid";
 
 /**
  * Escape HTML to prevent XSS
@@ -17,14 +18,6 @@ function escapeHtml(text: string): string {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
-}
-
-/**
- * Generate a unique ID for new intentions
- * @returns Unique ID string
- */
-function generateId(): string {
-  return `intention_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 /**
@@ -52,9 +45,10 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
         </div>
 
         <div class="panel-content">
-          <!-- Add new intention form -->
-          <div class="intention-form">
-            <h3 class="form-section-title">Add New Intention</h3>
+          <section class="intention-form">
+            <header class="form-section-heading">
+              <h3 class="form-section-title">Add New Intention</h3>
+            </header>
             <div class="form-grid">
               <div class="form-field">
                 <label for="intention-title" class="form-label">Title</label>
@@ -70,16 +64,18 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
 
               <div class="form-field form-field-emoji">
                 <label for="intention-emoji" class="form-label">Emoji</label>
-                <input
-                  type="text"
-                  id="intention-emoji"
-                  class="form-input emoji-input"
-                  placeholder="🎯"
-                  maxlength="2"
-                />
-                <button type="button" class="emoji-picker-btn" aria-label="Choose emoji">
-                  😊
-                </button>
+                <div class="emoji-picker-control">
+                  <input
+                    type="text"
+                    id="intention-emoji"
+                    class="form-input emoji-input"
+                    placeholder="🎯"
+                    maxlength="2"
+                  />
+                  <button type="button" class="emoji-picker-btn" aria-label="Choose emoji">
+                    😊
+                  </button>
+                </div>
               </div>
 
               <div class="form-field">
@@ -104,27 +100,32 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
               </div>
             </div>
 
-            <button type="button" class="btn-add-intention-submit">
-              <span aria-hidden="true">+</span>
-              Add Intention
-            </button>
-          </div>
+            <div class="form-actions">
+              <button type="button" class="btn-add-intention-submit">
+                <span aria-hidden="true">+</span>
+                Add intention
+              </button>
+            </div>
+          </section>
 
-          <!-- Existing intentions list -->
-          <div class="intentions-list-section">
-            <h3 class="form-section-title">
-              Your Intentions
+          <section class="intentions-list-section">
+            <div class="intentions-list-header">
+              <h3 class="form-section-title">Your Intentions</h3>
               <span class="intentions-count">${items.length}</span>
-            </h3>
+            </div>
             <div class="intentions-sortable-list" data-sortable="true">
               ${renderSortableIntentions(items)}
             </div>
-          </div>
+          </section>
         </div>
 
         <div class="panel-footer">
-          <button type="button" class="btn-panel-cancel">Cancel</button>
-          <button type="button" class="btn-panel-save">Save Changes</button>
+          <button type="button" class="panel-btn panel-btn-secondary btn-panel-cancel">
+            Cancel
+          </button>
+          <button type="button" class="panel-btn panel-btn-primary btn-panel-save">
+            Save Changes
+          </button>
         </div>
       </div>
     </div>
@@ -142,10 +143,12 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
  * @returns HTML string for <option> elements
  */
 function renderCategoryOptions(): string {
-  const categories = Object.keys(CONFIG.CATEGORIES) as Category[];
+  const categories = Object.keys(CONFIG.CATEGORIES) as Array<
+    keyof typeof CONFIG.CATEGORIES
+  >;
 
   return categories
-    .map(cat => {
+    .map((cat) => {
       const config = CONFIG.CATEGORIES[cat];
       return `<option value="${cat}">${config.emoji} ${config.label}</option>`;
     })
@@ -233,20 +236,30 @@ function renderSortableIntention(intention: CustomIntention, index: number): str
         </div>
       </div>
 
-      <div class="intention-item-actions">
-        <button
-          type="button"
-          class="btn-edit-intention"
-          data-intention-id="${intention.id}"
-          aria-label="Edit ${escapeHtml(intention.title)}"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M11.333 2L14 4.667l-9.334 9.333H2v-2.667L11.333 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
+    <div class="intention-item-actions">
+      <button
+        type="button"
+        class="btn-edit-intention"
+        data-intention-id="${intention.id}"
+        aria-label="Edit ${escapeHtml(intention.title)}"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M11.333 2L14 4.667l-9.334 9.333H2v-2.667L11.333 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="btn-delete-intention"
+        data-intention-id="${intention.id}"
+        aria-label="Delete ${escapeHtml(intention.title)}"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M5 4h6M4 4h8l-1 10H5L4 4zM6 4V2h4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
-  `;
+  </div>
+`;
 }
 
 /**
@@ -257,8 +270,11 @@ export function openCustomizationPanel(container: HTMLElement): void {
   const backdrop = container.querySelector('.customization-panel-backdrop') as HTMLElement;
   if (!backdrop) return;
 
+  const panel = backdrop.querySelector('.customization-panel') as HTMLElement | null;
+
   backdrop.dataset.panelVisible = 'true';
   backdrop.classList.add('visible');
+  panel?.classList.add('visible');
 
   // Focus the first input
   const firstInput = backdrop.querySelector('#intention-title') as HTMLInputElement;
@@ -279,6 +295,8 @@ export function closeCustomizationPanel(container: HTMLElement, shouldSave: bool
   const backdrop = container.querySelector('.customization-panel-backdrop') as HTMLElement;
   if (!backdrop) return;
 
+  const panel = backdrop.querySelector('.customization-panel') as HTMLElement | null;
+
   if (shouldSave) {
     // Changes are already saved via IntentionsManager throughout editing
     UI.showToast('✅ Intentions saved!', 'success');
@@ -286,6 +304,7 @@ export function closeCustomizationPanel(container: HTMLElement, shouldSave: bool
 
   backdrop.dataset.panelVisible = 'false';
   backdrop.classList.remove('visible');
+  panel?.classList.remove('visible');
 
     // Clear form
     const form = backdrop.querySelector('.intention-form') as HTMLElement;
@@ -441,27 +460,26 @@ export function setupCustomizationPanel(
           addBtn.innerHTML = '<span aria-hidden="true">+</span> Add Intention';
         }
 
-        // Refresh list
+        // Refresh the sortable list in the customization panel
         refreshIntentionsList(container);
 
-        if (onIntentionsChanged) onIntentionsChanged();
+        // Refresh the main intentions grid in the sidebar without closing the panel
+        refreshIntentionsGrid(container);
+
+        // Optionally notify parent component, but don't trigger full re-render
+        // if (onIntentionsChanged) onIntentionsChanged();
       } else {
         UI.showToast('❌ Failed to update intention', 'error');
       }
     } else {
-      // Create new intention
-      const newIntention: CustomIntention = {
-        id: generateId(),
-        title: titleInput.value.trim(),
-        category: categorySelect.value as Category,
-        duration: parseInt(durationInput.value),
-        emoji: emojiInput.value.trim() || undefined,
-        order: IntentionsManager.getSorted().length,
-        createdAt: new Date().toISOString()
-      };
+      const created = IntentionsManager.add(
+        titleInput.value.trim(),
+        categorySelect.value as Category,
+        parseInt(durationInput.value),
+        emojiInput.value.trim() || undefined
+      );
 
-      // Add to manager
-      if (IntentionsManager.add(newIntention)) {
+      if (created) {
         UI.showToast('✅ Intention added!', 'success');
 
         // Clear form
@@ -471,10 +489,14 @@ export function setupCustomizationPanel(
         durationInput.value = '';
         editingIntentionId = null;
 
-        // Refresh list
+        // Refresh the sortable list in the customization panel
         refreshIntentionsList(container);
 
-        if (onIntentionsChanged) onIntentionsChanged();
+        // Refresh the main intentions grid in the sidebar without closing the panel
+        refreshIntentionsGrid(container);
+
+        // Optionally notify parent component, but don't trigger full re-render
+        // if (onIntentionsChanged) onIntentionsChanged();
       } else {
         UI.showToast('❌ Failed to add intention', 'error');
       }
@@ -484,8 +506,8 @@ export function setupCustomizationPanel(
   // Edit intention (populate form)
   container.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
-    const editBtn = target.closest('.btn-edit-intention') as HTMLElement;
-    if (!editBtn) return;
+  const editBtn = target.closest('.btn-edit-intention') as HTMLElement;
+  if (!editBtn) return;
 
     const intentionId = editBtn.dataset.intentionId;
     if (!intentionId) return;
@@ -504,7 +526,13 @@ export function setupCustomizationPanel(
 
     if (titleInput) titleInput.value = intention.title;
     if (emojiInput) emojiInput.value = intention.emoji || '';
-    if (categorySelect) categorySelect.value = intention.category;
+    if (categorySelect) {
+      if (intention.category) {
+        categorySelect.value = intention.category;
+      } else {
+        categorySelect.selectedIndex = 0;
+      }
+    }
     if (durationInput) durationInput.value = intention.duration.toString();
 
     // Track that we're editing this intention
@@ -522,6 +550,37 @@ export function setupCustomizationPanel(
     // Focus title input
     titleInput?.focus();
     titleInput?.select();
+  });
+
+  // Delete intention
+  container.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const deleteBtn = target.closest('.btn-delete-intention') as HTMLElement;
+    if (!deleteBtn) return;
+
+    e.stopPropagation();
+    const intentionId = deleteBtn.dataset.intentionId;
+    if (!intentionId) return;
+
+    const confirmed = window.confirm
+      ? window.confirm('Delete this intention?')
+      : true;
+    if (!confirmed) return;
+
+    if (IntentionsManager.delete(intentionId)) {
+      UI.showToast('🗑️ Intention removed', 'success');
+
+      // Refresh the sortable list in the customization panel
+      refreshIntentionsList(container);
+
+      // Refresh the main intentions grid in the sidebar without closing the panel
+      refreshIntentionsGrid(container);
+
+      // Optionally notify parent component, but don't trigger full re-render
+      // if (onIntentionsChanged) onIntentionsChanged();
+    } else {
+      UI.showToast('❌ Failed to delete intention', 'error');
+    }
   });
 
   // Emoji picker
@@ -620,9 +679,15 @@ export function setupCustomizationPanel(
         .filter(id => id) as string[];
 
       IntentionsManager.reorder(newOrder);
+
+      // Refresh the sortable list in the customization panel
       refreshIntentionsList(container);
 
-      if (onIntentionsChanged) onIntentionsChanged();
+      // Refresh the main intentions grid in the sidebar without closing the panel
+      refreshIntentionsGrid(container);
+
+      // Optionally notify parent component, but don't trigger full re-render
+      // if (onIntentionsChanged) onIntentionsChanged();
     }
 
     draggedElement = null;

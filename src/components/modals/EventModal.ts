@@ -70,7 +70,7 @@ function ensureModal(): HTMLElement {
           </div>
           <div class="form-group event-modal-toggle">
             <label class="toggle-label">
-              <input type="checkbox" id="eventAllDay" checked />
+              <input type="checkbox" id="eventAllDay" />
               All-day
             </label>
           </div>
@@ -136,6 +136,7 @@ function ensureModal(): HTMLElement {
               </div>
             </div>
             <div class="form-group" id="eventWeekdaysGroup" hidden>
+              <div class="event-weekdays-label">Select the weekdays you want this event to repeat on (e.g., Tue + Thu).</div>
               <label>Days of week</label>
               <div class="modal-pill-row event-weekdays">
                 ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -300,7 +301,7 @@ class EventModalManager {
       if (titleInput) titleInput.value = "";
       if (dateInput) dateInput.value = ymdLocal(opts.date);
       if (notesInput) notesInput.value = "";
-      if (allDayInput) allDayInput.checked = true;
+      if (allDayInput) allDayInput.checked = false;
       if (startTimeInput) startTimeInput.value = "";
       if (endTimeInput) endTimeInput.value = "";
       if (endDateInput) endDateInput.value = "";

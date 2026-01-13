@@ -22,6 +22,12 @@
     visibility: visible;
 }
 
+:root:not(.dark-mode) .modal-overlay {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
 .dark-mode .modal-overlay {
     background: rgba(0, 0, 0, 0.88);
 }
@@ -40,6 +46,12 @@
     box-shadow: var(--shadow-xl);
     margin-top: env(safe-area-inset-top, 0px);
     margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+:root:not(.dark-mode) .modal {
+    background: color-mix(in srgb, var(--bg-elevated) 85%, #ffffff 15%);
+    border-color: var(--divider);
+    box-shadow: 0 22px 56px rgba(31, 45, 42, 0.18), 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .dark-mode .modal {
@@ -213,6 +225,12 @@
 /* Event modal specifics (kept subtle) */
 .event-modal .event-weekdays {
   flex-wrap: wrap;
+}
+
+.event-weekdays-label {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
 }
 
 .event-modal .event-delete-btn {

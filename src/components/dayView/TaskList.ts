@@ -5,6 +5,7 @@
 
 import type { Goal } from "../../types";
 import { CONFIG } from "../../config/constants";
+import { formatTimeRange, formatTo12Hour } from "../../utils/time";
 
 /**
  * Get emoji for a category
@@ -43,8 +44,15 @@ export function renderCompactTask(goal: Goal, showTime: boolean = false): string
   const isDone = goal.status === 'done';
   const doneClass = isDone ? 'task-done' : '';
 
-  const timeHtml = showTime && goal.startTime
-    ? `<span class="task-time">${goal.startTime}${goal.endTime ? ' - ' + goal.endTime : ''}</span>`
+  const startLabel = formatTo12Hour(goal.startTime);
+  const endLabel = formatTo12Hour(goal.endTime);
+  const timeLabel =
+    startLabel && endLabel
+      ? `${startLabel} - ${endLabel}`
+      : startLabel ?? endLabel ?? "";
+
+  const timeHtml = showTime && timeLabel
+    ? `<span class="task-time">${timeLabel}</span>`
     : '';
 
   return `
@@ -97,13 +105,14 @@ function renderExpandedContent(goal: Goal): string {
     ? CONFIG.CATEGORIES[goal.category as keyof typeof CONFIG.CATEGORIES]?.label || 'General'
     : 'General';
 
-  const hasTime = goal.startTime && goal.endTime;
+  const timeLabel = formatTimeRange(goal.startTime, goal.endTime);
+  const hasTime = Boolean(timeLabel);
   const timeHtml = hasTime
     ? `
       <div class="task-meta-item">
         <span class="meta-icon">⏰</span>
         <span class="meta-label">Time</span>
-        <span class="meta-value">${goal.startTime} - ${goal.endTime}</span>
+        <span class="meta-value">${timeLabel}</span>
       </div>
     `
     : '';

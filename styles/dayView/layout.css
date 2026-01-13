@@ -444,7 +444,7 @@
       rgba(255, 255, 255, 0.25) 50%,
       rgba(180, 106, 74, 0.08) 100%);
   overflow: hidden;
-  padding: var(--space-3, 1rem);
+  padding: 0 var(--space-3, 1rem);
   box-shadow:
     inset 0 2px 12px rgba(111, 155, 134, 0.08),
     inset 0 -2px 12px rgba(180, 106, 74, 0.05);

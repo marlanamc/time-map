@@ -6,7 +6,9 @@ import { CONFIG } from "../../config/constants";
 import { renderIntentionsGrid } from "./IntentionsGrid";
 import { renderCustomizationPanel } from "./CustomizationPanel";
 import { State } from "../../core/State";
+import type { EventInstance } from "../../utils/recurrence";
 import { expandEventsForRange } from "../../utils/recurrence";
+import { formatCountdown, formatTo12Hour } from "../../utils/time";
 
 /**
  * Renderer for the Planner-style day view
@@ -17,6 +19,8 @@ export class PlannerDayViewRenderer {
   private container: HTMLElement;
   private calculator: TimeSlotCalculator;
   private timelineGrid: TimelineGrid;
+  private todayEvents: EventInstance[] = [];
+  private activeDate: Date | null = null;
 
   /**
    * Generate SVG icon markup
@@ -85,6 +89,7 @@ export class PlannerDayViewRenderer {
     allGoals: Goal[],
     contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] }
   ): void {
+    this.activeDate = date;
     const dayGoals = allGoals
       .filter((g) => this.isGoalForDate(g, date))
       .filter((g) => g.level === "intention");
@@ -144,6 +149,7 @@ export class PlannerDayViewRenderer {
     const eventsToday = State.data?.events
       ? expandEventsForRange(State.data.events, dayStart, dayEnd)
       : [];
+    this.todayEvents = eventsToday;
     const formatEventTime = (iso: string, allDay: boolean) => {
       if (allDay) return "All day";
       const d = new Date(iso);
@@ -275,6 +281,7 @@ export class PlannerDayViewRenderer {
             ${this.timelineGrid.render()}
             <div class="planner-timeline-content">
               ${scheduled.map((g) => this.renderTimedTask(g)).join("")}
+              ${this.todayEvents.map((ev) => this.renderTimelineEvent(ev)).join("")}
             </div>
           </div>
         </main>
@@ -404,10 +411,12 @@ export class PlannerDayViewRenderer {
   }
   private renderSidebarItem(goal: Goal, showTime: boolean = false): string {
     const emoji = goal.category ? this.getCategoryEmoji(goal.category) : "📍";
+    const startTime = formatTo12Hour(goal.startTime);
+    const endTime = formatTo12Hour(goal.endTime);
     const timeStr =
-      showTime && goal.startTime
-        ? `<span class="sidebar-item-time">${goal.startTime}${
-            goal.endTime ? ` - ${goal.endTime}` : ""
+      showTime && startTime
+        ? `<span class="sidebar-item-time">${startTime}${
+            endTime ? ` - ${endTime}` : ""
           }</span>`
         : "";
 
@@ -482,6 +491,10 @@ export class PlannerDayViewRenderer {
 
     const emoji = goal.category ? this.getCategoryEmoji(goal.category) : "📍";
     const colorClass = goal.category ? `cat-${goal.category}` : "cat-default";
+    const countdownLabel = this.getCountdownLabelForTime(goal.startTime);
+    const countdownHtml = countdownLabel
+      ? `<span class="timeline-countdown" aria-hidden="true">${countdownLabel}</span>`
+      : "";
     const resizeHandles =
       goal.status !== "done"
         ? `
@@ -509,11 +522,96 @@ export class PlannerDayViewRenderer {
           <button class="btn-icon btn-planner-remove" type="button" data-goal-id="${
             goal.id
           }" aria-label="Remove from timeline" title="Remove from timeline">${this.icon(
-      "minus"
-    )}</button>
+            "minus"
+          )}</button>
         </div>
+        ${countdownHtml}
       </div>
     `;
+  }
+
+  private renderTimelineEvent(event: EventInstance): string {
+    if (event.allDay) return "";
+
+    const start = new Date(event.startAt);
+    const end = event.endAt ? new Date(event.endAt) : new Date(start);
+    const startMinRaw = start.getHours() * 60 + start.getMinutes();
+    const endMinRaw = end.getHours() * 60 + end.getMinutes();
+
+    const startMin = this.calculator.clamp(
+      startMinRaw,
+      this.calculator.getPlotStartMin(),
+      this.calculator.getPlotEndMin() - 15
+    );
+    let endMin = Math.min(
+      Math.max(endMinRaw, startMin + 15),
+      this.calculator.getPlotEndMin()
+    );
+    if (endMin <= startMin) {
+      endMin = Math.min(
+        this.calculator.getPlotEndMin(),
+        startMin + 60
+      );
+    }
+
+    const top = this.calculator.minutesToPercent(startMin);
+    const duration = Math.max(1, endMin - startMin);
+    const durPct = (duration / this.calculator.getPlotRangeMin()) * 100;
+    const adjustedHeight = Math.max(1, durPct - 0.2);
+
+    const startLabel = this.calculator.format12h(startMin);
+    const endLabel = this.calculator.format12h(endMin);
+    const timeLabel = `${startLabel} - ${endLabel}`;
+    const countdownLabel = this.getCountdownLabelFromIso(event.startAt);
+    const countdownHtml = countdownLabel
+      ? `<span class="timeline-countdown" aria-hidden="true">${countdownLabel}</span>`
+      : "";
+
+    return `
+      <div
+        class="planner-event-card"
+        style="top: ${top}%; height: ${adjustedHeight}%"
+        data-action="edit-event"
+        data-event-id="${event.originalId}"
+      >
+        <span class="planner-event-time">${timeLabel}</span>
+        <span class="planner-event-title">${event.title}</span>
+        ${countdownHtml}
+      </div>
+    `;
+  }
+
+  private getCountdownLabelForTime(time?: string | null): string | null {
+    const target = this.buildDateFromTime(time);
+    return this.getCountdownLabel(target);
+  }
+
+  private getCountdownLabelFromIso(iso: string): string | null {
+    if (!iso) return null;
+    const parsed = new Date(iso);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return this.getCountdownLabel(parsed);
+  }
+
+  private buildDateFromTime(time?: string | null): Date | null {
+    if (!time || !this.activeDate) return null;
+    const match = /^(\d{1,2}):(\d{2})$/.exec(time);
+    if (!match) return null;
+    const [hourText, minuteText] = match.slice(1);
+    const hour = Number(hourText);
+    const minute = Number(minuteText);
+    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+    const result = new Date(this.activeDate);
+    result.setHours(hour, minute, 0, 0);
+    return result;
+  }
+
+  private getCountdownLabel(target: Date | null): string | null {
+    if (!target) return null;
+    const now = new Date();
+    const diffMinutes = Math.round((target.getTime() - now.getTime()) / 60000);
+    const clamped = Math.max(0, diffMinutes);
+    return formatCountdown(clamped);
   }
 
   /**

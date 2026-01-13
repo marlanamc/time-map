@@ -375,6 +375,73 @@
   z-index: 20;
 }
 
+.planner-event-card {
+  position: absolute;
+  left: 70px;
+  right: 10px;
+  background: color-mix(in srgb, var(--accent) 20%, var(--bg-surface) 80%);
+  border-radius: 24px;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  box-shadow: var(--shadow-sm);
+  pointer-events: auto;
+  border: 1px solid color-mix(in srgb, var(--accent-border, #00aaff) 40%, var(--glass-border) 60%);
+  color: var(--text-primary);
+  z-index: 8;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.planner-event-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
+}
+
+.timeline-countdown {
+  position: absolute;
+  top: 0.75rem;
+  right: 1.15rem;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.timeline-countdown::before {
+  content: "Time until";
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.planner-event-card:hover .timeline-countdown::before,
+.day-goal-card.planner-timed-task:hover .timeline-countdown::before {
+  opacity: 0.75;
+}
+
+.planner-event-time {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.planner-event-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 /* Handle very short timeline items (15-30 minutes) in planner view */
 .planner-timed-task[style*="height: 1%"],
 .planner-timed-task[style*="height: 2%"],
