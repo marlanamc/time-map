@@ -12,7 +12,7 @@ export class TimeSlotCalculator {
     timeWindowStart: number = 480, // 8 AM
     timeWindowEnd: number = 1320, // 10 PM
     maxLanes: number = 4,
-    snapInterval: number = 5,
+    snapInterval: number = 5
   ) {
     this.plotStartMin = timeWindowStart;
     this.plotEndMin = timeWindowEnd;
@@ -108,7 +108,7 @@ export class TimeSlotCalculator {
         const endMinRaw = this.parseTimeToMinutes(goal.endTime);
         const startMin = Math.min(
           Math.max(startMinRaw, this.plotStartMin),
-          this.plotEndMin - 15,
+          this.plotEndMin - 15
         );
 
         let endMin =
@@ -116,8 +116,8 @@ export class TimeSlotCalculator {
             ? endMinRaw
             : startMinRaw + 60;
 
-        // Ensure minimum duration of 30 minutes
-        endMin = Math.min(Math.max(endMin, startMin + 30), this.plotEndMin);
+        // Ensure minimum duration of 15 minutes
+        endMin = Math.min(Math.max(endMin, startMin + 15), this.plotEndMin);
 
         return { goal, startMin, endMin };
       })
@@ -207,7 +207,7 @@ export class TimeSlotCalculator {
    */
   findAvailableSlots(
     goals: TimedGoal[],
-    durationMin: number,
+    durationMin: number
   ): { startMin: number; endMin: number }[] {
     const slots: { startMin: number; endMin: number }[] = [];
     const sortedGoals = [...goals].sort((a, b) => a.startMin - b.startMin);

@@ -19,9 +19,9 @@ export function handleClick(e: Event, deps: EventDeps): void {
   const target = e.target as HTMLElement;
   const currentDate = deps.state.currentDate ?? new Date();
 
-  const contextGoalBtn = target.closest(".year-vision-icon-only[data-goal-id]") as
-    | HTMLElement
-    | null;
+  const contextGoalBtn = target.closest(
+    ".year-vision-icon-only[data-goal-id]"
+  ) as HTMLElement | null;
   if (contextGoalBtn) {
     e.preventDefault();
     e.stopPropagation();
@@ -31,7 +31,7 @@ export function handleClick(e: Event, deps: EventDeps): void {
   }
 
   const customizeBtn = target.closest(
-    '[data-action="customize"], [data-action="add-intention"], [data-action="edit-intentions"]',
+    '[data-action="customize"], [data-action="add-intention"], [data-action="edit-intentions"]'
   ) as HTMLElement | null;
   if (customizeBtn) {
     e.preventDefault();
@@ -40,7 +40,9 @@ export function handleClick(e: Event, deps: EventDeps): void {
     return;
   }
 
-  const editEventBtn = target.closest("[data-action='edit-event']") as HTMLElement | null;
+  const editEventBtn = target.closest(
+    "[data-action='edit-event']"
+  ) as HTMLElement | null;
   if (editEventBtn) {
     e.preventDefault();
     e.stopPropagation();
@@ -56,16 +58,33 @@ export function handleClick(e: Event, deps: EventDeps): void {
   }
 
   const card = target.closest(".day-goal-card") as HTMLElement;
-  if (card && !target.closest(".day-goal-checkbox") && !target.closest(".btn-zen-focus")) {
+  if (
+    card &&
+    !target.closest(".day-goal-checkbox") &&
+    !target.closest(".btn-zen-focus")
+  ) {
     const goalId = card.dataset.goalId;
     if (goalId) deps.callbacks.onGoalClick(goalId);
     return;
   }
 
-  if (target.classList.contains("day-goal-checkbox") || target.closest(".day-goal-checkbox")) {
+  if (
+    target.classList.contains("day-goal-checkbox") ||
+    target.closest(".day-goal-checkbox")
+  ) {
     e.stopPropagation();
     const goalCard = target.closest(".day-goal-card") as HTMLElement;
-    const goalId = goalCard?.dataset.goalId;
+    const unscheduledItem = target.closest(
+      ".planner-unscheduled-item"
+    ) as HTMLElement;
+    const timedTask = target.closest(".planner-timed-task") as HTMLElement;
+
+    // Try to find goal ID from any of the possible parent containers
+    const goalId =
+      goalCard?.dataset.goalId ||
+      unscheduledItem?.dataset.goalId ||
+      timedTask?.dataset.goalId;
+
     if (!goalId) return;
 
     const goal = deps.state.currentGoals.find((g) => g.id === goalId);
@@ -81,22 +100,31 @@ export function handleClick(e: Event, deps: EventDeps): void {
     return;
   }
 
-  if (target.classList.contains("btn-zen-focus") || target.closest(".btn-zen-focus")) {
+  if (
+    target.classList.contains("btn-zen-focus") ||
+    target.closest(".btn-zen-focus")
+  ) {
     e.stopPropagation();
     const btn = target.classList.contains("btn-zen-focus")
-      ? target
-      : target.closest(".btn-zen-focus");
+      ? (target as HTMLElement)
+      : (target.closest(".btn-zen-focus") as HTMLElement);
     const goalId = btn?.dataset.goalId;
     if (goalId) deps.callbacks.onZenFocus(goalId);
     return;
   }
 
-  if (target.classList.contains("btn-planner-add") || target.closest(".btn-planner-add")) {
+  if (
+    target.classList.contains("btn-planner-add") ||
+    target.closest(".btn-planner-add")
+  ) {
     deps.callbacks.onPlantSomething?.();
     return;
   }
 
-  if (target.classList.contains("btn-planner-event") || target.closest(".btn-planner-event")) {
+  if (
+    target.classList.contains("btn-planner-event") ||
+    target.closest(".btn-planner-event")
+  ) {
     const y = currentDate.getFullYear();
     const m = formatDateComponent(currentDate.getMonth() + 1);
     const d = formatDateComponent(currentDate.getDate());
@@ -107,11 +135,17 @@ export function handleClick(e: Event, deps: EventDeps): void {
     return;
   }
 
-  if (target.classList.contains("btn-planner-prev") || target.closest(".btn-planner-prev")) {
+  if (
+    target.classList.contains("btn-planner-prev") ||
+    target.closest(".btn-planner-prev")
+  ) {
     deps.callbacks.onNavigate?.(-1);
     return;
   }
-  if (target.classList.contains("btn-planner-next") || target.closest(".btn-planner-next")) {
+  if (
+    target.classList.contains("btn-planner-next") ||
+    target.closest(".btn-planner-next")
+  ) {
     deps.callbacks.onNavigate?.(1);
     return;
   }
@@ -134,14 +168,18 @@ export function handleClick(e: Event, deps: EventDeps): void {
     return;
   }
 
-  const unscheduledItem = target.closest(".planner-unscheduled-item") as HTMLElement;
+  const unscheduledItem = target.closest(
+    ".planner-unscheduled-item"
+  ) as HTMLElement;
   if (
     unscheduledItem &&
     !target.closest(".unscheduled-task-actions") &&
     !target.closest(".day-goal-checkbox")
   ) {
     e.stopPropagation();
-    const allItems = deps.container.querySelectorAll(".planner-unscheduled-item");
+    const allItems = deps.container.querySelectorAll(
+      ".planner-unscheduled-item"
+    );
     allItems.forEach((item) => {
       if (item !== unscheduledItem) {
         item.classList.remove("active");
@@ -167,7 +205,9 @@ export function handleClick(e: Event, deps: EventDeps): void {
   }
 
   if (!target.closest(".planner-unscheduled-item")) {
-    const allItems = deps.container.querySelectorAll(".planner-unscheduled-item");
+    const allItems = deps.container.querySelectorAll(
+      ".planner-unscheduled-item"
+    );
     allItems.forEach((item) => item.classList.remove("active"));
   }
 }
@@ -175,7 +215,10 @@ export function handleClick(e: Event, deps: EventDeps): void {
 export function handleKeyDown(e: KeyboardEvent, deps: EventDeps): void {
   const target = e.target as HTMLElement;
 
-  if ((e.key === "Enter" || e.key === " ") && target.classList.contains("day-goal-card")) {
+  if (
+    (e.key === "Enter" || e.key === " ") &&
+    target.classList.contains("day-goal-card")
+  ) {
     e.preventDefault();
     const goalId = target.dataset.goalId;
     if (goalId) {

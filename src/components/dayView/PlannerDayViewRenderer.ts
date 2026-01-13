@@ -80,7 +80,11 @@ export class PlannerDayViewRenderer {
    * @param contextGoals - Optional Vision/Milestone/Focus goals to display in sidebar
    * @remarks Creates a complete planner layout with sidebar sections and a timeline.
    */
-  renderInitial(date: Date, allGoals: Goal[], contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
+  renderInitial(
+    date: Date,
+    allGoals: Goal[],
+    contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] }
+  ): void {
     const dayGoals = allGoals
       .filter((g) => this.isGoalForDate(g, date))
       .filter((g) => g.level === "intention");
@@ -108,8 +112,12 @@ export class PlannerDayViewRenderer {
       const bHasTime = Number(Boolean(b.startTime));
       if (aHasTime !== bHasTime) return bHasTime - aHasTime;
 
-      const aStart = a.startTime ? this.calculator.parseTimeToMinutes(a.startTime) ?? 9999 : 9999;
-      const bStart = b.startTime ? this.calculator.parseTimeToMinutes(b.startTime) ?? 9999 : 9999;
+      const aStart = a.startTime
+        ? this.calculator.parseTimeToMinutes(a.startTime) ?? 9999
+        : 9999;
+      const bStart = b.startTime
+        ? this.calculator.parseTimeToMinutes(b.startTime) ?? 9999
+        : 9999;
       if (aStart !== bStart) return aStart - bStart;
 
       return a.title.localeCompare(b.title);
@@ -123,10 +131,10 @@ export class PlannerDayViewRenderer {
       day % 10 === 1 && day !== 11
         ? "st"
         : day % 10 === 2 && day !== 12
-          ? "nd"
-          : day % 10 === 3 && day !== 13
-            ? "rd"
-            : "th";
+        ? "nd"
+        : day % 10 === 3 && day !== 13
+        ? "rd"
+        : "th";
     const dayName = `${weekday}, ${month} ${day}${ordinal}`;
 
     const dayStart = new Date(date);
@@ -161,35 +169,58 @@ export class PlannerDayViewRenderer {
               </div>
             </div>
 
-            ${contextGoals ? this.renderContextSection(contextGoals) : ''}
+            ${contextGoals ? this.renderContextSection(contextGoals) : ""}
 
+            ${
+              eventsToday.length > 0
+                ? `
             <div class="planner-sidebar-section">
-              <div class="section-title">Today’s events</div>
+              <div class="section-title">Today's events</div>
               <div class="sidebar-list">
+                ${eventsToday
+                  .slice(0, 8)
+                  .map(
+                    (ev) => `
+                      <button type="button" class="planner-event-item" data-action="edit-event" data-event-id="${
+                        ev.originalId
+                      }">
+                        <div class="planner-event-title">${ev.title}</div>
+                        <div class="planner-event-meta">${formatEventTime(
+                          ev.startAt,
+                          ev.allDay
+                        )}${
+                      ev.endAt && !ev.allDay
+                        ? `–${formatEventTime(ev.endAt, false)}`
+                        : ""
+                    }</div>
+                      </button>
+                    `
+                  )
+                  .join("")}
                 ${
-                  eventsToday.length > 0
-                    ? eventsToday
-                        .slice(0, 8)
-                        .map(
-                          (ev) => `
-                            <button type="button" class="planner-event-item" data-action="edit-event" data-event-id="${ev.originalId}">
-                              <div class="planner-event-title">${ev.title}</div>
-                              <div class="planner-event-meta">${formatEventTime(ev.startAt, ev.allDay)}${ev.endAt && !ev.allDay ? `–${formatEventTime(ev.endAt, false)}` : ""}</div>
-                            </button>
-                          `,
-                        )
-                        .join("")
-                    : '<div class="empty-list">No events yet</div>'
+                  eventsToday.length > 8
+                    ? `<div class="empty-list">+${
+                        eventsToday.length - 8
+                      } more</div>`
+                    : ""
                 }
-                ${eventsToday.length > 8 ? `<div class="empty-list">+${eventsToday.length - 8} more</div>` : ""}
               </div>
             </div>
+            `
+                : ""
+            }
 
             <div class="planner-sidebar-section">
               <div class="section-title">Today’s intentions</div>
               <div class="sidebar-list">
-                ${todayIntentions.map(g => this.renderSidebarItem(g, Boolean(g.startTime))).join('')}
-                ${todayIntentions.length === 0 ? '<div class="empty-list">No intentions yet</div>' : ''}
+                ${todayIntentions
+                  .map((g) => this.renderSidebarItem(g, Boolean(g.startTime)))
+                  .join("")}
+                ${
+                  todayIntentions.length === 0
+                    ? '<div class="empty-list">No intentions yet</div>'
+                    : ""
+                }
               </div>
             </div>
 
@@ -224,20 +255,26 @@ export class PlannerDayViewRenderer {
         </aside>
 
         <main class="planner-main">
-          ${unscheduled.length > 0 ? `
+          ${
+            unscheduled.length > 0
+              ? `
             <div class="planner-unscheduled-section">
               <div class="planner-unscheduled-header">
                 <h4 class="planner-unscheduled-title">Unscheduled</h4>
               </div>
               <div class="planner-unscheduled-list">
-                ${unscheduled.map(g => this.renderUnscheduledTask(g)).join('')}
+                ${unscheduled
+                  .map((g) => this.renderUnscheduledTask(g))
+                  .join("")}
               </div>
             </div>
-          ` : ''}
+          `
+              : ""
+          }
           <div class="planner-timeline-container day-timeline">
             ${this.timelineGrid.render()}
             <div class="planner-timeline-content">
-              ${scheduled.map(g => this.renderTimedTask(g)).join('')}
+              ${scheduled.map((g) => this.renderTimedTask(g)).join("")}
             </div>
           </div>
         </main>
@@ -254,39 +291,133 @@ export class PlannerDayViewRenderer {
    * @param date - The date to display
    * @param allGoals - All goals in the system
    * @param contextGoals - Optional Vision/Milestone/Focus goals to display in sidebar
-   * @remarks Currently performs a full re-render for simplicity
+   * @remarks Performs selective update to preserve expand/collapse state when possible
    */
-  update(date: Date, allGoals: Goal[], contextGoals?: { vision: Goal[], milestone: Goal[], focus: Goal[] }): void {
+  update(
+    date: Date,
+    allGoals: Goal[],
+    contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] }
+  ): void {
+    // Store expand/collapse state before re-rendering
+    const expandState = this.captureExpandState();
+
+    // Re-render
     this.renderInitial(date, allGoals, contextGoals);
+
+    // Restore expand/collapse state
+    this.restoreExpandState(expandState);
   }
 
   /**
-   * Update a single goal card
-   * @param _goalId - The ID of the goal to update (unused)
-   * @param _goal - The updated goal data (unused)
-   * @remarks Currently a no-op. Updates are handled via full re-render for consistency.
+   * Update a single goal
+   * @param _date - The date to display (for context, unused in current implementation)
+   * @param goalId - The ID of the goal to update
+   * @param goal - The updated goal data
    */
-  updateCard(_goalId: string, _goal: Goal): void {
-    // Re-render for simplicity and consistency
+  updateGoal(_date: Date, goalId: string, goal: Goal): void {
+    // Find and update the goal in the current view
+    const elements = this.container.querySelectorAll(
+      `[data-goal-id="${goalId}"]`
+    );
+
+    elements.forEach((element) => {
+      const htmlElement = element as HTMLElement;
+
+      // Update checkbox status
+      const checkbox = element.querySelector(".day-goal-checkbox");
+      if (checkbox) {
+        checkbox.classList.toggle("checked", goal.status === "done");
+      }
+
+      // Update card completion status
+      element.classList.toggle("completed", goal.status === "done");
+
+      // For timed tasks, update position if time changed
+      if (
+        element.classList.contains("planner-timed-task") &&
+        goal.startTime &&
+        goal.endTime
+      ) {
+        const startMin =
+          this.calculator.parseTimeToMinutes(goal.startTime) || 0;
+        const endMin =
+          this.calculator.parseTimeToMinutes(goal.endTime) || startMin + 60;
+        const duration = endMin - startMin;
+
+        // Calculate tighter positioning - account for card borders and padding
+        const top = this.calculator.minutesToPercent(startMin);
+        const durPct = (duration / this.calculator.getPlotRangeMin()) * 100;
+
+        // Apply a small adjustment to fit within hour boundaries better
+        const adjustedTop = Math.max(0, top - 0.1); // Slight upward adjustment
+        const adjustedHeight = Math.max(1, durPct - 0.2); // Reduce height slightly
+
+        htmlElement.style.top = `${adjustedTop}%`;
+        htmlElement.style.height = `${adjustedHeight}%`;
+      }
+    });
+
+    // If this is a new goal that wasn't visible before, do a full re-render
+    if (elements.length === 0) {
+      // Get current goals from the parent state or trigger a refresh
+      const event = new CustomEvent("requestRefresh", { detail: { goalId } });
+      this.container.dispatchEvent(event);
+    }
   }
 
   /**
-   * Render a sidebar item (task in cloud, ongoing, or upcoming)
-   * @param goal - The goal to render
-   * @param showTime - Whether to display the time range
-   * @returns HTML string for the sidebar item
+   * Capture expand/collapse state before re-rendering
+   * @returns Object containing expand state information
    * @private
    */
+  private captureExpandState(): Record<string, boolean> {
+    const state: Record<string, boolean> = {};
+
+    // Capture collapsed sections
+    const collapsedSections = this.container.querySelectorAll(
+      ".planner-sidebar-section.collapsed"
+    );
+    collapsedSections.forEach((section) => {
+      const sectionId = section.getAttribute("data-section-id") || "default";
+      state[sectionId] = true;
+    });
+
+    return state;
+  }
+
+  /**
+   * Restore expand/collapse state after re-rendering
+   * @param state - Expand state information from captureExpandState
+   * @private
+   */
+  private restoreExpandState(state: Record<string, boolean>): void {
+    Object.entries(state).forEach(([sectionId, isCollapsed]) => {
+      if (isCollapsed) {
+        const section =
+          this.container.querySelector(`[data-section-id="${sectionId}"]`) ||
+          this.container.querySelector(".planner-sidebar-section");
+        if (section) {
+          section.classList.add("collapsed");
+        }
+      }
+    });
+  }
   private renderSidebarItem(goal: Goal, showTime: boolean = false): string {
-    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : '📍';
+    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : "📍";
     const timeStr =
       showTime && goal.startTime
-        ? `<span class="sidebar-item-time">${goal.startTime}${goal.endTime ? ` - ${goal.endTime}` : ''}</span>`
-        : '';
+        ? `<span class="sidebar-item-time">${goal.startTime}${
+            goal.endTime ? ` - ${goal.endTime}` : ""
+          }</span>`
+        : "";
 
     return `
-      <div class="day-goal-card sidebar-item ${goal.status === 'done' ? 'completed' : ''}" data-goal-id="${goal.id}">
-        <div class="day-goal-checkbox ${goal.status === 'done' ? 'checked' : ''}"></div>
+      <div class="day-goal-card sidebar-item ${
+        goal.status === "done" ? "completed" : ""
+      }" data-goal-id="${goal.id}">
+        <div class="day-goal-checkbox ${
+          goal.status === "done" ? "checked" : ""
+        }"></div>
         <span class="sidebar-item-emoji">${emoji}</span>
         <span class="sidebar-item-title">${goal.title}</span>
         ${timeStr}
@@ -301,19 +432,29 @@ export class PlannerDayViewRenderer {
    * @private
    */
   private renderUnscheduledTask(goal: Goal): string {
-    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : '📍';
-    const colorClass = goal.category ? `cat-${goal.category}` : 'cat-default';
+    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : "📍";
+    const colorClass = goal.category ? `cat-${goal.category}` : "cat-default";
 
     return `
-      <div class="planner-unscheduled-item ${colorClass}" data-goal-id="${goal.id}">
-        <div class="day-goal-checkbox ${goal.status === 'done' ? 'checked' : ''}"></div>
+      <div class="planner-unscheduled-item ${colorClass}" data-goal-id="${
+      goal.id
+    }">
+        <div class="day-goal-checkbox ${
+          goal.status === "done" ? "checked" : ""
+        }"></div>
         <div class="unscheduled-task-content">
           <span class="unscheduled-task-emoji">${emoji}</span>
           <span class="unscheduled-task-title">${goal.title}</span>
         </div>
         <div class="unscheduled-task-actions">
-          <button class="btn-icon btn-schedule-task" type="button" data-goal-id="${goal.id}" aria-label="Schedule" title="Schedule">${this.icon("plus")}</button>
-          <button class="btn-zen-focus btn-icon" type="button" data-goal-id="${goal.id}" aria-label="Focus" title="Focus">${this.icon("eye")}</button>
+          <button class="btn-icon btn-schedule-task" type="button" data-goal-id="${
+            goal.id
+          }" aria-label="Schedule" title="Schedule">${this.icon(
+      "plus"
+    )}</button>
+          <button class="btn-zen-focus btn-icon" type="button" data-goal-id="${
+            goal.id
+          }" aria-label="Focus" title="Focus">${this.icon("eye")}</button>
         </div>
       </div>
     `;
@@ -327,13 +468,20 @@ export class PlannerDayViewRenderer {
    */
   private renderTimedTask(goal: Goal): string {
     const startMin = this.calculator.parseTimeToMinutes(goal.startTime) || 0;
-    const endMin = this.calculator.parseTimeToMinutes(goal.endTime) || startMin + 60;
+    const endMin =
+      this.calculator.parseTimeToMinutes(goal.endTime) || startMin + 60;
     const duration = endMin - startMin;
+
+    // Calculate tighter positioning - account for card borders and padding
     const top = this.calculator.minutesToPercent(startMin);
     const durPct = (duration / this.calculator.getPlotRangeMin()) * 100;
 
-    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : '📍';
-    const colorClass = goal.category ? `cat-${goal.category}` : 'cat-default';
+    // Apply a small adjustment to fit within hour boundaries better
+    const adjustedTop = Math.max(0, top - 0.1); // Slight upward adjustment
+    const adjustedHeight = Math.max(1, durPct - 0.2); // Reduce height slightly
+
+    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : "📍";
+    const colorClass = goal.category ? `cat-${goal.category}` : "cat-default";
     const resizeHandles =
       goal.status !== "done"
         ? `
@@ -343,16 +491,26 @@ export class PlannerDayViewRenderer {
         : "";
 
     return `
-        <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" style="top: ${top}%; height: ${durPct}%;" data-goal-id="${goal.id}">
+        <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" style="top: ${adjustedTop}%; height: ${adjustedHeight}%;" data-goal-id="${
+      goal.id
+    }">
         ${resizeHandles}
-        <div class="day-goal-checkbox ${goal.status === 'done' ? 'checked' : ''}"></div>
+        <div class="day-goal-checkbox ${
+          goal.status === "done" ? "checked" : ""
+        }"></div>
         <div class="timed-task-content">
           <span class="timed-task-emoji">${emoji}</span>
           <span class="timed-task-title">${goal.title}</span>
         </div>
         <div class="timed-task-actions">
-          <button class="btn-zen-focus btn-icon" type="button" data-goal-id="${goal.id}" aria-label="Focus" title="Focus">${this.icon("eye")}</button>
-          <button class="btn-icon btn-planner-remove" type="button" data-goal-id="${goal.id}" aria-label="Remove from timeline" title="Remove from timeline">${this.icon("minus")}</button>
+          <button class="btn-zen-focus btn-icon" type="button" data-goal-id="${
+            goal.id
+          }" aria-label="Focus" title="Focus">${this.icon("eye")}</button>
+          <button class="btn-icon btn-planner-remove" type="button" data-goal-id="${
+            goal.id
+          }" aria-label="Remove from timeline" title="Remove from timeline">${this.icon(
+      "minus"
+    )}</button>
         </div>
       </div>
     `;
@@ -379,25 +537,35 @@ export class PlannerDayViewRenderer {
    * @returns HTML string for the context section
    * @private
    */
-  private renderContextSection(contextGoals: { vision: Goal[], milestone: Goal[], focus: Goal[] }): string {
+  private renderContextSection(contextGoals: {
+    vision: Goal[];
+    milestone: Goal[];
+    focus: Goal[];
+  }): string {
     const renderIconOnly = (goals: Goal[], fallbackIcon: string) => {
-      if (goals.length === 0) return '';
+      if (goals.length === 0) return "";
       const primary = goals[0];
       const remaining = Math.max(0, goals.length - 1);
       const icon = primary.icon || fallbackIcon;
       return `
-        <button type="button" class="year-vision-icon-only" data-goal-id="${primary.id}" aria-label="${this.escapeHtml(primary.title)}">
+        <button type="button" class="year-vision-icon-only" data-goal-id="${
+          primary.id
+        }" aria-label="${this.escapeHtml(primary.title)}">
           <span class="vision-icon-large">${icon}</span>
-          ${remaining > 0 ? `<span class="vision-icon-badge">+${remaining}</span>` : ""}
+          ${
+            remaining > 0
+              ? `<span class="vision-icon-badge">+${remaining}</span>`
+              : ""
+          }
         </button>
       `;
     };
 
-    const visionHtml = renderIconOnly(contextGoals.vision, '✨');
-    const milestoneHtml = renderIconOnly(contextGoals.milestone, '🎯');
-    const focusHtml = renderIconOnly(contextGoals.focus, '🌿');
+    const visionHtml = renderIconOnly(contextGoals.vision, "✨");
+    const milestoneHtml = renderIconOnly(contextGoals.milestone, "🎯");
+    const focusHtml = renderIconOnly(contextGoals.focus, "🌿");
 
-    if (!visionHtml && !milestoneHtml && !focusHtml) return '';
+    if (!visionHtml && !milestoneHtml && !focusHtml) return "";
 
     return `
       <div class="planner-sidebar-section planner-context-section">
@@ -417,7 +585,7 @@ export class PlannerDayViewRenderer {
    * @private
    */
   private escapeHtml(text: string): string {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
@@ -438,6 +606,6 @@ export class PlannerDayViewRenderer {
       return CONFIG.CATEGORIES[catId as keyof typeof CONFIG.CATEGORIES].emoji;
     }
     // Default fallback
-    return '📍';
+    return "📍";
   }
 }

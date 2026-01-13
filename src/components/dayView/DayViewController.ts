@@ -165,6 +165,16 @@ export class DayViewController {
         this.boundHandlePointerDown
       );
 
+      // Add event listeners for refresh events
+      this.container.addEventListener(
+        "goalCreated",
+        this.handleGoalCreated.bind(this) as EventListener
+      );
+      this.container.addEventListener(
+        "requestRefresh",
+        this.handleRequestRefresh.bind(this) as EventListener
+      );
+
       this.setupSwipeSupport();
       this.ensureCustomizationPanelSetup();
 
@@ -232,6 +242,16 @@ export class DayViewController {
     this.container.removeEventListener(
       "pointerdown",
       this.boundHandlePointerDown
+    );
+
+    // Remove refresh event listeners
+    this.container.removeEventListener(
+      "goalCreated",
+      this.handleGoalCreated.bind(this) as EventListener
+    );
+    this.container.removeEventListener(
+      "requestRefresh",
+      this.handleRequestRefresh.bind(this) as EventListener
     );
   }
 
@@ -333,6 +353,23 @@ export class DayViewController {
     _clientY: number
   ): void {
     document.body.classList.remove(`is-dragging-${data.type}`);
+  }
+
+  private handleGoalCreated(_event: Event): void {
+    // A new goal was created, refresh the view
+    if (!this.state.currentDate) return;
+
+    // Trigger a re-render to show the new goal
+    this.renderer.updateCurrent();
+    setupDragAndDrop(this.timelineDeps);
+  }
+
+  private handleRequestRefresh(_event: Event): void {
+    // General refresh request
+    if (!this.state.currentDate) return;
+
+    this.renderer.updateCurrent();
+    setupDragAndDrop(this.timelineDeps);
   }
 
   private isMobileViewport(): boolean {
