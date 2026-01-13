@@ -7,9 +7,21 @@ import { PlannerDayViewRenderer } from "./PlannerDayViewRenderer";
 import { DragDropManager } from "./DragDropManager";
 import { DayViewState } from "./DayViewState";
 import { DayViewRenderer } from "./DayViewRenderer";
-import { DayViewEvents } from "./DayViewEvents";
-import { DayViewTimeline } from "./DayViewTimeline";
 import { setupCustomizationPanel } from "./CustomizationPanel";
+
+import { handleClick, handleKeyDown, type EventDeps } from "./events";
+import {
+  handleNativeDragStart,
+  handleNativeDragEnd,
+  handleNativeDragOver,
+  handleNativeDrop,
+  handlePointerDown,
+  setupDragAndDrop,
+  setupSwipeToComplete,
+  clearTimelineDropUi,
+  createTimelineRuntimeState,
+  type TimelineDeps,
+} from "./timeline";
 
 interface AppConfig {
   CATEGORIES: Record<string, { emoji: string; label: string; color: string }>;
@@ -29,8 +41,6 @@ export class DayViewController {
   private dragDropManager: DragDropManager;
 
   private renderer: DayViewRenderer;
-  private events: DayViewEvents;
-  private timeline: DayViewTimeline;
 
   private resizeObserver: ResizeObserver | null = null;
   private timeUpdateInterval: number | null = null;
@@ -38,6 +48,7 @@ export class DayViewController {
   private customizationPanelSetup: boolean = false;
 
   private state = new DayViewState();
+  private timelineState = createTimelineRuntimeState();
 
   private readonly boundHandleClick: (e: Event) => void;
   private readonly boundHandleKeyDown: (e: KeyboardEvent) => void;
@@ -51,7 +62,7 @@ export class DayViewController {
     container: HTMLElement,
     callbacks: DayViewCallbacks,
     _config: AppConfig,
-    options: Partial<DayViewOptions> = {},
+    options: Partial<DayViewOptions> = {}
   ) {
     this.container = container;
     this.callbacks = callbacks;
@@ -74,7 +85,7 @@ export class DayViewController {
       this.options.timeWindowStart!,
       this.options.timeWindowEnd!,
       this.options.maxLanes!,
-      this.options.snapInterval!,
+      this.options.snapInterval!
     );
 
     this.cardComponent = new CardComponent(_config);
@@ -83,34 +94,21 @@ export class DayViewController {
       container,
       this.cardComponent,
       this.calculator,
-      this.timelineGrid,
+      this.timelineGrid
     );
 
     this.dragDropManager = new DragDropManager({
       longPressMs: this.options.longPressMs,
       onDragStart: (data) => this.handleDragStart(data),
-      onDragEnd: (data, clientX, clientY) => this.handleDragEnd(data, clientX, clientY),
+      onDragEnd: (data, clientX, clientY) =>
+        this.handleDragEnd(data, clientX, clientY),
     });
 
     // Initialize new class-based modules
     this.renderer = new DayViewRenderer(this.plannerRenderer, this.state);
-    this.events = new DayViewEvents(
-      container,
-      this.callbacks,
-      this.state,
-      () => this.undo(),
-      () => this.redo()
-    );
-    this.timeline = new DayViewTimeline(
-      container,
-      this.calculator,
-      this.dragDropManager,
-      this.options,
-      this.callbacks,
-      this.state
-    );
 
     this.boundHandleClick = (e) => handleClick(e, this.eventDeps);
+
     this.boundHandleKeyDown = (e) => handleKeyDown(e, this.eventDeps);
     this.boundHandleNativeDragStart = (e) =>
       handleNativeDragStart(e, this.timelineDeps, this.timelineState);
@@ -144,13 +142,6 @@ export class DayViewController {
     };
   }
 
-  private get rendererDeps() {
-    return {
-      plannerRenderer: this.plannerRenderer,
-      state: this.state,
-    };
-  }
-
   mount(): void {
     if (this.isMounted) return;
 
@@ -159,11 +150,20 @@ export class DayViewController {
 
       this.container.addEventListener("click", this.boundHandleClick);
       this.container.addEventListener("keydown", this.boundHandleKeyDown);
-      this.container.addEventListener("dragstart", this.boundHandleNativeDragStart);
+      this.container.addEventListener(
+        "dragstart",
+        this.boundHandleNativeDragStart
+      );
       this.container.addEventListener("dragend", this.boundHandleNativeDragEnd);
-      this.container.addEventListener("dragover", this.boundHandleNativeDragOver);
+      this.container.addEventListener(
+        "dragover",
+        this.boundHandleNativeDragOver
+      );
       this.container.addEventListener("drop", this.boundHandleNativeDrop);
-      this.container.addEventListener("pointerdown", this.boundHandlePointerDown);
+      this.container.addEventListener(
+        "pointerdown",
+        this.boundHandlePointerDown
+      );
 
       this.setupSwipeSupport();
       this.ensureCustomizationPanelSetup();
@@ -182,9 +182,9 @@ export class DayViewController {
         if (currentDate.toDateString() === today.toDateString()) {
           this.renderer.renderCurrent();
         } else {
-          const gridEl = this.container.querySelector(".day-bed-grid") as
-            | HTMLElement
-            | null;
+          const gridEl = this.container.querySelector(
+            ".day-bed-grid"
+          ) as HTMLElement | null;
           if (gridEl) this.timelineGrid.updateElement(gridEl);
         }
       }, 60000);
@@ -216,14 +216,30 @@ export class DayViewController {
 
     this.container.removeEventListener("click", this.boundHandleClick);
     this.container.removeEventListener("keydown", this.boundHandleKeyDown);
-    this.container.removeEventListener("dragstart", this.boundHandleNativeDragStart);
-    this.container.removeEventListener("dragend", this.boundHandleNativeDragEnd);
-    this.container.removeEventListener("dragover", this.boundHandleNativeDragOver);
+    this.container.removeEventListener(
+      "dragstart",
+      this.boundHandleNativeDragStart
+    );
+    this.container.removeEventListener(
+      "dragend",
+      this.boundHandleNativeDragEnd
+    );
+    this.container.removeEventListener(
+      "dragover",
+      this.boundHandleNativeDragOver
+    );
     this.container.removeEventListener("drop", this.boundHandleNativeDrop);
-    this.container.removeEventListener("pointerdown", this.boundHandlePointerDown);
+    this.container.removeEventListener(
+      "pointerdown",
+      this.boundHandlePointerDown
+    );
   }
 
-  setGoals(date: Date, goals: Goal[], contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] }): void {
+  setGoals(
+    date: Date,
+    goals: Goal[],
+    contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] }
+  ): void {
     this.state.setGoals(date, goals, contextGoals);
 
     if (!this.isMounted) {
@@ -236,7 +252,7 @@ export class DayViewController {
   }
 
   render(): void {
-    renderCurrent(this.rendererDeps);
+    this.renderer.renderCurrent();
     setupDragAndDrop(this.timelineDeps);
   }
 
@@ -260,14 +276,14 @@ export class DayViewController {
       start,
       end,
       this.options.maxLanes!,
-      this.options.snapInterval!,
+      this.options.snapInterval!
     );
     this.timelineGrid = new TimelineGrid(this.calculator);
     this.plannerRenderer = new PlannerDayViewRenderer(
       this.container,
       this.cardComponent,
       this.calculator,
-      this.timelineGrid,
+      this.timelineGrid
     );
 
     this.render();
@@ -294,14 +310,14 @@ export class DayViewController {
         this.options.timeWindowStart!,
         this.options.timeWindowEnd!,
         newMaxLanes,
-        this.options.snapInterval!,
+        this.options.snapInterval!
       );
       this.timelineGrid = new TimelineGrid(this.calculator);
       this.plannerRenderer = new PlannerDayViewRenderer(
         this.container,
         this.cardComponent,
         this.calculator,
-        this.timelineGrid,
+        this.timelineGrid
       );
       this.render();
     }
@@ -311,7 +327,11 @@ export class DayViewController {
     document.body.classList.add(`is-dragging-${data.type}`);
   }
 
-  private handleDragEnd(data: DragData, _clientX: number, _clientY: number): void {
+  private handleDragEnd(
+    data: DragData,
+    _clientX: number,
+    _clientY: number
+  ): void {
     document.body.classList.remove(`is-dragging-${data.type}`);
   }
 
