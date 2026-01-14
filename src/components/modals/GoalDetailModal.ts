@@ -14,8 +14,14 @@ import { State } from "../../core/State";
 import { CONFIG } from "../../config";
 import { TimeBreakdown } from "../../utils/TimeBreakdown";
 import { ND_CONFIG } from "../../config/ndConfig";
-import { getVisionAccent } from "../../utils/goalLinkage";
-import type { AccentTheme, Goal, GoalStatus } from "../../types";
+import {
+  renderAccordionSection,
+  setupAccordionSectionToggles,
+} from "./shared/AccordionSection";
+import { renderEnergyMetaPanel, setupEnergyMetaPanel } from "./shared/EnergyMetaPanel";
+import { renderActivityPicker, setupActivityPicker } from "./shared/ActivityPicker";
+import { setupModalA11y, type ModalA11yCleanup } from "./shared/modalA11y";
+import type { AccentTheme, Category, Goal, GoalMeta, GoalStatus } from "../../types";
 
 export interface GoalDetailModalCallbacks {
   escapeHtml: (text: string) => string;
@@ -26,8 +32,280 @@ export interface GoalDetailModalCallbacks {
   onToast: (icon: string, message: string) => void;
 }
 
+type DetailSectionKey = "context" | "energy" | "link" | "details" | "advanced";
+
+const DETAIL_SECTION_IDS: Record<DetailSectionKey, string> = {
+  context: "goalDetailContextSection",
+  energy: "goalDetailEnergySection",
+  link: "goalDetailLinkSection",
+  details: "goalDetailDetailsSection",
+  advanced: "goalDetailAdvancedSection",
+};
+
+const DETAIL_SECTION_TITLES: Record<DetailSectionKey, { title: string; subtitle: string }> = {
+  context: {
+    title: "Context & orientation (optional)",
+    subtitle: "A quiet orientation to your time",
+  },
+  energy: {
+    title: "Make this easier (optional)",
+    subtitle: "Tiny + low-energy helpers",
+  },
+  link: {
+    title: "Link it up (optional)",
+    subtitle: "See what this connects to",
+  },
+  details: {
+    title: "Details & planning (optional)",
+    subtitle: "Track your progress",
+  },
+  advanced: {
+    title: "Advanced (optional)",
+    subtitle: "Subtasks, notes, time log, and meta",
+  },
+};
+
+type DetailModalState = {
+  getMeta: () => GoalMeta;
+  setMeta: (next: GoalMeta) => void;
+  getCategory: () => Category | null;
+  setCategory: (next: Category | null) => void;
+  getActivityId: () => string | null;
+  setActivityId: (next: string | null) => void;
+};
+
+function renderDetailAccordionSections(modal: HTMLElement): void {
+  const container = modal.querySelector("#goalDetailAccordionContainer");
+  if (!container) return;
+  container.innerHTML = [
+    renderAccordionSection({
+      id: DETAIL_SECTION_IDS.context,
+      title: DETAIL_SECTION_TITLES.context.title,
+      subtitle: DETAIL_SECTION_TITLES.context.subtitle,
+      bodyHtml: `<div id="goalDetailContextBody"></div>`,
+    }),
+    renderAccordionSection({
+      id: DETAIL_SECTION_IDS.energy,
+      title: DETAIL_SECTION_TITLES.energy.title,
+      subtitle: DETAIL_SECTION_TITLES.energy.subtitle,
+      bodyHtml: `<div id="goalDetailEnergyBody"></div>`,
+    }),
+    renderAccordionSection({
+      id: DETAIL_SECTION_IDS.link,
+      title: DETAIL_SECTION_TITLES.link.title,
+      subtitle: DETAIL_SECTION_TITLES.link.subtitle,
+      bodyHtml: `<div id="goalDetailLinkBody"></div>`,
+    }),
+    renderAccordionSection({
+      id: DETAIL_SECTION_IDS.details,
+      title: DETAIL_SECTION_TITLES.details.title,
+      subtitle: DETAIL_SECTION_TITLES.details.subtitle,
+      bodyHtml: `<div id="goalDetailDetailsBody"></div>`,
+    }),
+    renderAccordionSection({
+      id: DETAIL_SECTION_IDS.advanced,
+      title: DETAIL_SECTION_TITLES.advanced.title,
+      subtitle: DETAIL_SECTION_TITLES.advanced.subtitle,
+      bodyHtml: `<div id="goalDetailAdvancedBody"></div>`,
+    }),
+  ].join("");
+}
+
+function populateContextSection(modal: HTMLElement, goal: Goal): void {
+  const container = modal.querySelector("#goalDetailContextBody");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="detail-section time-section">
+      <h3>⏰ Time You Have</h3>
+      ${TimeBreakdown.generateHTML(goal.month, goal.year, false, goal.level)}
+    </div>
+  `;
+}
+
+function populateEnergySection(
+  modal: HTMLElement,
+  level: Goal["level"],
+  state: DetailModalState,
+): void {
+  const container = modal.querySelector("#goalDetailEnergyBody");
+  if (!container) return;
+  const categoryOptions = Object.entries(CONFIG.CATEGORIES)
+    .map(([key, meta]) => `<option value="${key}">${meta.label}</option>`)
+    .join("");
+  container.innerHTML = `
+    <div id="goalDetailEnergyMeta">
+      ${renderEnergyMetaPanel({ level, meta: state.getMeta() })}
+    </div>
+    <div class="form-group">
+      <label for="goalDetailCategory">Area of life (optional)</label>
+      <select id="goalDetailCategory" class="modal-select">
+        <option value="">No category</option>
+        ${categoryOptions}
+      </select>
+    </div>
+    <div class="form-group" id="goalDetailActivitySlot"></div>
+  `;
+  const metaSlot = container.querySelector("#goalDetailEnergyMeta") as HTMLElement | null;
+  setupEnergyMetaPanel(metaSlot, {
+    level,
+    meta: state.getMeta(),
+    getMeta: () => state.getMeta(),
+    onChange: (nextMeta) => state.setMeta(nextMeta),
+  });
+  const categorySelect = container.querySelector(
+    "#goalDetailCategory",
+  ) as HTMLSelectElement | null;
+  if (categorySelect) {
+    categorySelect.value = state.getCategory() ?? "";
+    categorySelect.onchange = () => {
+      const raw = categorySelect.value;
+      state.setCategory(
+        raw && raw in CONFIG.CATEGORIES ? (raw as Category) : null,
+      );
+    };
+  }
+  const activitySlot = container.querySelector("#goalDetailActivitySlot") as HTMLElement | null;
+  if (activitySlot) {
+    activitySlot.innerHTML = renderActivityPicker({ value: state.getActivityId() });
+    setupActivityPicker(activitySlot, {
+      value: state.getActivityId(),
+      onChange: (next) => state.setActivityId(next),
+    });
+  }
+}
+
+function populateLinkSection(
+  modal: HTMLElement,
+  goal: Goal,
+  escapeHtml: (value: string) => string,
+  getLevelLabel: (level: string) => string,
+): void {
+  const container = modal.querySelector("#goalDetailLinkBody");
+  if (!container) return;
+  let linkHtml = '<p class="field-help">None (life task)</p>';
+  if (goal.parentId) {
+    const parent = Goals.getById(goal.parentId);
+    if (parent) {
+      linkHtml = `<p class="field-help">${getLevelLabel(
+        parent.level,
+      )}: ${escapeHtml(parent.title)}</p>`;
+    } else {
+      linkHtml = `<p class="field-help">Linked to unknown goal</p>`;
+    }
+  }
+  container.innerHTML = `
+    <div class="form-group">
+      <label>Connection</label>
+      ${linkHtml}
+    </div>
+  `;
+}
+
+function populateDetailsSection(modal: HTMLElement, progress: number): void {
+  const container = modal.querySelector("#goalDetailDetailsBody");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="detail-section">
+      <h3>Progress</h3>
+      <div class="progress-control">
+        <div class="progress-bar-lg">
+          <div class="progress-fill-lg" style="width: ${progress}%"></div>
+        </div>
+        <span class="progress-value">${progress}%</span>
+      </div>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="${progress}"
+        class="progress-slider"
+        id="progressSlider"
+      />
+    </div>
+  `;
+}
+
+function populateAdvancedSection(
+  modal: HTMLElement,
+  goal: Goal,
+  callbacks: GoalDetailModalCallbacks,
+): void {
+  const container = modal.querySelector("#goalDetailAdvancedBody");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="detail-section">
+      <h3>Subtasks <span class="count">(${
+        goal.subtasks.filter((s) => s.done).length
+      }/${goal.subtasks.length})</span></h3>
+      <div class="subtasks-list" id="subtasksList">
+        ${goal.subtasks
+          .map(
+            (s) => `
+            <div class="subtask-item ${s.done ? "done" : ""}" data-subtask-id="${
+              s.id
+            }">
+              <div class="subtask-checkbox ${s.done ? "checked" : ""}"></div>
+              <span class="subtask-title">${callbacks.escapeHtml(s.title)}</span>
+              <button class="btn btn-icon btn-ghost subtask-delete">×</button>
+            </div>
+          `,
+          )
+          .join("")}
+      </div>
+      <div class="add-subtask">
+        <input type="text" placeholder="Add a subtask..." id="newSubtaskInput">
+        <button class="btn btn-sm btn-primary" id="addSubtaskBtn">Add</button>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Notes & Reflections</h3>
+      <div class="notes-list" id="notesList">
+        ${goal.notes
+          .map(
+            (n) => `
+            <div class="note-item">
+              <p>${callbacks.escapeHtml(n.text)}</p>
+              <span class="note-date">${callbacks.formatDate(n.createdAt)}</span>
+            </div>
+          `,
+          )
+          .join("")}
+      </div>
+      <div class="add-note">
+        <textarea placeholder="Add a note..." id="newNoteInput"></textarea>
+        <button class="btn btn-sm btn-primary" id="addNoteBtn">Add Note</button>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Time Spent</h3>
+      <div class="time-summary">
+        <span class="time-total">${callbacks.formatMinutes(
+          Goals.getTotalTime(goal.id),
+        )}</span>
+        <button class="btn btn-sm btn-ghost" id="logTimeBtn">+ Log Time</button>
+      </div>
+      ${
+        goal.lastWorkedOn
+          ? `<p class="last-worked">Last worked on: ${callbacks.formatDate(
+              goal.lastWorkedOn,
+            )}</p>`
+          : ""
+      }
+    </div>
+    <div class="detail-meta">
+      <span>Created: ${callbacks.formatDate(goal.createdAt)}</span>
+      ${
+        goal.completedAt
+          ? `<span>Completed: ${callbacks.formatDate(goal.completedAt)}</span>`
+          : ""
+      }
+    </div>
+  `;
+}
+
 class GoalDetailModalManager {
   private callbacks: GoalDetailModalCallbacks | null = null;
+  private a11yCleanup: ModalA11yCleanup | null = null;
 
   private getLevelLabel(level: string): string {
     switch (level) {
@@ -52,6 +330,18 @@ class GoalDetailModalManager {
   }
 
   /**
+   * Close and clean up the modal
+   */
+  private closeModal(modal: HTMLElement): void {
+    if (this.a11yCleanup) {
+      this.a11yCleanup();
+      this.a11yCleanup = null;
+    }
+    modal.remove();
+    State.selectedGoal = null;
+  }
+
+  /**
    * Open goal detail modal for a specific goal
    */
   show(goalId?: string): void {
@@ -67,262 +357,136 @@ class GoalDetailModalManager {
     const levelLabel = this.getLevelLabel(goal.level);
     const cat = goal.category ? CONFIG.CATEGORIES[goal.category] ?? null : null;
     const status = CONFIG.STATUSES[goal.status];
-    const isVision = goal.level === "vision";
-    const currentAccent = isVision ? getVisionAccent(goal)?.key ?? "" : "";
-    const accentOptions = isVision
-      ? Object.entries(ND_CONFIG.ACCENT_THEMES)
-          .filter(([key]) => key !== "rainbow")
-          .map(([key, meta]) => `<option value="${key}">${meta.label}</option>`)
-          .join("")
-      : "";
+
+    let detailMetaDraft: GoalMeta = { ...(goal.meta ?? {}) };
+    let detailActivityId: string | null = goal.activityId ?? null;
+    let detailCategory: Category | null = goal.category ?? null;
+
+    const detailState: DetailModalState = {
+      getMeta: () => detailMetaDraft,
+      setMeta: (nextMeta) => {
+        detailMetaDraft = nextMeta;
+      },
+      getCategory: () => detailCategory,
+      setCategory: (nextCategory) => {
+        detailCategory = nextCategory;
+      },
+      getActivityId: () => detailActivityId,
+      setActivityId: (next) => {
+        detailActivityId = next;
+      },
+    };
+
+    const statusButtonsHtml = Object.entries(CONFIG.STATUSES)
+      .map(
+        ([id, s]) => `
+          <button class="status-btn ${goal.status === id ? "active" : ""}"
+                  data-status="${id}"
+                  style="--status-color: ${s.color}">
+            ${s.emoji} ${s.label}
+          </button>
+        `,
+      )
+      .join("");
 
     const modal = document.createElement("div");
     modal.className = "modal-overlay active";
     modal.id = "goalDetailModal";
     modal.innerHTML = `
-                <div class="modal modal-lg">
-                    <div class="modal-header">
-                        <div class="goal-detail-header">
-                            ${
-                              cat
-                                ? `<span class="goal-category-badge" style="background: ${cat.color}20; color: ${cat.color}">
-                                ${cat.emoji} ${cat.label}
-                            </span>`
-                                : ""
-                            }
-                            <span class="goal-status-badge" style="background: ${
-                              status.color
-                            }20; color: ${status.color}">
-                                ${status.emoji} ${status.label}
-                            </span>
-                        </div>
-                        <button class="modal-close" id="closeGoalDetail">×</button>
-                    </div>
-	                    <div class="modal-body">
-	                        <div class="detail-section">
-	                          <div class="form-group">
-	                            <label for="goalTitleInput">${levelLabel} title</label>
-	                            <input id="goalTitleInput" type="text" value="${callbacks.escapeHtml(
-                                goal.title
-                              )}" />
-	                          </div>
-	                          <div class="form-group">
-	                            <label for="goalDescInput">Description (optional)</label>
-	                            <textarea id="goalDescInput" rows="2" placeholder="A short note to keep it grounded.">${callbacks.escapeHtml(
-                                goal.description ?? ""
-                              )}</textarea>
-	                          </div>
-	                        </div>
-
-	                        ${
-                            isVision
-                              ? `
-	                        <div class="detail-section">
-	                          <h3>Visuals</h3>
-                              <div class="form-group-row">
-                                <div class="form-group">
-                                    <label for="visionIconInput">Icon</label>
-                                    <div class="icon-input-wrapper">
-                                        <input id="visionIconInput" type="text" class="icon-input" value="${
-                                          goal.icon || "✨"
-                                        }" maxlength="2" />
-                                        <div class="icon-presets">
-                                            ${[
-                                              "✨",
-                                              "🚀",
-                                              "🏔️",
-                                              "🎯",
-                                              "💪",
-                                              "❤️",
-                                              "🧠",
-                                              "🦁",
-                                              "🌱",
-                                              "🌊",
-                                            ]
-                                              .map(
-                                                (icon) =>
-                                                  `<button type="button" class="icon-preset-btn" data-icon="${icon}">${icon}</button>`
-                                              )
-                                              .join("")}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group flex-grow">
-    	                            <label for="visionAccentDetail">Color Theme</label>
-    	                            <select id="visionAccentDetail" class="modal-select">
-    	                              <option value="">Default</option>
-    	                              ${accentOptions}
-    	                            </select>
-                                </div>
-                              </div>
-	                        </div>
-	                        `
-                              : ""
-                          }
-
-	                        ${
-                            isVision
-                              ? ""
-                              : `
-	                        <!-- Time Breakdown Section -->
-	                        <div class="detail-section time-section">
-	                            <h3>⏰ Time You Have</h3>
-	                            ${TimeBreakdown.generateHTML(
-                                goal.month,
-                                goal.year,
-                                false,
-                                goal.level
-                              )}
-	                        </div>
-
-	                        <!-- Progress Section -->
-	                        <div class="detail-section">
-	                            <h3>Progress</h3>
-	                            <div class="progress-control">
-	                                <div class="progress-bar-lg">
-	                                    <div class="progress-fill-lg" style="width: ${
-                                        goal.progress
-                                      }%"></div>
-	                                </div>
-	                                <span class="progress-value">${
-                                    goal.progress
-                                  }%</span>
-	                            </div>
-	                            <input type="range" min="0" max="100" value="${
-                                goal.progress
-                              }"
-	                                   class="progress-slider" id="progressSlider">
-	                        </div>
-	                        `
-                          }
-
-                        <!-- Status Section -->
-                        <div class="detail-section">
-                            <h3>Status</h3>
-                            <div class="status-buttons">
-                                ${Object.entries(CONFIG.STATUSES)
-                                  .map(
-                                    ([id, s]) => `
-                                    <button class="status-btn ${
-                                      goal.status === id ? "active" : ""
-                                    }"
-                                            data-status="${id}" style="--status-color: ${
-                                      s.color
-                                    }">
-                                        ${s.emoji} ${s.label}
-                                    </button>
-                                `
-                                  )
-                                  .join("")}
-                            </div>
-                        </div>
-
-                        <!-- Subtasks Section -->
-                        <div class="detail-section">
-                            <h3>Subtasks <span class="count">(${
-                              goal.subtasks.filter((s) => s.done).length
-                            }/${goal.subtasks.length})</span></h3>
-                            <div class="subtasks-list" id="subtasksList">
-                                ${goal.subtasks
-                                  .map(
-                                    (s) => `
-                                    <div class="subtask-item ${
-                                      s.done ? "done" : ""
-                                    }" data-subtask-id="${s.id}">
-                                        <div class="subtask-checkbox ${
-                                          s.done ? "checked" : ""
-                                        }"></div>
-                                        <span class="subtask-title">${callbacks.escapeHtml(
-                                          s.title
-                                        )}</span>
-                                        <button class="btn btn-icon btn-ghost subtask-delete">×</button>
-                                    </div>
-                                `
-                                  )
-                                  .join("")}
-                            </div>
-                            <div class="add-subtask">
-                                <input type="text" placeholder="Add a subtask..." id="newSubtaskInput">
-                                <button class="btn btn-sm btn-primary" id="addSubtaskBtn">Add</button>
-                            </div>
-                        </div>
-
-                        <!-- Notes Section -->
-                        <div class="detail-section">
-                            <h3>Notes & Reflections</h3>
-                            <div class="notes-list" id="notesList">
-                                ${goal.notes
-                                  .map(
-                                    (n) => `
-                                    <div class="note-item">
-                                        <p>${callbacks.escapeHtml(n.text)}</p>
-                                        <span class="note-date">${callbacks.formatDate(
-                                          n.createdAt
-                                        )}</span>
-                                    </div>
-                                `
-                                  )
-                                  .join("")}
-                            </div>
-                            <div class="add-note">
-                                <textarea placeholder="Add a note..." id="newNoteInput"></textarea>
-                                <button class="btn btn-sm btn-primary" id="addNoteBtn">Add Note</button>
-                            </div>
-                        </div>
-
-                        <!-- Time Tracking -->
-                        <div class="detail-section">
-                            <h3>Time Spent</h3>
-                            <div class="time-summary">
-                                <span class="time-total">${callbacks.formatMinutes(
-                                  Goals.getTotalTime(goalId)
-                                )}</span>
-                                <button class="btn btn-sm btn-ghost" id="logTimeBtn">+ Log Time</button>
-                            </div>
-                            ${
-                              goal.lastWorkedOn
-                                ? `<p class="last-worked">Last worked on: ${callbacks.formatDate(
-                                    goal.lastWorkedOn
-                                  )}</p>`
-                                : ""
-                            }
-                        </div>
-
-                        <!-- Meta Info -->
-                        <div class="detail-meta">
-                            <span>Created: ${callbacks.formatDate(
-                              goal.createdAt
-                            )}</span>
-                            ${
-                              goal.completedAt
-                                ? `<span>Completed: ${callbacks.formatDate(
-                                    goal.completedAt
-                                  )}</span>`
-                                : ""
-                            }
-                        </div>
-                    </div>
-		                    <div class="modal-actions">
-		                        <button class="btn btn-danger" id="deleteGoalBtn">Remove ${levelLabel}</button>
-		                        <button class="btn btn-primary" id="saveGoalBtn">Save Changes</button>
-		                    </div>
-		                </div>
-		            `;
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <div class="goal-detail-header">
+            ${
+              cat
+                ? `<span class="goal-category-badge" style="background: ${cat.color}20; color: ${cat.color}">
+                    ${cat.emoji} ${cat.label}
+                  </span>`
+                : ""
+            }
+            <span class="goal-status-badge" style="background: ${
+              status.color
+            }20; color: ${status.color}">
+              ${status.emoji} ${status.label}
+            </span>
+          </div>
+          <button class="modal-close" id="closeGoalDetail">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="goal-detail-hero">
+            <div class="form-group">
+              <label for="goalTitleInput">${levelLabel} title</label>
+              <input
+                id="goalTitleInput"
+                type="text"
+                value="${callbacks.escapeHtml(goal.title)}"
+              />
+            </div>
+            <div class="form-group">
+              <label for="goalDescInput">Description (optional)</label>
+              <textarea
+                id="goalDescInput"
+                rows="2"
+                placeholder="A short note to keep it grounded."
+              >${callbacks.escapeHtml(goal.description ?? "")}</textarea>
+            </div>
+            <div id="goalHeroReassurance" class="goal-title-help">
+              Take your time—this can evolve.
+            </div>
+            <div class="detail-section hero-status">
+              <h3>Status</h3>
+              <div class="status-buttons">
+                ${statusButtonsHtml}
+              </div>
+            </div>
+          </div>
+          <div id="goalDetailAccordionContainer" class="goal-detail-accordion"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-danger" id="deleteGoalBtn">Remove ${levelLabel}</button>
+          <button class="btn btn-primary" id="saveGoalBtn">Save Changes</button>
+        </div>
+      </div>
+    `;
 
     document.body.appendChild(modal);
-    if (isVision) {
-      const accentEl = modal.querySelector(
-        "#visionAccentDetail"
-      ) as HTMLSelectElement | null;
-      if (accentEl) accentEl.value = currentAccent;
+    renderDetailAccordionSections(modal);
+    const accordionContainer = modal.querySelector(
+      "#goalDetailAccordionContainer",
+    ) as HTMLElement | null;
+    setupAccordionSectionToggles(accordionContainer);
+    const getLevelLabel = this.getLevelLabel.bind(this);
+    populateContextSection(modal, goal);
+    populateEnergySection(modal, goal.level, detailState);
+    populateLinkSection(modal, goal, callbacks.escapeHtml, getLevelLabel);
+    populateDetailsSection(modal, goal.progress);
+    populateAdvancedSection(modal, goal, callbacks);
+    this.bindEvents(modal, goalId, detailState);
+
+    // Setup accessibility: ESC to close, focus trap, initial focus
+    const modalContainer = modal.querySelector(".modal") as HTMLElement | null;
+    if (modalContainer) {
+      // Clean up previous setup if showing again
+      if (this.a11yCleanup) {
+        this.a11yCleanup();
+        this.a11yCleanup = null;
+      }
+      this.a11yCleanup = setupModalA11y({
+        overlay: modal,
+        modal: modalContainer,
+        onClose: () => this.closeModal(modal),
+        initialFocusSelector: "#goalTitleInput",
+      });
     }
-    this.bindEvents(modal, goalId);
   }
 
   /**
    * Bind all event handlers for the modal
    */
-  private bindEvents(modal: HTMLElement, goalId: string): void {
+  private bindEvents(
+    modal: HTMLElement,
+    goalId: string,
+    detailState: DetailModalState,
+  ): void {
     if (!this.callbacks) return;
 
     // Store callbacks in local const to satisfy TypeScript null checks
@@ -330,15 +494,13 @@ class GoalDetailModalManager {
 
     // Close button
     modal.querySelector("#closeGoalDetail")?.addEventListener("click", () => {
-      modal.remove();
-      State.selectedGoal = null;
+      this.closeModal(modal);
     });
 
     // Click outside to close
     modal.addEventListener("click", (e: MouseEvent) => {
       if (e.target === modal) {
-        modal.remove();
-        State.selectedGoal = null;
+        this.closeModal(modal);
       }
     });
 
@@ -385,7 +547,7 @@ class GoalDetailModalManager {
         btn.classList.add("active");
         if (status === "done") {
           Goals.complete(goalId);
-          modal.remove();
+          this.closeModal(modal);
           callbacks.onRender();
         }
       });
@@ -474,7 +636,7 @@ class GoalDetailModalManager {
       const levelLabelLower = levelLabel.toLowerCase();
       if (confirm(`Remove this ${levelLabelLower}?`)) {
         Goals.delete(goalId);
-        modal.remove();
+        this.closeModal(modal);
         callbacks.onRender();
         callbacks.onToast("🗑️", `${levelLabel} removed`);
       }
@@ -497,15 +659,27 @@ class GoalDetailModalManager {
         if (title && title !== goal.title) updates.title = title;
         updates.description = description;
 
+        // Persist category and activityId from detailState
+        const nextCategory = detailState.getCategory();
+        if (nextCategory !== goal.category) {
+          updates.category = nextCategory;
+        }
+        const nextActivityId = detailState.getActivityId();
+        if (nextActivityId !== goal.activityId) {
+          updates.activityId = nextActivityId ?? undefined;
+        }
+
+        // Persist meta from detailState (merges level-specific fields)
+        const nextMeta = detailState.getMeta();
         if (goal.level === "vision") {
           const accentRaw =
             (
               modal.querySelector(
-                "#visionAccentDetail"
+                "#visionAccent"
               ) as HTMLSelectElement | null
             )?.value?.trim() ?? "";
           const accentValue = accentRaw as AccentTheme;
-          const metaClone = { ...(goal.meta ?? {}) };
+          const metaClone = { ...nextMeta };
           if (accentRaw && (accentValue as any) in ND_CONFIG.ACCENT_THEMES) {
             metaClone.accentTheme = accentRaw as AccentTheme;
           } else {
@@ -520,12 +694,15 @@ class GoalDetailModalManager {
           if (iconInput) {
             updates.icon = iconInput.value || "✨"; // Default if cleared
           }
+        } else {
+          // For non-vision levels, just apply the meta from detailState
+          updates.meta =
+            Object.keys(nextMeta).length > 0 ? nextMeta : undefined;
         }
 
         Goals.update(goalId, updates);
       }
-      modal.remove();
-      State.selectedGoal = null;
+      this.closeModal(modal);
       callbacks.onRender();
       callbacks.onToast("✅", "Changes saved");
     });
@@ -547,8 +724,14 @@ class GoalDetailModalManager {
 
   /**
    * Refresh the modal with updated goal data
+   * Note: We don't restore focus here since we're immediately re-showing
    */
   private refresh(modal: HTMLElement, goalId: string): void {
+    // Just remove modal without restoring focus since we're re-showing
+    if (this.a11yCleanup) {
+      // Don't call cleanup since we're immediately re-showing
+      this.a11yCleanup = null;
+    }
     modal.remove();
     this.show(goalId);
   }

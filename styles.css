@@ -5623,6 +5623,18 @@ body.focus-mode .month-card:not(.current) {
     color: var(--text-tertiary);
 }
 
+.quick-add-accordion {
+    margin-top: var(--space-4);
+}
+
+.quick-add-accordion .modal-disclosure {
+    border: 1px solid rgba(180, 106, 74, 0.15);
+}
+
+.dark-mode .quick-add-accordion .modal-disclosure {
+    border-color: rgba(140, 183, 217, 0.2);
+}
+
 
 body.focus-mode .month-card.current {
     transform: scale(1.02);

@@ -1,6 +1,7 @@
 /**
  * CustomizationPanel - Slide-in panel for editing custom intentions
  * @remarks Provides CRUD interface for managing user's custom intentions
+ * @remarks Uses progressive disclosure (accordions) for calm UX
  */
 
 import type { CustomIntention, Category } from "../../types";
@@ -8,6 +9,15 @@ import { IntentionsManager } from "../../core/IntentionsManager";
 import { CONFIG } from "../../config/constants";
 import { UI } from "../../ui/UIManager";
 import { refreshIntentionsGrid } from "./IntentionsGrid";
+import {
+  renderAccordionSection,
+  setupAccordionSectionToggles,
+} from "../modals/shared/AccordionSection";
+
+// Track accordion states across panel opens
+let addSectionOpen = true; // Default open on first visit
+let listSectionOpen = false;
+let hasOpenedOnce = false;
 
 /**
  * Escape HTML to prevent XSS
@@ -21,6 +31,86 @@ function escapeHtml(text: string): string {
 }
 
 /**
+ * Render the Add form body content (used inside accordion)
+ */
+function renderAddFormBody(): string {
+  return `
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="intention-title" class="form-label">Title</label>
+        <input
+          type="text"
+          id="intention-title"
+          class="form-input"
+          placeholder="e.g., Deep work, Email admin"
+          maxlength="50"
+          required
+        />
+      </div>
+
+      <div class="form-field form-field-emoji">
+        <label for="intention-emoji" class="form-label">Emoji</label>
+        <div class="emoji-picker-control">
+          <input
+            type="text"
+            id="intention-emoji"
+            class="form-input emoji-input"
+            placeholder="🎯"
+            maxlength="2"
+          />
+          <button type="button" class="emoji-picker-btn" aria-label="Choose emoji">
+            😊
+          </button>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="intention-category" class="form-label">Category</label>
+        <select id="intention-category" class="form-select">
+          ${renderCategoryOptions()}
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="intention-duration" class="form-label">Duration (minutes)</label>
+        <input
+          type="number"
+          id="intention-duration"
+          class="form-input"
+          placeholder="60"
+          min="5"
+          max="480"
+          step="5"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-add-intention-submit">
+        <span aria-hidden="true">+</span>
+        Add quick intention
+      </button>
+      <button type="button" class="btn-form-reset">
+        Cancel
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Render the list section body content (used inside accordion)
+ */
+function renderListBody(items: CustomIntention[]): string {
+  return `
+    <div class="intentions-list-hint">Drag to reorder</div>
+    <div class="intentions-sortable-list" data-sortable="true">
+      ${renderSortableIntentions(items)}
+    </div>
+  `;
+}
+
+/**
  * Render the customization panel
  * @param intentions - Current intentions to display
  * @returns HTML string for the panel
@@ -28,11 +118,37 @@ function escapeHtml(text: string): string {
 export function renderCustomizationPanel(intentions?: CustomIntention[]): string {
   const items = intentions || IntentionsManager.getSorted();
 
+  // On first open, show Add section. Otherwise, show list if items exist.
+  if (!hasOpenedOnce) {
+    addSectionOpen = true;
+    listSectionOpen = items.length > 0;
+    hasOpenedOnce = true;
+  }
+
+  const addAccordion = renderAccordionSection({
+    id: "panelAddSection",
+    title: "Add a quick intention",
+    subtitle: "Create a new template",
+    open: addSectionOpen,
+    bodyHtml: renderAddFormBody(),
+  });
+
+  const listAccordion = renderAccordionSection({
+    id: "panelListSection",
+    title: `Your quick intentions`,
+    subtitle: items.length > 0 ? `${items.length} templates` : "No templates yet",
+    open: listSectionOpen,
+    bodyHtml: renderListBody(items),
+  });
+
   return `
     <div class="customization-panel-backdrop" data-panel-visible="false">
       <div class="customization-panel" role="dialog" aria-labelledby="panel-title" aria-modal="true">
         <div class="panel-header">
-          <h2 id="panel-title" class="panel-title">Customize quick intentions</h2>
+          <div class="panel-header-content">
+            <h2 id="panel-title" class="panel-title">Quick intentions</h2>
+            <p class="panel-helper-text">These are templates—they don't affect your goals unless you add them to a day.</p>
+          </div>
           <button
             type="button"
             class="panel-close-btn"
@@ -45,86 +161,18 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
         </div>
 
         <div class="panel-content">
-          <section class="intention-form">
-            <header class="form-section-heading">
-              <h3 class="form-section-title">Add New Quick Intention</h3>
-            </header>
-            <div class="form-grid">
-              <div class="form-field">
-                <label for="intention-title" class="form-label">Title</label>
-                <input
-                  type="text"
-                  id="intention-title"
-                  class="form-input"
-                  placeholder="e.g., Deep work, Email admin"
-                  maxlength="50"
-                  required
-                />
-              </div>
-
-              <div class="form-field form-field-emoji">
-                <label for="intention-emoji" class="form-label">Emoji</label>
-                <div class="emoji-picker-control">
-                  <input
-                    type="text"
-                    id="intention-emoji"
-                    class="form-input emoji-input"
-                    placeholder="🎯"
-                    maxlength="2"
-                  />
-                  <button type="button" class="emoji-picker-btn" aria-label="Choose emoji">
-                    😊
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-field">
-                <label for="intention-category" class="form-label">Category</label>
-                <select id="intention-category" class="form-select">
-                  ${renderCategoryOptions()}
-                </select>
-              </div>
-
-              <div class="form-field">
-                <label for="intention-duration" class="form-label">Duration (minutes)</label>
-                <input
-                  type="number"
-                  id="intention-duration"
-                  class="form-input"
-                  placeholder="60"
-                  min="5"
-                  max="480"
-                  step="5"
-                  required
-                />
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn-add-intention-submit">
-                <span aria-hidden="true">+</span>
-                Add quick intention
-              </button>
-            </div>
-          </section>
-
-          <section class="intentions-list-section">
-            <div class="intentions-list-header">
-              <h3 class="form-section-title">Your Quick Intentions</h3>
-              <span class="intentions-count">${items.length}</span>
-            </div>
-            <div class="intentions-sortable-list" data-sortable="true">
-              ${renderSortableIntentions(items)}
-            </div>
-          </section>
+          <div class="panel-accordion-container" id="panelAccordionContainer">
+            ${addAccordion}
+            ${listAccordion}
+          </div>
         </div>
 
         <div class="panel-footer">
           <button type="button" class="panel-btn panel-btn-secondary btn-panel-cancel">
-            Cancel
+            Close
           </button>
           <button type="button" class="panel-btn panel-btn-primary btn-panel-save">
-            Save Changes
+            Done
           </button>
         </div>
       </div>
@@ -276,14 +324,49 @@ export function openCustomizationPanel(container: HTMLElement): void {
   backdrop.classList.add('visible');
   panel?.classList.add('visible');
 
-  // Focus the first input
-  const firstInput = backdrop.querySelector('#intention-title') as HTMLInputElement;
-  if (firstInput) {
-    setTimeout(() => firstInput.focus(), 300); // After animation
+  // Set up accordion toggles
+  const accordionContainer = backdrop.querySelector('#panelAccordionContainer') as HTMLElement | null;
+  setupAccordionSectionToggles(accordionContainer, (id, open) => {
+    if (id === "panelAddSection") {
+      addSectionOpen = open;
+    } else if (id === "panelListSection") {
+      listSectionOpen = open;
+    }
+  });
+
+  // Focus the first input if add section is open
+  if (addSectionOpen) {
+    const firstInput = backdrop.querySelector('#intention-title') as HTMLInputElement;
+    if (firstInput) {
+      setTimeout(() => firstInput.focus(), 300); // After animation
+    }
   }
 
   // Trap focus within panel
   trapFocus(backdrop);
+}
+
+/**
+ * Clear the add form and reset editing state
+ */
+function clearAddForm(container: HTMLElement, editingIdRef: { current: string | null }): void {
+  const titleInput = container.querySelector('#intention-title') as HTMLInputElement;
+  const emojiInput = container.querySelector('#intention-emoji') as HTMLInputElement;
+  const categorySelect = container.querySelector('#intention-category') as HTMLSelectElement;
+  const durationInput = container.querySelector('#intention-duration') as HTMLInputElement;
+
+  if (titleInput) titleInput.value = '';
+  if (emojiInput) emojiInput.value = '';
+  if (categorySelect) categorySelect.selectedIndex = 0;
+  if (durationInput) durationInput.value = '';
+
+  editingIdRef.current = null;
+
+  // Reset button text
+  const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
+  if (addBtn) {
+    addBtn.innerHTML = '<span aria-hidden="true">+</span> Add quick intention';
+  }
 }
 
 /**
@@ -306,25 +389,8 @@ export function closeCustomizationPanel(container: HTMLElement, shouldSave: bool
   backdrop.classList.remove('visible');
   panel?.classList.remove('visible');
 
-    // Clear form
-    const form = backdrop.querySelector('.intention-form') as HTMLElement;
-    if (form) {
-      const titleInput = form.querySelector('#intention-title') as HTMLInputElement;
-      const emojiInput = form.querySelector('#intention-emoji') as HTMLInputElement;
-      const categorySelect = form.querySelector('#intention-category') as HTMLSelectElement;
-      const durationInput = form.querySelector('#intention-duration') as HTMLInputElement;
-
-      if (titleInput) titleInput.value = '';
-      if (emojiInput) emojiInput.value = '';
-      if (categorySelect) categorySelect.selectedIndex = 0;
-      if (durationInput) durationInput.value = '';
-
-      // Reset button text
-      const addBtn = form.querySelector('.btn-add-intention-submit') as HTMLElement;
-      if (addBtn) {
-        addBtn.innerHTML = '<span aria-hidden="true">+</span> Add quick intention';
-      }
-    }
+  // Clear form with a dummy ref (actual ref managed by setupCustomizationPanel)
+  clearAddForm(backdrop, { current: null });
 }
 
 /**
@@ -377,7 +443,7 @@ export function setupCustomizationPanel(
   onIntentionsChanged?: () => void
 ): void {
   let draggedElement: HTMLElement | null = null;
-  let editingIntentionId: string | null = null;
+  const editingIdRef = { current: null as string | null };
 
   // Open panel button (handled in IntentionsGrid setup)
   // Close panel
@@ -405,6 +471,13 @@ export function setupCustomizationPanel(
       closeCustomizationPanel(container, false);
       return;
     }
+
+    // Form reset button
+    const resetBtn = target.closest('.btn-form-reset') as HTMLElement;
+    if (resetBtn) {
+      clearAddForm(container, editingIdRef);
+      return;
+    }
   });
 
   // Add new intention
@@ -413,13 +486,12 @@ export function setupCustomizationPanel(
     const addBtn = target.closest('.btn-add-intention-submit') as HTMLElement;
     if (!addBtn) return;
 
-    const form = container.querySelector('.intention-form') as HTMLElement;
-    if (!form) return;
+    const titleInput = container.querySelector('#intention-title') as HTMLInputElement;
+    const emojiInput = container.querySelector('#intention-emoji') as HTMLInputElement;
+    const categorySelect = container.querySelector('#intention-category') as HTMLSelectElement;
+    const durationInput = container.querySelector('#intention-duration') as HTMLInputElement;
 
-    const titleInput = form.querySelector('#intention-title') as HTMLInputElement;
-    const emojiInput = form.querySelector('#intention-emoji') as HTMLInputElement;
-    const categorySelect = form.querySelector('#intention-category') as HTMLSelectElement;
-    const durationInput = form.querySelector('#intention-duration') as HTMLInputElement;
+    if (!titleInput) return;
 
     // Validation
     if (!titleInput.value.trim()) {
@@ -435,7 +507,7 @@ export function setupCustomizationPanel(
     }
 
     // Check if we're editing an existing intention
-    if (editingIntentionId) {
+    if (editingIdRef.current) {
       // Update existing intention
       const updates: Partial<CustomIntention> = {
         title: titleInput.value.trim(),
@@ -444,21 +516,11 @@ export function setupCustomizationPanel(
         emoji: emojiInput.value.trim() || undefined,
       };
 
-      if (IntentionsManager.update(editingIntentionId, updates)) {
+      if (IntentionsManager.update(editingIdRef.current, updates)) {
         UI.showToast('✅ Quick intention updated!', 'success');
 
         // Clear form
-        titleInput.value = '';
-        emojiInput.value = '';
-        categorySelect.selectedIndex = 0;
-        durationInput.value = '';
-        editingIntentionId = null;
-
-        // Reset button text
-        const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
-        if (addBtn) {
-          addBtn.innerHTML = '<span aria-hidden="true">+</span> Add quick intention';
-        }
+        clearAddForm(container, editingIdRef);
 
         // Refresh the sortable list in the customization panel
         refreshIntentionsList(container);
@@ -483,11 +545,7 @@ export function setupCustomizationPanel(
         UI.showToast('✅ Quick intention added!', 'success');
 
         // Clear form
-        titleInput.value = '';
-        emojiInput.value = '';
-        categorySelect.selectedIndex = 0;
-        durationInput.value = '';
-        editingIntentionId = null;
+        clearAddForm(container, editingIdRef);
 
         // Refresh the sortable list in the customization panel
         refreshIntentionsList(container);
@@ -506,8 +564,8 @@ export function setupCustomizationPanel(
   // Edit intention (populate form)
   container.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
-  const editBtn = target.closest('.btn-edit-intention') as HTMLElement;
-  if (!editBtn) return;
+    const editBtn = target.closest('.btn-edit-intention') as HTMLElement;
+    if (!editBtn) return;
 
     const intentionId = editBtn.dataset.intentionId;
     if (!intentionId) return;
@@ -515,14 +573,20 @@ export function setupCustomizationPanel(
     const intention = IntentionsManager.getById(intentionId);
     if (!intention) return;
 
-    // Populate form
-    const form = container.querySelector('.intention-form') as HTMLElement;
-    if (!form) return;
+    // Ensure Add section is open
+    const addToggle = container.querySelector('[data-accordion-id="panelAddSection"]') as HTMLButtonElement | null;
+    const addBody = container.querySelector('#panelAddSection-body') as HTMLElement | null;
+    if (addToggle && addBody && addToggle.getAttribute('aria-expanded') === 'false') {
+      addToggle.setAttribute('aria-expanded', 'true');
+      addBody.hidden = false;
+      addSectionOpen = true;
+    }
 
-    const titleInput = form.querySelector('#intention-title') as HTMLInputElement;
-    const emojiInput = form.querySelector('#intention-emoji') as HTMLInputElement;
-    const categorySelect = form.querySelector('#intention-category') as HTMLSelectElement;
-    const durationInput = form.querySelector('#intention-duration') as HTMLInputElement;
+    // Populate form
+    const titleInput = container.querySelector('#intention-title') as HTMLInputElement;
+    const emojiInput = container.querySelector('#intention-emoji') as HTMLInputElement;
+    const categorySelect = container.querySelector('#intention-category') as HTMLSelectElement;
+    const durationInput = container.querySelector('#intention-duration') as HTMLInputElement;
 
     if (titleInput) titleInput.value = intention.title;
     if (emojiInput) emojiInput.value = intention.emoji || '';
@@ -536,15 +600,12 @@ export function setupCustomizationPanel(
     if (durationInput) durationInput.value = intention.duration.toString();
 
     // Track that we're editing this intention
-    editingIntentionId = intentionId;
+    editingIdRef.current = intentionId;
 
     // Update button text to indicate editing
     const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
     if (addBtn) {
-      const plusSpan = addBtn.querySelector('span[aria-hidden="true"]');
-      if (plusSpan) {
-        addBtn.innerHTML = '<span aria-hidden="true">✏️</span> Update quick intention';
-      }
+      addBtn.innerHTML = '<span aria-hidden="true">✏️</span> Update quick intention';
     }
 
     // Focus title input
@@ -705,9 +766,9 @@ function refreshIntentionsList(container: HTMLElement): void {
   const intentions = IntentionsManager.getSorted();
   list.innerHTML = renderSortableIntentions(intentions);
 
-  // Update count
-  const count = container.querySelector('.intentions-count') as HTMLElement;
-  if (count) {
-    count.textContent = intentions.length.toString();
+  // Update the accordion subtitle with the count
+  const listSubtitle = container.querySelector('#panelListSection .modal-disclosure-subtitle') as HTMLElement;
+  if (listSubtitle) {
+    listSubtitle.textContent = intentions.length > 0 ? `${intentions.length} templates` : "No templates yet";
   }
 }

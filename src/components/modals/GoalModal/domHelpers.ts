@@ -13,20 +13,9 @@ export function getOrCreateAfter(
 }
 
 export function setTitleHelp(text: string | null) {
-  const titleInput = document.getElementById("goalTitle") as HTMLInputElement | null;
-  if (!titleInput) return;
-  const container = titleInput.parentElement;
-  if (!container) return;
-  const existing = document.getElementById("goalTitleHelp");
-  if (!text) {
-    existing?.remove();
-    return;
-  }
-  const help = existing ?? document.createElement("div");
-  help.id = "goalTitleHelp";
-  help.className = "goal-title-help";
-  help.textContent = text;
-  if (!existing) container.appendChild(help);
+  const help = document.getElementById("goalHeroReassurance");
+  if (!help) return;
+  help.textContent = text ?? "";
 }
 
 export function setInlineHelp(

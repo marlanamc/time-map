@@ -908,115 +908,123 @@
           </button>
         </div>
         <form id="goalForm">
-          <div class="form-group">
-            <label for="goalTitle">What would you like to place here?</label>
-            <input
-              type="text"
-              id="goalTitle"
-              placeholder="e.g., Make space for my side project"
-              required
-              aria-required="true"
-            />
-          </div>
-          <div class="form-row" id="goalScopeRow">
-            <div class="form-group" id="goalYearGroup" style="display: none">
-              <label for="goalYear">Year</label>
+          <div class="goal-hero" id="goalHero">
+            <div class="form-group" id="goalTitleGroup">
+              <label for="goalTitle">What would you like to place here?</label>
               <input
-                type="number"
-                id="goalYear"
-                min="1970"
-                max="2100"
-                inputmode="numeric"
+                type="text"
+                id="goalTitle"
+                placeholder="e.g., Make space for my side project"
+                required
+                aria-required="true"
               />
             </div>
-            <div
-              class="form-group"
-              id="goalStartDateGroup"
-              style="display: none"
-            >
-              <label for="goalStartDate">Start date</label>
-              <input type="date" id="goalStartDate" />
-            </div>
+            <div class="goal-hero-date" id="goalHeroDateSlot" hidden></div>
+            <p class="goal-hero-reassurance" id="goalHeroReassurance"></p>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="goalMonth">When?</label>
-              <select id="goalMonth" required aria-required="true"></select>
+          <div id="goalAccordionContainer"></div>
+          <div id="goalDetailsPool" hidden>
+            <div class="form-row" id="goalScopeRow">
+              <div class="form-group" id="goalYearGroup" style="display: none">
+                <label for="goalYear">Year</label>
+                <input
+                  type="number"
+                  id="goalYear"
+                  min="1970"
+                  max="2100"
+                  inputmode="numeric"
+                />
+              </div>
+              <div
+                class="form-group"
+                id="goalStartDateGroup"
+                style="display: none"
+              >
+                <label for="goalStartDate">Start date</label>
+                <input type="date" id="goalStartDate" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="goalMonth">When?</label>
+                <select id="goalMonth" required aria-required="true"></select>
+              </div>
+              <div class="form-group">
+                <label for="goalCategory">Category (optional)</label>
+                <select id="goalCategory">
+                  <option value="" selected>No category</option>
+                  <option value="career">Career</option>
+                  <option value="health">Health</option>
+                  <option value="finance">Finance</option>
+                  <option value="personal">Personal</option>
+                  <option value="creative">Creative</option>
+                </select>
+              </div>
+              <div class="form-group" id="goalActivityGroup"></div>
+            </div>
+            <div class="form-row" id="goalDurationRow">
+              <div
+                class="form-group"
+                id="milestoneDurationGroup"
+                style="display: none"
+              >
+                <label for="milestoneDurationMonths">Duration (months)</label>
+                <select id="milestoneDurationMonths">
+                  <option value="1" selected>1 month</option>
+                  <option value="2">2 months</option>
+                  <option value="3">3 months</option>
+                  <option value="4">4 months</option>
+                  <option value="5">5 months</option>
+                  <option value="6">6 months</option>
+                  <option value="7">7 months</option>
+                  <option value="8">8 months</option>
+                  <option value="9">9 months</option>
+                  <option value="10">10 months</option>
+                  <option value="11">11 months</option>
+                  <option value="12">12 months</option>
+                </select>
+              </div>
+              <div
+                class="form-group"
+                id="focusDurationGroup"
+                style="display: none"
+              >
+                <label for="focusDurationWeeks">Duration (weeks)</label>
+                <select id="focusDurationWeeks">
+                  <option value="1" selected>1 week</option>
+                  <option value="2">2 weeks</option>
+                  <option value="3">3 weeks</option>
+                  <option value="4">4 weeks</option>
+                  <option value="5">5 weeks</option>
+                  <option value="6">6 weeks</option>
+                  <option value="7">7 weeks</option>
+                  <option value="8">8 weeks</option>
+                  <option value="9">9 weeks</option>
+                  <option value="10">10 weeks</option>
+                  <option value="11">11 weeks</option>
+                  <option value="12">12 weeks</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="goalStartTime">Start Time</label>
+                <input type="time" id="goalStartTime" />
+              </div>
+              <div class="form-group">
+                <label for="goalEndTime">End Time</label>
+                <input type="time" id="goalEndTime" />
+              </div>
             </div>
             <div class="form-group">
-              <label for="goalCategory">Category (optional)</label>
-              <select id="goalCategory">
-                <option value="" selected>No category</option>
-                <option value="career">Career</option>
-                <option value="health">Health</option>
-                <option value="finance">Finance</option>
-                <option value="personal">Personal</option>
-                <option value="creative">Creative</option>
+              <label for="goalPriority">Priority</label>
+              <select id="goalPriority">
+                <option value="low">Low - No rush</option>
+                <option value="medium" selected>Medium - When you can</option>
+                <option value="high">High - Important</option>
+                <option value="urgent">Urgent - Do soon</option>
               </select>
             </div>
-          </div>
-          <div class="form-row" id="goalDurationRow">
-            <div
-              class="form-group"
-              id="milestoneDurationGroup"
-              style="display: none"
-            >
-              <label for="milestoneDurationMonths">Duration (months)</label>
-              <select id="milestoneDurationMonths">
-                <option value="1" selected>1 month</option>
-                <option value="2">2 months</option>
-                <option value="3">3 months</option>
-                <option value="4">4 months</option>
-                <option value="5">5 months</option>
-                <option value="6">6 months</option>
-                <option value="7">7 months</option>
-                <option value="8">8 months</option>
-                <option value="9">9 months</option>
-                <option value="10">10 months</option>
-                <option value="11">11 months</option>
-                <option value="12">12 months</option>
-              </select>
-            </div>
-            <div
-              class="form-group"
-              id="focusDurationGroup"
-              style="display: none"
-            >
-              <label for="focusDurationWeeks">Duration (weeks)</label>
-              <select id="focusDurationWeeks">
-                <option value="1" selected>1 week</option>
-                <option value="2">2 weeks</option>
-                <option value="3">3 weeks</option>
-                <option value="4">4 weeks</option>
-                <option value="5">5 weeks</option>
-                <option value="6">6 weeks</option>
-                <option value="7">7 weeks</option>
-                <option value="8">8 weeks</option>
-                <option value="9">9 weeks</option>
-                <option value="10">10 weeks</option>
-                <option value="11">11 weeks</option>
-                <option value="12">12 weeks</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="goalStartTime">Start Time</label>
-              <input type="time" id="goalStartTime" />
-            </div>
-            <div class="form-group">
-              <label for="goalEndTime">End Time</label>
-              <input type="time" id="goalEndTime" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="goalPriority">Priority</label>
-            <select id="goalPriority">
-              <option value="low">Low - No rush</option>
-              <option value="medium" selected>Medium - When you can</option>
-              <option value="high">High - Important</option>
-              <option value="urgent">Urgent - Do soon</option>
-            </select>
           </div>
           <div class="modal-actions">
             <button type="button" class="btn btn-ghost" id="cancelModal">

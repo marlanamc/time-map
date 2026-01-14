@@ -1208,3 +1208,40 @@ html.dark-mode .time-context-safety {
     border: none;
     margin-bottom: 0;
 }
+
+/* ===================================
+   Goal Detail Modal - Calm Edit Layout
+   =================================== */
+.goal-detail-hero {
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.goal-detail-hero .hero-status {
+    margin-top: var(--space-4);
+    padding-top: 0;
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.goal-detail-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.goal-detail-accordion .modal-disclosure {
+    margin-bottom: 0;
+}
+
+.goal-detail-accordion .detail-section {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.goal-detail-accordion .detail-section:last-child {
+    margin-bottom: 0;
+}

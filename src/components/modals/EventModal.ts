@@ -1,6 +1,8 @@
 import { State } from "../../core/State";
 import { Events } from "../../core/Events";
 import { eventBus } from "../../core/EventBus";
+import { renderAccordionSection, setupAccordionSectionToggles } from "./shared/AccordionSection";
+import { setupModalA11y, type ModalA11yCleanup } from "./shared/modalA11y";
 import type { CalendarEvent, EventRecurrence } from "../../types";
 
 type ShowOptions = {
@@ -50,6 +52,59 @@ function ensureModal(): HTMLElement {
   overlay = document.createElement("div");
   overlay.id = "eventModal";
   overlay.className = "modal-overlay";
+  const repeatSectionHtml = renderAccordionSection({
+    id: "eventRepeatDisclosure",
+    title: "Repeat (optional)",
+    subtitle: "For recurring appointments or routines.",
+    bodyId: "eventRepeatBody",
+    bodyHtml: `
+            <div class="form-group">
+              <label for="eventFreq">Frequency</label>
+              <select id="eventFreq" class="modal-select">
+                <option value="">None</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+            <div class="form-row" id="eventRepeatDetailsRow" hidden>
+              <div class="form-group">
+                <label for="eventInterval">Every</label>
+                <input id="eventInterval" type="number" min="1" value="1" />
+              </div>
+              <div class="form-group">
+                <label for="eventEnds">Ends</label>
+                <select id="eventEnds" class="modal-select">
+                  <option value="never">Never</option>
+                  <option value="until">On date</option>
+                  <option value="count">After N times</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" id="eventEndsRow" hidden>
+              <div class="form-group" id="eventUntilGroup" hidden>
+                <label for="eventUntil">Until</label>
+                <input id="eventUntil" type="date" />
+              </div>
+              <div class="form-group" id="eventCountGroup" hidden>
+                <label for="eventCount">Count</label>
+                <input id="eventCount" type="number" min="1" value="10" />
+              </div>
+            </div>
+            <div class="form-group" id="eventWeekdaysGroup" hidden>
+              <div class="event-weekdays-label">Select the weekdays you want this event to repeat on (e.g., Tue + Thu).</div>
+              <label>Days of week</label>
+              <div class="modal-pill-row event-weekdays">
+                ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                  .map((label, idx) => `<button type="button" class="modal-pill" data-action="toggle-weekday" data-weekday="${idx}">${label}</button>`)
+                  .join("")}
+              </div>
+            </div>
+            <div class="time-context-safety">This is here to help you orient, not to rush you.</div>
+    `,
+    toggleAttributes: { "data-action": "toggle-event-repeat" },
+  });
   overlay.innerHTML = `
     <div class="modal modal-lg event-modal" role="dialog" aria-modal="true" aria-label="Event">
       <div class="modal-header">
@@ -95,58 +150,7 @@ function ensureModal(): HTMLElement {
           </div>
         </div>
 
-        <div class="modal-disclosure" id="eventRepeatDisclosure">
-          <button type="button" class="modal-disclosure-toggle" data-action="toggle-event-repeat" aria-expanded="false">
-            <div class="modal-disclosure-title">Repeat (optional)</div>
-            <div class="modal-disclosure-subtitle">For recurring appointments or routines.</div>
-          </button>
-          <div class="modal-disclosure-body" id="eventRepeatBody" hidden>
-            <div class="form-group">
-              <label for="eventFreq">Frequency</label>
-              <select id="eventFreq" class="modal-select">
-                <option value="">None</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
-            </div>
-            <div class="form-row" id="eventRepeatDetailsRow" hidden>
-              <div class="form-group">
-                <label for="eventInterval">Every</label>
-                <input id="eventInterval" type="number" min="1" value="1" />
-              </div>
-              <div class="form-group">
-                <label for="eventEnds">Ends</label>
-                <select id="eventEnds" class="modal-select">
-                  <option value="never">Never</option>
-                  <option value="until">On date</option>
-                  <option value="count">After N times</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row" id="eventEndsRow" hidden>
-              <div class="form-group" id="eventUntilGroup" hidden>
-                <label for="eventUntil">Until</label>
-                <input id="eventUntil" type="date" />
-              </div>
-              <div class="form-group" id="eventCountGroup" hidden>
-                <label for="eventCount">Count</label>
-                <input id="eventCount" type="number" min="1" value="10" />
-              </div>
-            </div>
-            <div class="form-group" id="eventWeekdaysGroup" hidden>
-              <div class="event-weekdays-label">Select the weekdays you want this event to repeat on (e.g., Tue + Thu).</div>
-              <label>Days of week</label>
-              <div class="modal-pill-row event-weekdays">
-                ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-                  .map((label, idx) => `<button type="button" class="modal-pill" data-action="toggle-weekday" data-weekday="${idx}">${label}</button>`)
-                  .join("")}
-              </div>
-            </div>
-            <div class="time-context-safety">This is here to help you orient, not to rush you.</div>
-          </div>
-        </div>
+        ${repeatSectionHtml}
 
         <div class="form-group">
           <label for="eventNotes">Notes (optional)</label>
@@ -163,6 +167,7 @@ function ensureModal(): HTMLElement {
   `;
 
   document.body.appendChild(overlay);
+  setupAccordionSectionToggles(overlay);
   return overlay;
 }
 
@@ -173,6 +178,7 @@ function getEventById(id: string): CalendarEvent | null {
 class EventModalManager {
   private currentId: string | null = null;
   private weekdays = new Set<number>();
+  private a11yCleanup: ModalA11yCleanup | null = null;
 
   show(opts: ShowOptions): void {
     const overlay = ensureModal();
@@ -191,7 +197,6 @@ class EventModalManager {
     const endDateInput = overlay.querySelector("#eventEndDate") as HTMLInputElement | null;
     const notesInput = overlay.querySelector("#eventNotes") as HTMLTextAreaElement | null;
 
-    const repeatBody = overlay.querySelector("#eventRepeatBody") as HTMLElement | null;
     const freqSelect = overlay.querySelector("#eventFreq") as HTMLSelectElement | null;
     const intervalInput = overlay.querySelector("#eventInterval") as HTMLInputElement | null;
     const endsSelect = overlay.querySelector("#eventEnds") as HTMLSelectElement | null;
@@ -328,16 +333,6 @@ class EventModalManager {
     allDayInput?.addEventListener("change", allDayHandler, { once: true });
     allDayInput?.addEventListener("change", updateAllDay);
 
-    const disclosureToggle = overlay.querySelector('[data-action="toggle-event-repeat"]') as HTMLButtonElement | null;
-    if (disclosureToggle && repeatBody) {
-      disclosureToggle.onclick = (e) => {
-        e.preventDefault();
-        const isOpen = disclosureToggle.getAttribute("aria-expanded") === "true";
-        disclosureToggle.setAttribute("aria-expanded", String(!isOpen));
-        repeatBody.toggleAttribute("hidden", isOpen);
-      };
-    }
-
     freqSelect?.addEventListener("change", updateRepeatVisibility);
     endsSelect?.addEventListener("change", updateRepeatVisibility);
 
@@ -433,11 +428,29 @@ class EventModalManager {
       };
     }
 
-    // Focus first input
-    setTimeout(() => titleInput?.focus(), 0);
+    // Setup accessibility: ESC to close, focus trap, initial focus
+    const modalContainer = overlay.querySelector(".modal") as HTMLElement | null;
+    if (modalContainer) {
+      // Clean up previous setup if showing again
+      if (this.a11yCleanup) {
+        this.a11yCleanup();
+        this.a11yCleanup = null;
+      }
+      this.a11yCleanup = setupModalA11y({
+        overlay,
+        modal: modalContainer,
+        onClose: () => this.hide(),
+        initialFocusSelector: "#eventTitle",
+      });
+    }
   }
 
   hide(): void {
+    // Clean up accessibility handlers and restore focus
+    if (this.a11yCleanup) {
+      this.a11yCleanup();
+      this.a11yCleanup = null;
+    }
     const overlay = document.getElementById("eventModal") as HTMLElement | null;
     overlay?.classList.remove("active");
     this.currentId = null;

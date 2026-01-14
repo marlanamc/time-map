@@ -1609,21 +1609,6 @@ export const UI = {
     goalModal.closeGoalModal(this);
   },
 
-  setFieldVisibility(element: HTMLElement | null, visible: boolean) {
-    goalModal.setFieldVisibility(element, visible);
-  },
-
-  populateMonthSelect(
-    preselectedMonth: number | null = null,
-    year: number | null = null
-  ) {
-    goalModal.populateMonthSelect(this, preselectedMonth, year);
-  },
-
-  updateGoalModalTimeBreakdown() {
-    goalModal.updateGoalModalTimeBreakdown(this);
-  },
-
   handleGoalSubmit(e: Event) {
     goalModal.handleGoalSubmit(this, e);
   },

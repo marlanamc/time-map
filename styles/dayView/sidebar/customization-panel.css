@@ -983,3 +983,96 @@
     transform: none;
   }
 }
+
+/* ===================================
+   Panel Accordion Layout (Calm UX)
+   =================================== */
+
+.panel-header-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.panel-helper-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.panel-accordion-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.panel-accordion-container .modal-disclosure {
+  background: var(--bg-elevated);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+}
+
+.panel-accordion-container .modal-disclosure-toggle {
+  padding: var(--space-4);
+}
+
+.panel-accordion-container .modal-disclosure-body {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.panel-accordion-container .form-grid {
+  margin-bottom: var(--space-4);
+}
+
+.panel-accordion-container .form-actions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.btn-form-reset {
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.btn-form-reset:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.intentions-list-hint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-3);
+  font-style: italic;
+}
+
+/* Remove old section styling when using accordions */
+.panel-accordion-container .intention-form,
+.panel-accordion-container .intentions-list-section {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* Ensure sortable list fills accordion body */
+.panel-accordion-container .intentions-sortable-list {
+  max-height: 380px;
+}
+
+:root.dark-mode .panel-accordion-container .modal-disclosure {
+  background: var(--bg-surface);
+  border-color: var(--glass-border);
+}
