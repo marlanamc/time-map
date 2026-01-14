@@ -8,9 +8,6 @@ const APP_SHELL = [
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/maskable-icon.svg",
-  "./icons/ios/180.png",
-  "./icons/ios/192.png",
-  "./icons/ios/512.png",
 ];
 
 async function precacheShell() {
