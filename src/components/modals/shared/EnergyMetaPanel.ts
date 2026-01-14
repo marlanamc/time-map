@@ -27,16 +27,18 @@ function themeOptions(): Option[] {
 export type EnergyMetaPanelOptions = {
   level: GoalLevel;
   meta?: GoalMeta;
+  icon?: string; // Add icon separately since it's on Goal, not in GoalMeta
 };
 
 export type EnergyMetaPanelSetupOptions = EnergyMetaPanelOptions & {
   onChange: (nextMeta: GoalMeta) => void;
   getMeta: () => GoalMeta;
   onRequestRerender?: () => void;
+  onIconChange?: (icon: string) => void; // Add icon change handler
 };
 
 export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
-  const { level, meta } = opts;
+  const { level, meta, icon } = opts;
 
   if (level === "vision") {
     const options = themeOptions()
@@ -47,9 +49,34 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
       .join("");
     return `
       <div class="form-group">
+        <label for="visionIcon">Vision emoji (optional)</label>
+        <div class="vision-icon-input-group">
+          <input
+            type="text"
+            id="visionIcon"
+            class="modal-input"
+            placeholder="✨"
+            maxlength="2"
+            value="${escapeHtml(icon ?? "")}"
+          />
+          <div class="vision-icon-presets">
+            <button type="button" class="icon-preset-btn" data-icon="✨">✨</button>
+            <button type="button" class="icon-preset-btn" data-icon="🎯">🎯</button>
+            <button type="button" class="icon-preset-btn" data-icon="🚀">🚀</button>
+            <button type="button" class="icon-preset-btn" data-icon="💎">💎</button>
+            <button type="button" class="icon-preset-btn" data-icon="🌟">🌟</button>
+            <button type="button" class="icon-preset-btn" data-icon="🔥">🔥</button>
+            <button type="button" class="icon-preset-btn" data-icon="🎨">🎨</button>
+            <button type="button" class="icon-preset-btn" data-icon="🌱">🌱</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
         <label for="visionAccent">Vision color (optional)</label>
         <select id="visionAccent" class="modal-select">
-          <option value=""${meta?.accentTheme ? "" : " selected"}>Default</option>
+          <option value=""${
+            meta?.accentTheme ? "" : " selected"
+          }>Default</option>
           ${options}
         </select>
       </div>
@@ -60,14 +87,16 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
     return `
       <div class="form-group">
         <label class="toggle-label">
-          <input type="checkbox" id="focusEasyMode"${meta?.easyMode ? " checked" : ""} />
+          <input type="checkbox" id="focusEasyMode"${
+            meta?.easyMode ? " checked" : ""
+          } />
           Easy mode week
         </label>
       </div>
       <div class="form-group">
         <label for="focusLowEnergy">Low-energy version (optional)</label>
         <textarea id="focusLowEnergy" rows="2">${escapeHtml(
-          meta?.lowEnergyVersion ?? "",
+          meta?.lowEnergyVersion ?? ""
         )}</textarea>
       </div>
     `;
@@ -89,7 +118,9 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
   return "";
 }
 
-function normalizeValue(value: string | boolean | undefined): string | boolean | undefined {
+function normalizeValue(
+  value: string | boolean | undefined
+): string | boolean | undefined {
   if (typeof value === "string") {
     const trimmed = value.trim();
     return trimmed.length === 0 ? undefined : trimmed;
@@ -115,10 +146,10 @@ function mergeMeta(base: GoalMeta, updates: Partial<GoalMeta>): GoalMeta {
 
 export function setupEnergyMetaPanel(
   container: HTMLElement | null,
-  opts: EnergyMetaPanelSetupOptions,
+  opts: EnergyMetaPanelSetupOptions
 ): void {
   if (!container) return;
-  const { level, onChange, getMeta, onRequestRerender } = opts;
+  const { level, onChange, getMeta, onRequestRerender, onIconChange } = opts;
 
   const update = (updates: Partial<GoalMeta>, rerender = false) => {
     const baseMeta = getMeta();
@@ -131,20 +162,42 @@ export function setupEnergyMetaPanel(
 
   if (level === "vision") {
     const accent = container.querySelector<HTMLSelectElement>("#visionAccent");
+    const iconInput = container.querySelector<HTMLInputElement>("#visionIcon");
+
+    // Handle accent theme change
     accent?.addEventListener("change", () => {
       update(
         {
           accentTheme: accent.value ? (accent.value as AccentTheme) : undefined,
         },
-        false,
+        false
       );
     });
+
+    // Handle icon input change
+    iconInput?.addEventListener("input", () => {
+      onIconChange?.(iconInput.value);
+    });
+
+    // Handle icon preset buttons
+    container.querySelectorAll(".icon-preset-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const icon = (btn as HTMLElement).dataset.icon;
+        if (iconInput && icon) {
+          iconInput.value = icon;
+          onIconChange?.(icon);
+        }
+      });
+    });
+
     return;
   }
 
   if (level === "focus") {
-    const easyMode = container.querySelector<HTMLInputElement>("#focusEasyMode");
-    const lowEnergy = container.querySelector<HTMLTextAreaElement>("#focusLowEnergy");
+    const easyMode =
+      container.querySelector<HTMLInputElement>("#focusEasyMode");
+    const lowEnergy =
+      container.querySelector<HTMLTextAreaElement>("#focusLowEnergy");
 
     easyMode?.addEventListener("change", () => {
       update({ easyMode: easyMode.checked ? true : undefined }, true);
