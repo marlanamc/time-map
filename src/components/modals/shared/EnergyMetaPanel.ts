@@ -138,7 +138,7 @@ function mergeMeta(base: GoalMeta, updates: Partial<GoalMeta>): GoalMeta {
     if (updated === undefined) {
       delete result[key];
     } else {
-      result[key] = updated as any;
+      (result as any)[key] = updated;
     }
   });
   return result;
