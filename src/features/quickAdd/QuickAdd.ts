@@ -333,7 +333,7 @@ class QuickAddManager {
       parentLevel: selectedLink?.parentLevel ?? null,
       meta,
       category: this.quickAddCategory ?? undefined,
-      activityId: this.quickAddActivityId ?? null,
+      activityId: this.quickAddActivityId ?? undefined,
     });
 
     this.callbacks.onRender();

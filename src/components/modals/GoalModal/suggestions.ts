@@ -43,15 +43,27 @@ export function getSuggestionChips(level: GoalLevel): SuggestionChips {
       },
       {
         label: "Build stability",
-        items: ["Keep the basics steady", "Protect sleep", "Do the week on easy mode"],
+        items: [
+          "Keep the basics steady",
+          "Protect sleep",
+          "Do the week on easy mode",
+        ],
       },
       {
         label: "Clear a bottleneck",
-        items: ["Follow up on one thing", "Schedule the appointment", "Handle the paperwork"],
+        items: [
+          "Follow up on one thing",
+          "Schedule the appointment",
+          "Handle the paperwork",
+        ],
       },
       {
         label: "Make room",
-        items: ["Create time for ___", "Declutter one surface", "Reset the space"],
+        items: [
+          "Create time for ___",
+          "Declutter one surface",
+          "Reset the space",
+        ],
       },
     ];
     return { easy, groups };
@@ -60,7 +72,12 @@ export function getSuggestionChips(level: GoalLevel): SuggestionChips {
     const groups = [
       {
         label: "Admin / follow-through",
-        items: ["Reply to one message", "Open the document", "Find the phone number", "Schedule it"],
+        items: [
+          "Reply to one message",
+          "Open the document",
+          "Find the phone number",
+          "Schedule it",
+        ],
       },
       {
         label: "Home / reset",
@@ -87,19 +104,37 @@ export function renderSuggestionsBody(opts: {
   if (level === "milestone" && Array.isArray(suggestionChips)) {
     return `<div class="modal-chip-row">
       ${suggestionChips
-        .map((t) => `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replaceAll("\"", "&quot;")}">${t}</button>`)
+        .map(
+          (t) =>
+            `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replace(
+              /"/g,
+              "&quot;"
+            )}">${t}</button>`
+        )
         .join("")}
     </div>`;
   }
-  if (level === "focus" && typeof suggestionChips === "object" && "groups" in suggestionChips) {
+  if (
+    level === "focus" &&
+    typeof suggestionChips === "object" &&
+    "groups" in suggestionChips
+  ) {
     const easy = focusEasyMode
       ? `
         <div class="modal-suggest-group">
           <div class="modal-suggest-label">Easy mode</div>
           <div class="modal-chip-row">
-            ${suggestionChips.easy
-              ?.map((t) => `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replaceAll("\"", "&quot;")}">${t}</button>`)
-              .join("") ?? ""}
+            ${
+              suggestionChips.easy
+                ?.map(
+                  (t) =>
+                    `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replace(
+                      /"/g,
+                      "&quot;"
+                    )}">${t}</button>`
+                )
+                .join("") ?? ""
+            }
           </div>
         </div>`
       : "";
@@ -112,16 +147,26 @@ export function renderSuggestionsBody(opts: {
               <div class="modal-suggest-label">${g.label}</div>
               <div class="modal-chip-row">
                 ${g.items
-                  .map((t) => `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replaceAll("\"", "&quot;")}">${t}</button>`)
+                  .map(
+                    (t) =>
+                      `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replace(
+                        /"/g,
+                        "&quot;"
+                      )}">${t}</button>`
+                  )
                   .join("")}
               </div>
             </div>
-          `,
+          `
         )
         .join("")}
     `;
   }
-  if (level === "intention" && typeof suggestionChips === "object" && "groups" in suggestionChips) {
+  if (
+    level === "intention" &&
+    typeof suggestionChips === "object" &&
+    "groups" in suggestionChips
+  ) {
     return `
       ${suggestionChips.groups
         .map(
@@ -130,11 +175,17 @@ export function renderSuggestionsBody(opts: {
               <div class="modal-suggest-label">${g.label}</div>
               <div class="modal-chip-row">
                 ${g.items
-                  .map((t) => `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replaceAll("\"", "&quot;")}">${t}</button>`)
+                  .map(
+                    (t) =>
+                      `<button type="button" class="modal-chip" data-action="suggest-title" data-template="${t.replace(
+                        /"/g,
+                        "&quot;"
+                      )}">${t}</button>`
+                  )
                   .join("")}
               </div>
             </div>
-          `,
+          `
         )
         .join("")}
     `;

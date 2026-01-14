@@ -216,11 +216,16 @@ export class SupportPanel {
 
     // Get current time-of-day theme from root element
     const root = document.documentElement;
-    const timeOfDay = root.classList.contains("time-dawn") ? "dawn"
-      : root.classList.contains("time-morning") ? "morning"
-      : root.classList.contains("time-afternoon") ? "afternoon"
-      : root.classList.contains("time-evening") ? "evening"
-      : root.classList.contains("time-night") ? "night"
+    const timeOfDay = root.classList.contains("time-dawn")
+      ? "dawn"
+      : root.classList.contains("time-morning")
+      ? "morning"
+      : root.classList.contains("time-afternoon")
+      ? "afternoon"
+      : root.classList.contains("time-evening")
+      ? "evening"
+      : root.classList.contains("time-night")
+      ? "night"
       : null;
 
     const accentThemes = ND_CONFIG.ACCENT_THEMES as Record<
@@ -242,16 +247,16 @@ export class SupportPanel {
     // Helper function to get hue from hex color for ROYGBIV sorting
     const getHueFromHex = (hex: string): number => {
       // Handle gradient strings
-      if (hex.includes('gradient')) return 999; // Put gradients at end
-      
+      if (hex.includes("gradient")) return 999; // Put gradients at end
+
       const r = parseInt(hex.slice(1, 3), 16) / 255;
       const g = parseInt(hex.slice(3, 5), 16) / 255;
       const b = parseInt(hex.slice(5, 7), 16) / 255;
-      
+
       const max = Math.max(r, g, b);
       const min = Math.min(r, g, b);
       const delta = max - min;
-      
+
       let hue = 0;
       if (delta !== 0) {
         if (max === r) {
@@ -269,7 +274,7 @@ export class SupportPanel {
 
     // ROYGBIV order mapping: Red(0-30), Orange(30-60), Yellow(60-90), Green(90-150), Blue(150-240), Indigo(240-270), Violet(270-360)
     const getROYGBIVOrder = (hex: string): number => {
-      if (hex.includes('gradient')) return 1000; // Rainbow last
+      if (hex.includes("gradient")) return 1000; // Rainbow last
       const hue = getHueFromHex(hex);
       // Map hue to ROYGBIV position
       if (hue >= 0 && hue < 30) return 1; // Red
@@ -284,23 +289,34 @@ export class SupportPanel {
 
     // Filter to show relevant accent colors for current time theme
     // Otherwise show all accent themes
-    let themesToShow: Array<[AccentTheme, typeof accentThemes[AccentTheme]]>;
-    
+    let themesToShow: Array<[AccentTheme, (typeof accentThemes)[AccentTheme]]>;
+
     if (timeOfDay && timeThemeAccentMap[timeOfDay]) {
       // Get the mapped accent themes for this time-of-day
       const mappedKeys = timeThemeAccentMap[timeOfDay];
       themesToShow = mappedKeys
-        .map(key => {
+        .map((key) => {
           const theme = accentThemes[key];
-          return theme ? [key, theme] as [AccentTheme, typeof accentThemes[AccentTheme]] : null;
+          return theme
+            ? ([key, theme] as [
+                AccentTheme,
+                (typeof accentThemes)[AccentTheme]
+              ])
+            : null;
         })
-        .filter((item): item is [AccentTheme, typeof accentThemes[AccentTheme]] => item !== null);
-      
+        .filter(
+          (item): item is [AccentTheme, (typeof accentThemes)[AccentTheme]] =>
+            item !== null
+        );
+
       // Always include rainbow
       themesToShow.push(["rainbow", accentThemes.rainbow]);
     } else {
       // No time theme active, show all
-      themesToShow = Object.entries(accentThemes);
+      themesToShow = Object.entries(accentThemes) as [
+        AccentTheme,
+        { label: string; emoji: string; color: string }
+      ][];
     }
 
     // Sort by ROYGBIV order

@@ -3,7 +3,10 @@ import type { GoalLevel } from "../../../types";
 type GoalSummary = { id: string; title: string };
 type LinkageCandidate = GoalSummary & { level: GoalLevel };
 
-export type LinkagePickerSelection = { parentId: string; parentLevel: GoalLevel } | null;
+export type LinkagePickerSelection = {
+  parentId: string;
+  parentLevel: GoalLevel;
+} | null;
 
 export type LinkagePickerOptions = {
   level: GoalLevel;
@@ -29,25 +32,37 @@ const INTENTION_BADGE_TEXT = "Life task (still valid)";
 function buildCandidates(opts: LinkagePickerOptions): LinkageCandidate[] {
   const { level, visions, milestones, focuses } = opts;
   if (level === "milestone") {
-    return visions.map((vision) => ({ ...vision, level: "vision" }));
+    return visions.map((vision) => ({
+      ...vision,
+      level: "vision" as GoalLevel,
+    }));
   }
   if (level === "focus") {
     return [
-      ...milestones.map((milestone) => ({ ...milestone, level: "milestone" })),
-      ...visions.map((vision) => ({ ...vision, level: "vision" })),
+      ...milestones.map((milestone) => ({
+        ...milestone,
+        level: "milestone" as GoalLevel,
+      })),
+      ...visions.map((vision) => ({ ...vision, level: "vision" as GoalLevel })),
     ];
   }
   if (level === "intention") {
     return [
-      ...focuses.map((focus) => ({ ...focus, level: "focus" })),
-      ...milestones.map((milestone) => ({ ...milestone, level: "milestone" })),
-      ...visions.map((vision) => ({ ...vision, level: "vision" })),
+      ...focuses.map((focus) => ({ ...focus, level: "focus" as GoalLevel })),
+      ...milestones.map((milestone) => ({
+        ...milestone,
+        level: "milestone" as GoalLevel,
+      })),
+      ...visions.map((vision) => ({ ...vision, level: "vision" as GoalLevel })),
     ];
   }
   return [];
 }
 
-function shouldUsePills(level: GoalLevel, candidates: LinkageCandidate[]): boolean {
+function shouldUsePills(
+  _level: GoalLevel,
+  candidates: LinkageCandidate[]
+): boolean {
   return candidates.length > 0 && candidates.length <= 6;
 }
 
@@ -55,15 +70,20 @@ function buildOptionValue(candidate: LinkageCandidate): string {
   return `${candidate.level}:${candidate.id}`;
 }
 
-function renderCandidateButton(candidate: LinkageCandidate, selected: LinkagePickerSelection): string {
+function renderCandidateButton(
+  candidate: LinkageCandidate,
+  selected: LinkagePickerSelection
+): string {
   const isSelected =
-    !!selected && selected.parentId === candidate.id && selected.parentLevel === candidate.level;
+    !!selected &&
+    selected.parentId === candidate.id &&
+    selected.parentLevel === candidate.level;
   const prefix =
     candidate.level === "milestone"
       ? "Milestone"
       : candidate.level === "vision"
-        ? "Vision"
-        : "Focus";
+      ? "Vision"
+      : "Focus";
   const label =
     candidate.level === "focus"
       ? candidate.title
@@ -81,9 +101,15 @@ function renderCandidateButton(candidate: LinkageCandidate, selected: LinkagePic
   `;
 }
 
-function renderPills(candidates: LinkageCandidate[], selected: LinkagePickerSelection, level: GoalLevel): string {
+function renderPills(
+  candidates: LinkageCandidate[],
+  selected: LinkagePickerSelection,
+  level: GoalLevel
+): string {
   const noneSelected = !selected;
-  const buttons = candidates.map((candidate) => renderCandidateButton(candidate, selected)).join("");
+  const buttons = candidates
+    .map((candidate) => renderCandidateButton(candidate, selected))
+    .join("");
   const noneButton =
     level === "intention"
       ? `
@@ -96,11 +122,18 @@ function renderPills(candidates: LinkageCandidate[], selected: LinkagePickerSele
         </button>
       `
       : "";
-  const spacer = noneButton || buttons ? `<div class="modal-pill-row">${noneButton}${buttons}</div>` : "";
+  const spacer =
+    noneButton || buttons
+      ? `<div class="modal-pill-row">${noneButton}${buttons}</div>`
+      : "";
   return spacer;
 }
 
-function renderSelect(opts: LinkagePickerOptions, candidates: LinkageCandidate[], selected: LinkagePickerSelection): string {
+function renderSelect(
+  opts: LinkagePickerOptions,
+  candidates: LinkageCandidate[],
+  selected: LinkagePickerSelection
+): string {
   const { level } = opts;
   const noneSelected = !selected;
 
@@ -108,8 +141,12 @@ function renderSelect(opts: LinkagePickerOptions, candidates: LinkageCandidate[]
     .filter((c) => c.level === "milestone")
     .map((candidate) => {
       const isSelected =
-        !!selected && selected.parentId === candidate.id && selected.parentLevel === candidate.level;
-      return `<option value="${buildOptionValue(candidate)}"${isSelected ? " selected" : ""}>${candidate.title}</option>`;
+        !!selected &&
+        selected.parentId === candidate.id &&
+        selected.parentLevel === candidate.level;
+      return `<option value="${buildOptionValue(candidate)}"${
+        isSelected ? " selected" : ""
+      }>${candidate.title}</option>`;
     })
     .join("");
 
@@ -117,8 +154,12 @@ function renderSelect(opts: LinkagePickerOptions, candidates: LinkageCandidate[]
     .filter((c) => c.level === "focus")
     .map((candidate) => {
       const isSelected =
-        !!selected && selected.parentId === candidate.id && selected.parentLevel === candidate.level;
-      return `<option value="${buildOptionValue(candidate)}"${isSelected ? " selected" : ""}>${candidate.title}</option>`;
+        !!selected &&
+        selected.parentId === candidate.id &&
+        selected.parentLevel === candidate.level;
+      return `<option value="${buildOptionValue(candidate)}"${
+        isSelected ? " selected" : ""
+      }>${candidate.title}</option>`;
     })
     .join("");
 
@@ -126,15 +167,21 @@ function renderSelect(opts: LinkagePickerOptions, candidates: LinkageCandidate[]
     .filter((c) => c.level === "vision")
     .map((candidate) => {
       const isSelected =
-        !!selected && selected.parentId === candidate.id && selected.parentLevel === candidate.level;
-      return `<option value="${buildOptionValue(candidate)}"${isSelected ? " selected" : ""}>${candidate.title}</option>`;
+        !!selected &&
+        selected.parentId === candidate.id &&
+        selected.parentLevel === candidate.level;
+      return `<option value="${buildOptionValue(candidate)}"${
+        isSelected ? " selected" : ""
+      }>${candidate.title}</option>`;
     })
     .join("");
 
   if (level === "milestone") {
     return `
       <select id="goalLinkSelect" class="modal-select">
-        <option value=""${noneSelected ? " selected" : ""}>Select a Vision</option>
+        <option value=""${
+          noneSelected ? " selected" : ""
+        }>Select a Vision</option>
         ${visionOptions}
       </select>
     `;
@@ -143,19 +190,41 @@ function renderSelect(opts: LinkagePickerOptions, candidates: LinkageCandidate[]
   if (level === "focus") {
     return `
       <select id="goalLinkSelect" class="modal-select">
-        <option value=""${noneSelected ? " selected" : ""}>Select a Milestone or Vision</option>
-        ${milestoneOptions ? `<optgroup label="Milestones">${milestoneOptions}</optgroup>` : ""}
-        ${visionOptions ? `<optgroup label="Visions">${visionOptions}</optgroup>` : ""}
+        <option value=""${
+          noneSelected ? " selected" : ""
+        }>Select a Milestone or Vision</option>
+        ${
+          milestoneOptions
+            ? `<optgroup label="Milestones">${milestoneOptions}</optgroup>`
+            : ""
+        }
+        ${
+          visionOptions
+            ? `<optgroup label="Visions">${visionOptions}</optgroup>`
+            : ""
+        }
       </select>
     `;
   }
 
   return `
     <select id="goalLinkSelect" class="modal-select">
-      <option value=""${noneSelected ? " selected" : ""}>None (life task)</option>
-      ${focusOptions ? `<optgroup label="Focus">${focusOptions}</optgroup>` : ""}
-      ${milestoneOptions ? `<optgroup label="Milestones">${milestoneOptions}</optgroup>` : ""}
-      ${visionOptions ? `<optgroup label="Vision">${visionOptions}</optgroup>` : ""}
+      <option value=""${
+        noneSelected ? " selected" : ""
+      }>None (life task)</option>
+      ${
+        focusOptions ? `<optgroup label="Focus">${focusOptions}</optgroup>` : ""
+      }
+      ${
+        milestoneOptions
+          ? `<optgroup label="Milestones">${milestoneOptions}</optgroup>`
+          : ""
+      }
+      ${
+        visionOptions
+          ? `<optgroup label="Vision">${visionOptions}</optgroup>`
+          : ""
+      }
     </select>
   `;
 }
@@ -172,7 +241,9 @@ export function renderLinkagePicker(opts: LinkagePickerOptions): string {
     : "";
   const badge =
     level === "intention"
-      ? `<div class="goal-linkage-badge" id="goalLinkageBadge"${!selected ? "" : " hidden"}>${INTENTION_BADGE_TEXT}</div>`
+      ? `<div class="goal-linkage-badge" id="goalLinkageBadge"${
+          !selected ? "" : " hidden"
+        }>${INTENTION_BADGE_TEXT}</div>`
       : "";
 
   const body = usePills

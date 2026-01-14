@@ -14,11 +14,11 @@ import { formatTimeRange, formatTo12Hour } from "../../utils/time";
  * @returns Color hex string
  */
 function getCategoryColor(category: string | null | undefined): string {
-  if (!category) return '#6b7280';
+  if (!category) return "#6b7280";
   if (CONFIG.CATEGORIES[category as keyof typeof CONFIG.CATEGORIES]) {
     return CONFIG.CATEGORIES[category as keyof typeof CONFIG.CATEGORIES].color;
   }
-  return '#6b7280';
+  return "#6b7280";
 }
 
 /**
@@ -27,10 +27,13 @@ function getCategoryColor(category: string | null | undefined): string {
  * @param showTime - Whether to show time range
  * @returns HTML string for compact task
  */
-export function renderCompactTask(goal: Goal, showTime: boolean = false): string {
+export function renderCompactTask(
+  goal: Goal,
+  showTime: boolean = false
+): string {
   const emoji = getGoalEmoji(goal);
-  const isDone = goal.status === 'done';
-  const doneClass = isDone ? 'task-done' : '';
+  const isDone = goal.status === "done";
+  const doneClass = isDone ? "task-done" : "";
 
   const startLabel = formatTo12Hour(goal.startTime);
   const endLabel = formatTo12Hour(goal.endTime);
@@ -39,9 +42,8 @@ export function renderCompactTask(goal: Goal, showTime: boolean = false): string
       ? `${startLabel} - ${endLabel}`
       : startLabel ?? endLabel ?? "";
 
-  const timeHtml = showTime && timeLabel
-    ? `<span class="task-time">${timeLabel}</span>`
-    : '';
+  const timeHtml =
+    showTime && timeLabel ? `<span class="task-time">${timeLabel}</span>` : "";
 
   return `
     <div
@@ -52,12 +54,12 @@ export function renderCompactTask(goal: Goal, showTime: boolean = false): string
       <div class="task-compact-view">
         <button
           type="button"
-          class="task-checkbox ${isDone ? 'checked' : ''}"
+          class="task-checkbox ${isDone ? "checked" : ""}"
           data-goal-id="${goal.id}"
-          aria-label="${isDone ? 'Mark as incomplete' : 'Mark as complete'}"
+          aria-label="${isDone ? "Mark as incomplete" : "Mark as complete"}"
           aria-checked="${isDone}"
         >
-          ${isDone ? '✓' : ''}
+          ${isDone ? "✓" : ""}
         </button>
         <span class="task-emoji" aria-hidden="true">${emoji}</span>
         <span class="task-title">${escapeHtml(goal.title)}</span>
@@ -90,8 +92,9 @@ export function renderCompactTask(goal: Goal, showTime: boolean = false): string
 function renderExpandedContent(goal: Goal): string {
   const categoryColor = getCategoryColor(goal.category);
   const categoryLabel = goal.category
-    ? CONFIG.CATEGORIES[goal.category as keyof typeof CONFIG.CATEGORIES]?.label || 'General'
-    : 'General';
+    ? CONFIG.CATEGORIES[goal.category as keyof typeof CONFIG.CATEGORIES]
+        ?.label || "General"
+    : "General";
 
   const timeLabel = formatTimeRange(goal.startTime, goal.endTime);
   const hasTime = Boolean(timeLabel);
@@ -103,10 +106,12 @@ function renderExpandedContent(goal: Goal): string {
         <span class="meta-value">${timeLabel}</span>
       </div>
     `
-    : '';
+    : "";
 
   const hasDuration = hasTime && goal.startTime && goal.endTime;
-  const durationMin = hasDuration ? calculateDuration(goal.startTime, goal.endTime) : 0;
+  const durationMin = hasDuration
+    ? calculateDuration(goal.startTime!, goal.endTime!)
+    : 0;
   const durationHtml = hasDuration
     ? `
       <div class="task-meta-item">
@@ -115,7 +120,7 @@ function renderExpandedContent(goal: Goal): string {
         <span class="meta-value">${formatDuration(durationMin)}</span>
       </div>
     `
-    : '';
+    : "";
 
   const hasProgress = goal.progress > 0;
   const progressHtml = hasProgress
@@ -129,7 +134,7 @@ function renderExpandedContent(goal: Goal): string {
         <span class="meta-value">${goal.progress}%</span>
       </div>
     `
-    : '';
+    : "";
 
   const hasDescription = goal.description && goal.description.trim().length > 0;
   const descriptionHtml = hasDescription
@@ -138,7 +143,7 @@ function renderExpandedContent(goal: Goal): string {
         ${escapeHtml(goal.description)}
       </div>
     `
-    : '';
+    : "";
 
   return `
     <div class="task-metadata">
@@ -182,8 +187,8 @@ function renderExpandedContent(goal: Goal): string {
  * @returns Duration in minutes
  */
 function calculateDuration(startTime: string, endTime: string): number {
-  const [startH, startM] = startTime.split(':').map(Number);
-  const [endH, endM] = endTime.split(':').map(Number);
+  const [startH, startM] = startTime.split(":").map(Number);
+  const [endH, endM] = endTime.split(":").map(Number);
 
   const startMinutes = startH * 60 + startM;
   const endMinutes = endH * 60 + endM;
@@ -217,7 +222,7 @@ function formatDuration(minutes: number): string {
  * @returns Escaped text
  */
 function escapeHtml(text: string): string {
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
@@ -227,11 +232,11 @@ function escapeHtml(text: string): string {
  * @param container - Container element with tasks
  */
 export function setupTaskListToggles(container: HTMLElement): void {
-  container.addEventListener('click', (e) => {
+  container.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
 
     // Handle expand button click
-    const expandBtn = target.closest('.task-expand-btn') as HTMLElement;
+    const expandBtn = target.closest(".task-expand-btn") as HTMLElement;
     if (expandBtn) {
       e.stopPropagation();
       const taskId = expandBtn.dataset.taskId;
@@ -242,8 +247,12 @@ export function setupTaskListToggles(container: HTMLElement): void {
     }
 
     // Handle task item click (anywhere except checkbox and buttons)
-    const taskItem = target.closest('.task-item') as HTMLElement;
-    if (taskItem && !target.closest('.task-checkbox') && !target.closest('.task-action-btn')) {
+    const taskItem = target.closest(".task-item") as HTMLElement;
+    if (
+      taskItem &&
+      !target.closest(".task-checkbox") &&
+      !target.closest(".task-action-btn")
+    ) {
       const taskId = taskItem.dataset.taskId;
       if (taskId) {
         toggleTaskExpansion(container, taskId);
@@ -258,25 +267,29 @@ export function setupTaskListToggles(container: HTMLElement): void {
  * @param taskId - Task ID to toggle
  */
 function toggleTaskExpansion(container: HTMLElement, taskId: string): void {
-  const taskItem = container.querySelector(`.task-item[data-task-id="${taskId}"]`) as HTMLElement;
+  const taskItem = container.querySelector(
+    `.task-item[data-task-id="${taskId}"]`
+  ) as HTMLElement;
   if (!taskItem) return;
 
-  const isExpanded = taskItem.dataset.expanded === 'true';
-  const expandedView = taskItem.querySelector('.task-expanded-view') as HTMLElement;
-  const expandBtn = taskItem.querySelector('.task-expand-btn') as HTMLElement;
+  const isExpanded = taskItem.dataset.expanded === "true";
+  const expandedView = taskItem.querySelector(
+    ".task-expanded-view"
+  ) as HTMLElement;
+  const expandBtn = taskItem.querySelector(".task-expand-btn") as HTMLElement;
 
   if (isExpanded) {
     // Collapse
-    taskItem.classList.remove('expanded');
-    taskItem.dataset.expanded = 'false';
+    taskItem.classList.remove("expanded");
+    taskItem.dataset.expanded = "false";
     expandedView.hidden = true;
-    expandBtn?.setAttribute('aria-expanded', 'false');
+    expandBtn?.setAttribute("aria-expanded", "false");
   } else {
     // Expand
-    taskItem.classList.add('expanded');
-    taskItem.dataset.expanded = 'true';
+    taskItem.classList.add("expanded");
+    taskItem.dataset.expanded = "true";
     expandedView.hidden = false;
-    expandBtn?.setAttribute('aria-expanded', 'true');
+    expandBtn?.setAttribute("aria-expanded", "true");
   }
 }
 
@@ -286,10 +299,13 @@ function toggleTaskExpansion(container: HTMLElement, taskId: string): void {
  * @param showTime - Whether to show time for each task
  * @returns HTML string for task list
  */
-export function renderTaskList(goals: Goal[], showTime: boolean = false): string {
+export function renderTaskList(
+  goals: Goal[],
+  showTime: boolean = false
+): string {
   if (goals.length === 0) {
     return '<div class="task-list-empty">No tasks</div>';
   }
 
-  return goals.map(goal => renderCompactTask(goal, showTime)).join('');
+  return goals.map((goal) => renderCompactTask(goal, showTime)).join("");
 }

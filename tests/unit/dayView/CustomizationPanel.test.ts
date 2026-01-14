@@ -1,4 +1,4 @@
-jest.mock('../../../src/ui/UIManager', () => ({
+jest.mock("../../../src/ui/UIManager", () => ({
   UI: { showToast: jest.fn() },
 }));
 
@@ -18,9 +18,11 @@ describe("CustomizationPanel", () => {
     const container = document.createElement("div");
     container.className = "planner-day-view";
     container.innerHTML = `
-      <div class="customization-panel-backdrop" data-panel-visible="false">
-        <div class="customization-panel" role="dialog" aria-modal="true">
-          <input id="intention-title" type="text" />
+      <div class="intentions-modal-overlay" data-panel-visible="false">
+        <div class="intentions-modal" role="dialog" aria-modal="true">
+          <div class="customization-panel">
+            <input id="intention-title" type="text" />
+          </div>
         </div>
       </div>
     `;
@@ -29,13 +31,13 @@ describe("CustomizationPanel", () => {
     openCustomizationPanel(container);
 
     const backdrop = container.querySelector(
-      ".customization-panel-backdrop"
+      ".intentions-modal-overlay"
     ) as HTMLElement;
-    const panel = container.querySelector(".customization-panel") as HTMLElement;
+    const modal = container.querySelector(".intentions-modal") as HTMLElement;
 
     expect(backdrop.dataset.panelVisible).toBe("true");
-    expect(backdrop.classList.contains("visible")).toBe(true);
-    expect(panel.classList.contains("visible")).toBe(true);
+    expect(backdrop.classList.contains("active")).toBe(true);
+    expect(modal.classList.contains("active")).toBe(true);
 
     jest.runAllTimers();
     const firstInput = container.querySelector(
@@ -45,10 +47,9 @@ describe("CustomizationPanel", () => {
 
     closeCustomizationPanel(container, false);
     expect(backdrop.dataset.panelVisible).toBe("false");
-    expect(backdrop.classList.contains("visible")).toBe(false);
-    expect(panel.classList.contains("visible")).toBe(false);
+    expect(backdrop.classList.contains("active")).toBe(false);
+    expect(modal.classList.contains("active")).toBe(false);
 
     container.remove();
   });
 });
-

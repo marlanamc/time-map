@@ -8,7 +8,7 @@
  */
 export function isTouchDevice(): boolean {
   return (
-    'ontouchstart' in window ||
+    "ontouchstart" in window ||
     navigator.maxTouchPoints > 0 ||
     (navigator as any).msMaxTouchPoints > 0
   );
@@ -60,7 +60,7 @@ export function enableLongPress(
       config.onLongPress(e);
 
       // Add haptic feedback if available
-      if ('vibrate' in navigator) {
+      if ("vibrate" in navigator) {
         navigator.vibrate(50);
       }
     }, threshold);
@@ -104,24 +104,24 @@ export function enableLongPress(
     isLongPressed = false;
   };
 
-  element.addEventListener('touchstart', handleTouchStart, { passive: true });
-  element.addEventListener('touchmove', handleTouchMove, { passive: true });
-  element.addEventListener('touchend', handleTouchEnd);
-  element.addEventListener('touchcancel', handleTouchCancel);
+  element.addEventListener("touchstart", handleTouchStart, { passive: true });
+  element.addEventListener("touchmove", handleTouchMove, { passive: true });
+  element.addEventListener("touchend", handleTouchEnd);
+  element.addEventListener("touchcancel", handleTouchCancel);
 
   return () => {
     if (longPressTimer) clearTimeout(longPressTimer);
-    element.removeEventListener('touchstart', handleTouchStart);
-    element.removeEventListener('touchmove', handleTouchMove);
-    element.removeEventListener('touchend', handleTouchEnd);
-    element.removeEventListener('touchcancel', handleTouchCancel);
+    element.removeEventListener("touchstart", handleTouchStart);
+    element.removeEventListener("touchmove", handleTouchMove);
+    element.removeEventListener("touchend", handleTouchEnd);
+    element.removeEventListener("touchcancel", handleTouchCancel);
   };
 }
 
 /**
  * Swipe direction
  */
-export type SwipeDirection = 'left' | 'right' | 'up' | 'down';
+export type SwipeDirection = "left" | "right" | "up" | "down";
 
 /**
  * Swipe configuration
@@ -172,20 +172,20 @@ export function enableSwipe(
     if (absDeltaX > threshold || absDeltaY > threshold) {
       if (absDeltaX > absDeltaY) {
         // Horizontal swipe
-        config.onSwipe(deltaX > 0 ? 'right' : 'left', e);
+        config.onSwipe(deltaX > 0 ? "right" : "left", e);
       } else {
         // Vertical swipe
-        config.onSwipe(deltaY > 0 ? 'down' : 'up', e);
+        config.onSwipe(deltaY > 0 ? "down" : "up", e);
       }
     }
   };
 
-  element.addEventListener('touchstart', handleTouchStart, { passive: true });
-  element.addEventListener('touchend', handleTouchEnd, { passive: true });
+  element.addEventListener("touchstart", handleTouchStart, { passive: true });
+  element.addEventListener("touchend", handleTouchEnd, { passive: true });
 
   return () => {
-    element.removeEventListener('touchstart', handleTouchStart);
-    element.removeEventListener('touchend', handleTouchEnd);
+    element.removeEventListener("touchstart", handleTouchStart);
+    element.removeEventListener("touchend", handleTouchEnd);
   };
 }
 
@@ -204,10 +204,7 @@ interface TapConfig {
  * @param config - Tap configuration
  * @returns Cleanup function
  */
-export function enableTap(
-  element: HTMLElement,
-  config: TapConfig
-): () => void {
+export function enableTap(element: HTMLElement, config: TapConfig): () => void {
   const doubleTapThreshold = config.doubleTapThreshold || 300;
 
   let lastTapTime = 0;
@@ -228,10 +225,10 @@ export function enableTap(
     }
   };
 
-  element.addEventListener('touchend', handleTouchEnd);
+  element.addEventListener("touchend", handleTouchEnd);
 
   return () => {
-    element.removeEventListener('touchend', handleTouchEnd);
+    element.removeEventListener("touchend", handleTouchEnd);
   };
 }
 
@@ -255,12 +252,12 @@ export function preventBodyScroll(element: HTMLElement): () => void {
     }
   };
 
-  document.body.addEventListener('touchmove', handleTouchMove, {
+  document.body.addEventListener("touchmove", handleTouchMove, {
     passive: false,
   });
 
   return () => {
-    document.body.removeEventListener('touchmove', handleTouchMove);
+    document.body.removeEventListener("touchmove", handleTouchMove);
   };
 }
 
@@ -269,13 +266,13 @@ export function preventBodyScroll(element: HTMLElement): () => void {
  * @param element - Element to add momentum scrolling to
  */
 export function enableMomentumScrolling(element: HTMLElement): void {
-  element.style.webkitOverflowScrolling = 'touch';
-  element.style.overflowY = 'auto';
+  (element.style as any).webkitOverflowScrolling = "touch";
+  element.style.overflowY = "auto";
 }
 
 /**
  * Check if reduced motion is preferred
  */
 export function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
