@@ -72,16 +72,14 @@ class QuickAddManager {
     overlay.className = "quick-add-overlay";
 
     const label = opts?.label ?? "Quick intention";
-    const placeholder = opts?.placeholder ?? "What's one small thing?";
     overlay.innerHTML = `
       <div class="quick-add-container">
         <div class="quick-add-header">
           <span class="quick-add-emoji">🌱</span>
           <span class="quick-add-label">${label}</span>
         </div>
-        <input type="text" id="quickAddInput" placeholder="${placeholder}" autocomplete="off" autocapitalize="sentences" spellcheck="true" autofocus>
+        <input type="text" id="quickAddInput" autocomplete="off" autocapitalize="sentences" spellcheck="true" autofocus>
         <div id="quickAddAccordionContainer" class="quick-add-accordion"></div>
-        <div class="quick-add-tip">Press Enter to save • Esc to cancel</div>
       </div>
     `;
 

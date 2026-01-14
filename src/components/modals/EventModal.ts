@@ -114,8 +114,7 @@ function ensureModal(): HTMLElement {
       <form class="modal-body" id="eventModalForm">
         <div class="form-group">
           <label for="eventTitle">What’s happening?</label>
-          <input id="eventTitle" type="text" autocomplete="off" placeholder="Vacation, appointment, dinner…" required />
-          <div class="field-help">This can be simple. Details are optional.</div>
+          <input id="eventTitle" type="text" autocomplete="off" required />
         </div>
 
         <div class="form-row">
@@ -146,7 +145,6 @@ function ensureModal(): HTMLElement {
           <div class="form-group">
             <label for="eventEndDate">End date (optional)</label>
             <input id="eventEndDate" type="date" />
-            <div class="field-help">Use this for trips or multi-day events.</div>
           </div>
         </div>
 
@@ -154,7 +152,7 @@ function ensureModal(): HTMLElement {
 
         <div class="form-group">
           <label for="eventNotes">Notes (optional)</label>
-          <textarea id="eventNotes" rows="3" placeholder="Anything you want to remember…"></textarea>
+          <textarea id="eventNotes" rows="3"></textarea>
         </div>
 
         <div class="modal-actions">

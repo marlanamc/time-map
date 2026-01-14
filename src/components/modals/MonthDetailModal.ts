@@ -80,7 +80,7 @@ class MonthDetailModalManager {
 
                         <!-- Add Milestone for this month -->
                         <div class="quick-add-goal">
-                            <input type="text" placeholder="Quick add a milestone for ${monthName}..." id="quickGoalInput">
+                            <input type="text" id="quickGoalInput">
                             <select id="quickGoalCategory">
                                 <option value="">No category</option>
                                 ${Object.entries(CONFIG.CATEGORIES)

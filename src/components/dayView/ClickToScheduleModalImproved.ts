@@ -69,14 +69,12 @@ export class ClickToScheduleModal extends BaseModal {
             id="schedule-date"
             class="form-input"
             value="${this.currentDate}"
-            aria-describedby="date-help"
           />
-          <div id="date-help" class="field-help">Select the date for this task</div>
         </div>
 
         <div class="form-group">
           <label for="schedule-time">Start Time</label>
-          <select id="schedule-time" class="form-select" aria-describedby="time-help">
+          <select id="schedule-time" class="form-select">
             ${timeOptions
               .map(
                 (time) => `
@@ -87,7 +85,6 @@ export class ClickToScheduleModal extends BaseModal {
               )
               .join('')}
           </select>
-          <div id="time-help" class="field-help">Choose when to start</div>
         </div>
 
         <div class="form-group">
@@ -107,7 +104,6 @@ export class ClickToScheduleModal extends BaseModal {
             <span class="duration-unit" aria-hidden="true">min</span>
             <button type="button" class="duration-btn" data-action="increase" aria-label="Increase duration">+</button>
           </div>
-          <div id="duration-label" class="field-help">How long will this take?</div>
         </div>
 
         <div class="schedule-preview" role="status" aria-live="polite">

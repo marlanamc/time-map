@@ -43,7 +43,6 @@ export function renderActivityPicker(opts: ActivityPickerOptions): string {
       <option value=""${value ? "" : " selected"}>None</option>
       ${options}
     </select>
-    <div class="field-help">Pick an activity emoji that fits this goal.</div>
   `;
 }
 

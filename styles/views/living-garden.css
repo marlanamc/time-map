@@ -6,12 +6,25 @@
   min-height: 100vh;
   background: transparent;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: #1a202c;
+  color: #1a202c !important;
+}
+
+/* Force dark text in light mode - override any parent color inheritance */
+:root:not(.dark-mode) .living-garden {
+  color: #1a202c !important;
+}
+
+:root:not(.dark-mode) .living-garden h1,
+:root:not(.dark-mode) .living-garden h2,
+:root:not(.dark-mode) .living-garden h3,
+:root:not(.dark-mode) .living-garden p,
+:root:not(.dark-mode) .living-garden span {
+  color: #1a202c !important;
 }
 
 html.dark-mode .living-garden {
   background: transparent;
-  color: #f8fafc;
+  color: #f8fafc !important;
 }
 
 .living-garden-container {
@@ -123,9 +136,22 @@ html.dark-mode .living-garden {
 
 .living-garden-subtitle {
   font-size: var(--text-xl);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   margin: 0 0 var(--space-4);
   font-weight: 500;
+  opacity: 0.95;
+}
+
+/* Force dark text in light mode */
+:root:not(.dark-mode) .living-garden-subtitle {
+  color: #1A2B2F !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  opacity: 1;
+}
+
+.dark-mode .living-garden-subtitle {
+  color: rgba(255, 255, 255, 0.95);
+  opacity: 1;
 }
 
 .living-garden-summary {
@@ -167,11 +193,103 @@ html.dark-mode .living-garden-summary {
   color: var(--text-primary);
 }
 
+/* Force dark text in light mode */
+:root:not(.dark-mode) .living-garden-empty h2 {
+  color: #0A1113 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.dark-mode .living-garden-empty h2 {
+  color: rgba(255, 255, 255, 0.98);
+}
+
 .living-garden-empty p {
   font-size: var(--text-lg);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   margin: 0 0 var(--space-8);
   line-height: 1.6;
+  opacity: 0.9;
+}
+
+/* Force dark text in light mode */
+:root:not(.dark-mode) .living-garden-empty p {
+  color: #1A2B2F !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  opacity: 1;
+}
+
+.dark-mode .living-garden-empty p {
+  color: rgba(255, 255, 255, 0.95);
+  opacity: 1;
+}
+
+/* Ensure visibility in light mode time themes */
+:root.time-dawn:not(.dark-mode) .living-garden-empty h2,
+:root.time-morning:not(.dark-mode) .living-garden-empty h2,
+:root.time-afternoon:not(.dark-mode) .living-garden-empty h2,
+:root.time-evening:not(.dark-mode) .living-garden-empty h2 {
+  color: #0A1113 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+:root.time-dawn:not(.dark-mode) .living-garden-empty p,
+:root.time-morning:not(.dark-mode) .living-garden-empty p,
+:root.time-afternoon:not(.dark-mode) .living-garden-empty p,
+:root.time-evening:not(.dark-mode) .living-garden-empty p {
+  color: #1A2B2F !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Time theme overrides for subtitle */
+:root.time-dawn:not(.dark-mode) .living-garden-subtitle,
+:root.time-morning:not(.dark-mode) .living-garden-subtitle,
+:root.time-afternoon:not(.dark-mode) .living-garden-subtitle,
+:root.time-evening:not(.dark-mode) .living-garden-subtitle {
+  color: #0A1113 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Mobile view - ensure darker text with !important to override any other rules */
+/* Target all possible combinations to ensure styles apply - maximum specificity */
+.living-garden-mobile .living-garden-subtitle,
+.living-garden--mobile .living-garden-subtitle,
+.living-garden-mobile .living-garden-header .living-garden-subtitle,
+.garden-view-container .living-garden-mobile .living-garden-subtitle,
+.garden-view-container.living-garden--mobile .living-garden-subtitle,
+#calendarGrid .living-garden-mobile .living-garden-subtitle,
+#calendarGrid .living-garden--mobile .living-garden-subtitle,
+:root:not(.dark-mode) .living-garden-mobile .living-garden-subtitle,
+:root:not(.dark-mode) .living-garden--mobile .living-garden-subtitle,
+:root:not(.dark-mode) .living-garden-mobile .living-garden-header .living-garden-subtitle {
+  color: #0A1113 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.living-garden-mobile .living-garden-empty h2,
+.living-garden--mobile .living-garden-empty h2,
+.garden-view-container .living-garden-mobile .living-garden-empty h2,
+.garden-view-container.living-garden--mobile .living-garden-empty h2,
+#calendarGrid .living-garden-mobile .living-garden-empty h2,
+#calendarGrid .living-garden--mobile .living-garden-empty h2,
+:root:not(.dark-mode) .living-garden-mobile .living-garden-empty h2,
+:root:not(.dark-mode) .living-garden--mobile .living-garden-empty h2 {
+  color: #0A1113 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.living-garden-mobile .living-garden-empty p,
+.living-garden--mobile .living-garden-empty p,
+.garden-view-container .living-garden-mobile .living-garden-empty p,
+.garden-view-container.living-garden--mobile .living-garden-empty p,
+#calendarGrid .living-garden-mobile .living-garden-empty p,
+#calendarGrid .living-garden--mobile .living-garden-empty p,
+:root:not(.dark-mode) .living-garden-mobile .living-garden-empty p,
+:root:not(.dark-mode) .living-garden--mobile .living-garden-empty p {
+  color: #1A2B2F !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+  opacity: 1 !important;
 }
 
 /* ===================================
@@ -743,4 +861,24 @@ html.dark-mode .living-garden-leaf:hover {
 .living-garden-plot-dormant p {
   margin: 0 0 var(--space-4);
   line-height: 1.5;
+}
+
+/* ===================================
+   FINAL OVERRIDE - Maximum Specificity
+   Force dark text in light mode for mobile garden view
+   =================================== */
+#calendarGrid .garden-view-container.living-garden--mobile .living-garden-mobile .living-garden-subtitle,
+#calendarGrid .garden-view-container.living-garden--mobile .living-garden-mobile .living-garden-empty h2,
+#calendarGrid .garden-view-container.living-garden--mobile .living-garden-mobile .living-garden-empty p,
+body:not(.dark-mode) #calendarGrid .living-garden-mobile .living-garden-subtitle,
+body:not(.dark-mode) #calendarGrid .living-garden-mobile .living-garden-empty h2,
+body:not(.dark-mode) #calendarGrid .living-garden-mobile .living-garden-empty p {
+  color: #0A1113 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+body:not(.dark-mode) #calendarGrid .living-garden-mobile .living-garden-empty p {
+  color: #1A2B2F !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
 }

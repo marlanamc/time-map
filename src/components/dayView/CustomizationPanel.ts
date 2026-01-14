@@ -35,48 +35,44 @@ function escapeHtml(text: string): string {
  */
 function renderAddFormBody(): string {
   return `
-    <div class="form-grid">
-      <div class="form-field">
-        <label for="intention-title" class="form-label">Title</label>
+    <div class="form-group">
+      <label for="intention-title">Title</label>
+      <input
+        type="text"
+        id="intention-title"
+        maxlength="50"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="intention-emoji">Emoji</label>
+      <div class="emoji-picker-control">
         <input
           type="text"
-          id="intention-title"
-          class="form-input"
-          placeholder="e.g., Deep work, Email admin"
-          maxlength="50"
-          required
+          id="intention-emoji"
+          placeholder="🎯"
+          maxlength="2"
         />
+        <button type="button" class="emoji-picker-btn" aria-label="Choose emoji">
+          😊
+        </button>
       </div>
+    </div>
 
-      <div class="form-field form-field-emoji">
-        <label for="intention-emoji" class="form-label">Emoji</label>
-        <div class="emoji-picker-control">
-          <input
-            type="text"
-            id="intention-emoji"
-            class="form-input emoji-input"
-            placeholder="🎯"
-            maxlength="2"
-          />
-          <button type="button" class="emoji-picker-btn" aria-label="Choose emoji">
-            😊
-          </button>
-        </div>
-      </div>
-
-      <div class="form-field">
-        <label for="intention-category" class="form-label">Category</label>
-        <select id="intention-category" class="form-select">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="intention-category">Category</label>
+        <select id="intention-category">
           ${renderCategoryOptions()}
         </select>
       </div>
 
-      <div class="form-field">
-        <label for="intention-duration" class="form-label">Duration (minutes)</label>
+      <div class="form-group">
+        <label for="intention-duration">Duration (min)</label>
         <input
           type="number"
           id="intention-duration"
-          class="form-input"
           placeholder="60"
           min="5"
           max="480"
@@ -86,13 +82,12 @@ function renderAddFormBody(): string {
       </div>
     </div>
 
-    <div class="form-actions">
-      <button type="button" class="btn-add-intention-submit">
-        <span aria-hidden="true">+</span>
-        Add quick intention
+    <div class="intention-form-actions">
+      <button type="button" class="btn btn-primary btn-add-intention-submit">
+        + Add quick intention
       </button>
-      <button type="button" class="btn-form-reset">
-        Cancel
+      <button type="button" class="btn btn-ghost btn-form-reset">
+        Clear
       </button>
     </div>
   `;
@@ -142,36 +137,30 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
   });
 
   return `
-    <div class="customization-panel-backdrop" data-panel-visible="false">
-      <div class="customization-panel" role="dialog" aria-labelledby="panel-title" aria-modal="true">
-        <div class="panel-header">
-          <div class="panel-header-content">
-            <h2 id="panel-title" class="panel-title">Quick intentions</h2>
-            <p class="panel-helper-text">These are templates—they don't affect your goals unless you add them to a day.</p>
+    <div class="modal-overlay intentions-modal-overlay" data-panel-visible="false">
+      <div class="modal intentions-modal" role="dialog" aria-labelledby="intentions-modal-title" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-header-content">
+            <h2 id="intentions-modal-title" class="modal-title">Quick intentions</h2>
+            <p class="modal-subtitle">Templates for your daily planning</p>
           </div>
-          <button
-            type="button"
-            class="panel-close-btn"
-            aria-label="Close customization panel"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
+          <button type="button" class="modal-close" aria-label="Close" data-action="close-modal">
+            <span aria-hidden="true">×</span>
           </button>
         </div>
 
-        <div class="panel-content">
-          <div class="panel-accordion-container" id="panelAccordionContainer">
+        <div class="modal-body">
+          <div class="intentions-accordion-container" id="panelAccordionContainer">
             ${addAccordion}
             ${listAccordion}
           </div>
         </div>
 
-        <div class="panel-footer">
-          <button type="button" class="panel-btn panel-btn-secondary btn-panel-cancel">
-            Close
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost btn-panel-cancel" data-action="close-modal">
+            Cancel
           </button>
-          <button type="button" class="panel-btn panel-btn-primary btn-panel-save">
+          <button type="button" class="btn btn-primary btn-panel-save">
             Done
           </button>
         </div>
@@ -315,17 +304,20 @@ function renderSortableIntention(intention: CustomIntention, index: number): str
  * @param container - Root container element
  */
 export function openCustomizationPanel(container: HTMLElement): void {
-  const backdrop = container.querySelector('.customization-panel-backdrop') as HTMLElement;
-  if (!backdrop) return;
+  const overlay = container.querySelector('.intentions-modal-overlay') as HTMLElement;
+  if (!overlay) return;
 
-  const panel = backdrop.querySelector('.customization-panel') as HTMLElement | null;
+  const modal = overlay.querySelector('.intentions-modal') as HTMLElement | null;
 
-  backdrop.dataset.panelVisible = 'true';
-  backdrop.classList.add('visible');
-  panel?.classList.add('visible');
+  // Prevent body scroll
+  document.body.style.overflow = 'hidden';
+
+  overlay.dataset.panelVisible = 'true';
+  overlay.classList.add('active');
+  modal?.classList.add('active');
 
   // Set up accordion toggles
-  const accordionContainer = backdrop.querySelector('#panelAccordionContainer') as HTMLElement | null;
+  const accordionContainer = overlay.querySelector('#panelAccordionContainer') as HTMLElement | null;
   setupAccordionSectionToggles(accordionContainer, (id, open) => {
     if (id === "panelAddSection") {
       addSectionOpen = open;
@@ -336,14 +328,14 @@ export function openCustomizationPanel(container: HTMLElement): void {
 
   // Focus the first input if add section is open
   if (addSectionOpen) {
-    const firstInput = backdrop.querySelector('#intention-title') as HTMLInputElement;
+    const firstInput = overlay.querySelector('#intention-title') as HTMLInputElement;
     if (firstInput) {
       setTimeout(() => firstInput.focus(), 300); // After animation
     }
   }
 
-  // Trap focus within panel
-  trapFocus(backdrop);
+  // Trap focus within modal
+  trapFocus(overlay);
 }
 
 /**
@@ -365,7 +357,7 @@ function clearAddForm(container: HTMLElement, editingIdRef: { current: string | 
   // Reset button text
   const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
   if (addBtn) {
-    addBtn.innerHTML = '<span aria-hidden="true">+</span> Add quick intention';
+    addBtn.textContent = '+ Add quick intention';
   }
 }
 
@@ -375,22 +367,25 @@ function clearAddForm(container: HTMLElement, editingIdRef: { current: string | 
  * @param shouldSave - Whether to save changes
  */
 export function closeCustomizationPanel(container: HTMLElement, shouldSave: boolean = false): void {
-  const backdrop = container.querySelector('.customization-panel-backdrop') as HTMLElement;
-  if (!backdrop) return;
+  const overlay = container.querySelector('.intentions-modal-overlay') as HTMLElement;
+  if (!overlay) return;
 
-  const panel = backdrop.querySelector('.customization-panel') as HTMLElement | null;
+  const modal = overlay.querySelector('.intentions-modal') as HTMLElement | null;
 
   if (shouldSave) {
     // Changes are already saved via IntentionsManager throughout editing
-    UI.showToast('✅ Quick intentions saved!', 'success');
+    UI.showToast('Quick intentions saved!', 'success');
   }
 
-  backdrop.dataset.panelVisible = 'false';
-  backdrop.classList.remove('visible');
-  panel?.classList.remove('visible');
+  // Restore body scroll
+  document.body.style.overflow = '';
+
+  overlay.dataset.panelVisible = 'false';
+  overlay.classList.remove('active');
+  modal?.classList.remove('active');
 
   // Clear form with a dummy ref (actual ref managed by setupCustomizationPanel)
-  clearAddForm(backdrop, { current: null });
+  clearAddForm(overlay, { current: null });
 }
 
 /**
@@ -425,6 +420,7 @@ function trapFocus(element: HTMLElement): void {
   // Close on Escape
   element.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      // Find parent container (day view)
       const container = element.closest('.planner-day-view') as HTMLElement;
       if (container) {
         closeCustomizationPanel(container, false);
@@ -450,8 +446,8 @@ export function setupCustomizationPanel(
   container.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
 
-    // Close button
-    const closeBtn = target.closest('.panel-close-btn, .btn-panel-cancel') as HTMLElement;
+    // Close button (modal-close or btn-panel-cancel)
+    const closeBtn = target.closest('.modal-close, .btn-panel-cancel, [data-action="close-modal"]') as HTMLElement;
     if (closeBtn) {
       closeCustomizationPanel(container, false);
       return;
@@ -465,9 +461,9 @@ export function setupCustomizationPanel(
       return;
     }
 
-    // Backdrop click to close
-    const backdrop = target.closest('.customization-panel-backdrop') as HTMLElement;
-    if (backdrop && target === backdrop) {
+    // Overlay click to close (click on overlay background, not on modal)
+    const overlay = target.closest('.intentions-modal-overlay') as HTMLElement;
+    if (overlay && target === overlay) {
       closeCustomizationPanel(container, false);
       return;
     }

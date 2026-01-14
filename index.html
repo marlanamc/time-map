@@ -576,28 +576,6 @@
           </div>
         </div>
 
-        <div
-          class="sidebar-section collapsible mobile-only"
-          data-section="here-garden"
-        >
-          <button
-            class="section-toggle"
-            aria-expanded="true"
-            aria-controls="hereGardenContent"
-          >
-            <span class="section-toggle-icon">▼</span>
-            <span class="section-toggle-label">Your Garden</span>
-          </button>
-          <div class="section-content" id="hereGardenContent">
-            <div
-              class="mobile-here-garden"
-              id="mobileHereGarden"
-              role="list"
-              aria-label="Your garden"
-            ></div>
-          </div>
-        </div>
-
         <!-- Affirmation - Emotional Regulation Support -->
         <div class="sidebar-section collapsible" data-section="affirmation">
           <button
@@ -909,7 +887,6 @@
               <input
                 type="text"
                 id="goalTitle"
-                placeholder="e.g., Make space for my side project"
                 required
                 aria-required="true"
               />
@@ -945,7 +922,7 @@
                 <select id="goalMonth" required aria-required="true"></select>
               </div>
               <div class="form-group">
-                <label for="goalCategory">Category (optional)</label>
+                <label for="goalCategory">Category</label>
                 <select id="goalCategory">
                   <option value="" selected>No category</option>
                   <option value="career">Career</option>

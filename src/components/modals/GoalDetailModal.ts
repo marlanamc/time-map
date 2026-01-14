@@ -253,7 +253,7 @@ function populateAdvancedSection(
           .join("")}
       </div>
       <div class="add-subtask">
-        <input type="text" placeholder="Add a subtask..." id="newSubtaskInput">
+        <input type="text" id="newSubtaskInput">
         <button class="btn btn-sm btn-primary" id="addSubtaskBtn">Add</button>
       </div>
     </div>
@@ -272,7 +272,7 @@ function populateAdvancedSection(
           .join("")}
       </div>
       <div class="add-note">
-        <textarea placeholder="Add a note..." id="newNoteInput"></textarea>
+        <textarea id="newNoteInput"></textarea>
         <button class="btn btn-sm btn-primary" id="addNoteBtn">Add Note</button>
       </div>
     </div>

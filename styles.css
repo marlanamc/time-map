@@ -2141,8 +2141,8 @@ select:focus-visible,
     height: 64px;
     border: none;
     border-radius: var(--radius-full);
-    background: var(--accent);
-    color: white;
+    background: var(--accent-fill);
+    color: var(--text-on-accent);
     box-shadow: 0 8px 32px var(--accent-subtle);
     display: inline-flex;
     align-items: center;
@@ -2153,7 +2153,7 @@ select:focus-visible,
 }
 
 .fab-add-anchor:hover {
-    background: var(--accent-hover);
+    filter: brightness(1.1);
     transform: translateY(-1px);
 }
 
@@ -2162,7 +2162,7 @@ select:focus-visible,
 }
 
 .fab-add-anchor:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--accent-highlight);
     outline-offset: 3px;
 }
 
@@ -2639,8 +2639,8 @@ select:focus-visible,
     width: fit-content;
     padding: 2px 6px;
     border-radius: var(--radius-full);
-    border: 1px solid var(--accent-muted);
-    background: var(--accent-muted);
+    border: 1px solid var(--accent-stroke);
+    background: var(--accent-fill);
     box-shadow: var(--shadow-sm);
 }
 
@@ -2665,17 +2665,18 @@ body.hide-sidebar .canvas-zoom-controls {
     border-radius: var(--radius-full);
     font-size: var(--text-base);
     font-weight: 600;
-    color: white;
-    background: var(--accent);
+    color: var(--text-on-accent);
+    background: transparent;
     border: none;
-    box-shadow: 0 4px 16px var(--accent-subtle);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--accent-stroke) 30%, transparent);
     transition: all var(--duration-normal) var(--ease-out);
 }
 
 .canvas-zoom-controls .zoom-btn:hover {
-    background: var(--accent-hover);
+    background: color-mix(in srgb, var(--text-on-accent) 12%, transparent);
+    filter: brightness(1.1);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px var(--accent-subtle);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--accent-stroke) 40%, transparent);
 }
 
 .canvas-zoom-controls .zoom-btn:active {
@@ -2685,7 +2686,7 @@ body.hide-sidebar .canvas-zoom-controls {
 .canvas-zoom-controls .zoom-level {
     min-width: 28px;
     font-size: 0.7rem;
-    color: var(--accent);
+    color: var(--text-on-accent);
 }
 
 .canvas {

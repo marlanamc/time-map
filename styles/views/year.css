@@ -845,7 +845,7 @@
 }
 
 .year-add-vision-btn {
-  margin-top: 12px;
+  /* Styling handled by .year-vision-icon-only */
 }
 
 .year-vision-empty--cosmic .year-add-vision-btn {
@@ -913,7 +913,7 @@
 
 .year-vision-hero-container {
   width: min(760px, calc(100% - 32px));
-  margin: 12px auto 24px;
+  margin: var(--space-3) auto 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1076,6 +1076,12 @@
   box-shadow: var(--shadow-md);
 }
 
+.year-vision-icon-only--empty:hover {
+  border-color: var(--accent-button);
+  background: var(--accent-subtle);
+  color: var(--accent-button);
+}
+
 .year-vision-icon-only:active {
   transform: scale(0.98);
 }
@@ -1083,6 +1089,8 @@
 .year-vision-icon-only--empty {
   border-style: dashed;
   background: transparent;
+  border-color: var(--accent-stroke);
+  color: var(--accent);
 }
 
 .vision-icon-large {

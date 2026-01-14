@@ -78,6 +78,8 @@ const sectionStates: Record<keyof typeof SECTION_IDS, boolean> = {
   details: false,
 };
 
+let moreOptionsExpanded = false;
+
 const LEVEL_DESCRIPTORS: Record<GoalLevel, string> = {
   vision: "Year direction",
   milestone: "Monthly chapter",
@@ -85,29 +87,50 @@ const LEVEL_DESCRIPTORS: Record<GoalLevel, string> = {
   intention: "Daily touch",
 };
 
-const SECTION_TITLES: Record<keyof typeof SECTION_IDS, { title: string; subtitle: string }> = {
+const SECTION_TITLES: Record<keyof typeof SECTION_IDS, { title: string; subtitle?: string }> = {
   context: {
-    title: "Context & Orientation (optional)",
-    subtitle: "Time context + suggestions",
+    title: "Time context",
   },
   energy: {
-    title: "Make this easier (optional)",
-    subtitle: "Tiny + low-energy helpers",
+    title: "Easy mode",
   },
   link: {
-    title: "Link it up (optional)",
-    subtitle: "Connect this to an existing goal",
+    title: "Connect to",
+    subtitle: "Link to existing goal",
   },
   details: {
-    title: "Details & Planning (optional)",
-    subtitle: "Timing, duration, and category",
+    title: "More details",
   },
 };
+
+function renderMoreOptionsButton(): string {
+  return `
+    <button
+      type="button"
+      class="goal-more-options-btn"
+      id="goalMoreOptionsBtn"
+      aria-expanded="${moreOptionsExpanded}"
+    >
+      ${moreOptionsExpanded ? "Fewer options" : "More options"}
+    </button>
+  `;
+}
 
 function renderAccordionSections() {
   const container = document.getElementById("goalAccordionContainer");
   if (!container) return;
-  container.innerHTML = [
+  
+  // Always show Link section (essential)
+  const linkSection = renderAccordionSection({
+    id: SECTION_IDS.link,
+    title: SECTION_TITLES.link.title,
+    subtitle: SECTION_TITLES.link.subtitle,
+    open: sectionStates.link,
+    bodyHtml: `<div id="goalLinkBody"></div>`,
+  });
+  
+  // Optional sections (hidden by default, shown when "More options" is expanded)
+  const optionalSections = moreOptionsExpanded ? [
     renderAccordionSection({
       id: SECTION_IDS.context,
       title: SECTION_TITLES.context.title,
@@ -123,19 +146,18 @@ function renderAccordionSections() {
       bodyHtml: `<div id="goalEnergyBody"></div>`,
     }),
     renderAccordionSection({
-      id: SECTION_IDS.link,
-      title: SECTION_TITLES.link.title,
-      subtitle: SECTION_TITLES.link.subtitle,
-      open: sectionStates.link,
-      bodyHtml: `<div id="goalLinkBody"></div>`,
-    }),
-    renderAccordionSection({
       id: SECTION_IDS.details,
       title: SECTION_TITLES.details.title,
       subtitle: SECTION_TITLES.details.subtitle,
       open: sectionStates.details,
       bodyHtml: `<div id="goalDetailsBody"></div>`,
     }),
+  ].join("") : "";
+  
+  container.innerHTML = [
+    linkSection,
+    renderMoreOptionsButton(),
+    `<div id="goalMoreOptionsContainer" ${moreOptionsExpanded ? "" : "hidden"}>${optionalSections}</div>`,
   ].join("");
 }
 
@@ -205,6 +227,35 @@ function moveInto(parent: HTMLElement | null, child: HTMLElement | null) {
   parent.appendChild(child);
 }
 
+function moveCategoryOutsideAccordion() {
+  // Move category field to be visible immediately after title input
+  const categoryGroup = document.querySelector('label[for="goalCategory"]')?.parentElement as HTMLElement | null;
+  const categoryLabel = document.querySelector('label[for="goalCategory"]') as HTMLElement | null;
+  const goalHero = document.getElementById("goalHero");
+  const accordionContainer = document.getElementById("goalAccordionContainer");
+  
+  if (categoryGroup && goalHero && categoryLabel) {
+    // Update label to remove "(optional)"
+    categoryLabel.textContent = "Category";
+    
+    // Create a container for category right after goal-hero
+    let categoryContainer = document.getElementById("goalCategoryContainer");
+    if (!categoryContainer) {
+      categoryContainer = document.createElement("div");
+      categoryContainer.id = "goalCategoryContainer";
+      categoryContainer.className = "goal-category-inline";
+      if (accordionContainer && accordionContainer.parentElement) {
+        accordionContainer.parentElement.insertBefore(categoryContainer, accordionContainer);
+      } else if (goalHero.parentElement) {
+        goalHero.parentElement.insertBefore(categoryContainer, goalHero.nextSibling);
+      }
+    }
+    
+    // Move category group into the container
+    moveInto(categoryContainer, categoryGroup);
+  }
+}
+
 function populateDetailsSection(_level: GoalLevel) {
   const detailsBody = document.getElementById("goalDetailsBody");
   if (!detailsBody) return;
@@ -212,8 +263,18 @@ function populateDetailsSection(_level: GoalLevel) {
   const scopeRow = document.getElementById("goalScopeRow");
   moveInto(detailsBody, scopeRow);
 
-  const monthGroup = document.querySelector('label[for="goalMonth"]')?.parentElement as HTMLElement | null;
-  moveInto(detailsBody, monthGroup?.closest(".form-row") ?? null);
+  // Extract month group from the form-row that contains both month and category
+  const monthCategoryRow = document.querySelector('label[for="goalMonth"]')?.closest(".form-row") as HTMLElement | null;
+  if (monthCategoryRow) {
+    // Create a new form-row for just the month field
+    const monthGroup = document.querySelector('label[for="goalMonth"]')?.parentElement as HTMLElement | null;
+    if (monthGroup) {
+      const newRow = document.createElement("div");
+      newRow.className = "form-row";
+      newRow.appendChild(monthGroup);
+      moveInto(detailsBody, newRow);
+    }
+  }
 
   const durationRow = document.getElementById("goalDurationRow");
   moveInto(detailsBody, durationRow);
@@ -274,6 +335,7 @@ export function closeGoalModal(ctx: GoalModalContext) {
   modalLinkSelection = null;
   modalMetaDraft = {};
   modalActivityId = null;
+  moreOptionsExpanded = false;
   syncEasyModeBadge();
 }
 
@@ -413,6 +475,7 @@ export function openGoalModal(
     });
     modalLinkSelection = null;
     milestoneTimeContextOpen = false;
+    moreOptionsExpanded = false;
   }
   const rerender = () =>
     openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
@@ -443,15 +506,7 @@ export function openGoalModal(
       label.textContent = "What is your intention for today?";
   }
 
-  setTitleHelp(
-    level === "vision"
-      ? "One sentence is enough. You can change this later."
-      : level === "focus"
-        ? "Aim for 1–3 Focus items. Smaller is okay."
-        : level === "intention"
-          ? "This can be small. Even a 2-minute task counts."
-          : null,
-  );
+  setTitleHelp(null);
 
   const monthGroup = document.querySelector(
     'label[for="goalMonth"]',
@@ -577,6 +632,61 @@ export function openGoalModal(
     sectionStates[key] = open;
     openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
   });
+  
+  // Setup "More options" button toggle
+  const moreOptionsBtn = document.getElementById("goalMoreOptionsBtn");
+  if (moreOptionsBtn) {
+    moreOptionsBtn.onclick = () => {
+      moreOptionsExpanded = !moreOptionsExpanded;
+      const container = document.getElementById("goalMoreOptionsContainer");
+      
+      if (moreOptionsExpanded) {
+        // Re-render to create optional sections
+        renderAccordionSections();
+        
+        // Re-setup accordion toggles for all sections
+        const updatedAccordionContainer = document.getElementById("goalAccordionContainer");
+        if (updatedAccordionContainer) {
+          setupAccordionSectionToggles(updatedAccordionContainer, (id, open) => {
+            const entry = (Object.entries(SECTION_IDS) as [keyof typeof SECTION_IDS, string][])
+              .find(([, value]) => value === id);
+            if (!entry) return;
+            const [key] = entry;
+            sectionStates[key] = open;
+            openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
+          });
+        }
+        
+        // Populate optional sections now that they exist
+        populateContextSection(ctx, level, getSuggestionChips(level), !!modalMetaDraft.easyMode);
+        populateEnergySection(ctx, level, rerender);
+        populateDetailsSection(level);
+        
+        // Update button reference and state
+        const updatedBtn = document.getElementById("goalMoreOptionsBtn");
+        if (updatedBtn) {
+          updatedBtn.setAttribute("aria-expanded", "true");
+          updatedBtn.textContent = "Fewer options";
+        }
+        if (container) {
+          container.hidden = false;
+        }
+      } else {
+        // Just hide the container
+        if (container) {
+          container.hidden = true;
+        }
+        if (moreOptionsBtn) {
+          moreOptionsBtn.setAttribute("aria-expanded", "false");
+          moreOptionsBtn.textContent = "More options";
+        }
+      }
+    };
+  }
+  
+  // Move category field outside accordion to show immediately
+  moveCategoryOutsideAccordion();
+  
   populateContextSection(ctx, level, getSuggestionChips(level), !!modalMetaDraft.easyMode);
   populateEnergySection(ctx, level, rerender);
   populateLinkSection(level, visions, milestones, focuses);

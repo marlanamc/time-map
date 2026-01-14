@@ -84,11 +84,14 @@ export const YearRenderer = {
       cardsContainer.innerHTML = visionIcons;
       visionWrap.appendChild(cardsContainer);
     } else {
-      visionWrap.innerHTML = `
-      <button type="button" class="year-vision-hero-card year-vision-hero-card--empty year-add-vision-btn" aria-label="Add Vision for ${viewingYear}">
-        <span class="year-vision-hero-title">+ Add Vision</span>
-              </button>
-    `;
+      const cardsContainer = document.createElement("div");
+      cardsContainer.className = "year-vision-icons-grid";
+      cardsContainer.innerHTML = `
+        <button type="button" class="year-vision-icon-only year-vision-icon-only--empty year-add-vision-btn" aria-label="Add Vision for ${viewingYear}">
+          <span class="vision-icon-large">+</span>
+        </button>
+      `;
+      visionWrap.appendChild(cardsContainer);
     }
 
     const grid = document.createElement("div");

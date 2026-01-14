@@ -73,16 +73,29 @@
 }
 
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: var(--space-1) var(--space-3);
     margin-bottom: var(--space-5);
+    align-items: start;
 }
 
 .modal-title {
     font-size: var(--text-xl);
     font-weight: 600;
     letter-spacing: -0.02em;
+    margin: 0;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.modal-level-descriptor {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    grid-column: 1;
+    grid-row: 2;
 }
 
 .modal-close {
@@ -100,6 +113,9 @@
     transition: all var(--duration-fast) var(--ease-out);
     min-width: 44px;
     min-height: 44px;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
 }
 
 .modal-close:hover {
@@ -1007,7 +1023,7 @@ html.dark-mode .modal-disclosure {
     border: none;
     background: transparent;
     cursor: pointer;
-    padding: var(--space-3);
+    padding: var(--space-2);
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1025,16 +1041,17 @@ html.dark-mode .modal-disclosure {
 }
 
 .modal-disclosure-subtitle {
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     color: var(--text-secondary);
     line-height: 1.4;
+    opacity: 0.8;
 }
 
 .modal-disclosure-body {
-    padding: 0 var(--space-3) var(--space-3);
+    padding: 0 var(--space-2) var(--space-2);
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-2);
     animation: slideDown 200ms var(--ease-out);
 }
 
@@ -1244,4 +1261,64 @@ html.dark-mode .time-context-safety {
 
 .goal-detail-accordion .detail-section:last-child {
     margin-bottom: 0;
+}
+
+/* ===================================
+   Goal Modal - Simplified Layout
+   =================================== */
+#goalAccordionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.goal-more-options-btn {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    margin-top: var(--space-2);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+    text-align: center;
+}
+
+.goal-more-options-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: var(--text-primary);
+}
+
+.goal-more-options-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+html.dark-mode .goal-more-options-btn {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark-mode .goal-more-options-btn:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+#goalMoreOptionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.goal-category-inline {
+    margin: var(--space-3) 0;
+    padding: 0;
+}
+
+.goal-category-inline .form-group {
+    margin: 0;
 }

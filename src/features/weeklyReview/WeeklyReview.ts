@@ -33,9 +33,6 @@ export function showReviewPrompt(ctx: WeeklyReviewContext) {
 }
 
 export function showWeeklyReview(ctx: WeeklyReviewContext) {
-  const weekGoals = Planning.getWeekGoals();
-  const completed = weekGoals.filter((g) => g.status === "done");
-
   const modal = document.createElement("div");
   modal.className = "modal-overlay active";
   modal.innerHTML = `
@@ -47,23 +44,22 @@ export function showWeeklyReview(ctx: WeeklyReviewContext) {
       <div class="modal-body">
         <div class="review-section">
           <h3>🎉 This Week's Wins</h3>
-          <p class="review-hint">What felt good this week? (${completed.length} intentions marked done)</p>
-          <textarea id="reviewWins" placeholder="List your wins this week..."></textarea>
+          <textarea id="reviewWins"></textarea>
         </div>
 
         <div class="review-section">
           <h3>🧗 Challenges Faced</h3>
-          <textarea id="reviewChallenges" placeholder="What obstacles did you encounter?"></textarea>
+          <textarea id="reviewChallenges"></textarea>
         </div>
 
         <div class="review-section">
           <h3>💡 Key Learnings</h3>
-          <textarea id="reviewLearnings" placeholder="What did you learn?"></textarea>
+          <textarea id="reviewLearnings"></textarea>
         </div>
 
         <div class="review-section">
           <h3>🎯 Next Week's Priorities</h3>
-          <textarea id="reviewPriorities" placeholder="What will you focus on next week?"></textarea>
+          <textarea id="reviewPriorities"></textarea>
         </div>
 
         <div class="review-section">

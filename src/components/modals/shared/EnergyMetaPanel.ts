@@ -52,7 +52,6 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
           <option value=""${meta?.accentTheme ? "" : " selected"}>Default</option>
           ${options}
         </select>
-        <div class="field-help">This color carries through linked milestones, focus, and intentions.</div>
       </div>
     `;
   }
@@ -64,14 +63,12 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
           <input type="checkbox" id="focusEasyMode"${meta?.easyMode ? " checked" : ""} />
           Easy mode week
         </label>
-        <div class="field-help">Lower the bar on purpose.</div>
       </div>
       <div class="form-group">
         <label for="focusLowEnergy">Low-energy version (optional)</label>
-        <textarea id="focusLowEnergy" rows="2" placeholder="If the week gets messy, what’s the smallest version that still counts?">${escapeHtml(
+        <textarea id="focusLowEnergy" rows="2">${escapeHtml(
           meta?.lowEnergyVersion ?? "",
         )}</textarea>
-        <div class="field-help">If the week gets messy, what’s the smallest version that still counts?</div>
       </div>
     `;
   }
@@ -84,9 +81,7 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
           type="text"
           id="intentionTiny"
           value="${escapeHtml(meta?.tinyVersion ?? "")}"
-          placeholder="If this feels like too much, what’s the smallest version?"
         />
-        <div class="field-help">If this feels like too much, what’s the smallest version?</div>
       </div>
     `;
   }

@@ -74,21 +74,21 @@ export class TimeVisualizations {
       if (hour < currentHour) {
         block.classList.add("hour-past");
         block.innerHTML = "🌸"; // Fully bloomed
-        block.setAttribute(
-          "aria-label",
-          `${this.formatHour(hour)} - completed`
-        );
+        const label = `${this.formatHour(hour)} - completed`;
+        block.setAttribute("aria-label", label);
+        block.setAttribute("title", label);
       } else if (hour === currentHour) {
         block.classList.add("hour-current");
         block.innerHTML = "🌼"; // Half bloomed
-        block.setAttribute(
-          "aria-label",
-          `${this.formatHour(hour)} - current hour`
-        );
+        const label = `${this.formatHour(hour)} - current hour`;
+        block.setAttribute("aria-label", label);
+        block.setAttribute("title", label);
       } else {
         block.classList.add("hour-future");
         block.innerHTML = "🌱"; // Bud
-        block.setAttribute("aria-label", `${this.formatHour(hour)} - upcoming`);
+        const label = `${this.formatHour(hour)} - upcoming`;
+        block.setAttribute("aria-label", label);
+        block.setAttribute("title", label);
       }
 
       container.appendChild(block);
@@ -116,21 +116,21 @@ export class TimeVisualizations {
       if (hour < currentHour) {
         block.classList.add("hour-past");
         block.innerHTML = "🌸";
-        block.setAttribute(
-          "aria-label",
-          `${this.formatHour(hour)} - completed`
-        );
+        const label = `${this.formatHour(hour)} - completed`;
+        block.setAttribute("aria-label", label);
+        block.setAttribute("title", label);
       } else if (hour === currentHour) {
         block.classList.add("hour-current");
         block.innerHTML = "🌼";
-        block.setAttribute(
-          "aria-label",
-          `${this.formatHour(hour)} - current hour`
-        );
+        const label = `${this.formatHour(hour)} - current hour`;
+        block.setAttribute("aria-label", label);
+        block.setAttribute("title", label);
       } else {
         block.classList.add("hour-future");
         block.innerHTML = "🌱";
-        block.setAttribute("aria-label", `${this.formatHour(hour)} - upcoming`);
+        const label = `${this.formatHour(hour)} - upcoming`;
+        block.setAttribute("aria-label", label);
+        block.setAttribute("title", label);
       }
     });
 

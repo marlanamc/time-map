@@ -98,9 +98,8 @@ export class BrainDump {
             <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
           </div>
           <div class="modal-body">
-            <p class="brain-dump-intro">Got thoughts bouncing around? Dump them here. Get them out of your head so you can focus.</p>
             <div class="add-thought">
-              <textarea id="brainDumpInput" placeholder="What's on your mind? Type it out and let it go..." rows="3"></textarea>
+              <textarea id="brainDumpInput" rows="3"></textarea>
               <button class="btn btn-primary" id="addThoughtBtn">Dump it</button>
             </div>
             <div class="brain-dump-list">
