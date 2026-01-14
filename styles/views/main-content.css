@@ -626,18 +626,22 @@
 
 .today-btn {
   padding: 0 var(--space-3);
-  background: var(--accent-badge-fill);
+  background: var(--accent);
   border-color: transparent;
-  color: rgba(8, 23, 39, 0.92);
+  color: white;
   text-shadow: none;
   font-weight: 600;
 }
 
 .dark-mode .today-btn {
-  background: var(--accent-badge-fill);
+  background: var(--accent);
   border-color: transparent;
-  color: rgba(8, 23, 39, 0.92);
+  color: var(--text-on-accent, rgba(8, 23, 39, 0.92));
   text-shadow: none;
+}
+
+.today-btn:hover {
+  background: var(--accent-hover, var(--accent));
 }
 
 .dark-mode .today-btn:hover {

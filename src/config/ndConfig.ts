@@ -4,6 +4,7 @@
 export const ND_CONFIG = {
   // Accent color themes - Using day mode colors for picker preview
   // Ordered in rainbow spectrum: red → orange → yellow → green → blue → indigo → violet
+  // Time-of-day themes at the end
   ACCENT_THEMES: {
     rose: { label: "Rose Petal", emoji: "🌹", color: "#E11D48" },
     coral: { label: "Warm Earth", emoji: "🏺", color: "#B8472F" },
@@ -15,6 +16,12 @@ export const ND_CONFIG = {
     indigo: { label: "Deep Indigo", emoji: "🌌", color: "#4F46E5" },
     violet: { label: "Violet", emoji: "💜", color: "#6D28D9" },
     rainbow: { label: "Rainbow", emoji: "🌈", color: "linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)" },
+    // Time-of-day themes - match background gradients
+    dawn: { label: "Dawn", emoji: "🌅", color: "#A78BFA" },  // Soft lavender purple
+    morning: { label: "Morning", emoji: "🌄", color: "#38BDF8" },  // Sky blue
+    afternoon: { label: "Afternoon", emoji: "☀️", color: "#FB7185" },  // Warm rose pink
+    evening: { label: "Evening", emoji: "🌆", color: "#C084FC" },  // Warm lavender
+    night: { label: "Night", emoji: "🌙", color: "#3B82F6" },  // Bright blue
   },
 
   // Body doubling / coworking timer options

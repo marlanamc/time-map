@@ -172,15 +172,21 @@ export class TimeSlotCalculator {
 
   /**
    * Generate time slots for the grid (hourly)
+   * Hours are evenly distributed across the timeline for consistent spacing
    */
   generateTimeSlots(): TimeSlot[] {
     const slots: TimeSlot[] = [];
     const startHour = Math.floor(this.plotStartMin / 60);
     const endHour = Math.ceil(this.plotEndMin / 60);
+    const hourCount = endHour - startHour + 1;
 
-    for (let hour = startHour; hour <= endHour; hour++) {
+    for (let i = 0; i < hourCount; i++) {
+      const hour = startHour + i;
       const totalMinutes = hour * 60;
-      const position = this.minutesToPercent(totalMinutes);
+      
+      // Calculate evenly spaced position (0% to 100%)
+      // For n hours, we have n-1 intervals, so position = (i / (hourCount - 1)) * 100
+      const position = hourCount > 1 ? (i / (hourCount - 1)) * 100 : 0;
 
       slots.push({
         hour,

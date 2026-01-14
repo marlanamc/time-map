@@ -60,7 +60,12 @@ export type AccentTheme =
   | "teal"
   | "indigo"
   | "violet"
-  | "rainbow";
+  | "rainbow"
+  | "dawn"
+  | "morning"
+  | "afternoon"
+  | "evening"
+  | "night";
 
 /** Break reminder frequency options for ADHD support */
 export type BreakReminder = "pomodoro" | "gentle" | "hyperfocus" | "off";

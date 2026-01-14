@@ -328,13 +328,13 @@
 }
 
 .planner-day-view .current-time-line {
-  border-top: 2px solid var(--accent-progress);
-  box-shadow: 0 0 10px var(--accent-progress);
+  border-top: 2px solid var(--accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .planner-day-view .current-time-dot {
-  background: var(--accent-progress);
-  box-shadow: 0 0 10px var(--accent-progress);
+  background: var(--accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
   width: 10px;
   height: 10px;
   margin-top: -4px;

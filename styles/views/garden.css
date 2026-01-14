@@ -5,6 +5,20 @@
 /* Import cosmic card component */
 @import '../components/cosmic-card.css';
 
+/* General container styling - applies to all screen sizes */
+.garden-view-container {
+  background: color-mix(in srgb, var(--liquid-glass-bg) 50%, transparent);
+  backdrop-filter: blur(var(--liquid-glass-blur));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+  border-radius: 48px;
+  border: 1px solid color-mix(in srgb, var(--liquid-glass-border) 50%, transparent);
+  box-shadow: 
+    0 8px 32px rgba(15, 23, 42, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all var(--liquid-transition-smooth);
+  overflow: hidden;
+}
+
 /* Desktop-only styles (2x2 grid layout) */
 @media (min-width: 901px) {
   /* Container */

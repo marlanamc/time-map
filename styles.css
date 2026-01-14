@@ -2301,7 +2301,7 @@ select:focus-visible,
     padding: 0 var(--space-3);
     background: var(--accent-subtle);
     border-color: transparent;
-    color: var(--text-primary);
+    color: white;
     font-weight: 600;
 }
 

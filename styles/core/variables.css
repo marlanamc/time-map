@@ -309,19 +309,91 @@
 :root.time-dawn:not(.dark-mode) {
     --glass-border: rgba(155, 180, 175, 0.12);
     --shadow-glow: 0 0 20px rgba(232, 200, 216, 0.10);
+    
+    /* Dawn accent colors - Purple to pink gradient theme */
+    --accent: #A78BFA;  /* Soft lavender purple */
+    --accent-hover: #C084FC;  /* Brighter lavender */
+    --accent-muted: rgba(167, 139, 250, 0.16);
+    --accent-subtle: rgba(167, 139, 250, 0.08);
+    --accent-button: #A78BFA;  /* Primary buttons */
+    --accent-active: #C084FC;  /* Active states */
+    --accent-border: #D8B4FE;  /* Light lavender borders */
+    --accent-highlight: #F0ABFC;  /* Pink highlight */
+    --accent-link: #9333EA;  /* Deep purple links */
+    --accent-badge: #EC4899;  /* Pink badge */
+    --accent-progress: #F472B6;  /* Pink progress */
+    --accent-icon: #C084FC;  /* Lavender icons */
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #A78BFA 0%, #EC4899 100%);
+    --accent-badge-fill: var(--accent-badge);
 }
 
 :root.time-morning:not(.dark-mode) {
     --glass-border: rgba(135, 170, 185, 0.12);
+    
+    /* Morning accent colors - Blue to cyan to green gradient theme */
+    --accent: #38BDF8;  /* Sky blue */
+    --accent-hover: #0EA5E9;  /* Bright sky */
+    --accent-muted: rgba(56, 189, 248, 0.16);
+    --accent-subtle: rgba(56, 189, 248, 0.08);
+    --accent-button: #38BDF8;  /* Primary buttons */
+    --accent-active: #22D3EE;  /* Cyan active */
+    --accent-border: #7DD3FC;  /* Light sky borders */
+    --accent-highlight: #06B6D4;  /* Cyan highlight */
+    --accent-link: #0EA5E9;  /* Sky blue links */
+    --accent-badge: #10B981;  /* Mint badge */
+    --accent-progress: #14B8A6;  /* Teal progress */
+    --accent-icon: #22D3EE;  /* Cyan icons */
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #38BDF8 0%, #10B981 100%);
+    --accent-badge-fill: var(--accent-badge);
 }
 
 :root.time-afternoon:not(.dark-mode) {
     --glass-border: rgba(74, 144, 226, 0.10);
+    
+    /* Afternoon accent colors - Pink to yellow to peach gradient theme */
+    --accent: #FB7185;  /* Warm rose pink */
+    --accent-hover: #F43F5E;  /* Deeper rose */
+    --accent-muted: rgba(251, 113, 133, 0.16);
+    --accent-subtle: rgba(251, 113, 133, 0.08);
+    --accent-button: #FB7185;  /* Primary buttons */
+    --accent-active: #FBBF24;  /* Golden active */
+    --accent-border: #FCD34D;  /* Light yellow borders */
+    --accent-highlight: #F59E0B;  /* Amber highlight */
+    --accent-link: #F43F5E;  /* Rose links */
+    --accent-badge: #F97316;  /* Orange badge */
+    --accent-progress: #FB923C;  /* Peach progress */
+    --accent-icon: #FBBF24;  /* Golden icons */
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #FB7185 0%, #FBBF24 50%, #FB923C 100%);
+    --accent-badge-fill: var(--accent-badge);
 }
 
 :root.time-evening:not(.dark-mode) {
     --glass-border: rgba(194, 120, 78, 0.12);
     --shadow-glow: 0 0 18px rgba(255, 179, 71, 0.10);
+    
+    /* Evening accent colors - Purple to pink gradient theme (warmer than dawn) */
+    --accent: #C084FC;  /* Warm lavender */
+    --accent-hover: #A855F7;  /* Deeper purple */
+    --accent-muted: rgba(192, 132, 252, 0.16);
+    --accent-subtle: rgba(192, 132, 252, 0.08);
+    --accent-button: #C084FC;  /* Primary buttons */
+    --accent-active: #EC4899;  /* Pink active */
+    --accent-border: #E879F9;  /* Light pink borders */
+    --accent-highlight: #F472B6;  /* Rose highlight */
+    --accent-link: #A855F7;  /* Purple links */
+    --accent-badge: #EC4899;  /* Pink badge */
+    --accent-progress: #F472B6;  /* Rose progress */
+    --accent-icon: #D946EF;  /* Magenta icons */
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
+    --accent-badge-fill: var(--accent-badge);
 }
 
 /* Time-of-day palettes (dark mode): keep UI dark, shift undertones */
@@ -335,6 +407,24 @@
     --glass-bg: rgba(14, 18, 34, 0.76);
     --glass-border: rgba(217, 140, 183, 0.18);
     --glass-shine: rgba(255, 220, 245, 0.06);
+    
+    /* Dawn accent colors (dark mode) - Deeper, richer purples and pinks */
+    --accent: #C084FC;  /* Bright lavender */
+    --accent-hover: #D8B4FE;  /* Lighter lavender */
+    --accent-muted: rgba(192, 132, 252, 0.20);
+    --accent-subtle: rgba(192, 132, 252, 0.10);
+    --accent-button: #C084FC;
+    --accent-active: #D8B4FE;
+    --accent-border: rgba(216, 180, 254, 0.30);
+    --accent-highlight: #F0ABFC;  /* Bright pink */
+    --accent-link: #D8B4FE;
+    --accent-badge: #EC4899;  /* Vibrant pink */
+    --accent-progress: #F472B6;
+    --accent-icon: #D8B4FE;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
+    --accent-badge-fill: var(--accent-badge);
 }
 
 :root.dark-mode.time-morning {
@@ -347,6 +437,24 @@
     --glass-bg: rgba(11, 24, 40, 0.76);
     --glass-border: rgba(140, 183, 217, 0.18);
     --glass-shine: rgba(180, 210, 240, 0.08);
+    
+    /* Morning accent colors (dark mode) - Bright, energetic blues and cyans */
+    --accent: #38BDF8;  /* Bright sky blue */
+    --accent-hover: #7DD3FC;  /* Light sky */
+    --accent-muted: rgba(56, 189, 248, 0.20);
+    --accent-subtle: rgba(56, 189, 248, 0.10);
+    --accent-button: #38BDF8;
+    --accent-active: #22D3EE;  /* Cyan */
+    --accent-border: rgba(125, 211, 252, 0.30);
+    --accent-highlight: #06B6D4;  /* Bright cyan */
+    --accent-link: #7DD3FC;
+    --accent-badge: #10B981;  /* Mint green */
+    --accent-progress: #14B8A6;  /* Teal */
+    --accent-icon: #22D3EE;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #38BDF8 0%, #10B981 100%);
+    --accent-badge-fill: var(--accent-badge);
 }
 
 :root.dark-mode.time-afternoon {
@@ -359,6 +467,24 @@
     --glass-bg: rgba(9, 20, 36, 0.78);
     --glass-border: rgba(140, 183, 217, 0.20);
     --glass-shine: rgba(180, 210, 240, 0.06);
+    
+    /* Afternoon accent colors (dark mode) - Warm, vibrant corals and golds */
+    --accent: #FB7185;  /* Warm rose */
+    --accent-hover: #FCD34D;  /* Golden yellow */
+    --accent-muted: rgba(251, 113, 133, 0.20);
+    --accent-subtle: rgba(251, 113, 133, 0.10);
+    --accent-button: #FB7185;
+    --accent-active: #FBBF24;  /* Golden */
+    --accent-border: rgba(252, 211, 77, 0.30);
+    --accent-highlight: #F59E0B;  /* Amber */
+    --accent-link: #FCD34D;
+    --accent-badge: #F97316;  /* Vibrant orange */
+    --accent-progress: #FB923C;  /* Peach */
+    --accent-icon: #FBBF24;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #FB7185 0%, #FBBF24 50%, #FB923C 100%);
+    --accent-badge-fill: var(--accent-badge);
 }
 
 :root.dark-mode.time-evening {
@@ -371,6 +497,65 @@
     --glass-bg: rgba(22, 14, 10, 0.76);
     --glass-border: rgba(231, 125, 62, 0.18);
     --glass-shine: rgba(255, 210, 180, 0.06);
+    
+    /* Evening accent colors (dark mode) - Rich, warm purples and magentas */
+    --accent: #C084FC;  /* Bright lavender */
+    --accent-hover: #D8B4FE;  /* Light lavender */
+    --accent-muted: rgba(192, 132, 252, 0.20);
+    --accent-subtle: rgba(192, 132, 252, 0.10);
+    --accent-button: #C084FC;
+    --accent-active: #EC4899;  /* Vibrant pink */
+    --accent-border: rgba(216, 180, 254, 0.30);
+    --accent-highlight: #F472B6;  /* Rose */
+    --accent-link: #D8B4FE;
+    --accent-badge: #EC4899;  /* Pink badge */
+    --accent-progress: #F472B6;
+    --accent-icon: #D946EF;  /* Magenta */
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+/* Night theme accents - Deep blue to cyan gradient */
+:root.time-night:not(.dark-mode) {
+    /* Night accent colors (light mode) - Deep, rich blues */
+    --accent: #1E40AF;  /* Deep blue */
+    --accent-hover: #2563EB;  /* Bright blue */
+    --accent-muted: rgba(30, 64, 175, 0.16);
+    --accent-subtle: rgba(30, 64, 175, 0.08);
+    --accent-button: #1E40AF;
+    --accent-active: #3B82F6;  /* Royal blue */
+    --accent-border: #60A5FA;  /* Light blue borders */
+    --accent-highlight: #3B82F6;  /* Bright blue highlight */
+    --accent-link: #2563EB;
+    --accent-badge: #0EA5E9;  /* Sky blue badge */
+    --accent-progress: #06B6D4;  /* Cyan progress */
+    --accent-icon: #3B82F6;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #1E40AF 0%, #06B6D4 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+:root.dark-mode.time-night {
+    /* Night accent colors (dark mode) - Bright, electric blues and cyans */
+    --accent: #3B82F6;  /* Bright blue */
+    --accent-hover: #60A5FA;  /* Light blue */
+    --accent-muted: rgba(59, 130, 246, 0.20);
+    --accent-subtle: rgba(59, 130, 246, 0.10);
+    --accent-button: #3B82F6;
+    --accent-active: #22D3EE;  /* Cyan */
+    --accent-border: rgba(96, 165, 250, 0.30);
+    --accent-highlight: #06B6D4;  /* Bright cyan */
+    --accent-link: #60A5FA;
+    --accent-badge: #0EA5E9;  /* Sky blue badge */
+    --accent-progress: #06B6D4;  /* Cyan progress */
+    --accent-icon: #22D3EE;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+    --accent-badge-fill: var(--accent-badge);
 }
 
 /* ===================================
@@ -438,7 +623,7 @@
     --task-item-expanded-bg: var(--surface-2);
 
     /* Customization panel */
-    --panel-width: 420px;
+    --panel-width: 520px;
     --panel-bg: var(--liquid-glass-bg);
     --panel-backdrop: rgba(0, 0, 0, 0.6);
 

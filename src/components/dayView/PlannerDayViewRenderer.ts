@@ -240,15 +240,6 @@ export class PlannerDayViewRenderer {
                   type="button"
                   class="sidebar-section-action-btn"
                   data-action="customize"
-                  aria-label="Add new quick intention"
-                  title="Add new quick intention"
-                >
-                  +
-                </button>
-                <button
-                  type="button"
-                  class="sidebar-section-action-btn"
-                  data-action="customize"
                   aria-label="Edit quick intentions"
                   title="Edit quick intentions"
                 >

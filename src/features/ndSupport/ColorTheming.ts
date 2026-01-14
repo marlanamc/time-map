@@ -24,6 +24,11 @@ export class ColorTheming {
       "theme-indigo",
       "theme-violet",
       "theme-rainbow",
+      "theme-dawn",
+      "theme-morning",
+      "theme-afternoon",
+      "theme-evening",
+      "theme-night",
     ] as const;
 
     // Remove all theme classes first

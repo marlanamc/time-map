@@ -567,14 +567,14 @@
 .current-time-line {
   height: 2px;
   background: linear-gradient(90deg,
-      color-mix(in srgb, var(--accent-progress) 0%, transparent) 0%,
-      color-mix(in srgb, var(--accent-progress) 90%, transparent) 10%,
-      color-mix(in srgb, var(--accent-progress) 90%, transparent) 90%,
-      color-mix(in srgb, var(--accent-progress) 0%, transparent) 100%);
+      color-mix(in srgb, var(--accent) 0%, transparent) 0%,
+      color-mix(in srgb, var(--accent) 90%, transparent) 10%,
+      color-mix(in srgb, var(--accent) 90%, transparent) 90%,
+      color-mix(in srgb, var(--accent) 0%, transparent) 100%);
   position: relative;
   box-shadow:
-    0 0 8px color-mix(in srgb, var(--accent-progress) 60%, transparent),
-    0 0 16px color-mix(in srgb, var(--accent-progress) 30%, transparent);
+    0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
   animation: timePulse 2s ease-in-out infinite;
 }
 
@@ -598,13 +598,13 @@
   width: 12px;
   height: 12px;
   background: radial-gradient(circle,
-      var(--accent-progress) 0%,
-      color-mix(in srgb, var(--accent-progress) 80%, transparent) 50%,
-      color-mix(in srgb, var(--accent-progress) 0%, transparent) 100%);
+      var(--accent) 0%,
+      color-mix(in srgb, var(--accent) 80%, transparent) 50%,
+      color-mix(in srgb, var(--accent) 0%, transparent) 100%);
   border-radius: 50%;
   box-shadow:
-    0 0 12px color-mix(in srgb, var(--accent-progress) 80%, transparent),
-    0 0 24px color-mix(in srgb, var(--accent-progress) 40%, transparent);
+    0 0 12px color-mix(in srgb, var(--accent) 80%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent) 40%, transparent);
   animation: dotPulse 2s ease-in-out infinite;
 }
 

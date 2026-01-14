@@ -462,3 +462,233 @@ body.dark-mode.theme-rainbow {
     --accent-progress: var(--accent-stroke);
     --accent-icon: var(--accent-stroke);
 }
+
+/* ===================================
+   Time-of-Day Accent Themes
+   These allow users to manually select time-of-day accent colors
+   =================================== */
+
+/* Dawn Theme - Purple to Pink */
+:root.theme-dawn,
+body.theme-dawn {
+    --accent: #A78BFA;  /* Soft lavender purple */
+    --accent-hover: #C084FC;
+    --accent-muted: rgba(167, 139, 250, 0.16);
+    --accent-subtle: rgba(167, 139, 250, 0.08);
+    --shadow-glow: 0 0 24px rgba(167, 139, 250, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(167, 139, 250, 0.16);
+    --accent-button: #A78BFA;
+    --accent-active: #C084FC;
+    --accent-border: #D8B4FE;
+    --accent-highlight: #F0ABFC;
+    --accent-link: #9333EA;
+    --accent-badge: #EC4899;
+    --accent-progress: #F472B6;
+    --accent-icon: #C084FC;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #A78BFA 0%, #EC4899 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+:root.dark-mode.theme-dawn,
+body.dark-mode.theme-dawn {
+    --accent: #C084FC;  /* Bright lavender */
+    --accent-hover: #D8B4FE;
+    --accent-muted: rgba(192, 132, 252, 0.20);
+    --accent-subtle: rgba(192, 132, 252, 0.10);
+    --shadow-glow: 0 0 24px rgba(192, 132, 252, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(192, 132, 252, 0.16);
+    --accent-button: #C084FC;
+    --accent-active: #D8B4FE;
+    --accent-border: rgba(216, 180, 254, 0.30);
+    --accent-highlight: #F0ABFC;
+    --accent-link: #D8B4FE;
+    --accent-badge: #EC4899;
+    --accent-progress: #F472B6;
+    --accent-icon: #D8B4FE;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+/* Morning Theme - Blue to Cyan to Green */
+:root.theme-morning,
+body.theme-morning {
+    --accent: #38BDF8;  /* Sky blue */
+    --accent-hover: #0EA5E9;
+    --accent-muted: rgba(56, 189, 248, 0.16);
+    --accent-subtle: rgba(56, 189, 248, 0.08);
+    --shadow-glow: 0 0 24px rgba(56, 189, 248, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(56, 189, 248, 0.16);
+    --accent-button: #38BDF8;
+    --accent-active: #22D3EE;
+    --accent-border: #7DD3FC;
+    --accent-highlight: #06B6D4;
+    --accent-link: #0EA5E9;
+    --accent-badge: #10B981;
+    --accent-progress: #14B8A6;
+    --accent-icon: #22D3EE;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #38BDF8 0%, #10B981 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+:root.dark-mode.theme-morning,
+body.dark-mode.theme-morning {
+    --accent: #38BDF8;  /* Bright sky blue */
+    --accent-hover: #7DD3FC;
+    --accent-muted: rgba(56, 189, 248, 0.20);
+    --accent-subtle: rgba(56, 189, 248, 0.10);
+    --shadow-glow: 0 0 24px rgba(56, 189, 248, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(56, 189, 248, 0.16);
+    --accent-button: #38BDF8;
+    --accent-active: #22D3EE;
+    --accent-border: rgba(125, 211, 252, 0.30);
+    --accent-highlight: #06B6D4;
+    --accent-link: #7DD3FC;
+    --accent-badge: #10B981;
+    --accent-progress: #14B8A6;
+    --accent-icon: #22D3EE;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #38BDF8 0%, #10B981 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+/* Afternoon Theme - Pink to Yellow to Peach */
+:root.theme-afternoon,
+body.theme-afternoon {
+    --accent: #FB7185;  /* Warm rose pink */
+    --accent-hover: #F43F5E;
+    --accent-muted: rgba(251, 113, 133, 0.16);
+    --accent-subtle: rgba(251, 113, 133, 0.08);
+    --shadow-glow: 0 0 24px rgba(251, 113, 133, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(251, 113, 133, 0.16);
+    --accent-button: #FB7185;
+    --accent-active: #FBBF24;
+    --accent-border: #FCD34D;
+    --accent-highlight: #F59E0B;
+    --accent-link: #F43F5E;
+    --accent-badge: #F97316;
+    --accent-progress: #FB923C;
+    --accent-icon: #FBBF24;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #FB7185 0%, #FBBF24 50%, #FB923C 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+:root.dark-mode.theme-afternoon,
+body.dark-mode.theme-afternoon {
+    --accent: #FB7185;  /* Warm rose */
+    --accent-hover: #FCD34D;
+    --accent-muted: rgba(251, 113, 133, 0.20);
+    --accent-subtle: rgba(251, 113, 133, 0.10);
+    --shadow-glow: 0 0 24px rgba(251, 113, 133, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(251, 113, 133, 0.16);
+    --accent-button: #FB7185;
+    --accent-active: #FBBF24;
+    --accent-border: rgba(252, 211, 77, 0.30);
+    --accent-highlight: #F59E0B;
+    --accent-link: #FCD34D;
+    --accent-badge: #F97316;
+    --accent-progress: #FB923C;
+    --accent-icon: #FBBF24;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #FB7185 0%, #FBBF24 50%, #FB923C 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+/* Evening Theme - Purple to Pink (warmer than dawn) */
+:root.theme-evening,
+body.theme-evening {
+    --accent: #C084FC;  /* Warm lavender */
+    --accent-hover: #A855F7;
+    --accent-muted: rgba(192, 132, 252, 0.16);
+    --accent-subtle: rgba(192, 132, 252, 0.08);
+    --shadow-glow: 0 0 24px rgba(192, 132, 252, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(192, 132, 252, 0.16);
+    --accent-button: #C084FC;
+    --accent-active: #EC4899;
+    --accent-border: #E879F9;
+    --accent-highlight: #F472B6;
+    --accent-link: #A855F7;
+    --accent-badge: #EC4899;
+    --accent-progress: #F472B6;
+    --accent-icon: #D946EF;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+:root.dark-mode.theme-evening,
+body.dark-mode.theme-evening {
+    --accent: #C084FC;  /* Bright lavender */
+    --accent-hover: #D8B4FE;
+    --accent-muted: rgba(192, 132, 252, 0.20);
+    --accent-subtle: rgba(192, 132, 252, 0.10);
+    --shadow-glow: 0 0 24px rgba(192, 132, 252, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(192, 132, 252, 0.16);
+    --accent-button: #C084FC;
+    --accent-active: #EC4899;
+    --accent-border: rgba(216, 180, 254, 0.30);
+    --accent-highlight: #F472B6;
+    --accent-link: #D8B4FE;
+    --accent-badge: #EC4899;
+    --accent-progress: #F472B6;
+    --accent-icon: #D946EF;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+/* Night Theme - Deep Blue to Cyan */
+:root.theme-night,
+body.theme-night {
+    --accent: #1E40AF;  /* Deep blue */
+    --accent-hover: #2563EB;
+    --accent-muted: rgba(30, 64, 175, 0.16);
+    --accent-subtle: rgba(30, 64, 175, 0.08);
+    --shadow-glow: 0 0 24px rgba(30, 64, 175, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(30, 64, 175, 0.16);
+    --accent-button: #1E40AF;
+    --accent-active: #3B82F6;
+    --accent-border: #60A5FA;
+    --accent-highlight: #3B82F6;
+    --accent-link: #2563EB;
+    --accent-badge: #0EA5E9;
+    --accent-progress: #06B6D4;
+    --accent-icon: #3B82F6;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #1E40AF 0%, #06B6D4 100%);
+    --accent-badge-fill: var(--accent-badge);
+}
+
+:root.dark-mode.theme-night,
+body.dark-mode.theme-night {
+    --accent: #3B82F6;  /* Bright blue */
+    --accent-hover: #60A5FA;
+    --accent-muted: rgba(59, 130, 246, 0.20);
+    --accent-subtle: rgba(59, 130, 246, 0.10);
+    --shadow-glow: 0 0 24px rgba(59, 130, 246, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(59, 130, 246, 0.16);
+    --accent-button: #3B82F6;
+    --accent-active: #22D3EE;
+    --accent-border: rgba(96, 165, 250, 0.30);
+    --accent-highlight: #06B6D4;
+    --accent-link: #60A5FA;
+    --accent-badge: #0EA5E9;
+    --accent-progress: #06B6D4;
+    --accent-icon: #22D3EE;
+    --accent-stroke: var(--accent-button);
+    --accent-fill: var(--accent-button);
+    --accent-fill-gradient: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+    --accent-badge-fill: var(--accent-badge);
+}

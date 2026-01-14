@@ -53,19 +53,6 @@ export const WeekRenderer = {
       ? buildAccentAttributes(getInheritedAccent(primaryFocus, goalsById))
       : { dataAttr: "", styleAttr: "" };
 
-    // Format date range with years if they differ
-    const startYear = weekStart.getFullYear();
-    const endYear = weekEnd.getFullYear();
-    const startFormatted = weekStart.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: startYear !== endYear ? "numeric" : undefined,
-    });
-    const endFormatted = weekEnd.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
 
     const weekStartYmd = formatYmd(weekStart);
     const eventsForWeek = State.data?.events
@@ -113,7 +100,6 @@ export const WeekRenderer = {
     let html = `<div class="week-view">
         <div class="week-view-header">
           <h2 class="week-view-title">Week ${weekNum}</h2>
-          <p class="week-view-range">${startFormatted} - ${endFormatted}</p>
           <div class="week-header-icons">
             ${
               primaryVision

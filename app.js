@@ -2938,7 +2938,6 @@
       let html = `<div class="week-view">
         <div class="week-view-header">
           <h2 class="week-view-title">Week ${State.viewingWeek}</h2>
-          <p class="week-view-range">${weekStart.toLocaleDateString("en-US", { month: "long", day: "numeric" })} - ${new Date(weekStart.getTime() + 6 * 86400000).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
         </div>
         <div class="week-grid">
       `;
