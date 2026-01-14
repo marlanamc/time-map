@@ -4,7 +4,7 @@
  * before transformation to application types
  */
 
-import type { GoalMeta } from "./types";
+import type { GoalMeta } from "../types";
 
 /**
  * Goals table schema

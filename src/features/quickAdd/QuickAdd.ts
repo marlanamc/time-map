@@ -7,7 +7,7 @@
  * - Provide keyboard shortcuts (Enter to save, Esc to cancel)
  */
 
-import { Goals } from '../../core/Goals';
+import { Goals } from "../../core/Goals";
 import { State } from "../../core/State";
 import type { Category, GoalLevel, GoalMeta } from "../../types";
 import { CONFIG } from "../../config";
@@ -20,9 +20,7 @@ import {
   renderEnergyMetaPanel,
   setupEnergyMetaPanel,
 } from "../../components/modals/shared/EnergyMetaPanel";
-import {
-  setupActivityPicker,
-} from "../../components/modals/shared/ActivityPicker";
+import { setupActivityPicker } from "../../components/modals/shared/ActivityPicker";
 
 export interface QuickAddCallbacks {
   onRender: () => void;
@@ -49,7 +47,10 @@ class QuickAddManager {
   private callbacks: QuickAddCallbacks | null = null;
   private quickAddMetaDraft: GoalMeta = {};
   private quickAddActivityId: string | null = null;
-  private quickAddLinkSelection: { parentId: string; parentLevel: GoalLevel } | null = null;
+  private quickAddLinkSelection: {
+    parentId: string;
+    parentLevel: GoalLevel;
+  } | null = null;
   private quickAddCategory: Category | null = null;
 
   /**
@@ -64,7 +65,7 @@ class QuickAddManager {
    */
   show(opts?: QuickAddOptions): void {
     if (!this.callbacks) {
-      console.error('QuickAdd callbacks not set');
+      console.error("QuickAdd callbacks not set");
       return;
     }
 
@@ -88,7 +89,9 @@ class QuickAddManager {
     if (opts?.prefillTitle) input.value = opts.prefillTitle;
     input.focus();
 
-    const accordionContainer = overlay.querySelector("#quickAddAccordionContainer") as HTMLElement | null;
+    const accordionContainer = overlay.querySelector(
+      "#quickAddAccordionContainer"
+    ) as HTMLElement | null;
     if (accordionContainer) {
       accordionContainer.innerHTML = renderAccordionSection({
         id: "quickAddMoreSection",
@@ -101,7 +104,7 @@ class QuickAddManager {
         `,
       });
       setupAccordionSectionToggles(accordionContainer);
-      refreshMoreSection();
+      // refreshMoreSection(); // Move this call after function declaration
     }
 
     this.quickAddMetaDraft = {};
@@ -150,7 +153,9 @@ class QuickAddManager {
         <div class="form-group">
           <label for="quickAddCategory">Category (optional)</label>
           <select id="quickAddCategory" class="modal-select">
-            <option value=""${this.quickAddCategory ? "" : " selected"}>No category</option>
+            <option value=""${
+              this.quickAddCategory ? "" : " selected"
+            }>No category</option>
             ${options}
           </select>
         </div>
@@ -159,24 +164,31 @@ class QuickAddManager {
     };
 
     const attachLinkHandlers = (container: HTMLElement) => {
-      container.querySelectorAll<HTMLElement>("[data-action='select-link']").forEach((btn) => {
-        btn.onclick = (e) => {
-          e.preventDefault();
-          const parentId = (btn as HTMLElement).dataset.parentId;
-          const parentLevel = (btn as HTMLElement).dataset.parentLevel as GoalLevel | undefined;
-          if (!parentId || !parentLevel) return;
-          this.quickAddLinkSelection = { parentId, parentLevel };
-          refreshMoreSection();
-        };
-      });
-      container.querySelectorAll<HTMLElement>("[data-action='clear-link']").forEach((btn) => {
-        btn.onclick = (e) => {
-          e.preventDefault();
-          this.quickAddLinkSelection = null;
-          refreshMoreSection();
-        };
-      });
-      const linkSelect = container.querySelector<HTMLSelectElement>("#goalLinkSelect");
+      container
+        .querySelectorAll<HTMLElement>("[data-action='select-link']")
+        .forEach((btn) => {
+          btn.onclick = (e) => {
+            e.preventDefault();
+            const parentId = (btn as HTMLElement).dataset.parentId;
+            const parentLevel = (btn as HTMLElement).dataset.parentLevel as
+              | GoalLevel
+              | undefined;
+            if (!parentId || !parentLevel) return;
+            this.quickAddLinkSelection = { parentId, parentLevel };
+            refreshMoreSection();
+          };
+        });
+      container
+        .querySelectorAll<HTMLElement>("[data-action='clear-link']")
+        .forEach((btn) => {
+          btn.onclick = (e) => {
+            e.preventDefault();
+            this.quickAddLinkSelection = null;
+            refreshMoreSection();
+          };
+        });
+      const linkSelect =
+        container.querySelector<HTMLSelectElement>("#goalLinkSelect");
       if (linkSelect) {
         linkSelect.onchange = () => {
           const raw = linkSelect.value?.trim();
@@ -187,8 +199,15 @@ class QuickAddManager {
           }
           const [parentLevel, parentId] = raw.split(":");
           if (!parentId) return;
-          if (parentLevel === "vision" || parentLevel === "milestone" || parentLevel === "focus") {
-            this.quickAddLinkSelection = { parentLevel: parentLevel as GoalLevel, parentId };
+          if (
+            parentLevel === "vision" ||
+            parentLevel === "milestone" ||
+            parentLevel === "focus"
+          ) {
+            this.quickAddLinkSelection = {
+              parentLevel: parentLevel as GoalLevel,
+              parentId,
+            };
           }
           refreshMoreSection();
         };
@@ -196,7 +215,9 @@ class QuickAddManager {
     };
 
     const refreshMoreSection = () => {
-      const linkContainer = overlay.querySelector("#quickAddLinkContainer") as HTMLElement | null;
+      const linkContainer = overlay.querySelector(
+        "#quickAddLinkContainer"
+      ) as HTMLElement | null;
       if (linkContainer) {
         linkContainer.innerHTML = renderLinkagePicker({
           level: "intention",
@@ -208,7 +229,9 @@ class QuickAddManager {
         attachLinkHandlers(linkContainer);
       }
 
-      const energyContainer = overlay.querySelector("#quickAddEnergyContainer") as HTMLElement | null;
+      const energyContainer = overlay.querySelector(
+        "#quickAddEnergyContainer"
+      ) as HTMLElement | null;
       if (energyContainer) {
         energyContainer.innerHTML = renderEnergyMetaPanel({
           level: "intention",
@@ -225,10 +248,15 @@ class QuickAddManager {
         });
       }
 
-      const detailsContainer = overlay.querySelector("#quickAddDetailsContainer") as HTMLElement | null;
+      const detailsContainer = overlay.querySelector(
+        "#quickAddDetailsContainer"
+      ) as HTMLElement | null;
       if (detailsContainer) {
         detailsContainer.innerHTML = renderCategorySelect();
-        const categorySelect = detailsContainer.querySelector<HTMLSelectElement>("#quickAddCategory");
+        const categorySelect =
+          detailsContainer.querySelector<HTMLSelectElement>(
+            "#quickAddCategory"
+          );
         if (categorySelect) {
           categorySelect.value = this.quickAddCategory ?? "";
           categorySelect.onchange = () => {
@@ -237,8 +265,10 @@ class QuickAddManager {
               raw && raw in CONFIG.CATEGORIES ? (raw as Category) : null;
           };
         }
-        const activitySlot = detailsContainer.querySelector("#quickAddActivitySlot");
-        setupActivityPicker(activitySlot, {
+        const activitySlot = detailsContainer.querySelector(
+          "#quickAddActivitySlot"
+        );
+        setupActivityPicker(activitySlot as HTMLElement | null, {
           value: this.quickAddActivityId,
           onChange: (nextValue) => {
             this.quickAddActivityId = nextValue;
@@ -246,6 +276,11 @@ class QuickAddManager {
         });
       }
     };
+
+    // Call refreshMoreSection after it's declared to fix hoisting issue
+    if (accordionContainer) {
+      refreshMoreSection();
+    }
 
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && input.value.trim()) {
@@ -275,7 +310,7 @@ class QuickAddManager {
       startDate?: string;
       parentId?: string | null;
       parentLevel?: GoalLevel | null;
-    },
+    }
   ): void {
     if (!this.callbacks) return;
 
@@ -285,7 +320,9 @@ class QuickAddManager {
         ? { parentId: opts.parentId, parentLevel: opts.parentLevel ?? null }
         : null);
     const meta: GoalMeta | undefined =
-      Object.keys(this.quickAddMetaDraft).length > 0 ? { ...this.quickAddMetaDraft } : undefined;
+      Object.keys(this.quickAddMetaDraft).length > 0
+        ? { ...this.quickAddMetaDraft }
+        : undefined;
 
     Goals.create({
       title,
