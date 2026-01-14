@@ -4,6 +4,8 @@
  * before transformation to application types
  */
 
+import type { GoalMeta } from "./types";
+
 /**
  * Goals table schema
  * Represents how goals are stored in the database
@@ -31,6 +33,8 @@ export interface GoalRow {
   notes: any[]; // JSONB array
   time_log: any[]; // JSONB array
   tags?: string[];
+  meta?: GoalMeta | null;
+  activity_id?: string;
   parent_id?: string;
   parent_level?: string;
 }

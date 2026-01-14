@@ -2,13 +2,13 @@ import type { Goal } from "../../types";
 import { CardComponent } from "./CardComponent";
 import { TimeSlotCalculator } from "./TimeSlotCalculator";
 import { TimelineGrid } from "./TimelineGrid";
-import { CONFIG } from "../../config/constants";
 import { renderIntentionsGrid } from "./IntentionsGrid";
 import { renderCustomizationPanel } from "./CustomizationPanel";
 import { State } from "../../core/State";
 import type { EventInstance } from "../../utils/recurrence";
 import { expandEventsForRange } from "../../utils/recurrence";
 import { formatCountdown, formatTo12Hour } from "../../utils/time";
+import { getGoalEmoji } from "../../utils/goalVisuals";
 
 /**
  * Renderer for the Planner-style day view
@@ -233,15 +233,15 @@ export class PlannerDayViewRenderer {
           <div class="planner-sidebar-section">
             <div class="sidebar-section-header">
               <div class="sidebar-section-left">
-                <span class="sidebar-section-title">Common intentions</span>
+                <span class="sidebar-section-title">Quick intentions</span>
               </div>
               <div class="sidebar-section-actions">
                 <button
                   type="button"
                   class="sidebar-section-action-btn"
                   data-action="customize"
-                  aria-label="Add new intention"
-                  title="Add new intention"
+                  aria-label="Add new quick intention"
+                  title="Add new quick intention"
                 >
                   +
                 </button>
@@ -249,8 +249,8 @@ export class PlannerDayViewRenderer {
                   type="button"
                   class="sidebar-section-action-btn"
                   data-action="customize"
-                  aria-label="Edit common intentions"
-                  title="Edit common intentions"
+                  aria-label="Edit quick intentions"
+                  title="Edit quick intentions"
                 >
                   ✏️
                 </button>
@@ -410,7 +410,7 @@ export class PlannerDayViewRenderer {
     });
   }
   private renderSidebarItem(goal: Goal, showTime: boolean = false): string {
-    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : "📍";
+    const emoji = getGoalEmoji(goal);
     const startTime = formatTo12Hour(goal.startTime);
     const endTime = formatTo12Hour(goal.endTime);
     const timeStr =
@@ -441,7 +441,7 @@ export class PlannerDayViewRenderer {
    * @private
    */
   private renderUnscheduledTask(goal: Goal): string {
-    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : "📍";
+    const emoji = getGoalEmoji(goal);
     const colorClass = goal.category ? `cat-${goal.category}` : "cat-default";
 
     return `
@@ -489,7 +489,7 @@ export class PlannerDayViewRenderer {
     const adjustedTop = Math.max(0, top - 0.1); // Slight upward adjustment
     const adjustedHeight = Math.max(1, durPct - 0.2); // Reduce height slightly
 
-    const emoji = goal.category ? this.getCategoryEmoji(goal.category) : "📍";
+    const emoji = getGoalEmoji(goal);
     const colorClass = goal.category ? `cat-${goal.category}` : "cat-default";
     const countdownLabel = this.getCountdownLabelForTime(goal.startTime);
     const countdownHtml = countdownLabel
@@ -688,22 +688,4 @@ export class PlannerDayViewRenderer {
     return div.innerHTML;
   }
 
-  /**
-   * Get the emoji for a category or activity
-   * @param catId - The category or activity identifier
-   * @returns The emoji character, or a default pin emoji if not found
-   * @private
-   */
-  private getCategoryEmoji(catId: string): string {
-    // First check activity-specific emojis
-    if (CONFIG.ACTIVITY_EMOJIS[catId]) {
-      return CONFIG.ACTIVITY_EMOJIS[catId];
-    }
-    // Fall back to main category emojis
-    if (CONFIG.CATEGORIES[catId as keyof typeof CONFIG.CATEGORIES]) {
-      return CONFIG.CATEGORIES[catId as keyof typeof CONFIG.CATEGORIES].emoji;
-    }
-    // Default fallback
-    return "📍";
-  }
 }

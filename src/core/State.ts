@@ -382,6 +382,15 @@ export const State: AppState & {
           weeklyReviews: this.data.weeklyReviews.length,
           hasPreferences: !!this.data.preferences
         });
+
+        // PR1.5: Persist the cloud-loaded snapshot locally so an offline refresh doesn't
+        // fall back to empty localStorage before any normal save path runs.
+        // This is intentionally local-only (no State.save(), no cloud side effects).
+        try {
+          localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
+        } catch (storageError) {
+          console.error('[State] Failed to persist cloud snapshot to localStorage:', storageError);
+        }
       } else {
         // Fallback to local or default
         console.log('[State] No cloud data found, checking localStorage...');

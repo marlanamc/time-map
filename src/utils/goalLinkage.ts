@@ -1,21 +1,6 @@
 import { ND_CONFIG } from "../config/ndConfig";
 import type { AccentTheme, Goal } from "../types";
-
-const INTERNAL_TAG_PREFIX = "__tm:";
-
-function getInternalTag(tags: string[] | undefined, key: string): string | undefined {
-  if (!tags || tags.length === 0) return undefined;
-  const prefix = `${INTERNAL_TAG_PREFIX}${key}=`;
-  const tag = tags.find((t) => t.startsWith(prefix));
-  return tag ? tag.slice(prefix.length) : undefined;
-}
-
-export function upsertInternalTag(tags: string[], key: string, value: string): string[] {
-  const prefix = `${INTERNAL_TAG_PREFIX}${key}=`;
-  const next = tags.filter((t) => !t.startsWith(prefix));
-  next.push(`${prefix}${value}`);
-  return Array.from(new Set(next));
-}
+import { getAccentTheme } from "./goalMeta";
 
 export type LinkAccent = { color: string; gradient?: string; key: AccentTheme };
 
@@ -35,7 +20,7 @@ export function resolveVisionForGoal(goal: Goal, goalsById: Map<string, Goal>): 
 }
 
 export function getVisionAccent(vision: Goal): LinkAccent | null {
-  const raw = getInternalTag(vision.tags, "accent") as AccentTheme | undefined;
+  const raw = getAccentTheme(vision);
   if (!raw) return null;
   const theme = (ND_CONFIG.ACCENT_THEMES as Record<string, { color: string }>)[raw];
   if (!theme || typeof theme.color !== "string") return null;
@@ -60,4 +45,3 @@ export function buildAccentAttributes(accent: LinkAccent | null): { dataAttr: st
     : ` style="--link-accent: ${accent.color};"`;
   return { dataAttr: ` data-link-accent="1"`, styleAttr: style };
 }
-

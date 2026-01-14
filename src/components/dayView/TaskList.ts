@@ -5,20 +5,8 @@
 
 import type { Goal } from "../../types";
 import { CONFIG } from "../../config/constants";
+import { getGoalEmoji } from "../../utils/goalVisuals";
 import { formatTimeRange, formatTo12Hour } from "../../utils/time";
-
-/**
- * Get emoji for a category
- * @param category - Category ID
- * @returns Emoji string
- */
-function getCategoryEmoji(category: string | null | undefined): string {
-  if (!category) return '📍';
-  if (CONFIG.CATEGORIES[category as keyof typeof CONFIG.CATEGORIES]) {
-    return CONFIG.CATEGORIES[category as keyof typeof CONFIG.CATEGORIES].emoji;
-  }
-  return '📍';
-}
 
 /**
  * Get color for a category
@@ -40,7 +28,7 @@ function getCategoryColor(category: string | null | undefined): string {
  * @returns HTML string for compact task
  */
 export function renderCompactTask(goal: Goal, showTime: boolean = false): string {
-  const emoji = getCategoryEmoji(goal.category);
+  const emoji = getGoalEmoji(goal);
   const isDone = goal.status === 'done';
   const doneClass = isDone ? 'task-done' : '';
 

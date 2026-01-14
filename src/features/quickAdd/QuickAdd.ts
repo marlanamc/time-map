@@ -8,7 +8,7 @@
  */
 
 import { Goals } from '../../core/Goals';
-import type { GoalLevel }  from "../../types";
+import type { GoalLevel, GoalMeta } from "../../types";
 
 export interface QuickAddCallbacks {
   onRender: () => void;
@@ -114,13 +114,18 @@ class QuickAddManager {
   ): void {
     if (!this.callbacks) return;
 
+    const meta: GoalMeta | undefined = opts?.tinyText
+      ? { tinyVersion: opts.tinyText }
+      : undefined;
+
     Goals.create({
       title,
       level: "intention",
-      description: opts?.tinyText ? opts.tinyText : "",
+      description: "",
       startDate: opts?.startDate,
       parentId: opts?.parentId ?? null,
       parentLevel: opts?.parentLevel ?? null,
+      meta,
     });
 
     this.callbacks.onRender();

@@ -58,18 +58,14 @@ export const Planning = {
   getWeekGoals(): Goal[] {
     if (!State.data) return [];
     const now = new Date();
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay());
+    const weekYear = State.getWeekYear(now);
+    const weekNum = State.getWeekNumber(now);
+    const weekStart = State.getWeekStart(weekYear, weekNum);
     const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setDate(weekEnd.getDate() + 6);
 
-    return State.data.goals.filter((g) => {
-      if (g.dueDate) {
-        const due = new Date(g.dueDate);
-        return due >= weekStart && due <= weekEnd;
-      }
-      return g.month === now.getMonth() && g.year === now.getFullYear();
-    });
+    // Canonical "active in range" definition via Goals.getForRange().
+    return Goals.getForRange(weekStart, weekEnd);
   },
 
   getPriorityMatrix(): {

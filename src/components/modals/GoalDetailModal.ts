@@ -14,7 +14,7 @@ import { State } from "../../core/State";
 import { CONFIG } from "../../config";
 import { TimeBreakdown } from "../../utils/TimeBreakdown";
 import { ND_CONFIG } from "../../config/ndConfig";
-import { getVisionAccent, upsertInternalTag } from "../../utils/goalLinkage";
+import { getVisionAccent } from "../../utils/goalLinkage";
 import type { AccentTheme, Goal, GoalStatus } from "../../types";
 
 export interface GoalDetailModalCallbacks {
@@ -505,13 +505,14 @@ class GoalDetailModalManager {
               ) as HTMLSelectElement | null
             )?.value?.trim() ?? "";
           const accentValue = accentRaw as AccentTheme;
-          const prefix = "__tm:accent=";
-          let tags = goal.tags ? [...goal.tags] : [];
-          tags = tags.filter((t) => !t.startsWith(prefix));
+          const metaClone = { ...(goal.meta ?? {}) };
           if (accentRaw && (accentValue as any) in ND_CONFIG.ACCENT_THEMES) {
-            tags = upsertInternalTag(tags, "accent", accentRaw);
+            metaClone.accentTheme = accentRaw as AccentTheme;
+          } else {
+            delete metaClone.accentTheme;
           }
-          updates.tags = tags;
+          updates.meta =
+            Object.keys(metaClone).length > 0 ? metaClone : undefined;
 
           const iconInput = modal.querySelector(
             "#visionIconInput"

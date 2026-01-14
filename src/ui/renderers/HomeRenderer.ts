@@ -7,6 +7,13 @@ import { TimeBreakdown } from '../../utils/TimeBreakdown';
 import { CONFIG } from '../../config';
 import type { UIElements } from '../../types';
 
+const LEVEL_DESCRIPTORS = {
+  vision: "Year direction",
+  milestone: "Monthly chapter",
+  focus: "Weekly emphasis",
+  intention: "Daily touch",
+} as const;
+
 export const HomeRenderer = {
   render(elements: UIElements, escapeHtmlFn: (text: string) => string, onGoalClick: (goalId: string) => void) {
     if (!State.data) return;
@@ -81,11 +88,12 @@ export const HomeRenderer = {
       const renderGoalSection = (goals: any[], levelKey: 'intention' | 'focus' | 'milestone' | 'vision', label: string) => {
         if (goals.length === 0) return '';
         
-        let section = `
+      let section = `
           <div class="goals-level-section">
             <div class="goals-level-header">
               <span class="goals-level-emoji">${CONFIG.LEVELS[levelKey].emoji}</span>
               <span class="goals-level-label">${label}</span>
+              <span class="goals-level-descriptor">${LEVEL_DESCRIPTORS[levelKey]}</span>
               <span class="goals-level-count">${goals.length}</span>
             </div>
             <div class="goals-level-list">

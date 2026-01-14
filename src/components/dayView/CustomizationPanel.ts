@@ -32,7 +32,7 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
     <div class="customization-panel-backdrop" data-panel-visible="false">
       <div class="customization-panel" role="dialog" aria-labelledby="panel-title" aria-modal="true">
         <div class="panel-header">
-          <h2 id="panel-title" class="panel-title">Customize Intentions</h2>
+          <h2 id="panel-title" class="panel-title">Customize quick intentions</h2>
           <button
             type="button"
             class="panel-close-btn"
@@ -47,7 +47,7 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
         <div class="panel-content">
           <section class="intention-form">
             <header class="form-section-heading">
-              <h3 class="form-section-title">Add New Intention</h3>
+              <h3 class="form-section-title">Add New Quick Intention</h3>
             </header>
             <div class="form-grid">
               <div class="form-field">
@@ -103,14 +103,14 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
             <div class="form-actions">
               <button type="button" class="btn-add-intention-submit">
                 <span aria-hidden="true">+</span>
-                Add intention
+                Add quick intention
               </button>
             </div>
           </section>
 
           <section class="intentions-list-section">
             <div class="intentions-list-header">
-              <h3 class="form-section-title">Your Intentions</h3>
+              <h3 class="form-section-title">Your Quick Intentions</h3>
               <span class="intentions-count">${items.length}</span>
             </div>
             <div class="intentions-sortable-list" data-sortable="true">
@@ -187,7 +187,7 @@ function renderSortableIntentions(intentions: CustomIntention[]): string {
   if (intentions.length === 0) {
     return `
       <div class="intentions-empty">
-        <p>No intentions yet. Add your first one above!</p>
+        <p>No quick intentions yet. Add your first one above!</p>
       </div>
     `;
   }
@@ -299,7 +299,7 @@ export function closeCustomizationPanel(container: HTMLElement, shouldSave: bool
 
   if (shouldSave) {
     // Changes are already saved via IntentionsManager throughout editing
-    UI.showToast('✅ Intentions saved!', 'success');
+    UI.showToast('✅ Quick intentions saved!', 'success');
   }
 
   backdrop.dataset.panelVisible = 'false';
@@ -322,7 +322,7 @@ export function closeCustomizationPanel(container: HTMLElement, shouldSave: bool
       // Reset button text
       const addBtn = form.querySelector('.btn-add-intention-submit') as HTMLElement;
       if (addBtn) {
-        addBtn.innerHTML = '<span aria-hidden="true">+</span> Add Intention';
+        addBtn.innerHTML = '<span aria-hidden="true">+</span> Add quick intention';
       }
     }
 }
@@ -445,7 +445,7 @@ export function setupCustomizationPanel(
       };
 
       if (IntentionsManager.update(editingIntentionId, updates)) {
-        UI.showToast('✅ Intention updated!', 'success');
+        UI.showToast('✅ Quick intention updated!', 'success');
 
         // Clear form
         titleInput.value = '';
@@ -457,7 +457,7 @@ export function setupCustomizationPanel(
         // Reset button text
         const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
         if (addBtn) {
-          addBtn.innerHTML = '<span aria-hidden="true">+</span> Add Intention';
+          addBtn.innerHTML = '<span aria-hidden="true">+</span> Add quick intention';
         }
 
         // Refresh the sortable list in the customization panel
@@ -469,7 +469,7 @@ export function setupCustomizationPanel(
         // Optionally notify parent component, but don't trigger full re-render
         // if (onIntentionsChanged) onIntentionsChanged();
       } else {
-        UI.showToast('❌ Failed to update intention', 'error');
+        UI.showToast('❌ Failed to update quick intention', 'error');
       }
     } else {
       const created = IntentionsManager.add(
@@ -480,7 +480,7 @@ export function setupCustomizationPanel(
       );
 
       if (created) {
-        UI.showToast('✅ Intention added!', 'success');
+        UI.showToast('✅ Quick intention added!', 'success');
 
         // Clear form
         titleInput.value = '';
@@ -498,7 +498,7 @@ export function setupCustomizationPanel(
         // Optionally notify parent component, but don't trigger full re-render
         // if (onIntentionsChanged) onIntentionsChanged();
       } else {
-        UI.showToast('❌ Failed to add intention', 'error');
+        UI.showToast('❌ Failed to add quick intention', 'error');
       }
     }
   });
@@ -543,7 +543,7 @@ export function setupCustomizationPanel(
     if (addBtn) {
       const plusSpan = addBtn.querySelector('span[aria-hidden="true"]');
       if (plusSpan) {
-        addBtn.innerHTML = '<span aria-hidden="true">✏️</span> Update Intention';
+        addBtn.innerHTML = '<span aria-hidden="true">✏️</span> Update quick intention';
       }
     }
 
@@ -562,13 +562,13 @@ export function setupCustomizationPanel(
     const intentionId = deleteBtn.dataset.intentionId;
     if (!intentionId) return;
 
-    const confirmed = window.confirm
-      ? window.confirm('Delete this intention?')
-      : true;
+      const confirmed = window.confirm
+        ? window.confirm('Delete this quick intention?')
+        : true;
     if (!confirmed) return;
 
     if (IntentionsManager.delete(intentionId)) {
-      UI.showToast('🗑️ Intention removed', 'success');
+      UI.showToast('🗑️ Quick intention removed', 'success');
 
       // Refresh the sortable list in the customization panel
       refreshIntentionsList(container);
@@ -579,7 +579,7 @@ export function setupCustomizationPanel(
       // Optionally notify parent component, but don't trigger full re-render
       // if (onIntentionsChanged) onIntentionsChanged();
     } else {
-      UI.showToast('❌ Failed to delete intention', 'error');
+      UI.showToast('❌ Failed to delete quick intention', 'error');
     }
   });
 

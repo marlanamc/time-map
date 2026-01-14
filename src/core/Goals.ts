@@ -10,16 +10,15 @@ import type {
   Subtask,
   Note,
   TimeLogEntry,
+  GoalMeta,
 } from "../types";
 import { State } from "./State";
 import { CONFIG } from "../config";
 import { SupabaseService } from "../services/supabase";
 import { dirtyTracker } from "../services/DirtyTracker";
 import { debouncedGoalSync } from "../services/sync/syncHelpers";
-import { upsertInternalTag } from "../utils/goalLinkage";
+import { getFocusStartDate } from "../utils/goalMeta";
 import DB, { DB_STORES } from "../db";
-
-const INTERNAL_TAG_PREFIX = "__tm:";
 
 function startOfDay(date: Date): Date {
   const d = new Date(date);
@@ -66,17 +65,6 @@ function getLocalWeekStart(date: Date): Date {
   return d;
 }
 
-function getInternalTag(
-  tags: string[] | undefined,
-  key: string
-): string | undefined {
-  if (!tags || tags.length === 0) return undefined;
-  const prefix = `${INTERNAL_TAG_PREFIX}${key}=`;
-  const tag = tags.find((t) => t.startsWith(prefix));
-  return tag ? tag.slice(prefix.length) : undefined;
-}
-
-
 function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
   // Default fallbacks: treat as month-scoped.
   const fallbackStart = startOfDay(new Date(goal.year, goal.month ?? 0, 1));
@@ -96,11 +84,10 @@ function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
       return { start, end: end < start ? start : end };
     }
     case "focus": {
-      const startTag = getInternalTag(goal.tags, "start");
-      const startFromTag = startTag ? parseYmdLocal(startTag) : null;
       const end = goal.dueDate ? new Date(goal.dueDate) : fallbackEnd;
       const start = (() => {
-        if (startFromTag) return startOfDay(startFromTag);
+        const focusStart = getFocusStartDate(goal);
+        if (focusStart) return startOfDay(focusStart);
         if (goal.dueDate) {
           const inferred = new Date(goal.dueDate);
           inferred.setDate(inferred.getDate() - 6);
@@ -120,6 +107,20 @@ function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
     default:
       return { start: fallbackStart, end: fallbackEnd };
   }
+}
+
+/**
+ * Canonical "active in range" check for goals.
+ *
+ * A goal is considered active if its computed date range overlaps the target range.
+ * Both ranges are treated as inclusive on both ends after normalizing to local
+ * start-of-day / end-of-day.
+ */
+export function isGoalActiveInRange(goal: Goal, rangeStart: Date, rangeEnd: Date): boolean {
+  const start = startOfDay(rangeStart);
+  const end = endOfDay(rangeEnd);
+  const goalRange = getGoalDateRange(goal);
+  return goalRange.start <= end && goalRange.end >= start;
 }
 
 // UI callback interface to break circular dependency
@@ -151,13 +152,7 @@ export const Goals = {
 
   getForRange(rangeStart: Date, rangeEnd: Date): Goal[] {
     if (!State.data) return [];
-    const start = startOfDay(rangeStart);
-    const end = endOfDay(rangeEnd);
-
-    return State.data.goals.filter((g) => {
-      const goalRange = getGoalDateRange(g);
-      return goalRange.start <= end && goalRange.end >= start;
-    });
+    return State.data.goals.filter((g) => isGoalActiveInRange(g, rangeStart, rangeEnd));
   },
 
   getStats() {
@@ -178,7 +173,8 @@ export const Goals = {
     let month = inputMonth;
     let year = inputYear;
     let dueDate: string | null = goalData.dueDate ?? null;
-    let tags = goalData.tags ? [...goalData.tags] : [];
+    const tags = goalData.tags ? [...goalData.tags] : [];
+    const meta: GoalMeta = goalData.meta ? { ...goalData.meta } : {};
 
     switch (goalData.level) {
       case "vision": {
@@ -219,7 +215,7 @@ export const Goals = {
         month = start.getMonth();
         year = start.getFullYear();
         dueDate = end.toISOString();
-        tags = upsertInternalTag(tags, "start", formatYmdLocal(start));
+        meta.startDate = formatYmdLocal(start);
         break;
       }
 
@@ -262,6 +258,8 @@ export const Goals = {
       parentId: goalData.parentId ?? null,
       parentLevel: goalData.parentLevel ?? null,
       icon: goalData.icon,
+      activityId: goalData.activityId ?? undefined,
+      meta: Object.keys(meta).length > 0 ? meta : undefined,
     };
 
     if (!State.data) {
@@ -309,7 +307,6 @@ export const Goals = {
       let newMonth = goal.month;
       let newYear = goal.year;
       let newDueDate = goal.dueDate;
-      let newTags = goal.tags ? [...goal.tags] : [];
 
       switch (updates.level) {
         case "vision": {
@@ -317,9 +314,12 @@ export const Goals = {
           newYear = now.getFullYear();
           newMonth = 0;
           newDueDate = endOfDay(new Date(newYear, 11, 31)).toISOString();
-          newTags = newTags.filter(
-            (t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`)
-          );
+          if (goal.meta?.startDate) {
+            const nextMeta = { ...goal.meta };
+            delete nextMeta.startDate;
+            updates.meta =
+              Object.keys(nextMeta).length > 0 ? nextMeta : undefined;
+          }
           break;
         }
 
@@ -330,9 +330,12 @@ export const Goals = {
           newDueDate = endOfDay(
             new Date(newYear, newMonth + 1, 0)
           ).toISOString();
-          newTags = newTags.filter(
-            (t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`)
-          );
+          if (goal.meta?.startDate) {
+            const nextMeta = { ...goal.meta };
+            delete nextMeta.startDate;
+            updates.meta =
+              Object.keys(nextMeta).length > 0 ? nextMeta : undefined;
+          }
           break;
         }
 
@@ -344,7 +347,10 @@ export const Goals = {
           newMonth = start.getMonth();
           newYear = start.getFullYear();
           newDueDate = end.toISOString();
-          newTags = upsertInternalTag(newTags, "start", formatYmdLocal(start));
+          updates.meta = {
+            ...(goal.meta ?? {}),
+            startDate: formatYmdLocal(start),
+          };
           break;
         }
 
@@ -353,9 +359,12 @@ export const Goals = {
           newYear = now.getFullYear();
           newMonth = now.getMonth();
           newDueDate = endOfDay(now).toISOString();
-          newTags = newTags.filter(
-            (t) => !t.startsWith(`${INTERNAL_TAG_PREFIX}start=`)
-          );
+          if (goal.meta?.startDate) {
+            const nextMeta = { ...goal.meta };
+            delete nextMeta.startDate;
+            updates.meta =
+              Object.keys(nextMeta).length > 0 ? nextMeta : undefined;
+          }
           break;
         }
       }
@@ -363,7 +372,6 @@ export const Goals = {
       updates.month = newMonth;
       updates.year = newYear;
       updates.dueDate = newDueDate;
-      updates.tags = newTags;
     }
 
     // Ensure icon update is preserved if passed

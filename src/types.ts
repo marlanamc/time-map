@@ -25,6 +25,18 @@ export type Category =
   | null;
 
 /**
+ * Structured metadata for goals
+ * @remarks Stores helper fields that were previously embedded in descriptions or tags
+ */
+export interface GoalMeta {
+  tinyVersion?: string;
+  lowEnergyVersion?: string;
+  startDate?: string;
+  easyMode?: boolean;
+  accentTheme?: AccentTheme;
+}
+
+/**
  * Custom intention template for the Day View intentions grid
  * @remarks User-editable templates stored locally
  */
@@ -159,6 +171,8 @@ export interface Goal {
   startTime?: string | null;
   endTime?: string | null;
   tags: string[];
+  meta?: GoalMeta;
+  activityId?: string;
   /** Optional parent linkage for hierarchy/alignment (Vision → Milestone → Focus → Intention). */
   parentId?: string | null;
   /** Cached parent level for quick color access */
@@ -182,6 +196,7 @@ export interface GoalData {
   dueDate?: string | null;
   startTime?: string | null;
   endTime?: string | null;
+  activityId?: string;
   /** Optional parent linkage for hierarchy/alignment (Vision → Milestone → Focus → Intention). */
   parentId?: string | null;
   parentLevel?: GoalLevel | null;
@@ -195,6 +210,7 @@ export interface GoalData {
   /** Focus duration in whole weeks (>= 1). */
   durationWeeks?: number;
   tags?: string[];
+  meta?: GoalMeta;
   /** Optional icon/emoji for the goal */
   icon?: string;
 }

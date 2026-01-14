@@ -10431,6 +10431,16 @@ select:focus {
     transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Descriptor helper text for levels */
+.modal-level-descriptor,
+.goals-level-descriptor {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.15rem;
+    letter-spacing: 0.02em;
+}
+
 /* Override any remaining generic styles */
 .modal,
 .support-panel,

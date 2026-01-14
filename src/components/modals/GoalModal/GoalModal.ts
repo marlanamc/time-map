@@ -5,7 +5,6 @@ import { ND_CONFIG } from "../../../config/ndConfig";
 import { TimeBreakdown } from "../../../utils/TimeBreakdown";
 import { viewportManager } from "../../../ui/viewport/ViewportManager";
 import { haptics } from "../../../utils/haptics";
-import { upsertInternalTag } from "../../../utils/goalLinkage";
 import {
   focusTitleAtBlank,
   getOrCreateAfter,
@@ -27,6 +26,7 @@ import type {
   Category,
   Priority,
   AccentTheme,
+  GoalMeta,
 } from "../../../types";
 
 export type GoalModalContext = {
@@ -51,6 +51,13 @@ let focusEasyMode = false;
 let intentionOptionsOpen = false;
 
 let modalLinkSelection: { parentId: string; parentLevel: GoalLevel } | null = null;
+
+const LEVEL_DESCRIPTORS: Record<GoalLevel, string> = {
+  vision: "Year direction",
+  milestone: "Monthly chapter",
+  focus: "Weekly emphasis",
+  intention: "Daily touch",
+};
 
 export function closeGoalModal(ctx: GoalModalContext) {
   ctx.elements.goalModal?.classList.remove("active");
@@ -262,6 +269,11 @@ export function openGoalModal(
     else if (level === "milestone") title.textContent = "Set New Milestone";
     else if (level === "focus") title.textContent = "Define New Focus";
     else if (level === "intention") title.textContent = "Set New Intention";
+  }
+
+  const descriptor = document.getElementById("goal-modal-level-descriptor");
+  if (descriptor) {
+    descriptor.textContent = LEVEL_DESCRIPTORS[level] ?? "";
   }
 
   if (label) {
@@ -927,6 +939,8 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     startTime,
     endTime,
   };
+  const meta: GoalMeta = {};
+  let hasMeta = false;
 
   // Linkage (create-time)
   if (ctx.goalModalLevel === "milestone" || ctx.goalModalLevel === "focus") {
@@ -944,7 +958,8 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     goalData.year = year;
     const accentRaw = visionAccentEl?.value?.trim() ?? "";
     if (accentRaw && (accentRaw as AccentTheme) in ND_CONFIG.ACCENT_THEMES) {
-      goalData.tags = upsertInternalTag([], "accent", accentRaw);
+      meta.accentTheme = accentRaw as AccentTheme;
+      hasMeta = true;
     }
   }
 
@@ -958,16 +973,27 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     if (startDate) goalData.startDate = startDate;
     if (Number.isFinite(durationWeeks)) goalData.durationWeeks = durationWeeks;
     const lowEnergy = (document.getElementById("focusLowEnergy") as HTMLTextAreaElement | null)?.value?.trim() ?? "";
-    goalData.description = lowEnergy ? `Low-energy version: ${lowEnergy}` : "";
+    if (lowEnergy) {
+      meta.lowEnergyVersion = lowEnergy;
+      hasMeta = true;
+    }
     if (focusEasyMode) {
-      goalData.tags = ["__tm:easymode=1"];
+      meta.easyMode = true;
+      hasMeta = true;
     }
   }
 
   if (ctx.goalModalLevel === "intention") {
     if (startDate) goalData.startDate = startDate;
     const tiny = (document.getElementById("intentionTiny") as HTMLInputElement | null)?.value?.trim() ?? "";
-    goalData.description = tiny ? `Tiny version: ${tiny}` : "";
+    if (tiny) {
+      meta.tinyVersion = tiny;
+      hasMeta = true;
+    }
+  }
+
+  if (hasMeta) {
+    goalData.meta = meta;
   }
 
   Goals.create(goalData);

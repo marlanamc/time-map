@@ -50,7 +50,9 @@ export class GoalsService {
         subtasks: g.subtasks || [],
         notes: g.notes || [],
         parentId: g.parent_id ?? null,
-        parentLevel: (g.parent_level as unknown as Goal['parentLevel']) ?? null
+        parentLevel: (g.parent_level as unknown as Goal['parentLevel']) ?? null,
+        meta: g.meta ?? undefined,
+        activityId: g.activity_id ?? undefined,
       }));
 
       cacheService.set(cacheKey, goals, cacheService.TTL.GOALS);
@@ -97,6 +99,8 @@ export class GoalsService {
         start_time: goal.startTime || null,
         end_time: goal.endTime || null,
         tags: goal.tags || [],
+        meta: goal.meta ?? {},
+        activity_id: goal.activityId || null,
         parent_id: goal.parentId ?? null,
         parent_level: goal.parentLevel ?? null
       };
@@ -202,6 +206,7 @@ export class GoalsService {
         subtasks: goal.subtasks,
         notes: goal.notes,
         time_log: goal.timeLog,
+        meta: goal.meta ?? {},
         created_at: goal.createdAt,
         updated_at: goal.updatedAt,
         completed_at: goal.completedAt,
@@ -210,6 +215,7 @@ export class GoalsService {
         start_time: goal.startTime,
         end_time: goal.endTime,
         tags: goal.tags,
+        activity_id: goal.activityId ?? null,
         parent_id: goal.parentId ?? null,
         parent_level: goal.parentLevel ?? null
       }));
@@ -278,7 +284,9 @@ export class GoalsService {
         subtasks: g.subtasks || [],
         notes: g.notes || [],
         parentId: g.parent_id ?? null,
-        parentLevel: (g.parent_level as unknown as Goal['parentLevel']) ?? null
+        parentLevel: (g.parent_level as unknown as Goal['parentLevel']) ?? null,
+        meta: g.meta ?? undefined,
+        activityId: g.activity_id ?? undefined,
       }));
 
       console.log(`[GoalsService] Diagnostic: Found ${goals.length} goals in database for user ${user.id}`);

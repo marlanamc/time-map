@@ -1086,43 +1086,37 @@ export const UI = {
   } {
     if (!State.data) return { vision: [], milestone: [], focus: [] };
 
-    const allGoals = State.data.goals.filter((g) => g.status !== "done");
-    const viewingYear = date.getFullYear();
-    const viewingMonth = date.getMonth();
+    // Canonical context ranges for the given date.
+    // - Vision: active during the date's year
+    // - Milestone: active during the date's month
+    // - Focus: active during the date's ISO week (Mon-Sun)
+    const year = date.getFullYear();
+    const month = date.getMonth();
 
-    // Get week number for the date
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year, 11, 31);
+
+    const monthStart = new Date(year, month, 1);
+    const monthEnd = new Date(year, month + 1, 0);
+
+    const weekYear = State.getWeekYear(date);
     const weekNum = State.getWeekNumber(date);
-    const weekStart = State.getWeekStart(viewingYear, weekNum);
+    const weekStart = State.getWeekStart(weekYear, weekNum);
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
 
-    // Vision: goals for the year
-    const vision = allGoals
-      .filter((g) => {
-        if (g.level !== "vision") return false;
-        if (!g.year) return false;
-        return g.year === viewingYear;
-      })
-      .slice(0, 2); // Show max 2
+    // Use the canonical overlap definition via Goals.getForRange() / getGoalDateRange().
+    const vision = Goals.getForRange(yearStart, yearEnd)
+      .filter((g) => g.status !== "done" && g.level === "vision")
+      .slice(0, 2);
 
-    // Milestone: goals for the month
-    const milestone = allGoals
-      .filter((g) => {
-        if (g.level !== "milestone") return false;
-        if (g.year === undefined || g.month === undefined) return false;
-        return g.year === viewingYear && g.month === viewingMonth;
-      })
-      .slice(0, 2); // Show max 2
+    const milestone = Goals.getForRange(monthStart, monthEnd)
+      .filter((g) => g.status !== "done" && g.level === "milestone")
+      .slice(0, 2);
 
-    // Focus: goals for the week
-    const focus = allGoals
-      .filter((g) => {
-        if (g.level !== "focus") return false;
-        if (!g.dueDate) return false;
-        const dueDate = new Date(g.dueDate);
-        return dueDate >= weekStart && dueDate <= weekEnd;
-      })
-      .slice(0, 2); // Show max 2
+    const focus = Goals.getForRange(weekStart, weekEnd)
+      .filter((g) => g.status !== "done" && g.level === "focus")
+      .slice(0, 2);
 
     return { vision, milestone, focus };
   },

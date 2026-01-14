@@ -14,7 +14,7 @@
 
 ### Applying Migrations
 
-- Run SQL in order: `supabase/migrations/001_initial_schema.sql`, `supabase/migrations/002_enable_rls.sql`, `supabase/migrations/003_add_performance_indexes.sql`, `supabase/migrations/004_add_streaks.sql`, `supabase/migrations/005_add_goal_time_columns.sql`, `supabase/migrations/006_patch_goals_schema.sql`
+- Run SQL in order: `supabase/migrations/001_initial_schema.sql`, `supabase/migrations/002_enable_rls.sql`, `supabase/migrations/003_add_performance_indexes.sql`, `supabase/migrations/004_add_streaks.sql`, `supabase/migrations/005_add_goal_time_columns.sql`, `supabase/migrations/006_patch_goals_schema.sql`, `supabase/migrations/007_add_events.sql`, `supabase/migrations/008_enable_rls_events.sql`, `supabase/migrations/009_add_goal_meta.sql`, `supabase/migrations/010_add_goal_activity_id.sql`
 - If you’re using Supabase Dashboard: SQL Editor → New query → paste file contents → Run
 
 If you get an error like `Could not find the 'end_time' column of 'goals' in the schema cache` after running SQL:
