@@ -25,7 +25,7 @@ let hasOpenedOnce = false;
  * @returns Escaped text
  */
 function escapeHtml(text: string): string {
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
@@ -110,7 +110,9 @@ function renderListBody(items: CustomIntention[]): string {
  * @param intentions - Current intentions to display
  * @returns HTML string for the panel
  */
-export function renderCustomizationPanel(intentions?: CustomIntention[]): string {
+export function renderCustomizationPanel(
+  intentions?: CustomIntention[]
+): string {
   const items = intentions || IntentionsManager.getSorted();
 
   // On first open, show Add section. Otherwise, show list if items exist.
@@ -131,7 +133,8 @@ export function renderCustomizationPanel(intentions?: CustomIntention[]): string
   const listAccordion = renderAccordionSection({
     id: "panelListSection",
     title: `Your quick intentions`,
-    subtitle: items.length > 0 ? `${items.length} templates` : "No templates yet",
+    subtitle:
+      items.length > 0 ? `${items.length} templates` : "No templates yet",
     open: listSectionOpen,
     bodyHtml: renderListBody(items),
   });
@@ -189,7 +192,7 @@ function renderCategoryOptions(): string {
       const config = CONFIG.CATEGORIES[cat];
       return `<option value="${cat}">${config.emoji} ${config.label}</option>`;
     })
-    .join('');
+    .join("");
 }
 
 /**
@@ -198,19 +201,59 @@ function renderCategoryOptions(): string {
  */
 function renderEmojiPicker(): string {
   const commonEmojis = [
-    '🎯', '💼', '📧', '📚', '✍️', '💡', '🧘', '🏃', '🍎', '☕',
-    '🎨', '🎵', '📱', '💻', '🗣️', '👥', '🏠', '🌟', '⚡', '🔥',
-    '📝', '📊', '🎓', '🔬', '🛠️', '🎯', '🌱', '🧠', '❤️', '✨',
-    '🚀', '⏰', '📅', '🎉', '🎁', '🏆', '💪', '🙏', '😊', '🌈'
+    "🎯",
+    "💼",
+    "📧",
+    "📚",
+    "✍️",
+    "💡",
+    "🧘",
+    "🏃",
+    "🍎",
+    "☕",
+    "🎨",
+    "🎵",
+    "📱",
+    "💻",
+    "🗣️",
+    "👥",
+    "🏠",
+    "🌟",
+    "⚡",
+    "🔥",
+    "📝",
+    "📊",
+    "🎓",
+    "🔬",
+    "🛠️",
+    "🎯",
+    "🌱",
+    "🧠",
+    "❤️",
+    "✨",
+    "🚀",
+    "⏰",
+    "📅",
+    "🎉",
+    "🎁",
+    "🏆",
+    "💪",
+    "🙏",
+    "😊",
+    "🌈",
   ];
 
   return `
     <div class="emoji-picker-grid">
-      ${commonEmojis.map(emoji => `
+      ${commonEmojis
+        .map(
+          (emoji) => `
         <button type="button" class="emoji-option" data-emoji="${emoji}">
           ${emoji}
         </button>
-      `).join('')}
+      `
+        )
+        .join("")}
     </div>
   `;
 }
@@ -231,7 +274,7 @@ function renderSortableIntentions(intentions: CustomIntention[]): string {
 
   return intentions
     .map((intention, index) => renderSortableIntention(intention, index))
-    .join('');
+    .join("");
 }
 
 /**
@@ -240,9 +283,18 @@ function renderSortableIntentions(intentions: CustomIntention[]): string {
  * @param index - Position in list
  * @returns HTML string for intention item
  */
-function renderSortableIntention(intention: CustomIntention, index: number): string {
-  const emoji = intention.emoji || CONFIG.CATEGORIES[intention.category as keyof typeof CONFIG.CATEGORIES]?.emoji || '📍';
-  const categoryLabel = CONFIG.CATEGORIES[intention.category as keyof typeof CONFIG.CATEGORIES]?.label || 'General';
+function renderSortableIntention(
+  intention: CustomIntention,
+  index: number
+): string {
+  const emoji =
+    intention.emoji ||
+    CONFIG.CATEGORIES[intention.category as keyof typeof CONFIG.CATEGORIES]
+      ?.emoji ||
+    "📍";
+  const categoryLabel =
+    CONFIG.CATEGORIES[intention.category as keyof typeof CONFIG.CATEGORIES]
+      ?.label || "General";
 
   return `
     <div
@@ -265,7 +317,9 @@ function renderSortableIntention(intention: CustomIntention, index: number): str
       <div class="intention-item-content">
         <div class="intention-item-header">
           <span class="intention-item-emoji">${emoji}</span>
-          <span class="intention-item-title">${escapeHtml(intention.title)}</span>
+          <span class="intention-item-title">${escapeHtml(
+            intention.title
+          )}</span>
         </div>
         <div class="intention-item-meta">
           <span class="meta-category">${categoryLabel}</span>
@@ -304,20 +358,26 @@ function renderSortableIntention(intention: CustomIntention, index: number): str
  * @param container - Root container element
  */
 export function openCustomizationPanel(container: HTMLElement): void {
-  const overlay = container.querySelector('.intentions-modal-overlay') as HTMLElement;
+  const overlay = container.querySelector(
+    ".intentions-modal-overlay"
+  ) as HTMLElement;
   if (!overlay) return;
 
-  const modal = overlay.querySelector('.intentions-modal') as HTMLElement | null;
+  const modal = overlay.querySelector(
+    ".intentions-modal"
+  ) as HTMLElement | null;
 
   // Prevent body scroll
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = "hidden";
 
-  overlay.dataset.panelVisible = 'true';
-  overlay.classList.add('active');
-  modal?.classList.add('active');
+  overlay.dataset.panelVisible = "true";
+  overlay.classList.add("active");
+  modal?.classList.add("active");
 
   // Set up accordion toggles
-  const accordionContainer = overlay.querySelector('#panelAccordionContainer') as HTMLElement | null;
+  const accordionContainer = overlay.querySelector(
+    "#panelAccordionContainer"
+  ) as HTMLElement | null;
   setupAccordionSectionToggles(accordionContainer, (id, open) => {
     if (id === "panelAddSection") {
       addSectionOpen = open;
@@ -328,7 +388,9 @@ export function openCustomizationPanel(container: HTMLElement): void {
 
   // Focus the first input if add section is open
   if (addSectionOpen) {
-    const firstInput = overlay.querySelector('#intention-title') as HTMLInputElement;
+    const firstInput = overlay.querySelector(
+      "#intention-title"
+    ) as HTMLInputElement;
     if (firstInput) {
       setTimeout(() => firstInput.focus(), 300); // After animation
     }
@@ -341,23 +403,36 @@ export function openCustomizationPanel(container: HTMLElement): void {
 /**
  * Clear the add form and reset editing state
  */
-function clearAddForm(container: HTMLElement, editingIdRef: { current: string | null }): void {
-  const titleInput = container.querySelector('#intention-title') as HTMLInputElement;
-  const emojiInput = container.querySelector('#intention-emoji') as HTMLInputElement;
-  const categorySelect = container.querySelector('#intention-category') as HTMLSelectElement;
-  const durationInput = container.querySelector('#intention-duration') as HTMLInputElement;
+function clearAddForm(
+  container: HTMLElement,
+  editingIdRef: { current: string | null }
+): void {
+  const titleInput = container.querySelector(
+    "#intention-title"
+  ) as HTMLInputElement;
+  const emojiInput = container.querySelector(
+    "#intention-emoji"
+  ) as HTMLInputElement;
+  const categorySelect = container.querySelector(
+    "#intention-category"
+  ) as HTMLSelectElement;
+  const durationInput = container.querySelector(
+    "#intention-duration"
+  ) as HTMLInputElement;
 
-  if (titleInput) titleInput.value = '';
-  if (emojiInput) emojiInput.value = '';
+  if (titleInput) titleInput.value = "";
+  if (emojiInput) emojiInput.value = "";
   if (categorySelect) categorySelect.selectedIndex = 0;
-  if (durationInput) durationInput.value = '';
+  if (durationInput) durationInput.value = "";
 
   editingIdRef.current = null;
 
   // Reset button text
-  const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
+  const addBtn = container.querySelector(
+    ".btn-add-intention-submit"
+  ) as HTMLElement;
   if (addBtn) {
-    addBtn.textContent = '+ Add quick intention';
+    addBtn.textContent = "+ Add quick intention";
   }
 }
 
@@ -366,23 +441,30 @@ function clearAddForm(container: HTMLElement, editingIdRef: { current: string | 
  * @param container - Root container element
  * @param shouldSave - Whether to save changes
  */
-export function closeCustomizationPanel(container: HTMLElement, shouldSave: boolean = false): void {
-  const overlay = container.querySelector('.intentions-modal-overlay') as HTMLElement;
+export function closeCustomizationPanel(
+  container: HTMLElement,
+  shouldSave: boolean = false
+): void {
+  const overlay = container.querySelector(
+    ".intentions-modal-overlay"
+  ) as HTMLElement;
   if (!overlay) return;
 
-  const modal = overlay.querySelector('.intentions-modal') as HTMLElement | null;
+  const modal = overlay.querySelector(
+    ".intentions-modal"
+  ) as HTMLElement | null;
 
   if (shouldSave) {
     // Changes are already saved via IntentionsManager throughout editing
-    UI.showToast('Quick intentions saved!', 'success');
+    UI.showToast("Quick intentions saved!", "success");
   }
 
   // Restore body scroll
-  document.body.style.overflow = '';
+  document.body.style.overflow = "";
 
-  overlay.dataset.panelVisible = 'false';
-  overlay.classList.remove('active');
-  modal?.classList.remove('active');
+  overlay.dataset.panelVisible = "false";
+  overlay.classList.remove("active");
+  modal?.classList.remove("active");
 
   // Clear form with a dummy ref (actual ref managed by setupCustomizationPanel)
   clearAddForm(overlay, { current: null });
@@ -397,10 +479,12 @@ function trapFocus(element: HTMLElement): void {
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
   );
   const firstFocusable = focusableElements[0] as HTMLElement;
-  const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement;
+  const lastFocusable = focusableElements[
+    focusableElements.length - 1
+  ] as HTMLElement;
 
-  element.addEventListener('keydown', (e) => {
-    if (e.key !== 'Tab') return;
+  element.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
 
     if (e.shiftKey) {
       // Shift + Tab
@@ -418,10 +502,10 @@ function trapFocus(element: HTMLElement): void {
   });
 
   // Close on Escape
-  element.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
+  element.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
       // Find parent container (day view)
-      const container = element.closest('.planner-day-view') as HTMLElement;
+      const container = element.closest(".planner-day-view") as HTMLElement;
       if (container) {
         closeCustomizationPanel(container, false);
       }
@@ -443,18 +527,20 @@ export function setupCustomizationPanel(
 
   // Open panel button (handled in IntentionsGrid setup)
   // Close panel
-  container.addEventListener('click', (e) => {
+  container.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
 
     // Close button (modal-close or btn-panel-cancel)
-    const closeBtn = target.closest('.modal-close, .btn-panel-cancel, [data-action="close-modal"]') as HTMLElement;
+    const closeBtn = target.closest(
+      '.modal-close, .btn-panel-cancel, [data-action="close-modal"]'
+    ) as HTMLElement;
     if (closeBtn) {
       closeCustomizationPanel(container, false);
       return;
     }
 
     // Save button
-    const saveBtn = target.closest('.btn-panel-save') as HTMLElement;
+    const saveBtn = target.closest(".btn-panel-save") as HTMLElement;
     if (saveBtn) {
       closeCustomizationPanel(container, true);
       if (onIntentionsChanged) onIntentionsChanged();
@@ -462,14 +548,14 @@ export function setupCustomizationPanel(
     }
 
     // Overlay click to close (click on overlay background, not on modal)
-    const overlay = target.closest('.intentions-modal-overlay') as HTMLElement;
+    const overlay = target.closest(".intentions-modal-overlay") as HTMLElement;
     if (overlay && target === overlay) {
       closeCustomizationPanel(container, false);
       return;
     }
 
     // Form reset button
-    const resetBtn = target.closest('.btn-form-reset') as HTMLElement;
+    const resetBtn = target.closest(".btn-form-reset") as HTMLElement;
     if (resetBtn) {
       clearAddForm(container, editingIdRef);
       return;
@@ -477,27 +563,35 @@ export function setupCustomizationPanel(
   });
 
   // Add new intention
-  container.addEventListener('click', (e) => {
+  container.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
-    const addBtn = target.closest('.btn-add-intention-submit') as HTMLElement;
+    const addBtn = target.closest(".btn-add-intention-submit") as HTMLElement;
     if (!addBtn) return;
 
-    const titleInput = container.querySelector('#intention-title') as HTMLInputElement;
-    const emojiInput = container.querySelector('#intention-emoji') as HTMLInputElement;
-    const categorySelect = container.querySelector('#intention-category') as HTMLSelectElement;
-    const durationInput = container.querySelector('#intention-duration') as HTMLInputElement;
+    const titleInput = container.querySelector(
+      "#intention-title"
+    ) as HTMLInputElement;
+    const emojiInput = container.querySelector(
+      "#intention-emoji"
+    ) as HTMLInputElement;
+    const categorySelect = container.querySelector(
+      "#intention-category"
+    ) as HTMLSelectElement;
+    const durationInput = container.querySelector(
+      "#intention-duration"
+    ) as HTMLInputElement;
 
     if (!titleInput) return;
 
     // Validation
     if (!titleInput.value.trim()) {
-      UI.showToast('⚠️ Please enter a title', 'error');
+      UI.showToast("⚠️ Please enter a title", "error");
       titleInput.focus();
       return;
     }
 
     if (!durationInput.value || parseInt(durationInput.value) < 5) {
-      UI.showToast('⚠️ Duration must be at least 5 minutes', 'error');
+      UI.showToast("⚠️ Duration must be at least 5 minutes", "error");
       durationInput.focus();
       return;
     }
@@ -513,7 +607,7 @@ export function setupCustomizationPanel(
       };
 
       if (IntentionsManager.update(editingIdRef.current, updates)) {
-        UI.showToast('✅ Quick intention updated!', 'success');
+        UI.showToast("✅ Quick intention updated!", "success");
 
         // Clear form
         clearAddForm(container, editingIdRef);
@@ -527,7 +621,7 @@ export function setupCustomizationPanel(
         // Optionally notify parent component, but don't trigger full re-render
         // if (onIntentionsChanged) onIntentionsChanged();
       } else {
-        UI.showToast('❌ Failed to update quick intention', 'error');
+        UI.showToast("❌ Failed to update quick intention", "error");
       }
     } else {
       const created = IntentionsManager.add(
@@ -538,7 +632,7 @@ export function setupCustomizationPanel(
       );
 
       if (created) {
-        UI.showToast('✅ Quick intention added!', 'success');
+        UI.showToast("✅ Quick intention added!", "success");
 
         // Clear form
         clearAddForm(container, editingIdRef);
@@ -552,15 +646,15 @@ export function setupCustomizationPanel(
         // Optionally notify parent component, but don't trigger full re-render
         // if (onIntentionsChanged) onIntentionsChanged();
       } else {
-        UI.showToast('❌ Failed to add quick intention', 'error');
+        UI.showToast("❌ Failed to add quick intention", "error");
       }
     }
   });
 
   // Edit intention (populate form)
-  container.addEventListener('click', (e) => {
+  container.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
-    const editBtn = target.closest('.btn-edit-intention') as HTMLElement;
+    const editBtn = target.closest(".btn-edit-intention") as HTMLElement;
     if (!editBtn) return;
 
     const intentionId = editBtn.dataset.intentionId;
@@ -570,22 +664,38 @@ export function setupCustomizationPanel(
     if (!intention) return;
 
     // Ensure Add section is open
-    const addToggle = container.querySelector('[data-accordion-id="panelAddSection"]') as HTMLButtonElement | null;
-    const addBody = container.querySelector('#panelAddSection-body') as HTMLElement | null;
-    if (addToggle && addBody && addToggle.getAttribute('aria-expanded') === 'false') {
-      addToggle.setAttribute('aria-expanded', 'true');
+    const addToggle = container.querySelector(
+      '[data-accordion-id="panelAddSection"]'
+    ) as HTMLButtonElement | null;
+    const addBody = container.querySelector(
+      "#panelAddSection-body"
+    ) as HTMLElement | null;
+    if (
+      addToggle &&
+      addBody &&
+      addToggle.getAttribute("aria-expanded") === "false"
+    ) {
+      addToggle.setAttribute("aria-expanded", "true");
       addBody.hidden = false;
       addSectionOpen = true;
     }
 
     // Populate form
-    const titleInput = container.querySelector('#intention-title') as HTMLInputElement;
-    const emojiInput = container.querySelector('#intention-emoji') as HTMLInputElement;
-    const categorySelect = container.querySelector('#intention-category') as HTMLSelectElement;
-    const durationInput = container.querySelector('#intention-duration') as HTMLInputElement;
+    const titleInput = container.querySelector(
+      "#intention-title"
+    ) as HTMLInputElement;
+    const emojiInput = container.querySelector(
+      "#intention-emoji"
+    ) as HTMLInputElement;
+    const categorySelect = container.querySelector(
+      "#intention-category"
+    ) as HTMLSelectElement;
+    const durationInput = container.querySelector(
+      "#intention-duration"
+    ) as HTMLInputElement;
 
     if (titleInput) titleInput.value = intention.title;
-    if (emojiInput) emojiInput.value = intention.emoji || '';
+    if (emojiInput) emojiInput.value = intention.emoji || "";
     if (categorySelect) {
       if (intention.category) {
         categorySelect.value = intention.category;
@@ -599,33 +709,50 @@ export function setupCustomizationPanel(
     editingIdRef.current = intentionId;
 
     // Update button text to indicate editing
-    const addBtn = container.querySelector('.btn-add-intention-submit') as HTMLElement;
+    const addBtn = container.querySelector(
+      ".btn-add-intention-submit"
+    ) as HTMLElement;
     if (addBtn) {
-      addBtn.innerHTML = '<span aria-hidden="true">✏️</span> Update quick intention';
+      addBtn.innerHTML =
+        '<span aria-hidden="true">✏️</span> Update quick intention';
     }
 
     // Focus title input
     titleInput?.focus();
-    titleInput?.select();
   });
 
   // Delete intention
-  container.addEventListener('click', (e) => {
+  container.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
-    const deleteBtn = target.closest('.btn-delete-intention') as HTMLElement;
+    const deleteBtn = target.closest(".btn-delete-intention") as HTMLElement;
     if (!deleteBtn) return;
 
     e.stopPropagation();
     const intentionId = deleteBtn.dataset.intentionId;
     if (!intentionId) return;
 
-      const confirmed = window.confirm
-        ? window.confirm('Delete this quick intention?')
-        : true;
+    // Simple confirmation dialog
+    const confirmed = window.confirm
+      ? window.confirm("Delete this quick intention?")
+      : true;
     if (!confirmed) return;
 
+    // Temporary fix: If IDs don't match, reset intentions to get consistent IDs
+    const currentIntentions = IntentionsManager.getSorted();
+    const intentionExists = currentIntentions.some((i) => i.id === intentionId);
+    if (!intentionExists) {
+      console.log("⚠️ Intention ID mismatch detected! Resetting intentions...");
+      IntentionsManager.reset();
+
+      // Refresh the UI with the new consistent IDs
+      refreshIntentionsList(container);
+      refreshIntentionsGrid(container);
+      UI.showToast("🔄 Intentions reset for consistency", "info");
+      return;
+    }
+
     if (IntentionsManager.delete(intentionId)) {
-      UI.showToast('🗑️ Quick intention removed', 'success');
+      UI.showToast("🗑️ Quick intention removed", "success");
 
       // Refresh the sortable list in the customization panel
       refreshIntentionsList(container);
@@ -636,24 +763,26 @@ export function setupCustomizationPanel(
       // Optionally notify parent component, but don't trigger full re-render
       // if (onIntentionsChanged) onIntentionsChanged();
     } else {
-      UI.showToast('❌ Failed to delete quick intention', 'error');
+      UI.showToast("❌ Failed to delete quick intention", "error");
     }
   });
 
   // Emoji picker
-  container.addEventListener('click', (e) => {
+  container.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
 
     // Toggle emoji picker
-    const pickerBtn = target.closest('.emoji-picker-btn') as HTMLElement;
+    const pickerBtn = target.closest(".emoji-picker-btn") as HTMLElement;
     if (pickerBtn) {
-      const picker = container.querySelector('.emoji-picker-dropdown') as HTMLElement;
+      const picker = container.querySelector(
+        ".emoji-picker-dropdown"
+      ) as HTMLElement;
       if (picker) {
         picker.hidden = !picker.hidden;
 
         // Position near button
         const rect = pickerBtn.getBoundingClientRect();
-        picker.style.position = 'fixed';
+        picker.style.position = "fixed";
         picker.style.top = `${rect.bottom + 4}px`;
         picker.style.left = `${rect.left}px`;
       }
@@ -661,52 +790,65 @@ export function setupCustomizationPanel(
     }
 
     // Select emoji
-    const emojiOption = target.closest('.emoji-option') as HTMLElement;
+    const emojiOption = target.closest(".emoji-option") as HTMLElement;
     if (emojiOption) {
       const emoji = emojiOption.dataset.emoji;
-      const emojiInput = container.querySelector('#intention-emoji') as HTMLInputElement;
+      const emojiInput = container.querySelector(
+        "#intention-emoji"
+      ) as HTMLInputElement;
       if (emojiInput && emoji) {
         emojiInput.value = emoji;
       }
 
-      const picker = container.querySelector('.emoji-picker-dropdown') as HTMLElement;
+      const picker = container.querySelector(
+        ".emoji-picker-dropdown"
+      ) as HTMLElement;
       if (picker) picker.hidden = true;
       return;
     }
   });
 
   // Close emoji picker when clicking outside
-  document.addEventListener('click', (e) => {
+  document.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
-    const picker = container.querySelector('.emoji-picker-dropdown') as HTMLElement;
-    const pickerBtn = container.querySelector('.emoji-picker-btn') as HTMLElement;
+    const picker = container.querySelector(
+      ".emoji-picker-dropdown"
+    ) as HTMLElement;
+    const pickerBtn = container.querySelector(
+      ".emoji-picker-btn"
+    ) as HTMLElement;
 
-    if (picker && !picker.hidden && !picker.contains(target) && target !== pickerBtn) {
+    if (
+      picker &&
+      !picker.hidden &&
+      !picker.contains(target) &&
+      target !== pickerBtn
+    ) {
       picker.hidden = true;
     }
   });
 
   // Drag and drop reordering
-  container.addEventListener('dragstart', (e) => {
+  container.addEventListener("dragstart", (e) => {
     const target = e.target as HTMLElement;
-    const item = target.closest('.sortable-intention-item') as HTMLElement;
+    const item = target.closest(".sortable-intention-item") as HTMLElement;
     if (!item) return;
 
     draggedElement = item;
-    item.classList.add('dragging');
+    item.classList.add("dragging");
 
     if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/html', item.innerHTML);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/html", item.innerHTML);
     }
   });
 
-  container.addEventListener('dragover', (e) => {
+  container.addEventListener("dragover", (e) => {
     e.preventDefault();
     if (!draggedElement) return;
 
     const target = e.target as HTMLElement;
-    const item = target.closest('.sortable-intention-item') as HTMLElement;
+    const item = target.closest(".sortable-intention-item") as HTMLElement;
     if (!item || item === draggedElement) return;
 
     const list = item.parentElement;
@@ -722,18 +864,22 @@ export function setupCustomizationPanel(
     }
   });
 
-  container.addEventListener('dragend', (_e) => {
+  container.addEventListener("dragend", (_e) => {
     if (!draggedElement) return;
 
-    draggedElement.classList.remove('dragging');
+    draggedElement.classList.remove("dragging");
 
     // Update order in IntentionsManager
-    const list = container.querySelector('.intentions-sortable-list') as HTMLElement;
+    const list = container.querySelector(
+      ".intentions-sortable-list"
+    ) as HTMLElement;
     if (list) {
-      const items = Array.from(list.querySelectorAll('.sortable-intention-item')) as HTMLElement[];
+      const items = Array.from(
+        list.querySelectorAll(".sortable-intention-item")
+      ) as HTMLElement[];
       const newOrder = items
-        .map(item => item.dataset.intentionId)
-        .filter(id => id) as string[];
+        .map((item) => item.dataset.intentionId)
+        .filter((id) => id) as string[];
 
       IntentionsManager.reorder(newOrder);
 
@@ -756,15 +902,22 @@ export function setupCustomizationPanel(
  * @param container - Container element
  */
 function refreshIntentionsList(container: HTMLElement): void {
-  const list = container.querySelector('.intentions-sortable-list') as HTMLElement;
+  const list = container.querySelector(
+    ".intentions-sortable-list"
+  ) as HTMLElement;
   if (!list) return;
 
   const intentions = IntentionsManager.getSorted();
   list.innerHTML = renderSortableIntentions(intentions);
 
   // Update the accordion subtitle with the count
-  const listSubtitle = container.querySelector('#panelListSection .modal-disclosure-subtitle') as HTMLElement;
+  const listSubtitle = container.querySelector(
+    "#panelListSection .modal-disclosure-subtitle"
+  ) as HTMLElement;
   if (listSubtitle) {
-    listSubtitle.textContent = intentions.length > 0 ? `${intentions.length} templates` : "No templates yet";
+    listSubtitle.textContent =
+      intentions.length > 0
+        ? `${intentions.length} templates`
+        : "No templates yet";
   }
 }

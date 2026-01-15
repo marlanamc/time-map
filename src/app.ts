@@ -4,14 +4,14 @@
 // ============================================
 
 // Import all styles (Vite bundles these automatically)
-import '../styles/main.css';
+import "../styles/main.css";
 
 // Most types are now used by the imported modules rather than app.ts directly
-import type { GardenEngine } from './garden/gardenEngine';
-import { State, Goals, Planning, Analytics } from './core';
-import { SupabaseService } from './services/supabase';
-import { VIEWS } from './config';
-import { getSupabaseClient, isSupabaseConfigured } from './supabaseClient';
+import type { GardenEngine } from "./garden/gardenEngine";
+import { State, Goals, Planning, Analytics } from "./core";
+import { SupabaseService } from "./services/supabase";
+import { VIEWS } from "./config";
+import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 // Removed duplicate interfaces - now imported from types.ts
 
@@ -68,23 +68,29 @@ declare global {
 // ============================================
 
 // Import UI Manager (bridge for gradual migration)
-import { UI } from './ui/UIBridge';
+import { UI } from "./ui/UIBridge";
 
 // Import Liquid Effects for sidebar animations
-import { initLiquidEffects } from './components/dayView/LiquidEffects';
-
+import { initLiquidEffects } from "./components/dayView/LiquidEffects";
 
 // ============================================
 // Initialize App
 // ============================================
 document.addEventListener("DOMContentLoaded", async () => {
+  // Start performance monitoring
+  // performanceMonitor.markAppInitStart();
+
   window.addEventListener("error", (event) => {
-    try {
-      console.error("Unhandled error:", event.error || event.message);
-      UI?.showToast?.("⚠️", "Something went wrong. Try refreshing.");
-    } catch {
-      // no-op
-    }
+    console.error("Global error:", event.error);
+
+    // Send error to performance monitoring
+    // performanceMonitor.sendMetric('error', {
+    //   message: event.error?.message || 'Unknown error',
+    //   filename: event.filename,
+    //   lineno: event.lineno,
+    //   colno: event.colno,
+    //   timestamp: Date.now()
+    // });
   });
 
   window.addEventListener("unhandledrejection", (event) => {
@@ -98,23 +104,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await State.init();
 
+  // Mark app initialization end
+  // performanceMonitor.markAppInitEnd();
+
   // Set up auth state change listeners for session expiration and multi-tab logout
   const supabase = await getSupabaseClient();
   supabase.auth.onAuthStateChange(async (event: string, _session: unknown) => {
-    console.log('Auth state changed:', event);
+    console.log("Auth state changed:", event);
 
-    if (event === 'SIGNED_OUT') {
+    if (event === "SIGNED_OUT") {
       // Clean up resources on logout
       await State.cleanup();
-      UI.updateSyncStatus?.('local');
+      UI.updateSyncStatus?.("local");
       location.reload();
-    } else if (event === 'SIGNED_IN' && !State.data) {
+    } else if (event === "SIGNED_IN" && !State.data) {
       // Handle sign in (e.g., from another tab or after session refresh)
       await State.init();
       UI.init();
-      UI.updateSyncStatus?.(isSupabaseConfigured ? 'synced' : 'local');
-    } else if (event === 'TOKEN_REFRESHED') {
-      console.log('Session token refreshed');
+      UI.updateSyncStatus?.(isSupabaseConfigured ? "synced" : "local");
+    } else if (event === "TOKEN_REFRESHED") {
+      console.log("Session token refreshed");
     }
   });
 
@@ -126,12 +135,35 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize liquid effects (time theming, shimmer, ripple)
   initLiquidEffects();
 
+  // Fallback: Ensure loading overlay is removed even if initialization fails
+  setTimeout(() => {
+    const loading = document.getElementById("appLoading");
+    if (loading && !loading.classList.contains("loaded")) {
+      console.warn("⚠️ Loading overlay still present, forcing removal");
+      loading.classList.add("loaded");
+      // Force hide with inline styles as backup
+      loading.style.opacity = "0";
+      loading.style.pointerEvents = "none";
+      setTimeout(() => loading.remove(), 650);
+    }
+  }, 5000); // 5 second fallback
+
+  // Additional emergency fallback
+  setTimeout(() => {
+    const loading = document.getElementById("appLoading");
+    if (loading) {
+      console.warn("🚨 Emergency fallback: removing loading overlay");
+      loading.style.display = "none";
+      loading.remove();
+    }
+  }, 10000); // 10 second emergency fallback
+
   // Initialize sync badge to reflect actual auth/config.
   try {
     const user = await SupabaseService.getUser();
-    UI.updateSyncStatus?.(user && isSupabaseConfigured ? 'synced' : 'local');
+    UI.updateSyncStatus?.(user && isSupabaseConfigured ? "synced" : "local");
   } catch {
-    UI.updateSyncStatus?.('local');
+    UI.updateSyncStatus?.("local");
   }
 
   // Support PWA shortcut URLs (e.g. /?view=day or /?action=new-task)
@@ -141,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const action = params.get("action");
     let didHandleAction = false;
 
-    const viewMap: Record<string, typeof VIEWS[keyof typeof VIEWS]> = {
+    const viewMap: Record<string, (typeof VIEWS)[keyof typeof VIEWS]> = {
       home: VIEWS.HOME,
       day: VIEWS.DAY,
       week: VIEWS.WEEK,
@@ -176,7 +208,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const refreshSyncBadgeFromAuth = async () => {
       try {
         const user = await SupabaseService.getUser();
-        UI.updateSyncStatus?.(user && isSupabaseConfigured ? "synced" : "local");
+        UI.updateSyncStatus?.(
+          user && isSupabaseConfigured ? "synced" : "local"
+        );
       } catch {
         UI.updateSyncStatus?.("local");
       }
@@ -198,8 +232,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       lastOnline = online;
     };
 
-    window.addEventListener("online", () => void applyConnectionState({ toast: true }));
-    window.addEventListener("offline", () => void applyConnectionState({ toast: true }));
+    window.addEventListener(
+      "online",
+      () => void applyConnectionState({ toast: true })
+    );
+    window.addEventListener(
+      "offline",
+      () => void applyConnectionState({ toast: true })
+    );
     void applyConnectionState({ toast: !navigator.onLine });
   }
 
@@ -218,7 +258,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         toastHideTimer = null;
       };
 
-      const showToast = (icon: string, message: string, opts?: { timeoutMs?: number; type?: string }) => {
+      const showToast = (
+        icon: string,
+        message: string,
+        opts?: { timeoutMs?: number; type?: string }
+      ) => {
         if (!toastEl || !toastIconEl || !toastMessageEl) return;
         if (toastHideTimer) window.clearTimeout(toastHideTimer);
         toastHideTimer = null;
@@ -247,7 +291,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!registration.waiting) return;
 
         const actionsClass = "toast-actions";
-        let actions = toastEl.querySelector(`.${actionsClass}`) as HTMLDivElement | null;
+        let actions = toastEl.querySelector(
+          `.${actionsClass}`
+        ) as HTMLDivElement | null;
         if (!actions) {
           actions = document.createElement("div");
           actions.className = actionsClass;
@@ -263,7 +309,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           "click",
           (e) => {
             const target = e.target as Element | null;
-            const btn = target?.closest("[data-sw-action]") as HTMLElement | null;
+            const btn = target?.closest(
+              "[data-sw-action]"
+            ) as HTMLElement | null;
             const action = btn?.dataset.swAction;
             if (!action) return;
             e.preventDefault();
@@ -276,7 +324,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               hideToast();
             }
           },
-          { once: true },
+          { once: true }
         );
 
         showToast("⬆️", "New version available.", { type: "sw-update" });
@@ -288,10 +336,16 @@ document.addEventListener("DOMContentLoaded", async () => {
           storeSwVersion(event.data.version);
         }
         if (type === "CACHES_CLEARED") {
-          showToast("🧹", "Cache cleared.", { timeoutMs: 2500, type: "sw-cache" });
+          showToast("🧹", "Cache cleared.", {
+            timeoutMs: 2500,
+            type: "sw-cache",
+          });
         }
         if (type === "CACHES_CLEAR_FAILED") {
-          showToast("⚠️", "Couldn’t clear cache.", { timeoutMs: 3500, type: "sw-cache" });
+          showToast("⚠️", "Couldn’t clear cache.", {
+            timeoutMs: 3500,
+            type: "sw-cache",
+          });
         }
         if (type === "PROCESS_SYNC_QUEUE") {
           import("./services/SyncQueue")
@@ -344,8 +398,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Header "More" Menu Toggle
-  const headerMoreToggle = document.getElementById("headerMoreToggle") as HTMLElement | null;
-  const headerMoreDropdown = document.getElementById("headerMoreDropdown") as HTMLElement | null;
+  const headerMoreToggle = document.getElementById(
+    "headerMoreToggle"
+  ) as HTMLElement | null;
+  const headerMoreDropdown = document.getElementById(
+    "headerMoreDropdown"
+  ) as HTMLElement | null;
 
   if (headerMoreToggle && headerMoreDropdown) {
     const setOpen = (open: boolean) => {
@@ -389,13 +447,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ND Menu Toggle
-  const ndMenuToggle = document.getElementById("ndMenuToggle") as HTMLElement | null;
-  const ndDropdown = document.getElementById("ndDropdown") as HTMLElement | null;
+  const ndMenuToggle = document.getElementById(
+    "ndMenuToggle"
+  ) as HTMLElement | null;
+  const ndDropdown = document.getElementById(
+    "ndDropdown"
+  ) as HTMLElement | null;
 
   if (ndMenuToggle && ndDropdown) {
     ndMenuToggle.addEventListener("click", () => {
-      const isExpanded =
-        ndMenuToggle.getAttribute("aria-expanded") === "true";
+      const isExpanded = ndMenuToggle.getAttribute("aria-expanded") === "true";
       ndMenuToggle.setAttribute("aria-expanded", String(!isExpanded));
       ndDropdown.hidden = isExpanded;
     });
@@ -413,7 +474,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Keyboard navigation
     ndDropdown.addEventListener("keydown", (e: KeyboardEvent) => {
       const items = Array.from(
-        ndDropdown.querySelectorAll<HTMLElement>(".nd-dropdown-item"),
+        ndDropdown.querySelectorAll<HTMLElement>(".nd-dropdown-item")
       );
       if (items.length === 0) return;
       const active = document.activeElement as HTMLElement | null;
@@ -438,26 +499,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Sidebar Collapsible Sections
-  document.querySelectorAll<HTMLElement>(".section-toggle").forEach((toggle) => {
-    toggle.addEventListener("click", () => {
-      const isExpanded = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!isExpanded));
+  document
+    .querySelectorAll<HTMLElement>(".section-toggle")
+    .forEach((toggle) => {
+      toggle.addEventListener("click", () => {
+        const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!isExpanded));
 
-      // Save preference
-      const sectionEl = toggle.closest(".sidebar-section") as HTMLElement | null;
-      const section = sectionEl?.dataset.section;
-      if (!section || !State.data) return;
-      if (
-        section !== "affirmation" &&
-        section !== "upcoming" &&
-        section !== "achievements"
-      ) {
-        return;
-      }
-      State.data.preferences.sidebarSections[section] = !isExpanded;
-      State.save();
+        // Save preference
+        const sectionEl = toggle.closest(
+          ".sidebar-section"
+        ) as HTMLElement | null;
+        const section = sectionEl?.dataset.section;
+        if (!section || !State.data) return;
+        if (
+          section !== "affirmation" &&
+          section !== "upcoming" &&
+          section !== "achievements"
+        ) {
+          return;
+        }
+        State.data.preferences.sidebarSections[section] = !isExpanded;
+        State.save();
+      });
     });
-  });
 
   // Restore saved sidebar section states
   function restoreSidebarStates() {
@@ -465,7 +530,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const preferences = State.data.preferences.sidebarSections;
     Object.entries(preferences).forEach(([section, expanded]) => {
       const toggle = document.querySelector(
-        `[data-section="${section}"] .section-toggle`,
+        `[data-section="${section}"] .section-toggle`
       ) as HTMLElement | null;
       if (toggle) {
         toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
@@ -481,18 +546,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ============================================
   const initGarden = async () => {
     try {
-      const { GardenEngine: GardenEngineCtor } = await import("./garden/gardenEngine");
+      const { GardenEngine: GardenEngineCtor } = await import(
+        "./garden/gardenEngine"
+      );
       const savedGardenPrefs = GardenEngineCtor.loadPreferences();
       const garden = new GardenEngineCtor(savedGardenPrefs);
       garden.initialize();
 
       // Log garden state changes for debugging
-      garden.on('timeChanged', (state) => {
-        console.log('🌅 Time changed:', state.time.timeOfDay);
+      garden.on("timeChanged", (state) => {
+        console.log("🌅 Time changed:", state.time.timeOfDay);
       });
 
-      garden.on('seasonChanged', (state) => {
-        console.log('🍂 Season changed:', state.season.season);
+      garden.on("seasonChanged", (state) => {
+        console.log("🍂 Season changed:", state.season.season);
       });
 
       // Expose garden for debugging

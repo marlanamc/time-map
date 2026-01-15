@@ -3,22 +3,58 @@
  * @remarks Manages user-defined intention templates stored in localStorage
  */
 
-import type { CustomIntention, Category } from '../types';
+import type { CustomIntention, Category } from "../types";
 
-const STORAGE_KEY = 'gardenFence.customIntentions';
+const STORAGE_KEY = "gardenFence.customIntentions";
 
 /**
  * Default intention templates (fallback when no custom intentions exist)
  * @remarks Based on the hardcoded common intentions from PlannerDayViewRenderer
  */
-const DEFAULT_INTENTIONS: Omit<CustomIntention, 'id' | 'createdAt'>[] = [
-  { title: "Deep work", category: "career", duration: 90, emoji: "💼", order: 0 },
-  { title: "Email + admin", category: "career", duration: 45, emoji: "📧", order: 1 },
+const DEFAULT_INTENTIONS: Omit<CustomIntention, "id" | "createdAt">[] = [
+  {
+    title: "Deep work",
+    category: "career",
+    duration: 90,
+    emoji: "💼",
+    order: 0,
+  },
+  {
+    title: "Email + admin",
+    category: "career",
+    duration: 45,
+    emoji: "📧",
+    order: 1,
+  },
   { title: "Workout", category: "health", duration: 60, emoji: "💪", order: 2 },
-  { title: "Meal prep", category: "health", duration: 60, emoji: "🍳", order: 3 },
-  { title: "Budget check-in", category: "finance", duration: 30, emoji: "💰", order: 4 },
-  { title: "Creative session", category: "creative", duration: 60, emoji: "🎨", order: 5 },
-  { title: "Journal + reflect", category: "personal", duration: 20, emoji: "📝", order: 6 },
+  {
+    title: "Meal prep",
+    category: "health",
+    duration: 60,
+    emoji: "🍳",
+    order: 3,
+  },
+  {
+    title: "Budget check-in",
+    category: "finance",
+    duration: 30,
+    emoji: "💰",
+    order: 4,
+  },
+  {
+    title: "Creative session",
+    category: "creative",
+    duration: 60,
+    emoji: "🎨",
+    order: 5,
+  },
+  {
+    title: "Journal + reflect",
+    category: "personal",
+    duration: 20,
+    emoji: "📝",
+    order: 6,
+  },
 ];
 
 /**
@@ -26,9 +62,9 @@ const DEFAULT_INTENTIONS: Omit<CustomIntention, 'id' | 'createdAt'>[] = [
  * @returns UUID v4 string
  */
 function generateId(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -46,29 +82,35 @@ export class IntentionsManager {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
-        return this.getDefaults();
+        // Generate defaults and save them to localStorage so IDs are consistent
+        const defaults = this.getDefaults();
+        this.save(defaults);
+        return defaults;
       }
 
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed) || parsed.length === 0) {
-        return this.getDefaults();
+        // Generate defaults and save them to localStorage so IDs are consistent
+        const defaults = this.getDefaults();
+        this.save(defaults);
+        return defaults;
       }
 
       // Validate and sanitize
       return parsed.filter((item): item is CustomIntention => {
         return (
-          typeof item === 'object' &&
+          typeof item === "object" &&
           item !== null &&
-          typeof item.id === 'string' &&
-          typeof item.title === 'string' &&
+          typeof item.id === "string" &&
+          typeof item.title === "string" &&
           item.title.trim().length > 0 &&
-          typeof item.duration === 'number' &&
+          typeof item.duration === "number" &&
           item.duration >= 5 &&
           item.duration <= 480
         );
       });
     } catch (error) {
-      console.error('Failed to load custom intentions:', error);
+      console.error("Failed to load custom intentions:", error);
       return this.getDefaults();
     }
   }
@@ -83,28 +125,33 @@ export class IntentionsManager {
       // Validate before saving
       const valid = intentions.every((item) => {
         return (
-          typeof item.id === 'string' &&
-          typeof item.title === 'string' &&
+          typeof item.id === "string" &&
+          typeof item.title === "string" &&
           item.title.trim().length > 0 &&
-          typeof item.duration === 'number' &&
+          typeof item.duration === "number" &&
           item.duration >= 5 &&
           item.duration <= 480
         );
       });
 
       if (!valid) {
-        console.error('Invalid intentions data, refusing to save');
+        console.error("Invalid intentions data, refusing to save");
         return false;
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(intentions));
       return true;
     } catch (error) {
-      console.error('Failed to save custom intentions:', error);
+      console.error("Failed to save custom intentions:", error);
 
       // Check for quota exceeded
-      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-        console.error('localStorage quota exceeded. Cannot save custom intentions.');
+      if (
+        error instanceof DOMException &&
+        error.name === "QuotaExceededError"
+      ) {
+        console.error(
+          "localStorage quota exceeded. Cannot save custom intentions."
+        );
       }
 
       return false;
@@ -140,17 +187,20 @@ export class IntentionsManager {
   ): CustomIntention | null {
     // Validation
     if (!title || title.trim().length === 0) {
-      console.error('Intention title is required');
+      console.error("Intention title is required");
       return null;
     }
 
     if (duration < 5 || duration > 480) {
-      console.error('Duration must be between 5 and 480 minutes');
+      console.error("Duration must be between 5 and 480 minutes");
       return null;
     }
 
     const intentions = this.load();
-    const maxOrder = intentions.reduce((max, item) => Math.max(max, item.order), -1);
+    const maxOrder = intentions.reduce(
+      (max, item) => Math.max(max, item.order),
+      -1
+    );
 
     const newIntention: CustomIntention = {
       id: generateId(),
@@ -177,7 +227,10 @@ export class IntentionsManager {
    * @param updates - Partial intention data to update
    * @returns True if update succeeded, false otherwise
    */
-  static update(id: string, updates: Partial<Omit<CustomIntention, 'id' | 'createdAt'>>): boolean {
+  static update(
+    id: string,
+    updates: Partial<Omit<CustomIntention, "id" | "createdAt">>
+  ): boolean {
     const intentions = this.load();
     const index = intentions.findIndex((item) => item.id === id);
 
@@ -188,12 +241,15 @@ export class IntentionsManager {
 
     // Validate updates
     if (updates.title !== undefined && updates.title.trim().length === 0) {
-      console.error('Intention title cannot be empty');
+      console.error("Intention title cannot be empty");
       return false;
     }
 
-    if (updates.duration !== undefined && (updates.duration < 5 || updates.duration > 480)) {
-      console.error('Duration must be between 5 and 480 minutes');
+    if (
+      updates.duration !== undefined &&
+      (updates.duration < 5 || updates.duration > 480)
+    ) {
+      console.error("Duration must be between 5 and 480 minutes");
       return false;
     }
 
@@ -203,7 +259,10 @@ export class IntentionsManager {
       ...updates,
       title: updates.title?.trim() ?? intentions[index].title,
       emoji: updates.emoji?.trim() ?? intentions[index].emoji,
-      duration: updates.duration !== undefined ? Math.floor(updates.duration) : intentions[index].duration,
+      duration:
+        updates.duration !== undefined
+          ? Math.floor(updates.duration)
+          : intentions[index].duration,
     };
 
     return this.save(intentions);
@@ -246,7 +305,7 @@ export class IntentionsManager {
     );
 
     if (!allIdsExist || orderedIds.length !== intentions.length) {
-      console.error('Invalid reorder: ID mismatch');
+      console.error("Invalid reorder: ID mismatch");
       return false;
     }
 

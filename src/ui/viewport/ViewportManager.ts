@@ -8,8 +8,8 @@
  * - Updates CSS custom properties for mobile layouts
  */
 
-import { State } from '../../core/State';
-import { VIEWS } from '../../config';
+import { State } from "../../core/State";
+import { VIEWS } from "../../config";
 
 export interface ViewportChangeCallbacks {
   onViewportChange?: () => void;
@@ -56,7 +56,9 @@ class ViewportManager {
       this.syncMobileDateNavPlacement(isMobile);
 
       // Show/hide mobile support panel button
-      const mobileSupportBtn = document.getElementById("supportPanelToggleBtnMobile");
+      const mobileSupportBtn = document.getElementById(
+        "supportPanelToggleBtnMobile"
+      );
       if (mobileSupportBtn) {
         if (isMobile) {
           mobileSupportBtn.removeAttribute("hidden");
@@ -119,8 +121,12 @@ class ViewportManager {
    */
   syncMobileDateNavPlacement(isMobile: boolean): void {
     const dateNav = document.querySelector(".date-nav") as HTMLElement | null;
-    const controlCenter = document.querySelector(".control-center") as HTMLElement | null;
-    const headerSlot = document.getElementById("headerMobileNav") as HTMLElement | null;
+    const controlCenter = document.querySelector(
+      ".control-center"
+    ) as HTMLElement | null;
+    const headerSlot = document.getElementById(
+      "headerMobileNav"
+    ) as HTMLElement | null;
 
     if (!dateNav || !controlCenter || !headerSlot) return;
 
@@ -155,16 +161,22 @@ class ViewportManager {
       }
 
       const tabBar = document.getElementById("mobileTabBar");
-      const tabBarHeight = tabBar
-        ? Math.round(tabBar.getBoundingClientRect().height)
-        : 0;
+      // Use fallback height if tab bar is not visible or has no height
+      const tabBarHeight =
+        tabBar && tabBar.getBoundingClientRect().height > 0
+          ? Math.round(tabBar.getBoundingClientRect().height)
+          : 68; // Fallback height matching CSS
       root.style.setProperty("--mobile-tab-bar-height", `${tabBarHeight}px`);
 
-      const isMobileHomeView = document.body.classList.contains("mobile-home-view");
-      const timeStats = document.querySelector(".time-stats") as HTMLElement | null;
-      const statsHeight = isMobileHomeView && timeStats
-        ? Math.round(timeStats.getBoundingClientRect().height)
-        : 0;
+      const isMobileHomeView =
+        document.body.classList.contains("mobile-home-view");
+      const timeStats = document.querySelector(
+        ".time-stats"
+      ) as HTMLElement | null;
+      const statsHeight =
+        isMobileHomeView && timeStats
+          ? Math.round(timeStats.getBoundingClientRect().height)
+          : 0;
       root.style.setProperty("--mobile-home-stats-height", `${statsHeight}px`);
     });
   }

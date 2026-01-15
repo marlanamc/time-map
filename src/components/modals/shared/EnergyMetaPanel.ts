@@ -27,14 +27,14 @@ function themeOptions(): Option[] {
 export type EnergyMetaPanelOptions = {
   level: GoalLevel;
   meta?: GoalMeta;
-  icon?: string; // Add icon separately since it's on Goal, not in GoalMeta
+  icon?: string;
 };
 
 export type EnergyMetaPanelSetupOptions = EnergyMetaPanelOptions & {
   onChange: (nextMeta: GoalMeta) => void;
   getMeta: () => GoalMeta;
   onRequestRerender?: () => void;
-  onIconChange?: (icon: string) => void; // Add icon change handler
+  onIconChange?: (icon: string) => void;
 };
 
 export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
@@ -58,17 +58,23 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
             placeholder="✨"
             maxlength="2"
             value="${escapeHtml(icon ?? "")}"
+            inputmode="emoji"
+            pattern="[\\p{Emoji}]{1,2}"
+            title="Click to open emoji keyboard"
           />
-          <div class="vision-icon-presets">
-            <button type="button" class="icon-preset-btn" data-icon="✨">✨</button>
-            <button type="button" class="icon-preset-btn" data-icon="🎯">🎯</button>
-            <button type="button" class="icon-preset-btn" data-icon="🚀">🚀</button>
-            <button type="button" class="icon-preset-btn" data-icon="💎">💎</button>
-            <button type="button" class="icon-preset-btn" data-icon="🌟">🌟</button>
-            <button type="button" class="icon-preset-btn" data-icon="🔥">🔥</button>
-            <button type="button" class="icon-preset-btn" data-icon="🎨">🎨</button>
-            <button type="button" class="icon-preset-btn" data-icon="🌱">🌱</button>
-          </div>
+          <button type="button" class="vision-emoji-keyboard-btn" aria-label="Open emoji keyboard">
+            😊
+          </button>
+        </div>
+        <div class="vision-icon-presets">
+          <button type="button" class="icon-preset-btn" data-icon="✨">✨</button>
+          <button type="button" class="icon-preset-btn" data-icon="🎯">🎯</button>
+          <button type="button" class="icon-preset-btn" data-icon="🚀">🚀</button>
+          <button type="button" class="icon-preset-btn" data-icon="💎">💎</button>
+          <button type="button" class="icon-preset-btn" data-icon="🌟">🌟</button>
+          <button type="button" class="icon-preset-btn" data-icon="🔥">🔥</button>
+          <button type="button" class="icon-preset-btn" data-icon="🎨">🎨</button>
+          <button type="button" class="icon-preset-btn" data-icon="🌱">🌱</button>
         </div>
       </div>
       <div class="form-group">
@@ -164,7 +170,6 @@ export function setupEnergyMetaPanel(
     const accent = container.querySelector<HTMLSelectElement>("#visionAccent");
     const iconInput = container.querySelector<HTMLInputElement>("#visionIcon");
 
-    // Handle accent theme change
     accent?.addEventListener("change", () => {
       update(
         {
@@ -174,12 +179,21 @@ export function setupEnergyMetaPanel(
       );
     });
 
-    // Handle icon input change
     iconInput?.addEventListener("input", () => {
       onIconChange?.(iconInput.value);
     });
 
-    // Handle icon preset buttons
+    const emojiKeyboardBtn = container.querySelector(
+      ".vision-emoji-keyboard-btn"
+    ) as HTMLElement;
+
+    emojiKeyboardBtn?.addEventListener("click", () => {
+      if (iconInput) {
+        iconInput.focus();
+        (iconInput as any).showPicker?.();
+      }
+    });
+
     container.querySelectorAll(".icon-preset-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const icon = (btn as HTMLElement).dataset.icon;

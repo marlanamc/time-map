@@ -855,9 +855,7 @@
           role="group"
           aria-label="Zoom controls"
         >
-          <button class="zoom-btn" id="zoomOut" aria-label="Zoom out">
-            −
-          </button>
+          <button class="zoom-btn" id="zoomOut" aria-label="Zoom out">−</button>
           <span class="zoom-level" id="zoomLevel" aria-live="polite">100%</span>
           <button class="zoom-btn" id="zoomIn" aria-label="Zoom in">+</button>
         </div>
@@ -875,7 +873,9 @@
       <div class="modal">
         <div class="modal-header">
           <h2 class="modal-title" id="goal-modal-title">Set New Intention</h2>
-          <p class="modal-level-descriptor" id="goal-modal-level-descriptor">Year direction</p>
+          <p class="modal-level-descriptor" id="goal-modal-level-descriptor">
+            Year direction
+          </p>
           <button class="modal-close" id="closeModal" aria-label="Close modal">
             ×
           </button>
@@ -884,12 +884,7 @@
           <div class="goal-hero" id="goalHero">
             <div class="form-group" id="goalTitleGroup">
               <label for="goalTitle">What would you like to place here?</label>
-              <input
-                type="text"
-                id="goalTitle"
-                required
-                aria-required="true"
-              />
+              <input type="text" id="goalTitle" required aria-required="true" />
             </div>
             <div class="goal-hero-date" id="goalHeroDateSlot" hidden></div>
             <p class="goal-hero-reassurance" id="goalHeroReassurance"></p>
@@ -1020,11 +1015,7 @@
         <div class="celebration-emoji" id="celebrationIcon" aria-hidden="true">
           🎉
         </div>
-        <div
-          class="celebration-title"
-          id="celebrationTitle"
-          id="celebration-title-label"
-        >
+        <div class="celebration-title" id="celebration-title-label">
           Amazing!
         </div>
         <div class="celebration-text" id="celebrationText">Updated.</div>

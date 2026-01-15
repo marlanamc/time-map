@@ -11,10 +11,7 @@ import { cacheElements } from "./elements/UIElements";
 import { Toast } from "../components/feedback/Toast";
 import { Celebration } from "../components/feedback/Celebration";
 import { TimeVisualizations } from "../garden/timeVisualizations";
-import {
-  MobileHereRenderer,
-  YearRenderer,
-} from "./renderers";
+import { MobileHereRenderer, YearRenderer } from "./renderers";
 import type { DayViewController } from "../components/dayView/DayViewController";
 import { ThemeManager } from "../theme/ThemeManager";
 import { eventBus } from "../core/EventBus";
@@ -36,7 +33,11 @@ import { DateNavigator } from "./navigation/DateNavigator";
 import { ViewNavigator } from "./navigation/ViewNavigator";
 import { RenderCoordinator } from "./rendering/RenderCoordinator";
 import { UIStateManager } from "./state/UIStateManager";
-import { escapeHtml as escapeHtmlUtil, formatDate as formatDateUtil, formatMinutes as formatMinutesUtil } from "./utils";
+import {
+  escapeHtml as escapeHtmlUtil,
+  formatDate as formatDateUtil,
+  formatMinutes as formatMinutesUtil,
+} from "./utils";
 import type {
   FeatureLoaders,
   NDSupportApi,
@@ -49,12 +50,7 @@ import * as weeklyReview from "../features/weeklyReview";
 import * as focusMode from "../features/focusMode";
 import * as keyboardShortcuts from "./keyboardShortcuts";
 import * as syncIssues from "../features/syncIssues";
-import type {
-  UIElements,
-  ViewType,
-  Goal,
-  GoalLevel,
-} from "../types";
+import type { UIElements, ViewType, Goal, GoalLevel } from "../types";
 
 type QuickAddShowOptions = Parameters<QuickAddApi["show"]>[0];
 
@@ -116,8 +112,7 @@ export const UI = {
         this.ensureNDSupport().then((nd) => nd.showDopamineMenu()),
       onShowNDSettings: () =>
         this.ensureNDSupport().then((nd) => nd.showSettingsPanel()),
-      onShowSettings: () =>
-        this.showSettingsPanel(),
+      onShowSettings: () => this.showSettingsPanel(),
       onForceCloudSync: () => this.forceCloudSync(),
       onPromptInstall: () => this.promptInstall(),
       onShowSyncIssues: () => {
@@ -130,7 +125,8 @@ export const UI = {
       },
       onHandleLogout: () => this.handleLogout(),
       onToggleFocusMode: () => this.toggleFocusMode(),
-      onApplyAccessibilityPreferences: () => this.applyAccessibilityPreferences(),
+      onApplyAccessibilityPreferences: () =>
+        this.applyAccessibilityPreferences(),
       onApplyTimeOfDayOverride: (timeOfDay) =>
         this.applyTimeOfDayOverride(timeOfDay),
     });
@@ -171,13 +167,20 @@ export const UI = {
         renderCalendar: () => {
           YearRenderer.render(this.elements, {
             escapeHtml: (text: string) => this.escapeHtml(text),
-            openGoalModal: (level: GoalLevel, month: number | null, year: number) =>
-              this.openGoalModal(level, month, year),
+            openGoalModal: (
+              level: GoalLevel,
+              month: number | null,
+              year: number
+            ) => this.openGoalModal(level, month, year),
             updateYearDisplay: () => this.updateYearDisplay(),
           });
         },
-        openGoalModal: (level: any, month: number, year: number, options?: any) =>
-          this.openGoalModal(level, month, year, options),
+        openGoalModal: (
+          level: any,
+          month: number,
+          year: number,
+          options?: any
+        ) => this.openGoalModal(level, month, year, options),
         escapeHtml: (text: string) => escapeHtmlUtil(text),
         dayViewController: this.dayViewController,
       },
@@ -432,7 +435,11 @@ export const UI = {
     // Allow initial paint of the skeleton before fading it out.
     window.requestAnimationFrame(() => {
       loading.classList.add("loaded");
-      window.setTimeout(() => loading.remove(), 650);
+      // Always remove the loading overlay after a timeout to prevent it from blocking interactions
+      window.setTimeout(() => {
+        loading.remove();
+        console.log("✓ App loading overlay removed");
+      }, 650);
     });
   },
 
@@ -446,7 +453,7 @@ export const UI = {
       // Enable smooth transitions for view changes
       const transitionOptions = {
         transition: true,
-        ...data
+        ...data,
       };
       this.scheduleRender(transitionOptions);
     });
@@ -1077,7 +1084,6 @@ export const UI = {
     display.setAttribute("aria-hidden", isRedundant ? "true" : "false");
   },
 
-
   // Get context goals (Vision/Milestone/Focus) for a specific date
   getContextGoalsForDate(date: Date): {
     vision: Goal[];
@@ -1386,7 +1392,6 @@ export const UI = {
     }
   },
 
-
   renderCategoryFilters() {
     const container = this.elements.categoryFilters;
     if (!container) return;
@@ -1512,8 +1517,11 @@ export const UI = {
         this.renderCategoryFilters();
         YearRenderer.render(this.elements, {
           escapeHtml: (text: string) => this.escapeHtml(text),
-          openGoalModal: (level: GoalLevel, month: number | null, year: number) =>
-            this.openGoalModal(level, month, year),
+          openGoalModal: (
+            level: GoalLevel,
+            month: number | null,
+            year: number
+          ) => this.openGoalModal(level, month, year),
           updateYearDisplay: () => this.updateYearDisplay(),
         });
         this.renderUpcomingGoals();

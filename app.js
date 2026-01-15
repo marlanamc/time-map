@@ -13,7 +13,8 @@
     // Calculate all time metrics between now and a target date
     calculate(targetMonth, targetYear) {
       const now = new Date();
-      const isCurrentMonth = targetMonth === now.getMonth() && targetYear === now.getFullYear();
+      const isCurrentMonth =
+        targetMonth === now.getMonth() && targetYear === now.getFullYear();
 
       // For current month, calculate to end of month. For future months, calculate to start of month.
       const target = isCurrentMonth
@@ -126,23 +127,36 @@
         <div class="time-breakdown-details">
           <div class="time-detail">
             <span class="time-detail-icon">🌴</span>
-            <span class="time-detail-text"><strong>${breakdown.weekends}</strong> weekends to work on this</span>
+            <span class="time-detail-text"><strong>${
+              breakdown.weekends
+            }</strong> weekends to work on this</span>
           </div>
           <div class="time-detail">
             <span class="time-detail-icon">💪</span>
-            <span class="time-detail-text"><strong>${breakdown.workSessions3x}</strong> sessions if you work 3x/week</span>
+            <span class="time-detail-text"><strong>${
+              breakdown.workSessions3x
+            }</strong> sessions if you work 3x/week</span>
           </div>
           <div class="time-detail">
             <span class="time-detail-icon">🚀</span>
-            <span class="time-detail-text"><strong>${breakdown.workSessions5x}</strong> sessions if you work 5x/week</span>
+            <span class="time-detail-text"><strong>${
+              breakdown.workSessions5x
+            }</strong> sessions if you work 5x/week</span>
           </div>
           <div class="time-detail">
             <span class="time-detail-icon">⏱️</span>
-            <span class="time-detail-text"><strong>${breakdown.focusHours1hDay}h</strong> total if 1h/day, <strong>${breakdown.focusHours2hDay}h</strong> if 2h/day</span>
+            <span class="time-detail-text"><strong>${
+              breakdown.focusHours1hDay
+            }h</strong> total if 1h/day, <strong>${
+        breakdown.focusHours2hDay
+      }h</strong> if 2h/day</span>
           </div>
         </div>
         <div class="time-breakdown-tip">
-          💡 <em>Break this anchor into ${Math.max(1, Math.ceil(breakdown.weeks / 2))} small steps — one every ~2 weeks</em>
+          💡 <em>Break this anchor into ${Math.max(
+            1,
+            Math.ceil(breakdown.weeks / 2)
+          )} small steps — one every ~2 weeks</em>
         </div>
       </div>`;
     },
@@ -178,7 +192,12 @@
       teal: { label: "Ocean Teal", emoji: "🌊", color: "#1E6FB8" },
       indigo: { label: "Deep Indigo", emoji: "🌌", color: "#4F46E5" },
       violet: { label: "Violet", emoji: "💜", color: "#6D28D9" },
-      rainbow: { label: "Rainbow", emoji: "🌈", color: "linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)" },
+      rainbow: {
+        label: "Rainbow",
+        emoji: "🌈",
+        color:
+          "linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)",
+      },
     },
 
     // Body doubling / coworking timer options
@@ -456,7 +475,7 @@
     // Get ISO week number
     getWeekNumber(date) {
       const d = new Date(
-        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
       );
       const dayNum = d.getUTCDay() || 7;
       d.setUTCDate(d.getUTCDate() + 4 - dayNum);
@@ -538,8 +557,8 @@
           },
           sidebarSections: {
             affirmation: false, // Collapsed by default in medium energy
-            upcoming: true,     // Expanded by default
-            achievements: false // Collapsed by default in medium energy
+            upcoming: true, // Expanded by default
+            achievements: false, // Collapsed by default in medium energy
           },
           // Neurodivergent accessibility preferences
           nd: {
@@ -623,10 +642,16 @@
         this.data.preferences = { ...defaults.preferences };
         changed = true;
       } else {
-        this.data.preferences = { ...defaults.preferences, ...this.data.preferences };
+        this.data.preferences = {
+          ...defaults.preferences,
+          ...this.data.preferences,
+        };
       }
 
-      if (!this.data.preferences.layout || typeof this.data.preferences.layout !== "object") {
+      if (
+        !this.data.preferences.layout ||
+        typeof this.data.preferences.layout !== "object"
+      ) {
         this.data.preferences.layout = { ...defaults.preferences.layout };
         changed = true;
       } else {
@@ -649,7 +674,10 @@
         };
       }
 
-      if (!this.data.preferences.nd || typeof this.data.preferences.nd !== "object") {
+      if (
+        !this.data.preferences.nd ||
+        typeof this.data.preferences.nd !== "object"
+      ) {
         this.data.preferences.nd = { ...defaults.preferences.nd };
         changed = true;
       } else {
@@ -759,7 +787,7 @@
 
     getByMonth(month, year) {
       return State.data.goals.filter(
-        (g) => g.month === month && g.year === year,
+        (g) => g.month === month && g.year === year
       );
     },
 
@@ -891,7 +919,7 @@
     checkAchievements() {
       const totalGoals = State.data.goals.length;
       const completedGoals = State.data.goals.filter(
-        (g) => g.status === "done",
+        (g) => g.status === "done"
       ).length;
       const hasSubtasks = State.data.goals.some((g) => g.subtasks.length > 0);
       const hasNotes = State.data.goals.some((g) => g.notes.length > 0);
@@ -931,7 +959,7 @@
       UI.celebrate(
         achievement.emoji,
         "Achievement Unlocked!",
-        achievement.label,
+        achievement.label
       );
     },
   };
@@ -967,7 +995,7 @@
 
     getWeeklyReviews() {
       return State.data.weeklyReviews.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
     },
 
@@ -982,7 +1010,7 @@
 
       const lastDate = new Date(lastReview.createdAt);
       const daysSince = Math.floor(
-        (Date.now() - lastDate) / (1000 * 60 * 60 * 24),
+        (Date.now() - lastDate) / (1000 * 60 * 60 * 24)
       );
       return daysSince >= 7;
     },
@@ -1033,7 +1061,7 @@
             ? Math.round(
                 (goals.filter((g) => g.status === "done").length /
                   goals.length) *
-                  100,
+                  100
               )
             : 0,
         totalTimeSpent: State.data.analytics.totalTimeSpent,
@@ -1053,7 +1081,7 @@
             catGoals.length > 0
               ? Math.round(
                   catGoals.reduce((sum, g) => sum + g.progress, 0) /
-                    catGoals.length,
+                    catGoals.length
                 )
               : 0,
         };
@@ -1067,7 +1095,7 @@
 
       CONFIG.MONTHS.forEach((_, idx) => {
         const monthGoals = State.data.goals.filter(
-          (g) => g.month === idx && g.year === year,
+          (g) => g.month === idx && g.year === year
         );
         stats[idx] = {
           total: monthGoals.length,
@@ -1088,7 +1116,7 @@
 
         // Count activities on this day
         const goalsCompleted = State.data.goals.filter(
-          (g) => g.completedAt && g.completedAt.startsWith(dateStr),
+          (g) => g.completedAt && g.completedAt.startsWith(dateStr)
         ).length;
 
         const timeLogged = State.data.goals.reduce((sum, g) => {
@@ -1139,7 +1167,7 @@
           "theme-sage",
           "theme-amber",
           "theme-clay",
-          "theme-violet",
+          "theme-violet"
         );
         document.body.classList.add(`theme-${prefs.accentTheme}`);
       }
@@ -1148,7 +1176,7 @@
       if (prefs.fontChoice && ND_CONFIG.FONT_OPTIONS[prefs.fontChoice]) {
         root.style.setProperty(
           "--font-sans",
-          ND_CONFIG.FONT_OPTIONS[prefs.fontChoice],
+          ND_CONFIG.FONT_OPTIONS[prefs.fontChoice]
         );
       }
 
@@ -1252,7 +1280,7 @@
       this.bodyDoubleEndTime = null;
 
       const session = State.data.bodyDoubleHistory.find(
-        (s) => s.id === sessionId,
+        (s) => s.id === sessionId
       );
       if (session) {
         session.completed = completed;
@@ -1263,7 +1291,7 @@
       if (completed) {
         UI.showToast(
           "Body double session complete! Great focus! 🎉",
-          "success",
+          "success"
         );
       }
     },
@@ -1278,12 +1306,9 @@
         clearInterval(this.breakTimer);
       }
 
-      this.breakTimer = setInterval(
-        () => {
-          this.showBreakReminder();
-        },
-        interval * 60 * 1000,
-      );
+      this.breakTimer = setInterval(() => {
+        this.showBreakReminder();
+      }, interval * 60 * 1000);
     },
 
     showBreakReminder() {
@@ -1311,40 +1336,40 @@
     },
 
     // Handle blocker selection
-	    handleBlocker(action, goalId) {
-	      switch (action) {
+    handleBlocker(action, goalId) {
+      switch (action) {
         case "break_down":
           UI.showToast(
             "Let's break this into tiny steps. What's the smallest first action?",
-            "info",
+            "info"
           );
           break;
         case "simplify":
           UI.showToast(
             "What's the 'good enough' version? Do that instead.",
-            "info",
+            "info"
           );
           break;
         case "mark_blocked":
           if (goalId) Goals.update(goalId, { status: "blocked" });
           UI.showToast(
             "Marked as blocked. What can you work on instead?",
-            "info",
+            "info"
           );
           break;
         case "defer":
           UI.showToast(
             "It's okay to rest. This will still be here when you're ready.",
-            "info",
+            "info"
           );
           break;
-	        case "focus_mode":
-	          UI.setFocusMode(true);
-	          break;
+        case "focus_mode":
+          UI.setFocusMode(true);
+          break;
         case "clarify_why":
           UI.showToast(
             "Why did you place this anchor? Reconnect with what you want from it.",
-            "info",
+            "info"
           );
           break;
         case "permission_slip":
@@ -1407,7 +1432,7 @@
           if (hoursUntil <= 24 && hoursUntil > 0) {
             UI.showToast(
               `⏰ "${goal.title}" is coming up in less than 24 hours.`,
-              "warning",
+              "warning"
             );
           }
         }
@@ -1466,7 +1491,11 @@
             </div>
             <div class="brain-dump-list">
               <h3>Parked thoughts (${unprocessed.length})</h3>
-              ${unprocessed.length === 0 ? '<p class="empty-state">Your mind is clear!</p>' : ""}
+              ${
+                unprocessed.length === 0
+                  ? '<p class="empty-state">Your mind is clear!</p>'
+                  : ""
+              }
               ${unprocessed
                 .map(
                   (item) => `
@@ -1477,7 +1506,7 @@
                     <button class="btn btn-sm btn-ghost" data-action="dismiss">Dismiss</button>
                   </div>
                 </div>
-              `,
+              `
                 )
                 .join("")}
             </div>
@@ -1551,7 +1580,7 @@
                   <span class="dopamine-label">${item.label}</span>
                   <span class="dopamine-time">${item.time}</span>
                 </button>
-              `,
+              `
                 )
                 .join("")}
             </div>
@@ -1583,19 +1612,19 @@
         () =>
           UI.showToast(
             "Add a note to any anchor — even just “thinking about this”",
-            "info",
+            "info"
           ),
         () =>
           UI.showToast(
             "Look at your achievements. You've done great things!",
-            "success",
+            "success"
           ),
         () => UI.pickRandomGoal(),
         () => {
           this.startBodyDouble(15);
           UI.showToast(
             "Body double started! 15 minutes of focus time.",
-            "success",
+            "success"
           );
         },
       ];
@@ -1624,16 +1653,26 @@
                     .map(
                       ([key, theme]) => `
                     <button
-                      class="theme-swatch ${prefs.accentTheme === key ? "active" : ""}"
+                      class="theme-swatch ${
+                        prefs.accentTheme === key ? "active" : ""
+                      }"
                       data-theme="${key}"
                       title="${theme.label}"
                       aria-label="${theme.label}"
-                      ${key === "rainbow" ? `style="--swatch-color: #0EA5E9"` : `style="--swatch-color: ${theme.color}"`}
+                      ${
+                        key === "rainbow"
+                          ? `style="--swatch-color: #0EA5E9"`
+                          : `style="--swatch-color: ${theme.color}"`
+                      }
                     >
-                      <span class="swatch-color" ${key === "rainbow" ? `style="background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)"` : ""}></span>
+                      <span class="swatch-color" ${
+                        key === "rainbow"
+                          ? `style="background: linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)"`
+                          : ""
+                      }></span>
                       <span class="swatch-emoji">${theme.emoji}</span>
                     </button>
-                  `,
+                  `
                     )
                     .join("")}
                 </div>
@@ -1644,28 +1683,42 @@
               <h3>Overwhelm Support</h3>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="ndSimplified" ${prefs.simplifiedView ? "checked" : ""}>
+                  <input type="checkbox" id="ndSimplified" ${
+                    prefs.simplifiedView ? "checked" : ""
+                  }>
                   Simplified view (less visual clutter)
                 </label>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="ndReduceEmojis" ${prefs.reduceEmojis ? "checked" : ""}>
+                  <input type="checkbox" id="ndReduceEmojis" ${
+                    prefs.reduceEmojis ? "checked" : ""
+                  }>
                   Reduce emojis (less visual noise)
                 </label>
               </div>
               <div class="setting-row">
                 <label>Anchor visibility</label>
                 <select id="ndMaxTasks">
-                  <option value="overwhelmed" ${prefs.maxVisibleTasks === "overwhelmed" ? "selected" : ""}>Minimal (1 anchor)</option>
-                  <option value="low_energy" ${prefs.maxVisibleTasks === "low_energy" ? "selected" : ""}>Low energy (3 anchors)</option>
-                  <option value="normal" ${prefs.maxVisibleTasks === "normal" ? "selected" : ""}>Normal (10 anchors)</option>
-                  <option value="high_energy" ${prefs.maxVisibleTasks === "high_energy" ? "selected" : ""}>Show all</option>
+                  <option value="overwhelmed" ${
+                    prefs.maxVisibleTasks === "overwhelmed" ? "selected" : ""
+                  }>Minimal (1 anchor)</option>
+                  <option value="low_energy" ${
+                    prefs.maxVisibleTasks === "low_energy" ? "selected" : ""
+                  }>Low energy (3 anchors)</option>
+                  <option value="normal" ${
+                    prefs.maxVisibleTasks === "normal" ? "selected" : ""
+                  }>Normal (10 anchors)</option>
+                  <option value="high_energy" ${
+                    prefs.maxVisibleTasks === "high_energy" ? "selected" : ""
+                  }>Show all</option>
                 </select>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="ndHideCompleted" ${prefs.hideCompletedTasks ? "checked" : ""}>
+                  <input type="checkbox" id="ndHideCompleted" ${
+                    prefs.hideCompletedTasks ? "checked" : ""
+                  }>
                   Hide done anchors
                 </label>
               </div>
@@ -1676,28 +1729,52 @@
               <div class="setting-row">
                 <label>Font Style</label>
                 <select id="ndFontChoice">
-                  <option value="default" ${prefs.fontChoice === "default" ? "selected" : ""}>Default (Inter)</option>
-                  <option value="dyslexia" ${prefs.fontChoice === "dyslexia" ? "selected" : ""}>Dyslexia-friendly</option>
-                  <option value="mono" ${prefs.fontChoice === "mono" ? "selected" : ""}>Monospace</option>
-                  <option value="readable" ${prefs.fontChoice === "readable" ? "selected" : ""}>High readability</option>
+                  <option value="default" ${
+                    prefs.fontChoice === "default" ? "selected" : ""
+                  }>Default (Inter)</option>
+                  <option value="dyslexia" ${
+                    prefs.fontChoice === "dyslexia" ? "selected" : ""
+                  }>Dyslexia-friendly</option>
+                  <option value="mono" ${
+                    prefs.fontChoice === "mono" ? "selected" : ""
+                  }>Monospace</option>
+                  <option value="readable" ${
+                    prefs.fontChoice === "readable" ? "selected" : ""
+                  }>High readability</option>
                 </select>
               </div>
               <div class="setting-row">
                 <label>Text Spacing</label>
                 <select id="ndTextSpacing">
-                  <option value="compact" ${prefs.textSpacing === "compact" ? "selected" : ""}>Compact</option>
-                  <option value="normal" ${prefs.textSpacing === "normal" ? "selected" : ""}>Normal</option>
-                  <option value="relaxed" ${prefs.textSpacing === "relaxed" ? "selected" : ""}>Relaxed</option>
-                  <option value="dyslexia" ${prefs.textSpacing === "dyslexia" ? "selected" : ""}>Dyslexia-optimized</option>
+                  <option value="compact" ${
+                    prefs.textSpacing === "compact" ? "selected" : ""
+                  }>Compact</option>
+                  <option value="normal" ${
+                    prefs.textSpacing === "normal" ? "selected" : ""
+                  }>Normal</option>
+                  <option value="relaxed" ${
+                    prefs.textSpacing === "relaxed" ? "selected" : ""
+                  }>Relaxed</option>
+                  <option value="dyslexia" ${
+                    prefs.textSpacing === "dyslexia" ? "selected" : ""
+                  }>Dyslexia-optimized</option>
                 </select>
               </div>
               <div class="setting-row">
                 <label>Color Vision</label>
                 <select id="ndColorBlind">
-                  <option value="none" ${prefs.colorBlindMode === "none" ? "selected" : ""}>Standard</option>
-                  <option value="deuteranopia" ${prefs.colorBlindMode === "deuteranopia" ? "selected" : ""}>Deuteranopia (green-blind)</option>
-                  <option value="protanopia" ${prefs.colorBlindMode === "protanopia" ? "selected" : ""}>Protanopia (red-blind)</option>
-                  <option value="tritanopia" ${prefs.colorBlindMode === "tritanopia" ? "selected" : ""}>Tritanopia (blue-blind)</option>
+                  <option value="none" ${
+                    prefs.colorBlindMode === "none" ? "selected" : ""
+                  }>Standard</option>
+                  <option value="deuteranopia" ${
+                    prefs.colorBlindMode === "deuteranopia" ? "selected" : ""
+                  }>Deuteranopia (green-blind)</option>
+                  <option value="protanopia" ${
+                    prefs.colorBlindMode === "protanopia" ? "selected" : ""
+                  }>Protanopia (red-blind)</option>
+                  <option value="tritanopia" ${
+                    prefs.colorBlindMode === "tritanopia" ? "selected" : ""
+                  }>Tritanopia (blue-blind)</option>
                 </select>
               </div>
             </div>
@@ -1707,21 +1784,33 @@
               <div class="setting-row">
                 <label>Break Reminders</label>
                 <select id="ndBreakReminder">
-                  <option value="pomodoro" ${prefs.breakReminder === "pomodoro" ? "selected" : ""}>Every 25 min (Pomodoro)</option>
-                  <option value="gentle" ${prefs.breakReminder === "gentle" ? "selected" : ""}>Every 45 min (Gentle)</option>
-                  <option value="hyperfocus" ${prefs.breakReminder === "hyperfocus" ? "selected" : ""}>Every 90 min (Hyperfocus)</option>
-                  <option value="off" ${prefs.breakReminder === "off" ? "selected" : ""}>Off</option>
+                  <option value="pomodoro" ${
+                    prefs.breakReminder === "pomodoro" ? "selected" : ""
+                  }>Every 25 min (Pomodoro)</option>
+                  <option value="gentle" ${
+                    prefs.breakReminder === "gentle" ? "selected" : ""
+                  }>Every 45 min (Gentle)</option>
+                  <option value="hyperfocus" ${
+                    prefs.breakReminder === "hyperfocus" ? "selected" : ""
+                  }>Every 90 min (Hyperfocus)</option>
+                  <option value="off" ${
+                    prefs.breakReminder === "off" ? "selected" : ""
+                  }>Off</option>
                 </select>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="ndInitiationPrompts" ${prefs.showInitiationPrompts ? "checked" : ""}>
+                  <input type="checkbox" id="ndInitiationPrompts" ${
+                    prefs.showInitiationPrompts ? "checked" : ""
+                  }>
                   Show "how to start" prompts
                 </label>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="ndTransitionWarnings" ${prefs.transitionWarnings ? "checked" : ""}>
+                  <input type="checkbox" id="ndTransitionWarnings" ${
+                    prefs.transitionWarnings ? "checked" : ""
+                  }>
                   Warn me before deadlines
                 </label>
               </div>
@@ -1732,10 +1821,18 @@
               <div class="setting-row">
                 <label>Celebration Style</label>
                 <select id="ndFeedbackStyle">
-                  <option value="minimal" ${prefs.feedbackStyle === "minimal" ? "selected" : ""}>Minimal (quiet)</option>
-                  <option value="subtle" ${prefs.feedbackStyle === "subtle" ? "selected" : ""}>Subtle (glow only)</option>
-                  <option value="moderate" ${prefs.feedbackStyle === "moderate" ? "selected" : ""}>Moderate (confetti)</option>
-                  <option value="celebration" ${prefs.feedbackStyle === "celebration" ? "selected" : ""}>Full celebration! 🎉</option>
+                  <option value="minimal" ${
+                    prefs.feedbackStyle === "minimal" ? "selected" : ""
+                  }>Minimal (quiet)</option>
+                  <option value="subtle" ${
+                    prefs.feedbackStyle === "subtle" ? "selected" : ""
+                  }>Subtle (glow only)</option>
+                  <option value="moderate" ${
+                    prefs.feedbackStyle === "moderate" ? "selected" : ""
+                  }>Moderate (confetti)</option>
+                  <option value="celebration" ${
+                    prefs.feedbackStyle === "celebration" ? "selected" : ""
+                  }>Full celebration! 🎉</option>
                 </select>
               </div>
             </div>
@@ -1780,7 +1877,7 @@
             breakReminder: document.getElementById("ndBreakReminder").value,
             maxVisibleTasks: document.getElementById("ndMaxTasks").value,
             showInitiationPrompts: document.getElementById(
-              "ndInitiationPrompts",
+              "ndInitiationPrompts"
             ).checked,
             transitionWarnings: document.getElementById("ndTransitionWarnings")
               .checked,
@@ -1810,8 +1907,10 @@
         const mins = Math.floor(remaining / 60);
         const secs = remaining % 60;
         UI.showToast(
-          `Body double active: ${mins}:${secs.toString().padStart(2, "0")} remaining`,
-          "info",
+          `Body double active: ${mins}:${secs
+            .toString()
+            .padStart(2, "0")} remaining`,
+          "info"
         );
         return;
       }
@@ -1833,7 +1932,7 @@
                   <span class="bd-time">${mins}</span>
                   <span class="bd-label">minutes</span>
                 </button>
-              `,
+              `
               ).join("")}
             </div>
             <div class="body-double-tip">
@@ -1852,7 +1951,7 @@
           modal.remove();
           UI.showToast(
             `Body double started! ${minutes} minutes of focus time.`,
-            "success",
+            "success"
           );
         });
       });
@@ -1880,7 +1979,7 @@
                 <button class="blocker-option" data-action="${prompt.action}">
                   ${prompt.label}
                 </button>
-              `,
+              `
               ).join("")}
             </div>
           </div>
@@ -1914,7 +2013,9 @@
             <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
           </div>
           <div class="modal-body">
-            <p class="initiation-goal">Starting: <strong>${UI.escapeHtml(goalTitle)}</strong></p>
+            <p class="initiation-goal">Starting: <strong>${UI.escapeHtml(
+              goalTitle
+            )}</strong></p>
             <div class="initiation-prompt">
               <p class="prompt-text">${prompt}</p>
             </div>
@@ -1938,7 +2039,7 @@
         modal.remove();
         UI.showToast(
           "You're doing it! Remember: progress over perfection.",
-          "success",
+          "success"
         );
       });
 
@@ -2041,15 +2142,25 @@
               <div class="setting-row">
                 <label for="settingsDefaultView">Default view</label>
                 <select id="settingsDefaultView">
-                  <option value="year" ${prefs.defaultView === VIEWS.YEAR ? "selected" : ""}>Year</option>
-                  <option value="month" ${prefs.defaultView === VIEWS.MONTH ? "selected" : ""}>Month</option>
-                  <option value="week" ${prefs.defaultView === VIEWS.WEEK ? "selected" : ""}>Week</option>
-                  <option value="day" ${prefs.defaultView === VIEWS.DAY ? "selected" : ""}>Day</option>
+                  <option value="year" ${
+                    prefs.defaultView === VIEWS.YEAR ? "selected" : ""
+                  }>Year</option>
+                  <option value="month" ${
+                    prefs.defaultView === VIEWS.MONTH ? "selected" : ""
+                  }>Month</option>
+                  <option value="week" ${
+                    prefs.defaultView === VIEWS.WEEK ? "selected" : ""
+                  }>Week</option>
+                  <option value="day" ${
+                    prefs.defaultView === VIEWS.DAY ? "selected" : ""
+                  }>Day</option>
                 </select>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="settingsFocusMode" ${prefs.focusMode ? "checked" : ""}>
+                  <input type="checkbox" id="settingsFocusMode" ${
+                    prefs.focusMode ? "checked" : ""
+                  }>
                   Start in Focus (reduce visual noise)
                 </label>
               </div>
@@ -2063,25 +2174,33 @@
               <h3>Visibility</h3>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="settingsShowHeader" ${prefs.layout?.showHeader !== false ? "checked" : ""}>
+                  <input type="checkbox" id="settingsShowHeader" ${
+                    prefs.layout?.showHeader !== false ? "checked" : ""
+                  }>
                   Show header
                 </label>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="settingsShowControlBar" ${prefs.layout?.showControlBar !== false ? "checked" : ""}>
+                  <input type="checkbox" id="settingsShowControlBar" ${
+                    prefs.layout?.showControlBar !== false ? "checked" : ""
+                  }>
                   Show top controls
                 </label>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="settingsShowSidebar" ${prefs.layout?.showSidebar !== false ? "checked" : ""}>
+                  <input type="checkbox" id="settingsShowSidebar" ${
+                    prefs.layout?.showSidebar !== false ? "checked" : ""
+                  }>
                   Show sidebar
                 </label>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="settingsShowNowPanel" ${prefs.layout?.showNowPanel !== false ? "checked" : ""}>
+                  <input type="checkbox" id="settingsShowNowPanel" ${
+                    prefs.layout?.showNowPanel !== false ? "checked" : ""
+                  }>
                   Show "You Are Here"
                 </label>
               </div>
@@ -2096,7 +2215,9 @@
                     .map(
                       ([key, theme]) => `
                     <button
-                      class="theme-swatch ${ndPrefs.accentTheme === key ? "active" : ""}"
+                      class="theme-swatch ${
+                        ndPrefs.accentTheme === key ? "active" : ""
+                      }"
                       data-theme="${key}"
                       title="${theme.label}"
                       aria-label="${theme.label}"
@@ -2106,7 +2227,7 @@
                       <span class="swatch-color"></span>
                       <span class="swatch-emoji">${theme.emoji}</span>
                     </button>
-                  `,
+                  `
                     )
                     .join("")}
                 </div>
@@ -2125,19 +2246,25 @@
               <h3>Sidebar</h3>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="settingsShowAffirmation" ${sidebarPrefs.showAffirmation ? "checked" : ""}>
+                  <input type="checkbox" id="settingsShowAffirmation" ${
+                    sidebarPrefs.showAffirmation ? "checked" : ""
+                  }>
                   Show affirmation
                 </label>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="settingsShowWhatsNext" ${sidebarPrefs.showWhatsNext ? "checked" : ""}>
+                  <input type="checkbox" id="settingsShowWhatsNext" ${
+                    sidebarPrefs.showWhatsNext ? "checked" : ""
+                  }>
                   Show Coming Up
                 </label>
               </div>
               <div class="setting-row checkbox-row">
                 <label>
-                  <input type="checkbox" id="settingsShowAchievements" ${sidebarPrefs.showAchievements ? "checked" : ""}>
+                  <input type="checkbox" id="settingsShowAchievements" ${
+                    sidebarPrefs.showAchievements ? "checked" : ""
+                  }>
                   Show achievements
                 </label>
               </div>
@@ -2186,10 +2313,12 @@
           UI.showKeyboardShortcuts();
         });
 
-      modal.querySelector("#openNdSettingsBtn")?.addEventListener("click", () => {
-        modal.remove();
-        NDSupport.showSettingsPanel();
-      });
+      modal
+        .querySelector("#openNdSettingsBtn")
+        ?.addEventListener("click", () => {
+          modal.remove();
+          NDSupport.showSettingsPanel();
+        });
 
       modal
         .querySelector("#downloadBackupBtn")
@@ -2218,7 +2347,7 @@
       modal.querySelector("#resetPrefsBtn")?.addEventListener("click", () => {
         if (
           !confirm(
-            "Reset preferences back to defaults? Your anchors and history will stay.",
+            "Reset preferences back to defaults? Your anchors and history will stay."
           )
         )
           return;
@@ -2226,7 +2355,11 @@
       });
 
       modal.querySelector("#resetAllBtn")?.addEventListener("click", () => {
-        if (!confirm("This will permanently delete ALL data on this device. Continue?"))
+        if (
+          !confirm(
+            "This will permanently delete ALL data on this device. Continue?"
+          )
+        )
           return;
         if (!confirm("Last check: delete everything?")) return;
         this.resetAllData();
@@ -2234,18 +2367,24 @@
 
       modal.querySelector("#saveAppSettings")?.addEventListener("click", () => {
         const defaultView = modal.querySelector("#settingsDefaultView")?.value;
-        const startFocusMode = !!modal.querySelector("#settingsFocusMode")?.checked;
-        const showHeader = !!modal.querySelector("#settingsShowHeader")?.checked;
+        const startFocusMode =
+          !!modal.querySelector("#settingsFocusMode")?.checked;
+        const showHeader = !!modal.querySelector("#settingsShowHeader")
+          ?.checked;
         const showControlBar = !!modal.querySelector("#settingsShowControlBar")
           ?.checked;
-        const showSidebar = !!modal.querySelector("#settingsShowSidebar")?.checked;
-        const showNowPanel = !!modal.querySelector("#settingsShowNowPanel")?.checked;
-        const showAffirmation = !!modal.querySelector("#settingsShowAffirmation")
+        const showSidebar = !!modal.querySelector("#settingsShowSidebar")
           ?.checked;
+        const showNowPanel = !!modal.querySelector("#settingsShowNowPanel")
+          ?.checked;
+        const showAffirmation = !!modal.querySelector(
+          "#settingsShowAffirmation"
+        )?.checked;
         const showWhatsNext = !!modal.querySelector("#settingsShowWhatsNext")
           ?.checked;
-        const showAchievements = !!modal.querySelector("#settingsShowAchievements")
-          ?.checked;
+        const showAchievements = !!modal.querySelector(
+          "#settingsShowAchievements"
+        )?.checked;
         const activeTheme = modal.querySelector(".theme-swatch.active");
         const selectedTheme = activeTheme
           ? activeTheme.dataset.theme
@@ -2485,7 +2624,7 @@
         toastIcon: document.getElementById("toastIcon"),
         celebrationModal: document.getElementById("celebrationModal"),
         celebrationEmoji: document.getElementById("celebrationEmoji"),
-        celebrationTitle: document.getElementById("celebrationTitle"),
+        celebrationTitle: document.getElementById("celebration-title-label"),
         celebrationText: document.getElementById("celebrationText"),
         confettiContainer: document.getElementById("confettiContainer"),
         // ND Support elements (may not exist yet)
@@ -2530,7 +2669,7 @@
       document
         .getElementById("addGoalBtn")
         ?.addEventListener("click", () =>
-          this.openGoalModal(State.viewingMonth, State.viewingYear),
+          this.openGoalModal(State.viewingMonth, State.viewingYear)
         );
 
       // Modal controls
@@ -2546,7 +2685,7 @@
 
       // Goal form submission
       this.elements.goalForm?.addEventListener("submit", (e) =>
-        this.handleGoalSubmit(e),
+        this.handleGoalSubmit(e)
       );
 
       // Zoom controls
@@ -2566,14 +2705,16 @@
         ?.addEventListener("click", () => this.toggleFocusMode());
 
       // Layout visibility shortcuts
-      document.getElementById("hideHeaderBtn")?.addEventListener("click", () => {
-        State.data.preferences.layout = {
-          ...(State.data.preferences.layout || {}),
-          showHeader: false,
-        };
-        State.save();
-        this.applyLayoutVisibility();
-      });
+      document
+        .getElementById("hideHeaderBtn")
+        ?.addEventListener("click", () => {
+          State.data.preferences.layout = {
+            ...(State.data.preferences.layout || {}),
+            showHeader: false,
+          };
+          State.save();
+          this.applyLayoutVisibility();
+        });
 
       document.getElementById("layoutHandle")?.addEventListener("click", () => {
         State.data.preferences.layout = {
@@ -2584,23 +2725,27 @@
         this.applyLayoutVisibility();
       });
 
-      document.getElementById("hideSidebarBtn")?.addEventListener("click", () => {
-        State.data.preferences.layout = {
-          ...(State.data.preferences.layout || {}),
-          showSidebar: false,
-        };
-        State.save();
-        this.applyLayoutVisibility();
-      });
+      document
+        .getElementById("hideSidebarBtn")
+        ?.addEventListener("click", () => {
+          State.data.preferences.layout = {
+            ...(State.data.preferences.layout || {}),
+            showSidebar: false,
+          };
+          State.save();
+          this.applyLayoutVisibility();
+        });
 
-      document.getElementById("sidebarHandle")?.addEventListener("click", () => {
-        State.data.preferences.layout = {
-          ...(State.data.preferences.layout || {}),
-          showSidebar: true,
-        };
-        State.save();
-        this.applyLayoutVisibility();
-      });
+      document
+        .getElementById("sidebarHandle")
+        ?.addEventListener("click", () => {
+          State.data.preferences.layout = {
+            ...(State.data.preferences.layout || {}),
+            showSidebar: true,
+          };
+          State.save();
+          this.applyLayoutVisibility();
+        });
 
       // Settings
       document
@@ -2767,7 +2912,7 @@
           text = State.viewingYear.toString();
           display.classList.toggle(
             "is-today",
-            State.viewingYear === now.getFullYear(),
+            State.viewingYear === now.getFullYear()
           );
           break;
         case VIEWS.MONTH:
@@ -2775,20 +2920,26 @@
           display.classList.toggle(
             "is-today",
             State.viewingMonth === now.getMonth() &&
-              State.viewingYear === now.getFullYear(),
+              State.viewingYear === now.getFullYear()
           );
           break;
         case VIEWS.WEEK:
           const weekStart = State.getWeekStart(
             State.viewingYear,
-            State.viewingWeek,
+            State.viewingWeek
           );
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekEnd.getDate() + 6);
-          text = `${weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+          text = `${weekStart.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          })} - ${weekEnd.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          })}`;
           display.classList.toggle(
             "is-today",
-            now >= weekStart && now <= weekEnd,
+            now >= weekStart && now <= weekEnd
           );
           break;
         case VIEWS.DAY:
@@ -2827,11 +2978,19 @@
           <div class="month-view-header">
             <h2 class="month-view-title">${CONFIG.MONTHS[month]} ${year}</h2>
             <p class="month-view-subtitle">
-              ${breakdown.isPast ? "This month has passed" : breakdown.isCurrentMonth ? `${breakdown.days} days remaining this month` : `${breakdown.days} days until this month`}
+              ${
+                breakdown.isPast
+                  ? "This month has passed"
+                  : breakdown.isCurrentMonth
+                  ? `${breakdown.days} days remaining this month`
+                  : `${breakdown.days} days until this month`
+              }
             </p>
           </div>
           <div class="month-calendar">
-            ${dayNames.map((d) => `<div class="month-calendar-header">${d}</div>`).join("")}
+            ${dayNames
+              .map((d) => `<div class="month-calendar-header">${d}</div>`)
+              .join("")}
       `;
 
       // Padding for first week
@@ -2853,17 +3012,27 @@
         });
 
         html += `
-          <div class="month-day ${isToday ? "today" : ""}" data-date="${date.toISOString()}">
+          <div class="month-day ${
+            isToday ? "today" : ""
+          }" data-date="${date.toISOString()}">
             <span class="month-day-number">${day}</span>
             <div class="month-day-goals">
               ${dayGoals
                 .slice(0, 2)
                 .map(
                   (g) =>
-                    `<div class="month-day-goal">${this.escapeHtml(g.title)}</div>`,
+                    `<div class="month-day-goal">${this.escapeHtml(
+                      g.title
+                    )}</div>`
                 )
                 .join("")}
-              ${dayGoals.length > 2 ? `<div class="month-day-more">+${dayGoals.length - 2} more</div>` : ""}
+              ${
+                dayGoals.length > 2
+                  ? `<div class="month-day-more">+${
+                      dayGoals.length - 2
+                    } more</div>`
+                  : ""
+              }
             </div>
           </div>
         `;
@@ -2930,7 +3099,7 @@
 
       const weekStart = State.getWeekStart(
         State.viewingYear,
-        State.viewingWeek,
+        State.viewingWeek
       );
       const today = new Date();
       const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -2955,21 +3124,31 @@
         });
 
         html += `
-          <div class="week-day-column ${isToday ? "today" : ""}" data-date="${date.toISOString()}">
+          <div class="week-day-column ${
+            isToday ? "today" : ""
+          }" data-date="${date.toISOString()}">
             <div class="week-day-header">
               <div class="week-day-name">${dayNames[i]}</div>
               <div class="week-day-date">${date.getDate()}</div>
             </div>
             <div class="week-day-goals">
-              ${dayGoals.length === 0 ? '<div class="week-day-empty">No tasks</div>' : ""}
+              ${
+                dayGoals.length === 0
+                  ? '<div class="week-day-empty">No tasks</div>'
+                  : ""
+              }
               ${dayGoals
                 .map(
                   (g) => `
-                <div class="week-goal-item ${g.status === "done" ? "completed" : ""}" data-goal-id="${g.id}">
+                <div class="week-goal-item ${
+                  g.status === "done" ? "completed" : ""
+                }" data-goal-id="${g.id}">
                   <div class="week-goal-title">${this.escapeHtml(g.title)}</div>
-                  <div class="week-goal-category">${CONFIG.CATEGORIES[g.category]?.emoji || ""} ${CONFIG.CATEGORIES[g.category]?.label || ""}</div>
+                  <div class="week-goal-category">${
+                    CONFIG.CATEGORIES[g.category]?.emoji || ""
+                  } ${CONFIG.CATEGORIES[g.category]?.label || ""}</div>
                 </div>
-              `,
+              `
                 )
                 .join("")}
             </div>
@@ -3068,7 +3247,9 @@
           html += `
             <div class="day-section">
               <h3 class="day-section-title">
-                To Do <span class="day-section-count">${activeGoals.length}</span>
+                To Do <span class="day-section-count">${
+                  activeGoals.length
+                }</span>
               </h3>
               <div class="day-goals-list">
                 ${activeGoals.map((g) => this.renderDayGoalCard(g)).join("")}
@@ -3081,7 +3262,9 @@
           html += `
             <div class="day-section">
               <h3 class="day-section-title">
-                Completed <span class="day-section-count">${completedGoals.length}</span>
+                Completed <span class="day-section-count">${
+                  completedGoals.length
+                }</span>
               </h3>
               <div class="day-goals-list">
                 ${completedGoals.map((g) => this.renderDayGoalCard(g)).join("")}
@@ -3119,7 +3302,6 @@
           }
         });
       });
-
     },
 
     // Render a single goal card for day view
@@ -3128,14 +3310,20 @@
       const isCompleted = goal.status === "done";
 
       return `
-        <div class="day-goal-card ${isCompleted ? "completed" : ""}" data-goal-id="${goal.id}">
+        <div class="day-goal-card ${
+          isCompleted ? "completed" : ""
+        }" data-goal-id="${goal.id}">
           <div class="day-goal-header">
-            <div class="day-goal-checkbox ${isCompleted ? "checked" : ""}"></div>
+            <div class="day-goal-checkbox ${
+              isCompleted ? "checked" : ""
+            }"></div>
             <div class="day-goal-content">
               <div class="day-goal-title">${this.escapeHtml(goal.title)}</div>
               <div class="day-goal-meta">
                 <span>${cat.emoji || ""} ${cat.label || ""}</span>
-                ${goal.progress > 0 ? `<span>${goal.progress}% done</span>` : ""}
+                ${
+                  goal.progress > 0 ? `<span>${goal.progress}% done</span>` : ""
+                }
               </div>
             </div>
           </div>
@@ -3163,12 +3351,18 @@
         .map((g) => {
           const cat = CONFIG.CATEGORIES[g.category] || {};
           return `
-          <div class="goal-item ${g.status === "done" ? "completed" : ""}" data-goal-id="${g.id}">
-            <div class="goal-checkbox ${g.status === "done" ? "checked" : ""}"></div>
+          <div class="goal-item ${
+            g.status === "done" ? "completed" : ""
+          }" data-goal-id="${g.id}">
+            <div class="goal-checkbox ${
+              g.status === "done" ? "checked" : ""
+            }"></div>
             <div class="goal-content">
               <div class="goal-title">${this.escapeHtml(g.title)}</div>
               <div class="goal-tags">
-                <span class="goal-tag">${cat.emoji || ""} ${cat.label || ""}</span>
+                <span class="goal-tag">${cat.emoji || ""} ${
+            cat.label || ""
+          }</span>
               </div>
             </div>
           </div>
@@ -3187,7 +3381,7 @@
         this.elements.yearDisplay.textContent = State.viewingYear;
         this.elements.yearDisplay.classList.toggle(
           "current-year",
-          State.viewingYear === currentYear,
+          State.viewingYear === currentYear
         );
       }
     },
@@ -3214,7 +3408,7 @@
           monthName,
           currentMonth,
           currentYear,
-          viewingYear,
+          viewingYear
         );
 
         // Click handler to drill into month view
@@ -3236,7 +3430,7 @@
       monthName,
       currentMonth,
       currentYear,
-      viewingYear,
+      viewingYear
     ) {
       const card = document.createElement("div");
       card.className = "month-card";
@@ -3259,7 +3453,7 @@
       // Get goals for this month
       const monthGoals = Goals.getByMonth(monthIndex, viewingYear);
       const completedCount = monthGoals.filter(
-        (g) => g.status === "done",
+        (g) => g.status === "done"
       ).length;
       const progressPercent =
         monthGoals.length > 0
@@ -3272,7 +3466,9 @@
       const breakdown = TimeBreakdown.calculate(monthIndex, viewingYear);
 
       if (isPastYear) {
-        timeContext = `${currentYear - viewingYear} year${currentYear - viewingYear > 1 ? "s" : ""} ago`;
+        timeContext = `${currentYear - viewingYear} year${
+          currentYear - viewingYear > 1 ? "s" : ""
+        } ago`;
         timeDetail = "";
       } else if (isFutureYear) {
         const monthsAway =
@@ -3300,13 +3496,19 @@
                 <div class="month-header">
                     <div class="month-name">${monthName}</div>
                     <div class="month-context">${timeContext}</div>
-                    ${timeDetail ? `<div class="month-time-detail">${timeDetail}</div>` : ""}
+                    ${
+                      timeDetail
+                        ? `<div class="month-time-detail">${timeDetail}</div>`
+                        : ""
+                    }
                 </div>
                     <div class="month-progress">
                     <div class="month-progress-bar">
                         <div class="month-progress-fill" style="width: ${progressPercent}%"></div>
                     </div>
-                    <div class="month-progress-label">${completedCount}/${monthGoals.length} anchors</div>
+                    <div class="month-progress-label">${completedCount}/${
+        monthGoals.length
+      } anchors</div>
                 </div>
                 <div class="month-goals">
                     ${this.renderMonthGoals(monthGoals)}
@@ -3344,7 +3546,7 @@
       let filteredGoals = goals;
       if (State.activeCategory !== "all") {
         filteredGoals = goals.filter(
-          (g) => g.category === State.activeCategory,
+          (g) => g.category === State.activeCategory
         );
       }
 
@@ -3359,19 +3561,46 @@
               : "";
 
           return `
-                    <div class="goal-item ${statusClass}" data-goal-id="${goal.id}">
-                        <div class="goal-checkbox ${goal.status === "done" ? "checked" : ""}"
+                    <div class="goal-item ${statusClass}" data-goal-id="${
+            goal.id
+          }">
+                        <div class="goal-checkbox ${
+                          goal.status === "done" ? "checked" : ""
+                        }"
                              data-goal-id="${goal.id}"></div>
                         <div class="goal-content">
-                            <div class="goal-title">${this.escapeHtml(goal.title)}</div>
+                            <div class="goal-title">${this.escapeHtml(
+                              goal.title
+                            )}</div>
                             <div class="goal-meta">
-                                ${cat ? `<span class="goal-category" style="color: ${cat.color}">${cat.emoji}</span>` : ""}
-                                ${goal.subtasks.length > 0 ? `<span class="goal-subtasks">${goal.subtasks.filter((s) => s.done).length}/${goal.subtasks.length}</span>` : ""}
-                                ${goal.progress > 0 && goal.progress < 100 ? `<span class="goal-progress-text">${goal.progress}%</span>` : ""}
+                                ${
+                                  cat
+                                    ? `<span class="goal-category" style="color: ${cat.color}">${cat.emoji}</span>`
+                                    : ""
+                                }
+                                ${
+                                  goal.subtasks.length > 0
+                                    ? `<span class="goal-subtasks">${
+                                        goal.subtasks.filter((s) => s.done)
+                                          .length
+                                      }/${goal.subtasks.length}</span>`
+                                    : ""
+                                }
+                                ${
+                                  goal.progress > 0 && goal.progress < 100
+                                    ? `<span class="goal-progress-text">${goal.progress}%</span>`
+                                    : ""
+                                }
                             </div>
-                            ${goal.progress > 0 ? `<div class="goal-progress-bar"><div class="goal-progress-fill" style="width: ${goal.progress}%"></div></div>` : ""}
+                            ${
+                              goal.progress > 0
+                                ? `<div class="goal-progress-bar"><div class="goal-progress-fill" style="width: ${goal.progress}%"></div></div>`
+                                : ""
+                            }
                         </div>
-                        <button class="btn btn-icon btn-ghost goal-edit-btn" data-goal-id="${goal.id}">⋮</button>
+                        <button class="btn btn-icon btn-ghost goal-edit-btn" data-goal-id="${
+                          goal.id
+                        }">⋮</button>
                     </div>
                 `;
         })
@@ -3405,7 +3634,9 @@
               .map(
                 (cat) => `
                   <button
-                    class="category-filter ${activeId === cat.id ? "active" : ""}"
+                    class="category-filter ${
+                      activeId === cat.id ? "active" : ""
+                    }"
                     type="button"
                     role="menuitemradio"
                     aria-checked="${activeId === cat.id}"
@@ -3413,7 +3644,7 @@
                   >
                     ${cat.emoji} ${cat.label}
                   </button>
-                `,
+                `
               )
               .join("")}
           </div>
@@ -3439,35 +3670,32 @@
       };
 
       if (this._filterDocListeners) {
-        document.removeEventListener("click", this._filterDocListeners.onDocClick);
+        document.removeEventListener(
+          "click",
+          this._filterDocListeners.onDocClick
+        );
         document.removeEventListener(
           "keydown",
-          this._filterDocListeners.onDocKeydown,
+          this._filterDocListeners.onDocKeydown
         );
         this._filterDocListeners = null;
       }
 
-      trigger.addEventListener(
-        "click",
-        () => {
-          if (menu.hidden) openMenu();
-          else closeMenu();
-        },
-      );
+      trigger.addEventListener("click", () => {
+        if (menu.hidden) openMenu();
+        else closeMenu();
+      });
 
-      trigger.addEventListener(
-        "keydown",
-        (e) => {
-          if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            openMenu();
-          }
-          if (e.key === "Escape") {
-            e.preventDefault();
-            closeMenu();
-          }
-        },
-      );
+      trigger.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openMenu();
+        }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeMenu();
+        }
+      });
 
       const onDocClick = (e) => {
         if (!dropdown.contains(e.target)) closeMenu();
@@ -3481,29 +3709,23 @@
       document.addEventListener("keydown", onDocKeydown);
       this._filterDocListeners = { onDocClick, onDocKeydown };
 
-      menu.addEventListener(
-        "keydown",
-        (e) => {
-          if (e.key === "Escape") {
-            e.preventDefault();
-            closeMenu();
-            trigger.focus();
-          }
-        },
-      );
+      menu.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeMenu();
+          trigger.focus();
+        }
+      });
 
       // Bind filter events
       menu.querySelectorAll(".category-filter").forEach((btn) => {
-        btn.addEventListener(
-          "click",
-          () => {
-            State.activeCategory = btn.dataset.category;
-            closeMenu();
-            this.renderCategoryFilters();
-            this.renderCalendar();
-            this.renderUpcomingGoals();
-          },
-        );
+        btn.addEventListener("click", () => {
+          State.activeCategory = btn.dataset.category;
+          closeMenu();
+          this.renderCategoryFilters();
+          this.renderCalendar();
+          this.renderUpcomingGoals();
+        });
       });
     },
 
@@ -3529,14 +3751,18 @@
 
           const timeLeft = TimeBreakdown.getSimpleTimeLeft(
             goal.month,
-            goal.year,
+            goal.year
           );
 
           return `
                     <div class="upcoming-goal" data-goal-id="${goal.id}">
-                        <div class="upcoming-dot" style="background: ${cat ? cat.color : "rgba(255,255,255,0.18)"}"></div>
+                        <div class="upcoming-dot" style="background: ${
+                          cat ? cat.color : "rgba(255,255,255,0.18)"
+                        }"></div>
                         <div class="upcoming-content">
-                            <div class="upcoming-title">${this.escapeHtml(goal.title)}</div>
+                            <div class="upcoming-title">${this.escapeHtml(
+                              goal.title
+                            )}</div>
                             <div class="upcoming-meta">${monthName} • ${timeLeft}</div>
                         </div>
                     </div>
@@ -3561,11 +3787,13 @@
       container.innerHTML = Object.entries(CONFIG.ACHIEVEMENTS)
         .map(
           ([id, ach]) => `
-                <div class="achievement ${unlocked.includes(id) ? "unlocked" : ""}"
+                <div class="achievement ${
+                  unlocked.includes(id) ? "unlocked" : ""
+                }"
                      data-tooltip="${ach.desc}">
                     ${ach.emoji}
                 </div>
-            `,
+            `
         )
         .join("");
     },
@@ -3596,20 +3824,23 @@
       const nowYear = now.getFullYear();
 
       const currentMonth = preselectedMonth ?? State.viewingMonth ?? nowMonth;
-      const currentYear = year ?? this.goalModalYear ?? State.viewingYear ?? nowYear;
+      const currentYear =
+        year ?? this.goalModalYear ?? State.viewingYear ?? nowYear;
 
       select.innerHTML = CONFIG.MONTHS.map((name, idx) => {
         const timeLeft = TimeBreakdown.getSimpleTimeLeft(idx, currentYear);
         const isPast =
           currentYear < nowYear || (currentYear === nowYear && idx < nowMonth);
-        return `<option value="${idx}" ${idx === currentMonth ? "selected" : ""} ${isPast ? 'class="past-month"' : ""}>
+        return `<option value="${idx}" ${
+          idx === currentMonth ? "selected" : ""
+        } ${isPast ? 'class="past-month"' : ""}>
                     ${name} ${!isPast ? `(${timeLeft})` : "(past)"}
                 </option>`;
       }).join("");
 
       // Add listener to show time breakdown when month changes
       select.addEventListener("change", () =>
-        this.updateGoalModalTimeBreakdown(),
+        this.updateGoalModalTimeBreakdown()
       );
 
       // Show initial time breakdown
@@ -3635,7 +3866,7 @@
         if (formRow) {
           formRow.parentNode.insertBefore(
             breakdownContainer,
-            formRow.nextSibling,
+            formRow.nextSibling
           );
         }
       }
@@ -3643,7 +3874,7 @@
       breakdownContainer.innerHTML = TimeBreakdown.generateHTML(
         selectedMonth,
         currentYear,
-        false,
+        false
       );
     },
 
@@ -3699,16 +3930,26 @@
                             </span>`
                                 : ""
                             }
-                            <span class="goal-status-badge" style="background: ${status.color}20; color: ${status.color}">
+                            <span class="goal-status-badge" style="background: ${
+                              status.color
+                            }20; color: ${status.color}">
                                 ${status.emoji} ${status.label}
                             </span>
                         </div>
                         <button class="modal-close" id="closeGoalDetail">×</button>
                     </div>
                     <div class="modal-body">
-                        <h2 class="goal-detail-title">${this.escapeHtml(goal.title)}</h2>
+                        <h2 class="goal-detail-title">${this.escapeHtml(
+                          goal.title
+                        )}</h2>
 
-                        ${goal.description ? `<p class="goal-description">${this.escapeHtml(goal.description)}</p>` : ""}
+                        ${
+                          goal.description
+                            ? `<p class="goal-description">${this.escapeHtml(
+                                goal.description
+                              )}</p>`
+                            : ""
+                        }
 
                         <!-- Time Breakdown Section -->
                         <div class="detail-section time-section">
@@ -3721,11 +3962,17 @@
                             <h3>Progress</h3>
                             <div class="progress-control">
                                 <div class="progress-bar-lg">
-                                    <div class="progress-fill-lg" style="width: ${goal.progress}%"></div>
+                                    <div class="progress-fill-lg" style="width: ${
+                                      goal.progress
+                                    }%"></div>
                                 </div>
-                                <span class="progress-value">${goal.progress}%</span>
+                                <span class="progress-value">${
+                                  goal.progress
+                                }%</span>
                             </div>
-                            <input type="range" min="0" max="100" value="${goal.progress}"
+                            <input type="range" min="0" max="100" value="${
+                              goal.progress
+                            }"
                                    class="progress-slider" id="progressSlider">
                         </div>
 
@@ -3736,11 +3983,15 @@
                                 ${Object.entries(CONFIG.STATUSES)
                                   .map(
                                     ([id, s]) => `
-                                    <button class="status-btn ${goal.status === id ? "active" : ""}"
-                                            data-status="${id}" style="--status-color: ${s.color}">
+                                    <button class="status-btn ${
+                                      goal.status === id ? "active" : ""
+                                    }"
+                                            data-status="${id}" style="--status-color: ${
+                                      s.color
+                                    }">
                                         ${s.emoji} ${s.label}
                                     </button>
-                                `,
+                                `
                                   )
                                   .join("")}
                             </div>
@@ -3748,17 +3999,25 @@
 
                         <!-- Subtasks Section -->
                         <div class="detail-section">
-                            <h3>Subtasks <span class="count">(${goal.subtasks.filter((s) => s.done).length}/${goal.subtasks.length})</span></h3>
+                            <h3>Subtasks <span class="count">(${
+                              goal.subtasks.filter((s) => s.done).length
+                            }/${goal.subtasks.length})</span></h3>
                             <div class="subtasks-list" id="subtasksList">
                                 ${goal.subtasks
                                   .map(
                                     (s) => `
-                                    <div class="subtask-item ${s.done ? "done" : ""}" data-subtask-id="${s.id}">
-                                        <div class="subtask-checkbox ${s.done ? "checked" : ""}"></div>
-                                        <span class="subtask-title">${this.escapeHtml(s.title)}</span>
+                                    <div class="subtask-item ${
+                                      s.done ? "done" : ""
+                                    }" data-subtask-id="${s.id}">
+                                        <div class="subtask-checkbox ${
+                                          s.done ? "checked" : ""
+                                        }"></div>
+                                        <span class="subtask-title">${this.escapeHtml(
+                                          s.title
+                                        )}</span>
                                         <button class="btn btn-icon btn-ghost subtask-delete">×</button>
                                     </div>
-                                `,
+                                `
                                   )
                                   .join("")}
                             </div>
@@ -3777,9 +4036,11 @@
                                     (n) => `
                                     <div class="note-item">
                                         <p>${this.escapeHtml(n.text)}</p>
-                                        <span class="note-date">${this.formatDate(n.createdAt)}</span>
+                                        <span class="note-date">${this.formatDate(
+                                          n.createdAt
+                                        )}</span>
                                     </div>
-                                `,
+                                `
                                   )
                                   .join("")}
                             </div>
@@ -3793,16 +4054,32 @@
                         <div class="detail-section">
                             <h3>Time Spent</h3>
                             <div class="time-summary">
-                                <span class="time-total">${this.formatMinutes(Goals.getTotalTime(goalId))}</span>
+                                <span class="time-total">${this.formatMinutes(
+                                  Goals.getTotalTime(goalId)
+                                )}</span>
                                 <button class="btn btn-sm btn-ghost" id="logTimeBtn">+ Log Time</button>
                             </div>
-                            ${goal.lastWorkedOn ? `<p class="last-worked">Last worked on: ${this.formatDate(goal.lastWorkedOn)}</p>` : ""}
+                            ${
+                              goal.lastWorkedOn
+                                ? `<p class="last-worked">Last worked on: ${this.formatDate(
+                                    goal.lastWorkedOn
+                                  )}</p>`
+                                : ""
+                            }
                         </div>
 
                         <!-- Meta Info -->
                         <div class="detail-meta">
-                            <span>Created: ${this.formatDate(goal.createdAt)}</span>
-                            ${goal.completedAt ? `<span>Completed: ${this.formatDate(goal.completedAt)}</span>` : ""}
+                            <span>Created: ${this.formatDate(
+                              goal.createdAt
+                            )}</span>
+                            ${
+                              goal.completedAt
+                                ? `<span>Completed: ${this.formatDate(
+                                    goal.completedAt
+                                  )}</span>`
+                                : ""
+                            }
                         </div>
                     </div>
                     <div class="modal-actions">
@@ -3960,19 +4237,33 @@
                         <!-- Month Overview -->
                         <div class="month-overview">
                             <div class="overview-stat">
-                                <div class="stat-value">${monthGoals.length}</div>
+                                <div class="stat-value">${
+                                  monthGoals.length
+                                }</div>
                                 <div class="stat-label">Total Anchors</div>
                             </div>
                             <div class="overview-stat">
-                                <div class="stat-value">${monthGoals.filter((g) => g.status === "done").length}</div>
+                                <div class="stat-value">${
+                                  monthGoals.filter((g) => g.status === "done")
+                                    .length
+                                }</div>
                                 <div class="stat-label">Completed</div>
                             </div>
                             <div class="overview-stat">
-                                <div class="stat-value">${monthGoals.filter((g) => g.status === "in-progress").length}</div>
+                                <div class="stat-value">${
+                                  monthGoals.filter(
+                                    (g) => g.status === "in-progress"
+                                  ).length
+                                }</div>
                                 <div class="stat-label">In Progress</div>
                             </div>
                             <div class="overview-stat">
-                                <div class="stat-value">${Math.round(monthGoals.reduce((s, g) => s + g.progress, 0) / (monthGoals.length || 1))}%</div>
+                                <div class="stat-value">${Math.round(
+                                  monthGoals.reduce(
+                                    (s, g) => s + g.progress,
+                                    0
+                                  ) / (monthGoals.length || 1)
+                                )}%</div>
                                 <div class="stat-label">Avg Progress</div>
                             </div>
                         </div>
@@ -3991,7 +4282,7 @@
                                   .map(
                                     ([id, cat]) => `
                                     <option value="${id}">${cat.emoji} ${cat.label}</option>
-                                `,
+                                `
                                   )
                                   .join("")}
                             </select>
@@ -4055,20 +4346,33 @@
           const statusConfig = CONFIG.STATUSES[status];
           return `
                     <div class="status-column">
-                        <h3 class="status-header" style="color: ${statusConfig.color}">
-                            ${statusConfig.emoji} ${statusConfig.label} (${statusGoals.length})
+                        <h3 class="status-header" style="color: ${
+                          statusConfig.color
+                        }">
+                            ${statusConfig.emoji} ${statusConfig.label} (${
+            statusGoals.length
+          })
                         </h3>
                         <div class="status-goals">
                             ${
                               statusGoals
                                 .map((goal) => {
-                                  const cat = CONFIG.CATEGORIES[goal.category] || null;
+                                  const cat =
+                                    CONFIG.CATEGORIES[goal.category] || null;
                                   return `
-                                    <div class="goal-item" data-goal-id="${goal.id}">
+                                    <div class="goal-item" data-goal-id="${
+                                      goal.id
+                                    }">
                                         <div class="goal-content">
-                                            <div class="goal-title">${this.escapeHtml(goal.title)}</div>
+                                            <div class="goal-title">${this.escapeHtml(
+                                              goal.title
+                                            )}</div>
                                             <div class="goal-meta">
-                                                ${cat ? `<span style="color: ${cat.color}">${cat.emoji}</span>` : ""}
+                                                ${
+                                                  cat
+                                                    ? `<span style="color: ${cat.color}">${cat.emoji}</span>`
+                                                    : ""
+                                                }
                                                 <span>${goal.progress}%</span>
                                             </div>
                                         </div>
@@ -4306,8 +4610,14 @@
       }
       if (this.elements.timeProgress) {
         this.elements.timeProgress.setAttribute("aria-label", label);
-        this.elements.timeProgress.setAttribute("aria-valuenow", String(progress));
-        this.elements.timeProgress.setAttribute("aria-valuetext", `${progress}%`);
+        this.elements.timeProgress.setAttribute(
+          "aria-valuenow",
+          String(progress)
+        );
+        this.elements.timeProgress.setAttribute(
+          "aria-valuetext",
+          `${progress}%`
+        );
       }
     },
 
@@ -4355,13 +4665,13 @@
       }
     },
 
-	    toggleFocusMode() {
-	      const previousView = State.currentView;
-	      this.setFocusMode(!State.focusMode);
-	      if (State.currentView !== previousView) {
-	        State.setView(previousView);
-	      }
-	    },
+    toggleFocusMode() {
+      const previousView = State.currentView;
+      this.setFocusMode(!State.focusMode);
+      if (State.currentView !== previousView) {
+        State.setView(previousView);
+      }
+    },
 
     setFocusMode(enabled, options = {}) {
       const { silent = false, persist = true } = options;
@@ -4397,7 +4707,7 @@
       if (!silent) {
         this.showToast(
           "",
-          State.focusMode ? "Focus on (calmer view)" : "Focus off",
+          State.focusMode ? "Focus on (calmer view)" : "Focus off"
         );
       }
     },
@@ -4425,15 +4735,21 @@
     applyLayoutVisibility() {
       const layout = State.data?.preferences?.layout || {};
 
-      document.body.classList.toggle("hide-header", layout.showHeader === false);
+      document.body.classList.toggle(
+        "hide-header",
+        layout.showHeader === false
+      );
       document.body.classList.toggle(
         "hide-control-bar",
-        layout.showControlBar === false,
+        layout.showControlBar === false
       );
-      document.body.classList.toggle("hide-sidebar", layout.showSidebar === false);
+      document.body.classList.toggle(
+        "hide-sidebar",
+        layout.showSidebar === false
+      );
       document.body.classList.toggle(
         "hide-now-panel",
-        layout.showNowPanel === false,
+        layout.showNowPanel === false
       );
 
       const layoutHandle = document.getElementById("layoutHandle");
@@ -4460,15 +4776,15 @@
 
       document.body.classList.toggle(
         "hide-affirmation",
-        sidebar.showAffirmation === false,
+        sidebar.showAffirmation === false
       );
       document.body.classList.toggle(
         "hide-whats-next",
-        sidebar.showWhatsNext === false,
+        sidebar.showWhatsNext === false
       );
       document.body.classList.toggle(
         "hide-achievements",
-        sidebar.showAchievements === false,
+        sidebar.showAchievements === false
       );
     },
 
@@ -4480,13 +4796,13 @@
       if (header) {
         root.style.setProperty(
           "--focus-header-height",
-          `${Math.max(56, header.offsetHeight)}px`,
+          `${Math.max(56, header.offsetHeight)}px`
         );
       }
       if (controlBar) {
         root.style.setProperty(
           "--focus-controlbar-height",
-          `${Math.max(48, controlBar.offsetHeight)}px`,
+          `${Math.max(48, controlBar.offsetHeight)}px`
         );
       }
     },
@@ -4524,7 +4840,8 @@
 
       const toggleReveal = () => {
         if (!State.focusMode) return;
-        const isRevealed = document.body.classList.contains("focus-ui-revealed");
+        const isRevealed =
+          document.body.classList.contains("focus-ui-revealed");
         if (isRevealed) {
           document.body.classList.remove("focus-ui-revealed");
         } else {
@@ -4551,7 +4868,7 @@
           () => {
             toggleReveal();
           },
-          { passive: true },
+          { passive: true }
         );
       });
     },
@@ -4580,10 +4897,10 @@
           type === "success"
             ? "✓"
             : type === "warning"
-              ? "!"
-              : type === "danger" || type === "error"
-                ? "⚠️"
-                : "";
+            ? "!"
+            : type === "danger" || type === "error"
+            ? "⚠️"
+            : "";
       }
 
       this.elements.toastIcon.textContent = icon;
@@ -4629,10 +4946,10 @@
       let particleCount = 30; // Reduced from 100
 
       // Further reduce for minimal feedback
-      const feedbackStyle = State.data.preferences.feedbackStyle || 'moderate';
-      if (feedbackStyle === 'subtle') {
+      const feedbackStyle = State.data.preferences.feedbackStyle || "moderate";
+      if (feedbackStyle === "subtle") {
         particleCount = Math.floor(particleCount / 2);
-      } else if (feedbackStyle === 'minimal') {
+      } else if (feedbackStyle === "minimal") {
         return; // No confetti
       }
 
@@ -4827,97 +5144,105 @@
     });
 
     State.init();
-	    UI.init();
+    UI.init();
 
-	    // Header "More" Menu Toggle
-	    const headerMoreToggle = document.getElementById('headerMoreToggle');
-	    const headerMoreDropdown = document.getElementById('headerMoreDropdown');
+    // Header "More" Menu Toggle
+    const headerMoreToggle = document.getElementById("headerMoreToggle");
+    const headerMoreDropdown = document.getElementById("headerMoreDropdown");
 
-	    if (headerMoreToggle && headerMoreDropdown) {
-	      const setOpen = (open) => {
-	        headerMoreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-	        headerMoreDropdown.hidden = !open;
-	      };
+    if (headerMoreToggle && headerMoreDropdown) {
+      const setOpen = (open) => {
+        headerMoreToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        headerMoreDropdown.hidden = !open;
+      };
 
-	      const isOpen = () => headerMoreToggle.getAttribute('aria-expanded') === 'true';
+      const isOpen = () =>
+        headerMoreToggle.getAttribute("aria-expanded") === "true";
 
-	      headerMoreToggle.addEventListener('click', () => {
-	        setOpen(!isOpen());
-	      });
+      headerMoreToggle.addEventListener("click", () => {
+        setOpen(!isOpen());
+      });
 
-	      // Close dropdown when clicking outside
-	      document.addEventListener('click', (e) => {
-	        if (
-	          !headerMoreToggle.contains(e.target) &&
-	          !headerMoreDropdown.contains(e.target)
-	        ) {
-	          setOpen(false);
-	        }
-	      });
+      // Close dropdown when clicking outside
+      document.addEventListener("click", (e) => {
+        if (
+          !headerMoreToggle.contains(e.target) &&
+          !headerMoreDropdown.contains(e.target)
+        ) {
+          setOpen(false);
+        }
+      });
 
-	      // Close on Escape, keep focus sensible
-	      headerMoreDropdown.addEventListener('keydown', (e) => {
-	        if (e.key === 'Escape') {
-	          setOpen(false);
-	          headerMoreToggle.focus();
-	        }
-	      });
+      // Close on Escape, keep focus sensible
+      headerMoreDropdown.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          setOpen(false);
+          headerMoreToggle.focus();
+        }
+      });
 
-	      // Close after clicking "action" items (but keep open for toggles like energy buttons)
-	      headerMoreDropdown.addEventListener('click', (e) => {
-	        const closeItem = e.target.closest('[data-close-header-more]');
-	        if (closeItem) setOpen(false);
-	      });
-	    }
+      // Close after clicking "action" items (but keep open for toggles like energy buttons)
+      headerMoreDropdown.addEventListener("click", (e) => {
+        const closeItem = e.target.closest("[data-close-header-more]");
+        if (closeItem) setOpen(false);
+      });
+    }
 
-	    // ND Menu Toggle
-	    const ndMenuToggle = document.getElementById('ndMenuToggle');
-	    const ndDropdown = document.getElementById('ndDropdown');
+    // ND Menu Toggle
+    const ndMenuToggle = document.getElementById("ndMenuToggle");
+    const ndDropdown = document.getElementById("ndDropdown");
 
     if (ndMenuToggle && ndDropdown) {
-      ndMenuToggle.addEventListener('click', () => {
-        const isExpanded = ndMenuToggle.getAttribute('aria-expanded') === 'true';
-        ndMenuToggle.setAttribute('aria-expanded', !isExpanded);
+      ndMenuToggle.addEventListener("click", () => {
+        const isExpanded =
+          ndMenuToggle.getAttribute("aria-expanded") === "true";
+        ndMenuToggle.setAttribute("aria-expanded", !isExpanded);
         ndDropdown.hidden = isExpanded;
       });
 
       // Close dropdown when clicking outside
-      document.addEventListener('click', (e) => {
-        if (!ndMenuToggle.contains(e.target) && !ndDropdown.contains(e.target)) {
-          ndMenuToggle.setAttribute('aria-expanded', 'false');
+      document.addEventListener("click", (e) => {
+        if (
+          !ndMenuToggle.contains(e.target) &&
+          !ndDropdown.contains(e.target)
+        ) {
+          ndMenuToggle.setAttribute("aria-expanded", "false");
           ndDropdown.hidden = true;
         }
       });
 
       // Keyboard navigation
-      ndDropdown.addEventListener('keydown', (e) => {
-        const items = Array.from(ndDropdown.querySelectorAll('.nd-dropdown-item'));
+      ndDropdown.addEventListener("keydown", (e) => {
+        const items = Array.from(
+          ndDropdown.querySelectorAll(".nd-dropdown-item")
+        );
         const currentIndex = items.indexOf(document.activeElement);
 
-        if (e.key === 'ArrowDown') {
+        if (e.key === "ArrowDown") {
           e.preventDefault();
           const nextIndex = (currentIndex + 1) % items.length;
           items[nextIndex].focus();
-        } else if (e.key === 'ArrowUp') {
+        } else if (e.key === "ArrowUp") {
           e.preventDefault();
-          const prevIndex = currentIndex === 0 ? items.length - 1 : currentIndex - 1;
+          const prevIndex =
+            currentIndex === 0 ? items.length - 1 : currentIndex - 1;
           items[prevIndex].focus();
-        } else if (e.key === 'Escape') {
+        } else if (e.key === "Escape") {
           ndMenuToggle.focus();
-          ndMenuToggle.setAttribute('aria-expanded', 'false');
+          ndMenuToggle.setAttribute("aria-expanded", "false");
           ndDropdown.hidden = true;
         }
       });
     }
 
     // Sidebar Collapsible Sections
-    document.querySelectorAll('.section-toggle').forEach(toggle => {
-      toggle.addEventListener('click', () => {
-        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', !isExpanded);
+    document.querySelectorAll(".section-toggle").forEach((toggle) => {
+      toggle.addEventListener("click", () => {
+        const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", !isExpanded);
 
         // Save preference
-        const section = toggle.closest('.sidebar-section').dataset.section;
+        const section = toggle.closest(".sidebar-section").dataset.section;
         const preferences = State.data.preferences.sidebarSections || {};
         preferences[section] = !isExpanded;
         State.data.preferences.sidebarSections = preferences;
@@ -4929,9 +5254,11 @@
     function restoreSidebarStates() {
       const preferences = State.data.preferences.sidebarSections || {};
       Object.entries(preferences).forEach(([section, expanded]) => {
-        const toggle = document.querySelector(`[data-section="${section}"] .section-toggle`);
+        const toggle = document.querySelector(
+          `[data-section="${section}"] .section-toggle`
+        );
         if (toggle) {
-          toggle.setAttribute('aria-expanded', expanded);
+          toggle.setAttribute("aria-expanded", expanded);
         }
       });
     }

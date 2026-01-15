@@ -1330,21 +1330,46 @@ html.dark-mode .goal-more-options-btn:hover {
 /* Vision Icon Input Group */
 .vision-icon-input-group {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--space-2);
 }
 
 .vision-icon-input-group .modal-input {
+  flex: 1;
+  max-width: 80px;
   font-size: 1.25rem;
   text-align: center;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
     sans-serif;
 }
 
+.vision-emoji-keyboard-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px dashed var(--divider);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xl);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+    sans-serif;
+}
+
+.vision-emoji-keyboard-btn:hover {
+  border-color: var(--accent);
+  border-style: solid;
+  background: var(--bg-hover);
+}
+
 .vision-icon-presets {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: var(--space-1);
+  margin-top: var(--space-2);
 }
 
 .icon-preset-btn {
@@ -1373,8 +1398,70 @@ html.dark-mode .goal-more-options-btn:hover {
   transform: scale(0.95);
 }
 
+/* Vision Emoji Picker Dropdown */
+.vision-emoji-picker-dropdown {
+  position: fixed;
+  z-index: 1100;
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-lg);
+  max-width: 400px;
+  max-height: 320px;
+  overflow-y: auto;
+  margin-top: var(--space-1);
+}
+
+.vision-emoji-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: var(--space-1);
+}
+
+.vision-emoji-option {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast);
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+    sans-serif;
+}
+
+.vision-emoji-option:hover {
+  background: var(--accent-subtle);
+  transform: scale(1.1);
+}
+
+.vision-emoji-option:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 600px) {
+  .vision-emoji-picker-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
+  .vision-emoji-picker-dropdown {
+    max-width: 320px;
+    max-height: 280px;
+  }
+}
+
 @media (max-width: 480px) {
   .vision-icon-presets {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .vision-emoji-picker-grid {
+    grid-template-columns: repeat(6, 1fr);
   }
 }
