@@ -83,6 +83,20 @@ const LEVEL_DESCRIPTORS: Record<GoalLevel, string> = {
   intention: "Daily touch",
 };
 
+const TITLE_PROMPTS: Record<GoalLevel, string> = {
+  vision: "What is your vision for this year?",
+  milestone: "What is your milestone for this month?",
+  focus: "What is your focus for this week?",
+  intention: "What is your intention for today?",
+};
+
+const ACTION_LABELS: Record<GoalLevel, string> = {
+  vision: "Create Vision",
+  milestone: "Set Milestone",
+  focus: "Define Focus",
+  intention: "Save Intention",
+};
+
 const SECTION_TITLES: Record<
   keyof typeof SECTION_IDS,
   { title: string; subtitle?: string }
@@ -548,7 +562,6 @@ export function openGoalModal(
     openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
 
   const title = document.getElementById("goal-modal-title");
-  const label = document.querySelector('label[for="goalTitle"]');
 
   if (title) {
     if (level === "vision") title.textContent = "Create New Vision";
@@ -562,18 +575,15 @@ export function openGoalModal(
     descriptor.textContent = LEVEL_DESCRIPTORS[level] ?? "";
   }
 
-  if (label) {
-    if (level === "vision")
-      label.textContent = "What is your vision for this year?";
-    else if (level === "milestone")
-      label.textContent = "What is your milestone for this month?";
-    else if (level === "focus")
-      label.textContent = "What is your focus for this week?";
-    else if (level === "intention")
-      label.textContent = "What is your intention for today?";
-  }
+  const heroPrompt = TITLE_PROMPTS[level] ?? "";
+  setTitleHelp(heroPrompt);
 
-  setTitleHelp(null);
+  const submitBtn = document.getElementById(
+    "goalSubmitButton",
+  ) as HTMLButtonElement | null;
+  if (submitBtn) {
+    submitBtn.textContent = ACTION_LABELS[level] ?? "Save";
+  }
 
   const monthGroup = document.querySelector('label[for="goalMonth"]')
     ?.parentElement as HTMLElement;
@@ -645,19 +655,9 @@ export function openGoalModal(
   const focusDurationSelect = document.getElementById(
     "focusDurationWeeks",
   ) as HTMLSelectElement | null;
-  const submitBtn = document.querySelector(
-    '#goalForm button[type="submit"]',
-  ) as HTMLElement;
   const durationRow = document.getElementById(
     "goalDurationRow",
   ) as HTMLElement | null;
-
-  if (submitBtn) {
-    if (level === "vision") submitBtn.textContent = "Create Vision";
-    else if (level === "milestone") submitBtn.textContent = "Set Milestone";
-    else if (level === "focus") submitBtn.textContent = "Define Focus";
-    else if (level === "intention") submitBtn.textContent = "Set Intention";
-  }
 
   if (monthSelect) monthSelect.required = false;
   if (yearGroup) yearGroup.style.display = "none";

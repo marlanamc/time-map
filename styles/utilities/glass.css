@@ -1,0 +1,94 @@
+.glassPanel {
+  background: var(--glass-panel-bg);
+  border: 1px solid var(--glass-panel-border);
+  border-radius: var(--glass-panel-border-radius);
+  box-shadow: var(--glass-panel-shadow);
+  backdrop-filter: blur(var(--glass-panel-blur));
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur));
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.glassPanel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.12),
+    transparent 45%
+  );
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.glassButton {
+  background: var(--glass-button-bg);
+  border: 1px solid var(--glass-button-border);
+  box-shadow:
+    var(--glass-button-shadow),
+    0 0 20px var(--glass-button-glow);
+  color: var(--text-on-accent);
+  border-radius: var(--glass-panel-border-radius);
+  padding: var(--space-3) var(--space-8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  backdrop-filter: blur(calc(var(--glass-panel-blur) + 2px));
+  -webkit-backdrop-filter: blur(calc(var(--glass-panel-blur) + 2px));
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+.glassButton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% -20%,
+    color-mix(in srgb, var(--glass-button-glow) 80%, rgba(255, 255, 255, 0.4)),
+    transparent 55%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.glassButton:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow:
+    var(--glass-button-shadow),
+    0 0 32px var(--glass-button-glow);
+}
+
+.glassButton:hover::after {
+  opacity: 0.35;
+}
+
+.glassPill {
+  background: var(--glass-pill-bg);
+  border: 1px solid var(--glass-pill-border);
+  box-shadow: var(--glass-pill-shadow);
+  border-radius: var(--glass-panel-border-radius);
+  padding: var(--space-2) var(--space-6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  backdrop-filter: blur(var(--glass-panel-blur));
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur));
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.glassPill:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--glass-panel-border) 70%, rgba(255, 255, 255, 0.6));
+}

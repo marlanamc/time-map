@@ -19,8 +19,38 @@ type AddGoalLinkedOpts = {
 };
 
 let reflectionOpen = false;
+let contextExpanded = false;
+let showStats = false;
 
 const reflectionCache = new Map<string, WeekReflection | null>();
+
+function getPrimaryFocus(
+  focusesInWeek: Goal[],
+  intentionsInWeek: Goal[],
+  viewDate: Date,
+): { type: "focus" | "intention" | "empty"; goal?: Goal } {
+  // Priority 1: Current week's focus
+  if (focusesInWeek.length > 0) {
+    return { type: "focus", goal: focusesInWeek[0] };
+  }
+
+  // Priority 2: Today's first unscheduled intention
+  const today = viewDate.toDateString();
+  const todayIntentions = intentionsInWeek.filter(
+    (i) =>
+      !i.startTime &&
+      i.dueDate &&
+      new Date(i.dueDate).toDateString() === today &&
+      i.status !== "done",
+  );
+
+  if (todayIntentions.length > 0) {
+    return { type: "intention", goal: todayIntentions[0] };
+  }
+
+  // Priority 3: Empty state
+  return { type: "empty" };
+}
 
 function getWeekRangeFor(date: Date): {
   weekStart: Date;
@@ -78,16 +108,20 @@ export const LivingGardenRenderer = {
       (g) => g.level === "intention",
     );
 
-    const statsOverview = Analytics.getOverview();
-    const intentionsCompletedThisWeek = intentionsInWeek.filter(
-      (i) => i.status === "done",
-    ).length;
-    const completionRate =
-      intentionsInWeek.length > 0
-        ? Math.round(
-            (intentionsCompletedThisWeek / intentionsInWeek.length) * 100,
-          )
-        : 0;
+    // Calculate stats only when needed (not by default)
+    const getStatsWhenNeeded = () => {
+      const statsOverview = Analytics.getOverview();
+      const intentionsCompletedThisWeek = intentionsInWeek.filter(
+        (i) => i.status === "done",
+      ).length;
+      const completionRate =
+        intentionsInWeek.length > 0
+          ? Math.round(
+              (intentionsCompletedThisWeek / intentionsInWeek.length) * 100,
+            )
+          : 0;
+      return { statsOverview, intentionsCompletedThisWeek, completionRate };
+    };
 
     // Build ecosystem data
     const ecosystem = visions.map((vision) => {
@@ -144,6 +178,24 @@ export const LivingGardenRenderer = {
         }
       });
     }
+
+    // Determine primary focus
+    const primaryFocus = getPrimaryFocus(
+      focusesInWeek,
+      intentionsInWeek,
+      viewDate,
+    );
+
+    // Get first vision and milestone for context (simplified)
+    const firstVision = visions[0] || null;
+    const firstMilestone =
+      firstVision && milestonesToday.length > 0
+        ? milestonesToday.filter(
+            (m) =>
+              m.parentId === firstVision.id &&
+              (m.parentLevel ?? "vision") === "vision",
+          )[0] || null
+        : null;
 
     // Mobile detection
     const isMobile = typeof window !== "undefined" && window.innerWidth <= 600;
@@ -270,273 +322,183 @@ export const LivingGardenRenderer = {
           }
         </div>
       `;
-    } else {
-      // Desktop: The Living Garden
-      container.className = "garden-view-container living-garden";
-      container.innerHTML = `
-        <div class="living-garden-container">
-          <header class="living-garden-header">
+      } else {
+        // Desktop: ADHD-Friendly Living Garden
+        container.className = "garden-view-container living-garden";
+
+        const activeMilestones = milestonesToday.length;
+        const milestoneLabel =
+          activeMilestones > 0
+            ? `${activeMilestones} active milestone${activeMilestones === 1 ? "" : "s"}`
+            : "No active milestones";
+        const intentionsLabel =
+          intentionsInWeek.length > 0
+            ? `${intentionsInWeek.length} intention${intentionsInWeek.length === 1 ? "" : "s"} this week`
+            : "No intentions this week";
+        const headerSummary = `${milestoneLabel} • ${intentionsLabel}`;
+        const headerMarkup = `
+          <header class="living-garden-header glassPanel">
             <h1 class="living-garden-title">Your Living Garden</h1>
-            <div class="living-garden-summary">
-              ${visions.length} vision${visions.length === 1 ? "" : "s"} • 
-              ${milestonesToday.length} active milestone${milestonesToday.length === 1 ? "" : "s"} • 
-              ${intentionsInWeek.length} intention${intentionsInWeek.length === 1 ? "" : "s"} this week
-            </div>
+            <div class="living-garden-summary glassPill">${headerSummary}</div>
           </header>
+        `;
 
-          <!-- Check-in CTA -->
-          ${
-            !cachedReflection
-              ? `
-            <div class="living-garden-checkin-cta" data-action="toggle-reflection">
-              <div class="living-garden-checkin-text">
-                <h3>Weekly Check-in Due</h3>
-                <p>Reflect on your growth and set intentions for the week ahead.</p>
+        // Build hero section content
+        let heroContent = "";
+        let primaryCTA = "";
+
+        const heroGoal = primaryFocus.goal;
+        if (heroGoal) {
+          const heroGoalTitle = escapeHtmlFn(heroGoal.title);
+          heroContent = `<p class="living-garden-focus-text">${heroGoalTitle}</p>`;
+          const heroGoalId = escapeHtmlFn(heroGoal.id);
+          primaryCTA = `<button class="living-garden-btn-primary glassButton" data-action="open-goal" data-goal-id="${heroGoalId}">
+            <span class="btn-icon">🌱</span>
+            Plant today's seed
+          </button>`;
+        } else {
+          heroContent = `<p class="living-garden-focus-text">No focus set for this week</p>`;
+          primaryCTA = onAddGoal
+            ? `<button class="living-garden-btn-primary glassButton" data-action="add-focus">
+            <span class="btn-icon">🌱</span>
+            Plant today's seed
+          </button>`
+            : "";
+        }
+      
+      // Build context panel (collapsible)
+      let contextPanel = "";
+      if (firstVision || firstMilestone) {
+        contextPanel = `
+          <section class="living-garden-context ${contextExpanded ? "" : "is-collapsed"}" data-collapsed="${!contextExpanded}">
+            <div class="living-garden-context-card glassPanel">
+              <h3 class="living-garden-context-title">Vision & Milestones</h3>
+              <div class="living-garden-context-content">
+                ${firstVision ? `<div class="living-garden-vision-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(firstVision.id)}">🌿 Vision: ${escapeHtmlFn(firstVision.title)}</div>` : ""}
+                ${firstMilestone ? `<div class="living-garden-milestone-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(firstMilestone.id)}">☑ Milestone: ${escapeHtmlFn(firstMilestone.title)}</div>` : ""}
               </div>
-              <div class="living-garden-checkin-icon">🌱</div>
+              ${!cachedReflection ? `<button class="living-garden-btn-secondary" data-action="toggle-reflection">Weekly Reflection ✨</button>` : ""}
             </div>
-          `
-              : ""
-          }
-
-          <!-- Weekly Stats -->
-          <div class="living-garden-stats">
+          </section>
+        `;
+      }
+      
+      // Stats (hidden by default, only shown when showStats is true)
+      const stats = showStats ? getStatsWhenNeeded() : null;
+      const statsSection = stats
+        ? `
+          <section class="living-garden-stats is-visible">
             <div class="living-garden-stat-card">
-              <span class="living-garden-stat-value">${intentionsCompletedThisWeek}</span>
+              <span class="living-garden-stat-value">${stats.intentionsCompletedThisWeek}</span>
               <span class="living-garden-stat-label">Done this week</span>
             </div>
             <div class="living-garden-stat-card">
-              <span class="living-garden-stat-value">${completionRate}%</span>
+              <span class="living-garden-stat-value">${stats.completionRate}%</span>
               <span class="living-garden-stat-label">Completion Rate</span>
             </div>
             <div class="living-garden-stat-card">
-              <span class="living-garden-stat-value">${statsOverview.currentStreak}🔥</span>
+              <span class="living-garden-stat-value">${stats.statsOverview.currentStreak}🔥</span>
               <span class="living-garden-stat-label">Current Streak</span>
             </div>
-            <div class="living-garden-stat-card">
-              <span class="living-garden-stat-value">${statsOverview.totalGoals}</span>
-              <span class="living-garden-stat-label">Total Seeds Planted</span>
+            <button class="living-garden-stats-close" data-action="hide-stats">×</button>
+          </section>
+        `
+        : "";
+      
+      container.innerHTML = `
+        ${headerMarkup}
+        <div class="living-garden-container">
+          <!-- Hero Card: Today's Focus (40-60% height) -->
+          <section class="living-garden-hero">
+            <div class="living-garden-hero-card glassPanel">
+              <h2 class="living-garden-hero-title">Today's focus</h2>
+              <div class="living-garden-hero-content">
+                ${heroContent}
+              </div>
+              ${primaryCTA}
             </div>
-          </div>
+          </section>
+          
+          <!-- Progressive disclosure link -->
+          ${firstVision || firstMilestone ? `<button class="living-garden-context-trigger glassPill" data-action="toggle-context">See the bigger picture →</button>` : ""}
+          
+          ${contextPanel}
+          
+          ${statsSection}
 
+          <!-- Reflection Panel -->
           ${
-            visions.length === 0
+            reflectionOpen
               ? `
-            <div class="living-garden-empty">
-              <div class="living-garden-empty-icon">🌱</div>
-              <h2 style="color: #000 !important;">Start your garden</h2>
-              <p style="color: #1e293b !important;">Every great garden begins with a single vision. Plant yours and watch it grow.</p>
-              ${onAddGoal ? `<button class="living-garden-btn-primary" data-action="add-vision">Plant Your First Vision</button>` : ""}
+            <div class="living-garden-reflection">
+              <div class="living-garden-reflection-header">
+                <h3>Weekly Garden Reflection</h3>
+                <button class="living-garden-reflection-close" data-action="toggle-reflection">×</button>
+              </div>
+              <div class="living-garden-reflection-body">
+                <div class="living-garden-reflection-question">
+                  <h4>How did your garden grow this week?</h4>
+                  <div class="living-garden-reflection-options">
+                    ${[
+                      "Flourishing 🌸",
+                      "Steady growth 🌿",
+                      "Some challenges 🍂",
+                      "Dormant period ❄️",
+                    ]
+                      .map((opt) => {
+                        const selected =
+                          cachedReflection?.answers?.q1 === opt;
+                        return `<button class="living-garden-reflection-option ${selected ? "is-selected" : ""}" 
+                                     data-action="set-reflection" data-q="q1" data-value="${escapeHtmlFn(opt)}">${opt}</button>`;
+                      })
+                      .join("")}
+                  </div>
+                </div>
+                <div class="living-garden-reflection-question">
+                  <h4>How aligned do you feel with your visions?</h4>
+                  <div class="living-garden-alignment-score">
+                    ${[1, 2, 3, 4, 5]
+                      .map((score) => {
+                        const selected =
+                          (cachedReflection?.answers?.alignmentScore || 0) ===
+                          score;
+                        return `<button class="living-garden-score-btn ${selected ? "is-selected" : ""}" 
+                                      data-action="set-reflection" data-q="alignmentScore" data-value="${score}">
+                                ${score}
+                              </button>`;
+                      })
+                      .join("")}
+                  </div>
+                </div>
+
+                <div class="living-garden-reflection-question">
+                  <h4>What were your biggest wins this week?</h4>
+                  <textarea class="living-garden-reflection-input" 
+                            data-action="input-reflection" data-q="wins" 
+                            placeholder="List your accomplishments...">${escapeHtmlFn(cachedReflection?.answers?.wins || "")}</textarea>
+                </div>
+
+                <div class="living-garden-reflection-question">
+                  <h4>Growth note (What did you learn?)</h4>
+                  <textarea class="living-garden-reflection-input" 
+                            data-action="input-reflection" data-q="growthNote" 
+                            placeholder="Reflect on challenges and learnings...">${escapeHtmlFn(cachedReflection?.answers?.growthNote || "")}</textarea>
+                </div>
+
+                <div class="living-garden-reflection-question">
+                  <h4>Priorities for next week</h4>
+                  <textarea class="living-garden-reflection-input" 
+                            data-action="input-reflection" data-q="nextWeekPriorities" 
+                            placeholder="What will you focus on next?">${escapeHtmlFn(cachedReflection?.answers?.nextWeekPriorities || "")}</textarea>
+                </div>
+                <div class="living-garden-reflection-actions">
+                  <span class="living-garden-reflection-note">Saved locally for this week</span>
+                  <button class="living-garden-btn-ghost" data-action="clear-reflection">Clear</button>
+                </div>
+              </div>
             </div>
           `
-              : `
-            <div class="living-garden-ecosystem">
-              ${ecosystem
-                .map(
-                  (plot) => `
-                <div class="living-garden-plot ${plot.isAlive ? "is-thriving" : "is-dormant"}" 
-                     style="${plot.accent ? `--garden-accent: ${plot.accent.color}; --garden-accent-gradient: ${plot.accent.gradient || ""};` : ""}"
-                     data-vision-id="${escapeHtmlFn(plot.vision.id)}">
-                  
-                  <!-- Vision Tree -->
-                  <div class="living-garden-tree">
-                    <div class="living-garden-trunk">
-                      <div class="living-garden-vision">
-                        ${plot.vision.icon ? `<span class="living-garden-emoji">${escapeHtmlFn(plot.vision.icon)}</span>` : ""}
-                        <span class="living-garden-vision-text">${escapeHtmlFn(plot.vision.title)}</span>
-                      </div>
-                    </div>
-                    
-                    ${
-                      plot.isAlive
-                        ? `
-                      <div class="living-garden-branches">
-                        ${
-                          plot.milestones.length > 0
-                            ? `
-                          <div class="living-garden-branch living-garden-branch--milestones">
-                            <div class="living-garden-branch-label">Milestones</div>
-                            <div class="living-garden-branch-items">
-                              ${plot.milestones
-                                .map(
-                                  (milestone) => `
-                                <div class="living-garden-branch-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(milestone.id)}">
-                                  ${milestone.icon ? `<span class="living-garden-emoji">${escapeHtmlFn(milestone.icon)}</span>` : ""}
-                                  <span>${escapeHtmlFn(milestone.title)}</span>
-                                </div>
-                              `,
-                                )
-                                .join("")}
-                            </div>
-                          </div>
-                        `
-                            : ""
-                        }
-                        
-                        ${
-                          plot.focuses.length > 0
-                            ? `
-                          <div class="living-garden-branch living-garden-branch--focuses">
-                            <div class="living-garden-branch-label">Weekly Focus</div>
-                            <div class="living-garden-branch-items">
-                              ${plot.focuses
-                                .map(
-                                  (focus) => `
-                                <div class="living-garden-branch-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(focus.id)}">
-                                  ${focus.icon ? `<span class="living-garden-emoji">${escapeHtmlFn(focus.icon)}</span>` : ""}
-                                  <span>${escapeHtmlFn(focus.title)}</span>
-                                </div>
-                              `,
-                                )
-                                .join("")}
-                            </div>
-                          </div>
-                        `
-                            : ""
-                        }
-                        
-                        ${
-                          plot.intentions.length > 0
-                            ? `
-                          <div class="living-garden-branch living-garden-branch--intentions">
-                            <div class="living-garden-branch-label">This Week's Intentions</div>
-                            <div class="living-garden-branch-items">
-                              ${plot.intentions
-                                .map(
-                                  (intention) => `
-                                <div class="living-garden-branch-item ${intention.status === "done" ? "is-complete" : ""}" 
-                                     data-action="open-goal" data-goal-id="${escapeHtmlFn(intention.id)}">
-                                  ${intention.icon ? `<span class="living-garden-emoji">${escapeHtmlFn(intention.icon)}</span>` : ""}
-                                  <span>${escapeHtmlFn(intention.title)}</span>
-                                </div>
-                              `,
-                                )
-                                .join("")}
-                            </div>
-                          </div>
-                        `
-                            : ""
-                        }
-                      </div>
-                    `
-                        : `
-                      <div class="living-garden-dormant-state">
-                        <div class="living-garden-dormant-icon">🌱</div>
-                        <p>This vision is waiting for care</p>
-                        ${
-                          onAddGoalLinked
-                            ? `
-                          <button class="living-garden-btn-secondary" data-action="add-milestone" data-vision-id="${escapeHtmlFn(plot.vision.id)}">Plant a Milestone</button>
-                        `
-                            : ""
-                        }
-                      </div>
-                    `
-                    }
-                  </div>
-                </div>
-              `,
-                )
-                .join("")}
-            </div>
-
-            <!-- Garden Actions -->
-            <div class="living-garden-actions">
-              <div class="living-garden-actions-left">
-                ${
-                  onAddGoal
-                    ? `
-                  <button class="living-garden-btn-primary" data-action="add-vision">
-                    <span class="living-garden-btn-icon">🌱</span>
-                    Plant New Vision
-                  </button>
-                `
-                    : ""
-                }
-              </div>
-              <div class="living-garden-actions-right">
-                <button class="living-garden-btn-secondary living-garden-btn--reflection" data-action="toggle-reflection">
-                  <span class="living-garden-btn-icon">🧭</span>
-                  Weekly Reflection
-                </button>
-              </div>
-            </div>
-
-            <!-- Reflection Panel -->
-            ${
-              reflectionOpen
-                ? `
-              <div class="living-garden-reflection">
-                <div class="living-garden-reflection-header">
-                  <h3>Weekly Garden Reflection</h3>
-                  <button class="living-garden-reflection-close" data-action="toggle-reflection">×</button>
-                </div>
-                <div class="living-garden-reflection-body">
-                  <div class="living-garden-reflection-question">
-                    <h4>How did your garden grow this week?</h4>
-                    <div class="living-garden-reflection-options">
-                      ${[
-                        "Flourishing 🌸",
-                        "Steady growth 🌿",
-                        "Some challenges 🍂",
-                        "Dormant period ❄️",
-                      ]
-                        .map((opt) => {
-                          const selected =
-                            cachedReflection?.answers?.q1 === opt;
-                          return `<button class="living-garden-reflection-option ${selected ? "is-selected" : ""}" 
-                                       data-action="set-reflection" data-q="q1" data-value="${escapeHtmlFn(opt)}">${opt}</button>`;
-                        })
-                        .join("")}
-                    </div>
-                  </div>
-                  <div class="living-garden-reflection-question">
-                    <h4>How aligned do you feel with your visions?</h4>
-                    <div class="living-garden-alignment-score">
-                      ${[1, 2, 3, 4, 5]
-                        .map((score) => {
-                          const selected =
-                            (cachedReflection?.answers?.alignmentScore || 0) ===
-                            score;
-                          return `<button class="living-garden-score-btn ${selected ? "is-selected" : ""}" 
-                                        data-action="set-reflection" data-q="alignmentScore" data-value="${score}">
-                                  ${score}
-                                </button>`;
-                        })
-                        .join("")}
-                    </div>
-                  </div>
-
-                  <div class="living-garden-reflection-question">
-                    <h4>What were your biggest wins this week?</h4>
-                    <textarea class="living-garden-reflection-input" 
-                              data-action="input-reflection" data-q="wins" 
-                              placeholder="List your accomplishments...">${escapeHtmlFn(cachedReflection?.answers?.wins || "")}</textarea>
-                  </div>
-
-                  <div class="living-garden-reflection-question">
-                    <h4>Growth note (What did you learn?)</h4>
-                    <textarea class="living-garden-reflection-input" 
-                              data-action="input-reflection" data-q="growthNote" 
-                              placeholder="Reflect on challenges and learnings...">${escapeHtmlFn(cachedReflection?.answers?.growthNote || "")}</textarea>
-                  </div>
-
-                  <div class="living-garden-reflection-question">
-                    <h4>Priorities for next week</h4>
-                    <textarea class="living-garden-reflection-input" 
-                              data-action="input-reflection" data-q="nextWeekPriorities" 
-                              placeholder="What will you focus on next?">${escapeHtmlFn(cachedReflection?.answers?.nextWeekPriorities || "")}</textarea>
-                  </div>
-                  <div class="living-garden-reflection-actions">
-                    <span class="living-garden-reflection-note">Saved locally for this week</span>
-                    <button class="living-garden-btn-ghost" data-action="clear-reflection">Clear</button>
-                  </div>
-                </div>
-              </div>
-            `
-                : ""
-            }
-          `
+              : ""
           }
         </div>
       `;
@@ -557,6 +519,28 @@ export const LivingGardenRenderer = {
         });
     }
 
+    // Context toggle handler (desktop only)
+    if (!isMobile) {
+      container
+        .querySelector<HTMLElement>("[data-action='toggle-context']")
+        ?.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          contextExpanded = !contextExpanded;
+          eventBus.emit("view:changed", { transition: false });
+        });
+
+      // Stats hide handler
+      container
+        .querySelector<HTMLElement>("[data-action='hide-stats']")
+        ?.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          showStats = false;
+          eventBus.emit("view:changed", { transition: false });
+        });
+    }
+
     // Common event handlers for both Mobile and Desktop
     container
       .querySelectorAll<HTMLElement>("[data-action='add-vision']")
@@ -565,6 +549,16 @@ export const LivingGardenRenderer = {
           e.preventDefault();
           e.stopPropagation();
           onAddGoal?.("vision");
+        });
+      });
+
+    container
+      .querySelectorAll<HTMLElement>("[data-action='add-focus']")
+      .forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onAddGoal?.("focus");
         });
       });
 

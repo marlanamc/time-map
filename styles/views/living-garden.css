@@ -59,13 +59,73 @@
     system-ui,
     -apple-system,
     sans-serif;
-  color: #1a202c !important;
-  perspective: 1000px;
+  color: var(--text-primary) !important;
+  position: relative;
+  isolation: isolate;
 }
 
-/* Force dark text in light mode - override any parent color inheritance */
+.living-garden::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 6, 15, 0.32) 0%,
+    rgba(5, 6, 15, 0.05) 45%,
+    rgba(5, 6, 15, 0.45) 100%
+  );
+  pointer-events: none;
+  opacity: 0.25;
+  z-index: -1;
+  mix-blend-mode: multiply;
+}
+
+.garden-view-container.living-garden {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Starry effect overlay - only in dark mode, subtle in light mode */
+.living-garden::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(2px 2px at 60% 70%, rgba(255, 255, 255, 0.2), transparent),
+    radial-gradient(1px 1px at 50% 50%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 80% 10%, rgba(255, 255, 255, 0.25), transparent),
+    radial-gradient(2px 2px at 40% 80%, rgba(255, 255, 255, 0.3), transparent);
+  background-size: 200% 200%;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Show stars in dark mode */
+html.dark-mode .living-garden::before {
+  opacity: 0.6;
+}
+
+/* Subtle sparkle effect in light mode */
+:root:not(.dark-mode) .living-garden::before {
+  background-image: 
+    radial-gradient(1px 1px at 20% 30%, rgba(90, 155, 141, 0.15), transparent),
+    radial-gradient(1px 1px at 60% 70%, rgba(74, 144, 153, 0.12), transparent),
+    radial-gradient(0.5px 0.5px at 50% 50%, rgba(139, 92, 246, 0.1), transparent);
+  opacity: 0.3;
+}
+
+/* Use theme text colors */
 :root:not(.dark-mode) .living-garden {
-  color: #1a202c !important;
+  color: var(--text-primary) !important;
 }
 
 :root:not(.dark-mode) .living-garden h1,
@@ -73,7 +133,7 @@
 :root:not(.dark-mode) .living-garden h3,
 :root:not(.dark-mode) .living-garden p,
 :root:not(.dark-mode) .living-garden span {
-  color: #1a202c !important;
+  color: var(--text-primary) !important;
 }
 
 /* Override for empty state - must be pure black */
@@ -85,62 +145,203 @@
 }
 
 html.dark-mode .living-garden {
-  background: transparent;
-  color: #f8fafc !important;
+  color: var(--text-primary) !important;
 }
 
 .living-garden-container {
-  max-width: 1400px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: var(--space-6);
+  padding: var(--space-10) var(--space-6) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
   animation: growIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  z-index: 1;
 }
 
 /* ===================================
-   Garden Header
+   Hero Section - Today's Focus
+   =================================== */
+.living-garden-hero {
+  min-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-10) var(--space-6);
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.living-garden-hero-card {
+  width: 100%;
+  max-width: 760px;
+  padding: var(--space-10) var(--space-8);
+  border-radius: var(--glass-panel-border-radius);
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.living-garden-hero-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: var(--space-4);
+  text-align: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.living-garden-hero-content {
+  margin-bottom: var(--space-8);
+}
+
+.living-garden-focus-text {
+  font-size: clamp(1.5rem, 4vw, 2.8rem);
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* Progressive disclosure trigger */
+.living-garden-context-trigger {
+  margin: 0 auto var(--space-8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: transform 0.3s ease;
+}
+
+.living-garden-context-trigger:hover {
+  transform: translateY(-1px);
+}
+
+/* Context Panel - Collapsible */
+.living-garden-context {
+  margin-bottom: var(--space-8);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.living-garden-context.is-collapsed {
+  display: none;
+}
+
+.living-garden-context[data-collapsed="true"] {
+  display: none;
+}
+
+.living-garden-context-card {
+  padding: var(--space-6);
+  border-radius: var(--glass-panel-border-radius);
+}
+
+.living-garden-context-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.living-garden-context-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.living-garden-vision-item,
+.living-garden-milestone-item {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.living-garden-vision-item:hover,
+.living-garden-milestone-item:hover {
+  color: var(--accent);
+}
+
+/* Stats - Hidden by default */
+.living-garden-stats {
+  display: none;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: var(--space-8);
+  position: relative;
+  padding: var(--space-6);
+  padding-top: var(--space-10);
+  animation: growIn 0.8s ease-out 0.2s backwards;
+}
+
+.living-garden-stats.is-visible {
+  display: grid;
+}
+
+.living-garden-stats-close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.living-garden-stats-close:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: scale(1.1);
+  border-color: var(--accent);
+}
+
+/* ===================================
+   Garden Header (Deprecated - keeping for backward compatibility)
    =================================== */
 .living-garden-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: var(--space-10);
-  padding: var(--space-6) 0;
-  position: relative;
-  isolation: isolate;
+  margin: 0 auto var(--space-8);
+  padding: var(--space-6);
+  width: min(980px, 100%);
   gap: var(--space-4);
-}
-
-.living-garden-header::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(100%, 820px);
-  height: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.32),
-    rgba(255, 255, 255, 0.18)
-  );
-  border-radius: 20px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  pointer-events: none;
-  z-index: 1;
-}
-
-html.dark-mode .living-garden-header::before {
-  background: linear-gradient(
-    180deg,
-    rgba(30, 41, 59, 0.24),
-    rgba(30, 41, 59, 0.18)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
 }
 
 .living-garden-header > * {
@@ -149,147 +350,29 @@ html.dark-mode .living-garden-header::before {
 }
 
 .living-garden-title {
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   margin: 0;
-  display: block;
-  text-align: center;
-  background-image: linear-gradient(
-    135deg,
-    #059669 0%,
-    #0284c7 50%,
-    #7c3aed 100%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
-  text-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    0 1px 6px rgba(255, 255, 255, 0.4),
-    0 0 1px rgba(0, 0, 0, 0.2);
-  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.2);
-  position: relative;
-  z-index: 10;
-}
-
-/* Time-aware Title Gradients */
-/* Dawn */
-:root.time-dawn:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(
-    135deg,
-    #e91e63 0%,
-    #ec4899 50%,
-    #f472b6 100%
-  );
-}
-:root.dark-mode.time-dawn .living-garden-title {
-  background-image: linear-gradient(
-    135deg,
-    #ff8a95 0%,
-    #ffb3ba 50%,
-    #ffe0e3 100%
-  );
-}
-
-/* Morning */
-:root.time-morning:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-}
-:root.dark-mode.time-morning .living-garden-title {
-  background-image: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%);
-}
-
-/* Afternoon */
-:root.time-afternoon:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #059669 0%, #10b981 100%);
-}
-:root.dark-mode.time-afternoon .living-garden-title {
-  background-image: linear-gradient(135deg, #34d399 0%, #4ade80 100%);
-}
-
-/* Evening */
-:root.time-evening:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
-}
-:root.dark-mode.time-evening .living-garden-title {
-  background-image: linear-gradient(
-    135deg,
-    #f87171 0%,
-    #fb923c 50%,
-    #fbbf24 100%
-  );
-}
-
-/* Night */
-:root.time-night:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-}
-:root.dark-mode.time-night .living-garden-title {
-  background-image: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
-  filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5));
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
 }
 
 html.dark-mode .living-garden-title {
-  text-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.5),
-    0 4px 16px rgba(255, 255, 255, 0.3),
-    0 0 4px rgba(255, 255, 255, 0.2);
-  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.25);
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
-}
-
-.living-garden-subtitle {
-  font-size: var(--text-xl);
-  color: var(--text-primary);
-  margin: 0 0 var(--space-4);
-  font-weight: 500;
-  opacity: 0.95;
-  animation: growIn 1s ease-out 0.2s backwards;
-}
-
-/* Force dark text in light mode */
-:root:not(.dark-mode) .living-garden-subtitle {
-  color: #1a2b2f !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-}
-.dark-mode .living-garden-subtitle {
-  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 8px 20px rgba(0, 0, 0, 0.65);
 }
 
 .living-garden-summary {
-  font-size: var(--text-sm);
-  color: rgba(15, 23, 42, 0.7);
-  padding: var(--space-2) var(--space-4);
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: var(--radius-full);
-  display: inline-block;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.06),
-    0 1px 2px rgba(255, 255, 255, 0.2);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: 0.02em;
   animation: growIn 1s ease-out 0.4s backwards;
-  transition:
-    transform 0.3s ease,
-    background 0.3s ease;
+  transition: transform 0.3s ease;
   text-align: center;
   margin: 0 auto;
 }
 .living-garden-summary:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.6);
-}
-
-html.dark-mode .living-garden-summary {
-  background: rgba(15, 23, 42, 0.28);
-  border-color: rgba(255, 255, 255, 0.18);
-  color: rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.18),
-    0 1px 2px rgba(255, 255, 255, 0.08);
 }
 
 /* ===================================
@@ -692,39 +775,19 @@ html.dark-mode .living-garden-actions {
 .living-garden-btn-primary {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
   padding: var(--space-4) var(--space-8);
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  border-radius: 16px;
   font-weight: 700;
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  margin-top: var(--space-4);
+  border-radius: var(--glass-panel-border-radius);
   position: relative;
   overflow: hidden;
 }
 
-.living-garden-btn-primary::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.living-garden-btn-primary:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-}
-.living-garden-btn-primary:hover::before {
-  opacity: 1;
+.living-garden-btn-primary .btn-icon {
+  font-size: 1.2em;
 }
 
 .living-garden-btn-secondary {
@@ -1065,30 +1128,33 @@ html.dark-mode .living-garden-reflection-actions {
 }
 
 .living-garden-stat-card {
-  background: rgba(255, 255, 255, 0.45);
+  background: color-mix(in srgb, var(--glass-bg) 60%, transparent);
   padding: var(--space-5);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--accent-border) 25%, var(--glass-border) 75%);
+  backdrop-filter: blur(15px) saturate(150%);
+  -webkit-backdrop-filter: blur(15px) saturate(150%);
   text-align: center;
   transition: all 0.3s ease;
-}
-
-html.dark-mode .living-garden-stat-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.08);
+  position: relative;
+  box-shadow: 
+    0 4px 12px color-mix(in srgb, var(--accent-subtle) 5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, rgba(255, 255, 255, 0.1) 50%, transparent);
 }
 
 .living-garden-stat-card:hover {
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.6);
-  border-color: var(--garden-accent, #10b981);
+  background: color-mix(in srgb, var(--bg-hover) 65%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--glass-border) 50%);
+  box-shadow: 
+    0 8px 24px color-mix(in srgb, var(--accent-subtle) 12%, transparent),
+    0 0 30px color-mix(in srgb, var(--accent-fill) 8%, transparent);
 }
 
 .living-garden-stat-value {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--garden-accent, #10b981);
+  color: var(--accent);
   display: block;
   line-height: 1;
   margin-bottom: 4px;

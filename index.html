@@ -821,140 +821,170 @@
 
     <!-- Add Item Modal -->
     <div
-      class="modal-overlay"
+      class="modal-overlay edit-sheet"
       id="goalModal"
       role="dialog"
       aria-modal="true"
       aria-labelledby="goal-modal-title"
     >
-      <div class="modal">
-        <div class="modal-header">
-          <h2 class="modal-title" id="goal-modal-title">Set New Intention</h2>
-          <p class="modal-level-descriptor" id="goal-modal-level-descriptor">
-            Year direction
-          </p>
-          <button class="modal-close" id="closeModal" aria-label="Close modal">
-            ×
-          </button>
-        </div>
-        <form id="goalForm">
-          <div class="goal-hero" id="goalHero">
-            <div class="form-group" id="goalTitleGroup">
-              <label for="goalTitle">What would you like to place here?</label>
-              <input type="text" id="goalTitle" required aria-required="true" />
+      <div class="modal edit-sheet-panel">
+        <form id="goalForm" class="goal-edit-sheet">
+          <header class="edit-sheet-topbar">
+            <div class="edit-sheet-topbar-title">
+              <h2 class="modal-title" id="goal-modal-title">
+                Set New Intention
+              </h2>
+              <p class="modal-level-descriptor" id="goal-modal-level-descriptor">
+                Year direction
+              </p>
             </div>
-            <div class="goal-hero-date" id="goalHeroDateSlot" hidden></div>
-            <p class="goal-hero-reassurance" id="goalHeroReassurance"></p>
-          </div>
-          <div id="goalAccordionContainer"></div>
-          <div id="goalDetailsPool" hidden>
-            <div class="form-row" id="goalScopeRow">
-              <div class="form-group" id="goalYearGroup" style="display: none">
-                <label for="goalYear">Year</label>
-                <input
-                  type="number"
-                  id="goalYear"
-                  min="1970"
-                  max="2100"
-                  inputmode="numeric"
-                />
+          </header>
+
+          <div class="edit-sheet-body">
+            <section class="edit-sheet-section edit-sheet-primary">
+              <div class="goal-hero" id="goalHero">
+                <div class="form-group" id="goalTitleGroup">
+                  <label for="goalTitle">Name</label>
+                  <input
+                    type="text"
+                    id="goalTitle"
+                    required
+                    aria-required="true"
+                    autofocus
+                    placeholder="Name this focus"
+                  />
+                </div>
+                <div class="goal-hero-date" id="goalHeroDateSlot" hidden></div>
+                <p
+                  class="goal-hero-reassurance"
+                  id="goalHeroReassurance"
+                ></p>
               </div>
-              <div
-                class="form-group"
-                id="goalStartDateGroup"
-                style="display: none"
-              >
-                <label for="goalStartDate">Start date</label>
-                <input type="date" id="goalStartDate" />
+            </section>
+
+            <section class="edit-sheet-section" aria-label="Linkage">
+              <div id="goalAccordionContainer"></div>
+            </section>
+
+            <section class="edit-sheet-section" id="goalDetailsPool" hidden>
+              <div class="form-row" id="goalScopeRow">
+                <div class="form-group" id="goalYearGroup" style="display: none">
+                  <label for="goalYear">Year</label>
+                  <input
+                    type="number"
+                    id="goalYear"
+                    min="1970"
+                    max="2100"
+                    inputmode="numeric"
+                  />
+                </div>
+                <div
+                  class="form-group"
+                  id="goalStartDateGroup"
+                  style="display: none"
+                >
+                  <label for="goalStartDate">Start date</label>
+                  <input type="date" id="goalStartDate" />
+                </div>
               </div>
-            </div>
-            <div class="form-row">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="goalMonth">When?</label>
+                  <select id="goalMonth" required aria-required="true"></select>
+                </div>
+                <div class="form-group">
+                  <label for="goalCategory">Category</label>
+                  <select id="goalCategory">
+                    <option value="" selected>No category</option>
+                    <option value="career">Career</option>
+                    <option value="health">Health</option>
+                    <option value="finance">Finance</option>
+                    <option value="personal">Personal</option>
+                    <option value="creative">Creative</option>
+                  </select>
+                </div>
+                <div class="form-group" id="goalActivityGroup"></div>
+              </div>
+              <div class="form-row" id="goalDurationRow">
+                <div
+                  class="form-group"
+                  id="milestoneDurationGroup"
+                  style="display: none"
+                >
+                  <label for="milestoneDurationMonths">Duration (months)</label>
+                  <select id="milestoneDurationMonths">
+                    <option value="1" selected>1 month</option>
+                    <option value="2">2 months</option>
+                    <option value="3">3 months</option>
+                    <option value="4">4 months</option>
+                    <option value="5">5 months</option>
+                    <option value="6">6 months</option>
+                    <option value="7">7 months</option>
+                    <option value="8">8 months</option>
+                    <option value="9">9 months</option>
+                    <option value="10">10 months</option>
+                    <option value="11">11 months</option>
+                    <option value="12">12 months</option>
+                  </select>
+                </div>
+                <div
+                  class="form-group"
+                  id="focusDurationGroup"
+                  style="display: none"
+                >
+                  <label for="focusDurationWeeks">Duration (weeks)</label>
+                  <select id="focusDurationWeeks">
+                    <option value="1" selected>1 week</option>
+                    <option value="2">2 weeks</option>
+                    <option value="3">3 weeks</option>
+                    <option value="4">4 weeks</option>
+                    <option value="5">5 weeks</option>
+                    <option value="6">6 weeks</option>
+                    <option value="7">7 weeks</option>
+                    <option value="8">8 weeks</option>
+                    <option value="9">9 weeks</option>
+                    <option value="10">10 weeks</option>
+                    <option value="11">11 weeks</option>
+                    <option value="12">12 weeks</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="goalStartTime">Start Time</label>
+                  <input type="time" id="goalStartTime" />
+                </div>
+                <div class="form-group">
+                  <label for="goalEndTime">End Time</label>
+                  <input type="time" id="goalEndTime" />
+                </div>
+              </div>
               <div class="form-group">
-                <label for="goalMonth">When?</label>
-                <select id="goalMonth" required aria-required="true"></select>
-              </div>
-              <div class="form-group">
-                <label for="goalCategory">Category</label>
-                <select id="goalCategory">
-                  <option value="" selected>No category</option>
-                  <option value="career">Career</option>
-                  <option value="health">Health</option>
-                  <option value="finance">Finance</option>
-                  <option value="personal">Personal</option>
-                  <option value="creative">Creative</option>
+                <label for="goalPriority">Priority</label>
+                <select id="goalPriority">
+                  <option value="low">Low - No rush</option>
+                  <option value="medium" selected>Medium - When you can</option>
+                  <option value="high">High - Important</option>
+                  <option value="urgent">Urgent - Do soon</option>
                 </select>
               </div>
-              <div class="form-group" id="goalActivityGroup"></div>
-            </div>
-            <div class="form-row" id="goalDurationRow">
-              <div
-                class="form-group"
-                id="milestoneDurationGroup"
-                style="display: none"
+            </section>
+            <div class="edit-sheet-actions">
+              <button
+                type="button"
+                class="edit-sheet-action edit-sheet-action-cancel"
+                id="cancelModal"
               >
-                <label for="milestoneDurationMonths">Duration (months)</label>
-                <select id="milestoneDurationMonths">
-                  <option value="1" selected>1 month</option>
-                  <option value="2">2 months</option>
-                  <option value="3">3 months</option>
-                  <option value="4">4 months</option>
-                  <option value="5">5 months</option>
-                  <option value="6">6 months</option>
-                  <option value="7">7 months</option>
-                  <option value="8">8 months</option>
-                  <option value="9">9 months</option>
-                  <option value="10">10 months</option>
-                  <option value="11">11 months</option>
-                  <option value="12">12 months</option>
-                </select>
-              </div>
-              <div
-                class="form-group"
-                id="focusDurationGroup"
-                style="display: none"
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="edit-sheet-action edit-sheet-action-save"
+                id="goalSubmitButton"
               >
-                <label for="focusDurationWeeks">Duration (weeks)</label>
-                <select id="focusDurationWeeks">
-                  <option value="1" selected>1 week</option>
-                  <option value="2">2 weeks</option>
-                  <option value="3">3 weeks</option>
-                  <option value="4">4 weeks</option>
-                  <option value="5">5 weeks</option>
-                  <option value="6">6 weeks</option>
-                  <option value="7">7 weeks</option>
-                  <option value="8">8 weeks</option>
-                  <option value="9">9 weeks</option>
-                  <option value="10">10 weeks</option>
-                  <option value="11">11 weeks</option>
-                  <option value="12">12 weeks</option>
-                </select>
-              </div>
+                Set Intention
+              </button>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="goalStartTime">Start Time</label>
-                <input type="time" id="goalStartTime" />
-              </div>
-              <div class="form-group">
-                <label for="goalEndTime">End Time</label>
-                <input type="time" id="goalEndTime" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="goalPriority">Priority</label>
-              <select id="goalPriority">
-                <option value="low">Low - No rush</option>
-                <option value="medium" selected>Medium - When you can</option>
-                <option value="high">High - Important</option>
-                <option value="urgent">Urgent - Do soon</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn btn-ghost" id="cancelModal">
-              Cancel
-            </button>
-            <button type="submit" class="btn btn-primary">Set Intention</button>
           </div>
         </form>
       </div>

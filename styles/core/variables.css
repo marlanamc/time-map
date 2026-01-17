@@ -31,6 +31,23 @@
     0.12
   ); /* Increased to 0.12 for WCAG AA 3:1 UI component contrast */
   --glass-shine: rgba(250, 252, 251, 0.55);
+  --glass-panel-border-radius: var(--radius-lg);
+  --glass-panel-blur: 14px;
+  --glass-panel-bg: color-mix(in srgb, var(--glass-bg) 75%, rgba(255, 255, 255, 0.15));
+  --glass-panel-border: color-mix(in srgb, var(--glass-border) 60%, rgba(255, 255, 255, 0.35));
+  --glass-panel-shadow: 0 14px 30px rgba(3, 7, 20, 0.32);
+
+  --glass-button-bg: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-button) 80%, rgba(255, 255, 255, 0.25)) 0%,
+    color-mix(in srgb, var(--accent-progress) 80%, rgba(0, 0, 0, 0.65)) 100%
+  );
+  --glass-button-border: color-mix(in srgb, var(--accent-border) 70%, rgba(255, 255, 255, 0.35));
+  --glass-button-shadow: 0 12px 28px rgba(3, 7, 20, 0.45);
+  --glass-button-glow: color-mix(in srgb, var(--accent-progress) 70%, rgba(255, 255, 255, 0.35));
+  --glass-pill-bg: color-mix(in srgb, var(--glass-bg) 65%, rgba(255, 255, 255, 0.08));
+  --glass-pill-border: color-mix(in srgb, var(--glass-border) 65%, rgba(255, 255, 255, 0.3));
+  --glass-pill-shadow: 0 8px 20px rgba(3, 7, 20, 0.25);
 
   /* Text hierarchy - Optimized for day mode (dark text on light backgrounds) */
   --text-primary: #1f2d2a;
@@ -692,4 +709,19 @@
 
   --panel-bg: rgba(12, 22, 36, 0.85);
   --panel-backdrop: rgba(0, 0, 0, 0.8);
+
+  --glass-panel-bg: color-mix(in srgb, var(--glass-bg) 88%, rgba(5, 7, 20, 0.45));
+  --glass-panel-border: rgba(255, 255, 255, 0.22);
+  --glass-panel-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+  --glass-button-bg: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-button) 70%, rgba(255, 255, 255, 0.15)) 0%,
+    color-mix(in srgb, var(--accent-progress) 75%, rgba(0, 0, 0, 0.85)) 100%
+  );
+  --glass-button-border: rgba(255, 255, 255, 0.35);
+  --glass-button-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+  --glass-button-glow: color-mix(in srgb, var(--accent-progress) 70%, rgba(255, 255, 255, 0.25));
+  --glass-pill-bg: rgba(255, 255, 255, 0.06);
+  --glass-pill-border: rgba(255, 255, 255, 0.2);
+  --glass-pill-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
 }
