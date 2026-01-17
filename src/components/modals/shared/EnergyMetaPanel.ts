@@ -37,6 +37,27 @@ export type EnergyMetaPanelSetupOptions = EnergyMetaPanelOptions & {
   onIconChange?: (icon: string) => void; // Add icon change handler
 };
 
+function renderEmojiInput(id: string, label: string, value: string): string {
+  return `
+    <div class="form-group">
+      <label for="${id}">${label}</label>
+      <div class="vision-icon-input-group">
+        <input
+          type="text"
+          id="${id}"
+          class="modal-input vision-emoji-input"
+          placeholder="Tap to choose emoji"
+          maxlength="10"
+          value="${escapeHtml(value)}"
+          readonly
+          aria-label="Tap to open emoji keyboard"
+        />
+      </div>
+      <p class="vision-icon-hint">Tap the field, then use the emoji key on your keyboard</p>
+    </div>
+  `;
+}
+
 export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
   const { level, meta, icon } = opts;
 
@@ -48,22 +69,7 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
       })
       .join("");
     return `
-      <div class="form-group">
-        <label for="visionIcon">Vision emoji (optional)</label>
-        <div class="vision-icon-input-group">
-          <input
-            type="text"
-            id="visionIcon"
-            class="modal-input vision-emoji-input"
-            placeholder="Tap to choose emoji"
-            maxlength="10"
-            value="${escapeHtml(icon ?? "")}"
-            readonly
-            aria-label="Tap to open emoji keyboard"
-          />
-        </div>
-        <p class="vision-icon-hint">Tap the field, then use the emoji key on your keyboard</p>
-      </div>
+      ${renderEmojiInput("visionIcon", "Vision emoji (optional)", icon ?? "")}
       <div class="form-group">
         <label for="visionAccent">Vision color (optional)</label>
         <select id="visionAccent" class="modal-select">
@@ -78,6 +84,7 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
 
   if (level === "focus") {
     return `
+      ${renderEmojiInput("focusIcon", "Focus emoji (optional)", icon ?? "")}
       <div class="form-group">
         <label class="toggle-label">
           <input type="checkbox" id="focusEasyMode"${
@@ -89,7 +96,7 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
       <div class="form-group">
         <label for="focusLowEnergy">Low-energy version (optional)</label>
         <textarea id="focusLowEnergy" rows="2">${escapeHtml(
-          meta?.lowEnergyVersion ?? ""
+          meta?.lowEnergyVersion ?? "",
         )}</textarea>
       </div>
     `;
@@ -108,11 +115,21 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
     `;
   }
 
+  if (level === "milestone") {
+    return `
+      ${renderEmojiInput(
+        "milestoneIcon",
+        "Milestone emoji (optional)",
+        icon ?? "",
+      )}
+    `;
+  }
+
   return "";
 }
 
 function normalizeValue(
-  value: string | boolean | undefined
+  value: string | boolean | undefined,
 ): string | boolean | undefined {
   if (typeof value === "string") {
     const trimmed = value.trim();
@@ -139,7 +156,7 @@ function mergeMeta(base: GoalMeta, updates: Partial<GoalMeta>): GoalMeta {
 
 export function setupEnergyMetaPanel(
   container: HTMLElement | null,
-  opts: EnergyMetaPanelSetupOptions
+  opts: EnergyMetaPanelSetupOptions,
 ): void {
   if (!container) return;
   const { level, onChange, getMeta, onRequestRerender, onIconChange } = opts;
@@ -163,28 +180,18 @@ export function setupEnergyMetaPanel(
         {
           accentTheme: accent.value ? (accent.value as AccentTheme) : undefined,
         },
-        false
+        false,
       );
     });
 
-    // Handle icon input - tap to open native emoji keyboard
-    if (iconInput) {
-      // Remove readonly on focus to allow input
-      iconInput.addEventListener("focus", () => {
-        iconInput.removeAttribute("readonly");
-      });
+    setupEmojiField(iconInput, onIconChange);
+    return;
+  }
 
-      // Re-add readonly on blur to maintain tap-to-open behavior
-      iconInput.addEventListener("blur", () => {
-        iconInput.setAttribute("readonly", "");
-      });
-
-      // Handle icon input change
-      iconInput.addEventListener("input", () => {
-        onIconChange?.(iconInput.value);
-      });
-    }
-
+  if (level === "milestone") {
+    const iconInput =
+      container.querySelector<HTMLInputElement>("#milestoneIcon");
+    setupEmojiField(iconInput, onIconChange);
     return;
   }
 
@@ -193,6 +200,7 @@ export function setupEnergyMetaPanel(
       container.querySelector<HTMLInputElement>("#focusEasyMode");
     const lowEnergy =
       container.querySelector<HTMLTextAreaElement>("#focusLowEnergy");
+    const iconInput = container.querySelector<HTMLInputElement>("#focusIcon");
 
     easyMode?.addEventListener("change", () => {
       update({ easyMode: easyMode.checked ? true : undefined }, true);
@@ -201,6 +209,8 @@ export function setupEnergyMetaPanel(
     lowEnergy?.addEventListener("input", () => {
       update({ lowEnergyVersion: lowEnergy.value }, false);
     });
+
+    setupEmojiField(iconInput, onIconChange);
     return;
   }
 
@@ -208,6 +218,28 @@ export function setupEnergyMetaPanel(
     const tiny = container.querySelector<HTMLInputElement>("#intentionTiny");
     tiny?.addEventListener("input", () => {
       update({ tinyVersion: tiny.value }, false);
+    });
+  }
+}
+
+function setupEmojiField(
+  iconInput: HTMLInputElement | null,
+  onIconChange?: (icon: string) => void,
+) {
+  if (iconInput) {
+    // Remove readonly on focus to allow input
+    iconInput.addEventListener("focus", () => {
+      iconInput.removeAttribute("readonly");
+    });
+
+    // Re-add readonly on blur to maintain tap-to-open behavior
+    iconInput.addEventListener("blur", () => {
+      iconInput.setAttribute("readonly", "");
+    });
+
+    // Handle icon input change
+    iconInput.addEventListener("input", () => {
+      onIconChange?.(iconInput.value);
     });
   }
 }

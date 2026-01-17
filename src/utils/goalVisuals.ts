@@ -3,7 +3,14 @@ import type { Goal } from "../types";
 
 export function getGoalCategoryMeta(category?: string | null) {
   if (!category) return null;
-  return (CONFIG.CATEGORIES as Record<string, { emoji: string; color: string; label: string }>)[category] ?? null;
+  return (
+    (
+      CONFIG.CATEGORIES as Record<
+        string,
+        { emoji: string; color: string; label: string }
+      >
+    )[category] ?? null
+  );
 }
 
 export function getGoalActivityId(goal: Goal): string | undefined {
@@ -26,10 +33,10 @@ export function getActivityEmoji(goal: Goal): string | undefined {
 }
 
 export function getGoalEmoji(goal: Goal, fallback = "📍"): string {
+  if (goal.icon) return goal.icon;
   const activity = getActivityEmoji(goal);
   if (activity) return activity;
   const categoryMeta = getGoalCategoryMeta(goal.category);
   if (categoryMeta?.emoji) return categoryMeta.emoji;
-  if (goal.icon) return goal.icon;
   return fallback;
 }

@@ -149,9 +149,9 @@ html.dark-mode .living-garden-header::before {
 }
 
 .living-garden-title {
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   margin: 0;
   display: block;
   text-align: center;
@@ -165,11 +165,11 @@ html.dark-mode .living-garden-header::before {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
   text-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.35),
-    0 2px 12px rgba(255, 255, 255, 0.6),
-    0 0 2px rgba(0, 0, 0, 0.3);
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 1px 6px rgba(255, 255, 255, 0.4),
+    0 0 1px rgba(0, 0, 0, 0.2);
   -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 10;
@@ -260,9 +260,9 @@ html.dark-mode .living-garden-title {
 }
 
 .living-garden-summary {
-  font-size: var(--text-base);
-  color: rgba(15, 23, 42, 0.8);
-  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-sm);
+  color: rgba(15, 23, 42, 0.7);
+  padding: var(--space-2) var(--space-4);
   background: rgba(255, 255, 255, 0.5);
   border-radius: var(--radius-full);
   display: inline-block;
@@ -365,22 +365,22 @@ html.dark-mode .living-garden-summary {
 .living-garden-ecosystem {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: var(--space-8);
-  margin-bottom: var(--space-12);
+  gap: var(--space-6);
+  margin-bottom: var(--space-10);
   perspective: 1000px;
 }
 
 .living-garden-plot {
   background: rgba(255, 255, 255, 0.65);
-  border-radius: 28px;
-  padding: var(--space-8);
+  border-radius: 20px;
+  padding: var(--space-6);
   border: 1px solid rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   position: relative;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-  min-height: 420px;
+  min-height: 380px;
   box-shadow:
     0 4px 6px rgba(0, 0, 0, 0.02),
     0 12px 24px rgba(0, 0, 0, 0.04);
@@ -467,8 +467,8 @@ html.dark-mode .living-garden-plot:hover {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-size: 1.15rem;
+  font-weight: 700;
   color: var(--text-primary);
   padding: var(--space-5) var(--space-6);
   background: rgba(255, 255, 255, 0.6);
@@ -1059,8 +1059,8 @@ html.dark-mode .living-garden-reflection-actions {
 .living-garden-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-4);
-  margin-bottom: var(--space-10);
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
   animation: growIn 0.8s ease-out 0.2s backwards;
 }
 
@@ -1086,7 +1086,7 @@ html.dark-mode .living-garden-stat-card {
 }
 
 .living-garden-stat-value {
-  font-size: 2.25rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--garden-accent, #10b981);
   display: block;
@@ -1095,7 +1095,7 @@ html.dark-mode .living-garden-stat-card {
 }
 
 .living-garden-stat-label {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
   color: var(--text-tertiary);
   text-transform: uppercase;
@@ -1170,13 +1170,13 @@ html.dark-mode .living-garden-reflection-input {
 .living-garden-checkin-cta {
   background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
   color: white;
-  padding: var(--space-6) var(--space-8);
-  border-radius: 24px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 16px;
   margin-bottom: var(--space-8);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.15);
   animation: growIn 0.8s ease-out;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1189,7 +1189,7 @@ html.dark-mode .living-garden-reflection-input {
 
 .living-garden-checkin-text h3 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: white !important;
 }
@@ -1202,6 +1202,6 @@ html.dark-mode .living-garden-reflection-input {
 }
 
 .living-garden-checkin-icon {
-  font-size: 2rem;
+  font-size: 1.75rem;
   animation: bounce 2s infinite;
 }
