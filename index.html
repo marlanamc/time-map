@@ -400,6 +400,14 @@
           <div class="now-panel-logo">
             <div class="logo-icon" aria-hidden="true">🌱</div>
             <span class="logo-text">The Garden Fence</span>
+            <button
+              class="help-btn"
+              id="showShortcutsBtn"
+              title="Keyboard Shortcuts (Press ?)"
+              aria-label="Keyboard Shortcuts"
+            >
+              ?
+            </button>
           </div>
           <div class="now-label">You Are Here</div>
           <div class="now-context" id="nowContext"></div>
@@ -975,6 +983,7 @@
     <div class="toast" id="toast" role="status" aria-live="polite">
       <span class="toast-icon" id="toastIcon" aria-hidden="true"></span>
       <span class="toast-message" id="toastMessage">Saved.</span>
+      <button class="toast-close" id="toastClose" aria-label="Close">×</button>
     </div>
 
     <!-- Support Tools Panel (right drawer) -->
@@ -1000,9 +1009,14 @@
         <div class="support-panel-body" role="menu" aria-label="Menu">
           <!-- Section 1: Account -->
           <div class="support-panel-section" data-section="account">
-            <div class="support-panel-section-label" aria-hidden="true">Account</div>
+            <div class="support-panel-section-label" aria-hidden="true">
+              Account
+            </div>
 
-            <div class="support-panel-profile-section compact" aria-label="User profile">
+            <div
+              class="support-panel-profile-section compact"
+              aria-label="User profile"
+            >
               <div class="support-panel-avatar-wrapper">
                 <div class="user-avatar" id="supportPanelUserAvatar">U</div>
               </div>
@@ -1041,7 +1055,9 @@
 
           <!-- Section 2: Preferences -->
           <div class="support-panel-section" data-section="preferences">
-            <div class="support-panel-section-label" aria-hidden="true">Preferences</div>
+            <div class="support-panel-section-label" aria-hidden="true">
+              Preferences
+            </div>
 
             <button
               class="support-panel-item primary"
@@ -1059,7 +1075,9 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+                  <path
+                    d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+                  ></path>
                   <path
                     d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z"
                   ></path>
@@ -1102,14 +1120,17 @@
                 aria-describedby="support-panel-focus-desc"
               ></button>
               <span class="sr-only" id="support-panel-focus-desc"
-                >Focus reduces visual noise. It doesn't track productivity.</span
+                >Focus reduces visual noise. It doesn't track
+                productivity.</span
               >
             </div>
           </div>
 
           <!-- Section 3: Appearance -->
           <div class="support-panel-section" data-section="appearance">
-            <div class="support-panel-section-label" aria-hidden="true">Appearance</div>
+            <div class="support-panel-section-label" aria-hidden="true">
+              Appearance
+            </div>
 
             <div class="support-panel-focus-toggle support-panel-theme-toggle">
               <label
@@ -1128,7 +1149,10 @@
               ></button>
             </div>
 
-            <div class="support-panel-appearance-card" aria-label="Accent color">
+            <div
+              class="support-panel-appearance-card"
+              aria-label="Accent color"
+            >
               <div class="support-panel-appearance-label">Accent color</div>
               <div
                 class="theme-picker support-panel-theme-picker"
@@ -1165,12 +1189,17 @@
                 </div>
               </button>
 
-              <div class="support-panel-section-content" data-section="advanced">
+              <div
+                class="support-panel-section-content"
+                data-section="advanced"
+              >
                 <div
                   class="support-panel-appearance-card"
                   aria-label="Time of day theme"
                 >
-                  <div class="support-panel-appearance-label">Time Theme (Dev)</div>
+                  <div class="support-panel-appearance-label">
+                    Time Theme (Dev)
+                  </div>
                   <div
                     class="time-theme-picker"
                     id="timeThemePicker"
@@ -1238,7 +1267,9 @@
                   class="support-panel-appearance-card"
                   aria-label="Time Range Configuration"
                 >
-                  <div class="support-panel-appearance-label">Daily Time Range</div>
+                  <div class="support-panel-appearance-label">
+                    Daily Time Range
+                  </div>
                   <div class="time-range-config">
                     <div class="time-range-inputs">
                       <div class="time-range-input-group">
@@ -1291,7 +1322,9 @@
                   </div>
                 </div>
 
-                <div class="support-panel-group-label" aria-hidden="true">Tools</div>
+                <div class="support-panel-group-label" aria-hidden="true">
+                  Tools
+                </div>
 
                 <button
                   class="support-panel-item compact"
@@ -1317,7 +1350,9 @@
                   </span>
                   <span class="support-panel-text">
                     <span class="support-panel-name">Brain Dump</span>
-                    <span class="support-panel-desc">Park intrusive thoughts</span>
+                    <span class="support-panel-desc"
+                      >Park intrusive thoughts</span
+                    >
                   </span>
                 </button>
 
@@ -1342,7 +1377,9 @@
                   </span>
                   <span class="support-panel-text">
                     <span class="support-panel-name">Body Double</span>
-                    <span class="support-panel-desc">Focused work sessions</span>
+                    <span class="support-panel-desc"
+                      >Focused work sessions</span
+                    >
                   </span>
                 </button>
 
@@ -1387,14 +1424,18 @@
                       stroke-linecap="round"
                       stroke-linejoin="round"
                     >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <path
+                        d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                      ></path>
                       <polyline points="7 10 12 15 17 10"></polyline>
                       <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
                   </span>
                   <span class="support-panel-text">
                     <span class="support-panel-name">Install App</span>
-                    <span class="support-panel-desc">Add to your home screen</span>
+                    <span class="support-panel-desc"
+                      >Add to your home screen</span
+                    >
                   </span>
                 </button>
 
@@ -1415,14 +1456,18 @@
                       stroke-linecap="round"
                       stroke-linejoin="round"
                     >
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                      <path
+                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                      ></path>
                       <line x1="12" y1="9" x2="12" y2="13"></line>
                       <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
                   </span>
                   <span class="support-panel-text">
                     <span class="support-panel-name">Sync Issues</span>
-                    <span class="support-panel-desc">Review unsynced changes</span>
+                    <span class="support-panel-desc"
+                      >Review unsynced changes</span
+                    >
                   </span>
                 </button>
               </div>

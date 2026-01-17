@@ -5,239 +5,260 @@
 
 /* CSS Variables */
 :root {
-    /* ===========================================
+  /* ===========================================
        Light Mode Surfaces (Paper System)
        - No pure white for large surfaces
        - 3-level hierarchy: app wash → card → raised
        =========================================== */
-    --surface-0: #EAF4F2; /* app background wash */
-    --surface-1: #F2F7F6; /* default card/panel */
-    --surface-2: #FAFCFB; /* raised/active/selected */
+  --surface-0: #eaf4f2; /* app background wash */
+  --surface-1: #f2f7f6; /* default card/panel */
+  --surface-2: #fafcfb; /* raised/active/selected */
 
-    /* Base colors - mapped to surface system */
-    --bg-base: var(--surface-0);
-    --bg-surface: var(--surface-1);
-    --bg-elevated: var(--surface-2);
-    --bg-hover: rgba(31, 45, 42, 0.04);
-    --bg-active: rgba(31, 45, 42, 0.07);
+  /* Base colors - mapped to surface system */
+  --bg-base: var(--surface-0);
+  --bg-surface: var(--surface-1);
+  --bg-elevated: var(--surface-2);
+  --bg-hover: rgba(31, 45, 42, 0.04);
+  --bg-active: rgba(31, 45, 42, 0.07);
 
-    /* Glass effects - Soft & Gentle */
-    --divider: rgba(0, 0, 0, 0.06);
-    --glass-bg: rgba(242, 247, 246, 0.86);
-    --glass-border: rgba(31, 45, 42, 0.12); /* Increased to 0.12 for WCAG AA 3:1 UI component contrast */
-    --glass-shine: rgba(250, 252, 251, 0.55);
+  /* Glass effects - Soft & Gentle */
+  --divider: rgba(0, 0, 0, 0.06);
+  --glass-bg: rgba(242, 247, 246, 0.86);
+  --glass-border: rgba(
+    31,
+    45,
+    42,
+    0.12
+  ); /* Increased to 0.12 for WCAG AA 3:1 UI component contrast */
+  --glass-shine: rgba(250, 252, 251, 0.55);
 
-    /* Text hierarchy - Optimized for day mode (dark text on light backgrounds) */
-    --text-primary: #1F2D2A;
-    --text-secondary: #4B6761;
-    --text-tertiary: rgba(31, 45, 42, 0.64);
-    --text-ghost: rgba(31, 45, 42, 0.48);
-    /* Text on accent-filled UI (chips, badges, zoom controls) */
-    --text-on-accent: rgba(255, 255, 255, 1.0); /* Increased to 1.0 for WCAG AA contrast */
+  /* Text hierarchy - Optimized for day mode (dark text on light backgrounds) */
+  --text-primary: #1f2d2a;
+  --text-secondary: #4b6761;
+  --text-tertiary: rgba(31, 45, 42, 0.64);
+  --text-ghost: rgba(31, 45, 42, 0.48);
+  /* Text on accent-filled UI (chips, badges, zoom controls) */
+  --text-on-accent: rgba(
+    255,
+    255,
+    255,
+    1
+  ); /* Increased to 1.0 for WCAG AA contrast */
 
-    /* Daylight Garden Colors (Vibrant Primary) */
-    --sage: #5A9B8D;
-    /* saturated leaf green */
-    --teal: #4A9099;
-    /* primary garden blue */
-    /* Clay removed - using coral instead for earth tones */
-    --coral: #B8472F;
-    /* warm earth tone */
-    --terracotta: var(--coral);
-    /* legacy alias (used in gradients/themes) */
-    --earth: var(--coral);
-    /* legacy alias (used in a few components) */
-    --sky: #8CB7D9;
-    /* legacy alias (used in accent themes) */
-    --sunset: #E77D3E;
-    /* vibrant orange spice (DMC 722) */
-    --petal: #C85A65;
-    /* bright floral pink (darkened for WCAG AA contrast) */
-    --amber: #D89A00;
-    /* bright sunlight (darkened for WCAG AA contrast) */
-    --indigo: #4F46E5;
-    /* deep indigo */
-    --violet: #6D28D9;
-    /* vibrant violet */
-    --rose: #E11D48;
-    /* rose red */
-    --coral: #B8472F;
-    /* warm coral */
-    --mint: #10B981;
-    /* fresh mint */
+  /* Daylight Garden Colors (Vibrant Primary) */
+  --sage: #5a9b8d;
+  /* saturated leaf green */
+  --teal: #4a9099;
+  /* primary garden blue */
+  /* Clay removed - using coral instead for earth tones */
+  --coral: #b8472f;
+  /* warm earth tone */
+  --terracotta: var(--coral);
+  /* legacy alias (used in gradients/themes) */
+  --earth: var(--coral);
+  /* legacy alias (used in a few components) */
+  --sky: #8cb7d9;
+  /* legacy alias (used in accent themes) */
+  --sunset: #e77d3e;
+  /* vibrant orange spice (DMC 722) */
+  --petal: #c85a65;
+  /* bright floral pink (darkened for WCAG AA contrast) */
+  --amber: #d89a00;
+  /* bright sunlight (darkened for WCAG AA contrast) */
+  --indigo: #4f46e5;
+  /* deep indigo */
+  --violet: #6d28d9;
+  /* vibrant violet */
+  --rose: #e11d48;
+  /* rose red */
+  --coral: #b8472f;
+  /* warm coral */
+  --mint: #10b981;
+  /* fresh mint */
 
-    /* Accent System
+  /* Accent System
        - Keep legacy `--accent-*` tokens for compatibility across themes.
        - Prefer `--accent-fill*` for filled surfaces (buttons, badges, progress),
          and `--accent-stroke` for outlines/borders/focus.
        - The rainbow theme overrides `--accent-fill*` to a unified multi-stop gradient. */
-    --accent: var(--teal);  /* Primary accent (default theme) */
-    --accent-hover: #5AAAB2;
-    --accent-muted: rgba(74, 144, 153, 0.16);
-    --accent-subtle: rgba(74, 144, 153, 0.08);
+  --accent: var(--teal); /* Primary accent (default theme) */
+  --accent-hover: #5aaab2;
+  --accent-muted: rgba(74, 144, 153, 0.16);
+  --accent-subtle: rgba(74, 144, 153, 0.08);
 
-    /* Filled surfaces */
-    --accent-stroke: var(--accent);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, var(--accent-button) 0%, var(--accent-progress) 120%);
-    --accent-badge-fill: var(--accent-badge);
+  /* Filled surfaces */
+  --accent-stroke: var(--accent);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(
+    135deg,
+    var(--accent-button) 0%,
+    var(--accent-progress) 120%
+  );
+  --accent-badge-fill: var(--accent-badge);
 
-    /* Legacy accents for different UI elements */
-    --accent-button: var(--teal);  /* Primary buttons */
-    --accent-active: var(--sage);  /* Active states, selected items */
-    --accent-border: var(--sky);  /* Borders, dividers */
-    --accent-highlight: var(--petal);  /* Highlights, focus rings */
-    --accent-link: var(--indigo);  /* Links, interactive text */
-    --accent-badge: #D96320;  /* Badges, tags */
-    --accent-progress: var(--sunset);  /* Progress bars, meters */
-    --accent-icon: var(--violet);  /* Icons, decorative elements */
+  /* Legacy accents for different UI elements */
+  --accent-button: var(--teal); /* Primary buttons */
+  --accent-active: var(--sage); /* Active states, selected items */
+  --accent-border: var(--sky); /* Borders, dividers */
+  --accent-highlight: var(--petal); /* Highlights, focus rings */
+  --accent-link: var(--indigo); /* Links, interactive text */
+  --accent-badge: #d96320; /* Badges, tags */
+  --accent-progress: var(--sunset); /* Progress bars, meters */
+  --accent-icon: var(--violet); /* Icons, decorative elements */
 
-    /* Month card transparency */
-    --month-card-bg: rgba(242, 247, 246, 0.62);
-    --month-card-bg-hover: rgba(250, 252, 251, 0.72);
-    --month-card-past-grey: rgba(160, 160, 160, 0.12);
-    --month-card-past-grey-hover: rgba(160, 160, 160, 0.18);
+  /* Month card transparency */
+  --month-card-bg: rgba(242, 247, 246, 0.62);
+  --month-card-bg-hover: rgba(250, 252, 251, 0.72);
+  --month-card-past-grey: rgba(160, 160, 160, 0.12);
+  --month-card-past-grey-hover: rgba(160, 160, 160, 0.18);
 
-    /* Semantic colors */
-    --success: #5A9B8D;
-    --success-muted: rgba(90, 155, 141, 0.12);
-    --warning: var(--sunset);
-    --warning-muted: rgba(244, 162, 97, 0.12);
-    --danger: var(--coral);
-    --danger-muted: rgba(184, 71, 47, 0.12);
-    --info: #4A90E2;
-    /* primary blue */
-    --info-muted: rgba(74, 144, 226, 0.12);
+  /* Semantic colors */
+  --success: #5a9b8d;
+  --success-muted: rgba(90, 155, 141, 0.12);
+  --warning: var(--sunset);
+  --warning-muted: rgba(244, 162, 97, 0.12);
+  --danger: var(--coral);
+  --danger-muted: rgba(184, 71, 47, 0.12);
+  --info: #4a90e2;
+  /* primary blue */
+  --info-muted: rgba(74, 144, 226, 0.12);
 
-    /* Category colors */
-    --cat-career: #4A90E2;
-    /* Primary Blue */
-    --cat-career-muted: rgba(74, 144, 226, 0.12);
-    --cat-health: #5A9B8D;
-    /* Primary Green */
-    --cat-health-muted: rgba(90, 155, 141, 0.12);
-    --cat-finance: var(--amber);
-    /* Primary Yellow */
-    --cat-finance-muted: rgba(240, 180, 41, 0.12);
-    --cat-personal: var(--petal);
-    --cat-personal-muted: rgba(229, 154, 160, 0.12);
-    --cat-creative: #9F7AEA;
-    /* Vibrant Purple */
-    --cat-creative-muted: rgba(159, 122, 234, 0.12);
+  /* Category colors */
+  --cat-career: #4a90e2;
+  /* Primary Blue */
+  --cat-career-muted: rgba(74, 144, 226, 0.12);
+  --cat-health: #5a9b8d;
+  /* Primary Green */
+  --cat-health-muted: rgba(90, 155, 141, 0.12);
+  --cat-finance: var(--amber);
+  /* Primary Yellow */
+  --cat-finance-muted: rgba(240, 180, 41, 0.12);
+  --cat-personal: var(--petal);
+  --cat-personal-muted: rgba(229, 154, 160, 0.12);
+  --cat-creative: #9f7aea;
+  /* Vibrant Purple */
+  --cat-creative-muted: rgba(159, 122, 234, 0.12);
 
-    /* Priority indicators */
-    --priority-low: var(--text-tertiary);
-    --priority-medium: var(--teal);
-    --priority-high: var(--sunset);
-    --priority-urgent: var(--coral);
+  /* Priority indicators */
+  --priority-low: var(--text-tertiary);
+  --priority-medium: var(--teal);
+  --priority-high: var(--sunset);
+  --priority-urgent: var(--coral);
 
-    /* Spacing scale */
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-5: 20px;
-    --space-6: 24px;
-    --space-8: 32px;
-    --space-10: 40px;
-    --space-12: 48px;
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
 
-    /* Border radius - Softened */
-    --radius-sm: 8px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
-    --radius-xl: 32px;
-    --radius-full: 9999px;
+  /* Border radius - Softened */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
 
-    /* Transitions */
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-    --duration-fast: 150ms;
-    --duration-normal: 250ms;
-    --duration-slow: 400ms;
+  /* Transitions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
 
-    /* Shadows */
-    /* Shadows - Softened */
-    --shadow-xs: 0 3px 10px rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 16px 36px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 26px 56px rgba(0, 0, 0, 0.10);
-    --shadow-xl: 0 40px 90px rgba(0, 0, 0, 0.12);
-    --shadow-glow: 0 0 24px rgba(111, 155, 134, 0.14);
-    --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.10);
+  /* Shadows */
+  /* Shadows - Softened */
+  --shadow-xs: 0 3px 10px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 16px 36px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 26px 56px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 40px 90px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 24px rgba(111, 155, 134, 0.14);
+  --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.1);
 
-    /* Typography */
-    --font-sans:
-        "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-        sans-serif;
-    --font-mono: "JetBrains Mono", "SF Mono", Monaco, monospace;
-    --font-display: 'Lexend', var(--font-sans);
+  /* Typography */
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  --font-display: "Lexend", var(--font-sans);
 
-    /* Font sizes */
-    --text-xs: 0.6875rem;
-    --text-sm: 0.8125rem;
-    --text-base: 0.9375rem;
-    --text-lg: 1.0625rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --text-3xl: 2rem;
+  /* Font sizes */
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
 
-    /* ===========================================
+  /* ===========================================
        Common Pattern Utilities
        =========================================== */
-    
-    /* Card styles */
-    --card-bg: var(--surface-1);
-    --card-border: 1px solid var(--divider);
-    --card-radius: var(--radius-lg);
-    --card-shadow: var(--shadow-sm);
-    --card-padding: var(--space-4);
-    
-    /* Interactive element states */
-    --focus-ring: 0 0 0 2px var(--accent-muted);
-    --focus-ring-offset: 0 0 0 4px var(--bg-base);
-    
-    /* Section spacing */
-    --section-gap: var(--space-6);
-    --item-gap: var(--space-3);
-    
-    /* Input styles */
-    --input-bg: var(--surface-2);
-    --input-border: 1px solid var(--divider);
-    --input-radius: var(--radius-md);
-    --input-padding: var(--space-3) var(--space-4);
-    
-    /* Button common properties */
-    --btn-radius: var(--radius-md);
-    --btn-padding: var(--space-3) var(--space-5);
-    --btn-font-weight: 500;
-    
-    /* Common transitions */
-    --transition-colors: color var(--duration-fast) var(--ease-out), 
-                         background-color var(--duration-fast) var(--ease-out),
-                         border-color var(--duration-fast) var(--ease-out);
-    --transition-transform: transform var(--duration-fast) var(--ease-out);
-    --transition-all: all var(--duration-normal) var(--ease-out);
 
-    /* Garden Engine - Dynamic Time & Season Variables */
-    --time-brightness: 1;
-    --time-saturation: 1;
-    --time-hue-shift: 0deg;
-    --shadow-opacity: 0.3;
-    --shadow-length: 4px;
-    --shadow-angle: 45deg;
-    --celestial-offset: 0px;
-    /* Offset for celestial bodies on mobile */
+  /* Card styles */
+  --card-bg: var(--surface-1);
+  --card-border: 1px solid var(--divider);
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-sm);
+  --card-padding: var(--space-4);
 
-    /* Mobile layout metrics (overridden by JS when available) */
-    --mobile-tab-bar-height: 0px;
-    --mobile-home-stats-height: 0px;
+  /* Interactive element states */
+  --focus-ring: 0 0 0 2px var(--accent-muted);
+  --focus-ring-offset: 0 0 0 4px var(--bg-base);
 
-    /* Seasonal colors (defaults to current) */
-    --seasonal-accent: var(--sage);
-    --seasonal-bg: var(--bg-base);
-    --seasonal-flower: var(--petal);
-    --seasonal-secondary: var(--teal);
+  /* Section spacing */
+  --section-gap: var(--space-6);
+  --item-gap: var(--space-3);
+
+  /* Input styles */
+  --input-bg: var(--surface-2);
+  --input-border: 1px solid var(--divider);
+  --input-radius: var(--radius-md);
+  --input-padding: var(--space-3) var(--space-4);
+
+  /* Button common properties */
+  --btn-radius: var(--radius-md);
+  --btn-padding: var(--space-3) var(--space-5);
+  --btn-font-weight: 500;
+
+  /* Common transitions */
+  --transition-colors:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+  --transition-transform: transform var(--duration-fast) var(--ease-out);
+  --transition-all: all var(--duration-normal) var(--ease-out);
+
+  /* Garden Engine - Dynamic Time & Season Variables */
+  --time-brightness: 1;
+  --time-saturation: 1;
+  --time-hue-shift: 0deg;
+  --shadow-opacity: 0.3;
+  --shadow-length: 4px;
+  --shadow-angle: 45deg;
+  --celestial-offset: 0px;
+  /* Offset for celestial bodies on mobile */
+
+  /* Mobile layout metrics (overridden by JS when available) */
+  --mobile-tab-bar-height: 0px;
+  --mobile-home-stats-height: 0px;
+
+  /* Seasonal colors (defaults to current) */
+  --seasonal-accent: var(--sage);
+  --seasonal-bg: var(--bg-base);
+  --seasonal-flower: var(--petal);
+  --seasonal-secondary: var(--teal);
+
+  /* Breakpoints */
+  --bp-sm: 600px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
 }
 
 /* ===================================
@@ -250,312 +271,326 @@
 
 /* Dark mode base → dark UI with light text */
 :root.dark-mode {
-    --surface-0: #0B1624;
-    --surface-1: #111E2D;
-    --surface-2: #16243A;
-    --divider: rgba(255, 255, 255, 0.10);
+  --surface-0: #0b1624;
+  --surface-1: #111e2d;
+  --surface-2: #16243a;
+  --divider: rgba(255, 255, 255, 0.1);
 
-    --bg-base: #0B1624;
-    --bg-elevated: #111E2D;
-    --bg-surface: rgba(17, 30, 45, 0.82);
-    --bg-hover: rgba(24, 40, 58, 0.86);
-    --bg-active: rgba(32, 52, 74, 0.90);
+  --bg-base: #0b1624;
+  --bg-elevated: #111e2d;
+  --bg-surface: rgba(17, 30, 45, 0.82);
+  --bg-hover: rgba(24, 40, 58, 0.86);
+  --bg-active: rgba(32, 52, 74, 0.9);
 
-    --glass-bg: rgba(12, 22, 36, 0.72);
-    --glass-border: rgba(140, 183, 217, 0.18);
-    --glass-shine: rgba(180, 210, 240, 0.10);
-    
-    /* Accents for dark mode - softer, lighter versions */
-    --accent-button: #8CB7D9;  /* Sky blue for buttons */
-    --accent-active: #6F9B86;  /* Sage green for active states */
-    --accent-border: #7DD3FC;  /* Light sky for borders */
-    --accent-highlight: #FB7185;  /* Rose pink for highlights */
-    --accent-link: #818CF8;  /* Indigo for links */
-    --accent-badge: #E77D3E;  /* Sunset orange for badges */
-    --accent-progress: #6EE7B7;  /* Mint for progress */
-    --accent-icon: #8B5CF6;  /* Violet for icons */
+  --glass-bg: rgba(12, 22, 36, 0.72);
+  --glass-border: rgba(140, 183, 217, 0.18);
+  --glass-shine: rgba(180, 210, 240, 0.1);
 
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, var(--accent-button) 0%, var(--accent-progress) 120%);
-    --accent-badge-fill: var(--accent-badge);
+  /* Accents for dark mode - softer, lighter versions */
+  --accent-button: #8cb7d9; /* Sky blue for buttons */
+  --accent-active: #6f9b86; /* Sage green for active states */
+  --accent-border: #7dd3fc; /* Light sky for borders */
+  --accent-highlight: #fb7185; /* Rose pink for highlights */
+  --accent-link: #818cf8; /* Indigo for links */
+  --accent-badge: #e77d3e; /* Sunset orange for badges */
+  --accent-progress: #6ee7b7; /* Mint for progress */
+  --accent-icon: #8b5cf6; /* Violet for icons */
 
-    --text-primary: rgba(255, 255, 255, 0.95);
-    --text-secondary: rgba(255, 255, 255, 0.75);
-    --text-tertiary: rgba(255, 255, 255, 0.60);
-    --text-ghost: rgba(255, 255, 255, 0.45);
-    /* Dark UI uses lighter accents; use dark ink for legible text on them */
-    --text-on-accent: rgba(8, 23, 39, 0.92);
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(
+    135deg,
+    var(--accent-button) 0%,
+    var(--accent-progress) 120%
+  );
+  --accent-badge-fill: var(--accent-badge);
 
-    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.45);
-    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.55);
-    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.62);
-    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.68);
-    --shadow-xl: 0 36px 90px rgba(0, 0, 0, 0.74);
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.75);
+  --text-tertiary: rgba(255, 255, 255, 0.6);
+  --text-ghost: rgba(255, 255, 255, 0.45);
+  /* Dark UI uses lighter accents; use dark ink for legible text on them */
+  --text-on-accent: rgba(8, 23, 39, 0.92);
 
-    --month-card-bg: rgba(17, 30, 45, 0.30);
-    --month-card-bg-hover: rgba(24, 40, 58, 0.42);
-    --month-card-past-grey: rgba(120, 140, 160, 0.12);
-    --month-card-past-grey-hover: rgba(120, 140, 160, 0.18);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.55);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.62);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.68);
+  --shadow-xl: 0 36px 90px rgba(0, 0, 0, 0.74);
 
-    /* Keep dark mode component surfaces consistent */
-    --card-bg: var(--glass-bg);
-    --card-border: 1px solid var(--glass-border);
-    --input-bg: var(--bg-surface);
-    --input-border: 1px solid var(--glass-border);
+  --month-card-bg: rgba(17, 30, 45, 0.3);
+  --month-card-bg-hover: rgba(24, 40, 58, 0.42);
+  --month-card-past-grey: rgba(120, 140, 160, 0.12);
+  --month-card-past-grey-hover: rgba(120, 140, 160, 0.18);
+
+  /* Keep dark mode component surfaces consistent */
+  --card-bg: var(--glass-bg);
+  --card-border: 1px solid var(--glass-border);
+  --input-bg: var(--bg-surface);
+  --input-border: 1px solid var(--glass-border);
 }
 
 /* Time-of-day UI tuning (light mode): soften glass + shadows for transition periods */
 :root.time-dawn:not(.dark-mode) {
-    --glass-border: rgba(155, 180, 175, 0.12);
-    --shadow-glow: 0 0 20px rgba(232, 200, 216, 0.10);
-    
-    /* Dawn accent colors - Purple to pink gradient theme */
-    --accent: #A78BFA;  /* Soft lavender purple */
-    --accent-hover: #C084FC;  /* Brighter lavender */
-    --accent-muted: rgba(167, 139, 250, 0.16);
-    --accent-subtle: rgba(167, 139, 250, 0.08);
-    --accent-button: #A78BFA;  /* Primary buttons */
-    --accent-active: #C084FC;  /* Active states */
-    --accent-border: #D8B4FE;  /* Light lavender borders */
-    --accent-highlight: #F0ABFC;  /* Pink highlight */
-    --accent-link: #9333EA;  /* Deep purple links */
-    --accent-badge: #EC4899;  /* Pink badge */
-    --accent-progress: #F472B6;  /* Pink progress */
-    --accent-icon: #C084FC;  /* Lavender icons */
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #A78BFA 0%, #EC4899 100%);
-    --accent-badge-fill: var(--accent-badge);
+  --glass-border: rgba(155, 180, 175, 0.12);
+  --shadow-glow: 0 0 20px rgba(232, 200, 216, 0.1);
+
+  /* Dawn accent colors - Purple to pink gradient theme */
+  --accent: #a78bfa; /* Soft lavender purple */
+  --accent-hover: #c084fc; /* Brighter lavender */
+  --accent-muted: rgba(167, 139, 250, 0.16);
+  --accent-subtle: rgba(167, 139, 250, 0.08);
+  --accent-button: #a78bfa; /* Primary buttons */
+  --accent-active: #c084fc; /* Active states */
+  --accent-border: #d8b4fe; /* Light lavender borders */
+  --accent-highlight: #f0abfc; /* Pink highlight */
+  --accent-link: #9333ea; /* Deep purple links */
+  --accent-badge: #ec4899; /* Pink badge */
+  --accent-progress: #f472b6; /* Pink progress */
+  --accent-icon: #c084fc; /* Lavender icons */
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+  --accent-badge-fill: var(--accent-badge);
 }
 
 :root.time-morning:not(.dark-mode) {
-    --glass-border: rgba(135, 170, 185, 0.12);
-    
-    /* Morning accent colors - Blue to cyan to green gradient theme */
-    --accent: #38BDF8;  /* Sky blue */
-    --accent-hover: #0EA5E9;  /* Bright sky */
-    --accent-muted: rgba(56, 189, 248, 0.16);
-    --accent-subtle: rgba(56, 189, 248, 0.08);
-    --accent-button: #38BDF8;  /* Primary buttons */
-    --accent-active: #22D3EE;  /* Cyan active */
-    --accent-border: #7DD3FC;  /* Light sky borders */
-    --accent-highlight: #06B6D4;  /* Cyan highlight */
-    --accent-link: #0EA5E9;  /* Sky blue links */
-    --accent-badge: #10B981;  /* Mint badge */
-    --accent-progress: #14B8A6;  /* Teal progress */
-    --accent-icon: #22D3EE;  /* Cyan icons */
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #38BDF8 0%, #10B981 100%);
-    --accent-badge-fill: var(--accent-badge);
+  --glass-border: rgba(135, 170, 185, 0.12);
+
+  /* Morning accent colors - Blue to cyan to green gradient theme */
+  --accent: #38bdf8; /* Sky blue */
+  --accent-hover: #0ea5e9; /* Bright sky */
+  --accent-muted: rgba(56, 189, 248, 0.16);
+  --accent-subtle: rgba(56, 189, 248, 0.08);
+  --accent-button: #38bdf8; /* Primary buttons */
+  --accent-active: #22d3ee; /* Cyan active */
+  --accent-border: #7dd3fc; /* Light sky borders */
+  --accent-highlight: #06b6d4; /* Cyan highlight */
+  --accent-link: #0ea5e9; /* Sky blue links */
+  --accent-badge: #10b981; /* Mint badge */
+  --accent-progress: #14b8a6; /* Teal progress */
+  --accent-icon: #22d3ee; /* Cyan icons */
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(135deg, #38bdf8 0%, #10b981 100%);
+  --accent-badge-fill: var(--accent-badge);
 }
 
 :root.time-afternoon:not(.dark-mode) {
-    --glass-border: rgba(74, 144, 226, 0.10);
-    
-    /* Afternoon accent colors - Pink to yellow to peach gradient theme */
-    --accent: #FB7185;  /* Warm rose pink */
-    --accent-hover: #F43F5E;  /* Deeper rose */
-    --accent-muted: rgba(251, 113, 133, 0.16);
-    --accent-subtle: rgba(251, 113, 133, 0.08);
-    --accent-button: #FB7185;  /* Primary buttons */
-    --accent-active: #FBBF24;  /* Golden active */
-    --accent-border: #FCD34D;  /* Light yellow borders */
-    --accent-highlight: #F59E0B;  /* Amber highlight */
-    --accent-link: #F43F5E;  /* Rose links */
-    --accent-badge: #F97316;  /* Orange badge */
-    --accent-progress: #FB923C;  /* Peach progress */
-    --accent-icon: #FBBF24;  /* Golden icons */
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #FB7185 0%, #FBBF24 50%, #FB923C 100%);
-    --accent-badge-fill: var(--accent-badge);
+  --glass-border: rgba(74, 144, 226, 0.1);
+
+  /* Afternoon accent colors - Pink to yellow to peach gradient theme */
+  --accent: #fb7185; /* Warm rose pink */
+  --accent-hover: #f43f5e; /* Deeper rose */
+  --accent-muted: rgba(251, 113, 133, 0.16);
+  --accent-subtle: rgba(251, 113, 133, 0.08);
+  --accent-button: #fb7185; /* Primary buttons */
+  --accent-active: #fbbf24; /* Golden active */
+  --accent-border: #fcd34d; /* Light yellow borders */
+  --accent-highlight: #f59e0b; /* Amber highlight */
+  --accent-link: #f43f5e; /* Rose links */
+  --accent-badge: #f97316; /* Orange badge */
+  --accent-progress: #fb923c; /* Peach progress */
+  --accent-icon: #fbbf24; /* Golden icons */
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(
+    135deg,
+    #fb7185 0%,
+    #fbbf24 50%,
+    #fb923c 100%
+  );
+  --accent-badge-fill: var(--accent-badge);
 }
 
 :root.time-evening:not(.dark-mode) {
-    --glass-border: rgba(194, 120, 78, 0.12);
-    --shadow-glow: 0 0 18px rgba(255, 179, 71, 0.10);
-    
-    /* Evening accent colors - Purple to pink gradient theme (warmer than dawn) */
-    --accent: #C084FC;  /* Warm lavender */
-    --accent-hover: #A855F7;  /* Deeper purple */
-    --accent-muted: rgba(192, 132, 252, 0.16);
-    --accent-subtle: rgba(192, 132, 252, 0.08);
-    --accent-button: #C084FC;  /* Primary buttons */
-    --accent-active: #EC4899;  /* Pink active */
-    --accent-border: #E879F9;  /* Light pink borders */
-    --accent-highlight: #F472B6;  /* Rose highlight */
-    --accent-link: #A855F7;  /* Purple links */
-    --accent-badge: #EC4899;  /* Pink badge */
-    --accent-progress: #F472B6;  /* Rose progress */
-    --accent-icon: #D946EF;  /* Magenta icons */
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
-    --accent-badge-fill: var(--accent-badge);
+  --glass-border: rgba(194, 120, 78, 0.12);
+  --shadow-glow: 0 0 18px rgba(255, 179, 71, 0.1);
+
+  /* Evening accent colors - Purple to pink gradient theme (warmer than dawn) */
+  --accent: #c084fc; /* Warm lavender */
+  --accent-hover: #a855f7; /* Deeper purple */
+  --accent-muted: rgba(192, 132, 252, 0.16);
+  --accent-subtle: rgba(192, 132, 252, 0.08);
+  --accent-button: #c084fc; /* Primary buttons */
+  --accent-active: #ec4899; /* Pink active */
+  --accent-border: #e879f9; /* Light pink borders */
+  --accent-highlight: #f472b6; /* Rose highlight */
+  --accent-link: #a855f7; /* Purple links */
+  --accent-badge: #ec4899; /* Pink badge */
+  --accent-progress: #f472b6; /* Rose progress */
+  --accent-icon: #d946ef; /* Magenta icons */
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(135deg, #c084fc 0%, #ec4899 100%);
+  --accent-badge-fill: var(--accent-badge);
 }
 
 /* Time-of-day palettes (dark mode): keep UI dark, shift undertones */
 :root.dark-mode.time-dawn {
-    --bg-base: #0E1322;
-    --bg-elevated: #161B2F;
-    --bg-surface: rgba(22, 27, 47, 0.86);
-    --bg-hover: rgba(30, 36, 58, 0.88);
-    --bg-active: rgba(38, 46, 72, 0.90);
+  --bg-base: #0e1322;
+  --bg-elevated: #161b2f;
+  --bg-surface: rgba(22, 27, 47, 0.86);
+  --bg-hover: rgba(30, 36, 58, 0.88);
+  --bg-active: rgba(38, 46, 72, 0.9);
 
-    --glass-bg: rgba(14, 18, 34, 0.76);
-    --glass-border: rgba(217, 140, 183, 0.18);
-    --glass-shine: rgba(255, 220, 245, 0.06);
-    
-    /* Dawn accent colors (dark mode) - Deeper, richer purples and pinks */
-    --accent: #C084FC;  /* Bright lavender */
-    --accent-hover: #D8B4FE;  /* Lighter lavender */
-    --accent-muted: rgba(192, 132, 252, 0.20);
-    --accent-subtle: rgba(192, 132, 252, 0.10);
-    --accent-button: #C084FC;
-    --accent-active: #D8B4FE;
-    --accent-border: rgba(216, 180, 254, 0.30);
-    --accent-highlight: #F0ABFC;  /* Bright pink */
-    --accent-link: #D8B4FE;
-    --accent-badge: #EC4899;  /* Vibrant pink */
-    --accent-progress: #F472B6;
-    --accent-icon: #D8B4FE;
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
-    --accent-badge-fill: var(--accent-badge);
+  --glass-bg: rgba(14, 18, 34, 0.76);
+  --glass-border: rgba(217, 140, 183, 0.18);
+  --glass-shine: rgba(255, 220, 245, 0.06);
+
+  /* Dawn accent colors (dark mode) - Deeper, richer purples and pinks */
+  --accent: #c084fc; /* Bright lavender */
+  --accent-hover: #d8b4fe; /* Lighter lavender */
+  --accent-muted: rgba(192, 132, 252, 0.2);
+  --accent-subtle: rgba(192, 132, 252, 0.1);
+  --accent-button: #c084fc;
+  --accent-active: #d8b4fe;
+  --accent-border: rgba(216, 180, 254, 0.3);
+  --accent-highlight: #f0abfc; /* Bright pink */
+  --accent-link: #d8b4fe;
+  --accent-badge: #ec4899; /* Vibrant pink */
+  --accent-progress: #f472b6;
+  --accent-icon: #d8b4fe;
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(135deg, #c084fc 0%, #ec4899 100%);
+  --accent-badge-fill: var(--accent-badge);
 }
 
 :root.dark-mode.time-morning {
-    --bg-base: #0B1828;
-    --bg-elevated: #10233A;
-    --bg-surface: rgba(16, 35, 58, 0.86);
-    --bg-hover: rgba(22, 46, 74, 0.88);
-    --bg-active: rgba(30, 60, 92, 0.90);
+  --bg-base: #0b1828;
+  --bg-elevated: #10233a;
+  --bg-surface: rgba(16, 35, 58, 0.86);
+  --bg-hover: rgba(22, 46, 74, 0.88);
+  --bg-active: rgba(30, 60, 92, 0.9);
 
-    --glass-bg: rgba(11, 24, 40, 0.76);
-    --glass-border: rgba(140, 183, 217, 0.18);
-    --glass-shine: rgba(180, 210, 240, 0.08);
-    
-    /* Morning accent colors (dark mode) - Bright, energetic blues and cyans */
-    --accent: #38BDF8;  /* Bright sky blue */
-    --accent-hover: #7DD3FC;  /* Light sky */
-    --accent-muted: rgba(56, 189, 248, 0.20);
-    --accent-subtle: rgba(56, 189, 248, 0.10);
-    --accent-button: #38BDF8;
-    --accent-active: #22D3EE;  /* Cyan */
-    --accent-border: rgba(125, 211, 252, 0.30);
-    --accent-highlight: #06B6D4;  /* Bright cyan */
-    --accent-link: #7DD3FC;
-    --accent-badge: #10B981;  /* Mint green */
-    --accent-progress: #14B8A6;  /* Teal */
-    --accent-icon: #22D3EE;
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #38BDF8 0%, #10B981 100%);
-    --accent-badge-fill: var(--accent-badge);
+  --glass-bg: rgba(11, 24, 40, 0.76);
+  --glass-border: rgba(140, 183, 217, 0.18);
+  --glass-shine: rgba(180, 210, 240, 0.08);
+
+  /* Morning accent colors (dark mode) - Bright, energetic blues and cyans */
+  --accent: #38bdf8; /* Bright sky blue */
+  --accent-hover: #7dd3fc; /* Light sky */
+  --accent-muted: rgba(56, 189, 248, 0.2);
+  --accent-subtle: rgba(56, 189, 248, 0.1);
+  --accent-button: #38bdf8;
+  --accent-active: #22d3ee; /* Cyan */
+  --accent-border: rgba(125, 211, 252, 0.3);
+  --accent-highlight: #06b6d4; /* Bright cyan */
+  --accent-link: #7dd3fc;
+  --accent-badge: #10b981; /* Mint green */
+  --accent-progress: #14b8a6; /* Teal */
+  --accent-icon: #22d3ee;
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(135deg, #38bdf8 0%, #10b981 100%);
+  --accent-badge-fill: var(--accent-badge);
 }
 
 :root.dark-mode.time-afternoon {
-    --bg-base: #081727;
-    --bg-elevated: #0D2238;
-    --bg-surface: rgba(13, 34, 56, 0.88);
-    --bg-hover: rgba(18, 44, 70, 0.90);
-    --bg-active: rgba(26, 60, 92, 0.92);
+  --bg-base: #081727;
+  --bg-elevated: #0d2238;
+  --bg-surface: rgba(13, 34, 56, 0.88);
+  --bg-hover: rgba(18, 44, 70, 0.9);
+  --bg-active: rgba(26, 60, 92, 0.92);
 
-    --glass-bg: rgba(9, 20, 36, 0.78);
-    --glass-border: rgba(140, 183, 217, 0.20);
-    --glass-shine: rgba(180, 210, 240, 0.06);
-    
-    /* Afternoon accent colors (dark mode) - Warm, vibrant corals and golds */
-    --accent: #FB7185;  /* Warm rose */
-    --accent-hover: #FCD34D;  /* Golden yellow */
-    --accent-muted: rgba(251, 113, 133, 0.20);
-    --accent-subtle: rgba(251, 113, 133, 0.10);
-    --accent-button: #FB7185;
-    --accent-active: #FBBF24;  /* Golden */
-    --accent-border: rgba(252, 211, 77, 0.30);
-    --accent-highlight: #F59E0B;  /* Amber */
-    --accent-link: #FCD34D;
-    --accent-badge: #F97316;  /* Vibrant orange */
-    --accent-progress: #FB923C;  /* Peach */
-    --accent-icon: #FBBF24;
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #FB7185 0%, #FBBF24 50%, #FB923C 100%);
-    --accent-badge-fill: var(--accent-badge);
+  --glass-bg: rgba(9, 20, 36, 0.78);
+  --glass-border: rgba(140, 183, 217, 0.2);
+  --glass-shine: rgba(180, 210, 240, 0.06);
+
+  /* Afternoon accent colors (dark mode) - Warm, vibrant corals and golds */
+  --accent: #fb7185; /* Warm rose */
+  --accent-hover: #fcd34d; /* Golden yellow */
+  --accent-muted: rgba(251, 113, 133, 0.2);
+  --accent-subtle: rgba(251, 113, 133, 0.1);
+  --accent-button: #fb7185;
+  --accent-active: #fbbf24; /* Golden */
+  --accent-border: rgba(252, 211, 77, 0.3);
+  --accent-highlight: #f59e0b; /* Amber */
+  --accent-link: #fcd34d;
+  --accent-badge: #f97316; /* Vibrant orange */
+  --accent-progress: #fb923c; /* Peach */
+  --accent-icon: #fbbf24;
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(
+    135deg,
+    #fb7185 0%,
+    #fbbf24 50%,
+    #fb923c 100%
+  );
+  --accent-badge-fill: var(--accent-badge);
 }
 
 :root.dark-mode.time-evening {
-    --bg-base: #190F0D;
-    --bg-elevated: #241610;
-    --bg-surface: rgba(36, 22, 16, 0.86);
-    --bg-hover: rgba(48, 30, 22, 0.88);
-    --bg-active: rgba(62, 40, 28, 0.90);
+  --bg-base: #190f0d;
+  --bg-elevated: #241610;
+  --bg-surface: rgba(36, 22, 16, 0.86);
+  --bg-hover: rgba(48, 30, 22, 0.88);
+  --bg-active: rgba(62, 40, 28, 0.9);
 
-    --glass-bg: rgba(22, 14, 10, 0.76);
-    --glass-border: rgba(231, 125, 62, 0.18);
-    --glass-shine: rgba(255, 210, 180, 0.06);
-    
-    /* Evening accent colors (dark mode) - Rich, warm purples and magentas */
-    --accent: #C084FC;  /* Bright lavender */
-    --accent-hover: #D8B4FE;  /* Light lavender */
-    --accent-muted: rgba(192, 132, 252, 0.20);
-    --accent-subtle: rgba(192, 132, 252, 0.10);
-    --accent-button: #C084FC;
-    --accent-active: #EC4899;  /* Vibrant pink */
-    --accent-border: rgba(216, 180, 254, 0.30);
-    --accent-highlight: #F472B6;  /* Rose */
-    --accent-link: #D8B4FE;
-    --accent-badge: #EC4899;  /* Pink badge */
-    --accent-progress: #F472B6;
-    --accent-icon: #D946EF;  /* Magenta */
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
-    --accent-badge-fill: var(--accent-badge);
+  --glass-bg: rgba(22, 14, 10, 0.76);
+  --glass-border: rgba(231, 125, 62, 0.18);
+  --glass-shine: rgba(255, 210, 180, 0.06);
+
+  /* Evening accent colors (dark mode) - Rich, warm purples and magentas */
+  --accent: #c084fc; /* Bright lavender */
+  --accent-hover: #d8b4fe; /* Light lavender */
+  --accent-muted: rgba(192, 132, 252, 0.2);
+  --accent-subtle: rgba(192, 132, 252, 0.1);
+  --accent-button: #c084fc;
+  --accent-active: #ec4899; /* Vibrant pink */
+  --accent-border: rgba(216, 180, 254, 0.3);
+  --accent-highlight: #f472b6; /* Rose */
+  --accent-link: #d8b4fe;
+  --accent-badge: #ec4899; /* Pink badge */
+  --accent-progress: #f472b6;
+  --accent-icon: #d946ef; /* Magenta */
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(135deg, #c084fc 0%, #ec4899 100%);
+  --accent-badge-fill: var(--accent-badge);
 }
 
 /* Night theme accents - Deep blue to cyan gradient */
 :root.time-night:not(.dark-mode) {
-    /* Night accent colors (light mode) - Deep, rich blues */
-    --accent: #1E40AF;  /* Deep blue */
-    --accent-hover: #2563EB;  /* Bright blue */
-    --accent-muted: rgba(30, 64, 175, 0.16);
-    --accent-subtle: rgba(30, 64, 175, 0.08);
-    --accent-button: #1E40AF;
-    --accent-active: #3B82F6;  /* Royal blue */
-    --accent-border: #60A5FA;  /* Light blue borders */
-    --accent-highlight: #3B82F6;  /* Bright blue highlight */
-    --accent-link: #2563EB;
-    --accent-badge: #0EA5E9;  /* Sky blue badge */
-    --accent-progress: #06B6D4;  /* Cyan progress */
-    --accent-icon: #3B82F6;
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #1E40AF 0%, #06B6D4 100%);
-    --accent-badge-fill: var(--accent-badge);
+  /* Night accent colors (light mode) - Deep, rich blues */
+  --accent: #1e40af; /* Deep blue */
+  --accent-hover: #2563eb; /* Bright blue */
+  --accent-muted: rgba(30, 64, 175, 0.16);
+  --accent-subtle: rgba(30, 64, 175, 0.08);
+  --accent-button: #1e40af;
+  --accent-active: #3b82f6; /* Royal blue */
+  --accent-border: #60a5fa; /* Light blue borders */
+  --accent-highlight: #3b82f6; /* Bright blue highlight */
+  --accent-link: #2563eb;
+  --accent-badge: #0ea5e9; /* Sky blue badge */
+  --accent-progress: #06b6d4; /* Cyan progress */
+  --accent-icon: #3b82f6;
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(135deg, #1e40af 0%, #06b6d4 100%);
+  --accent-badge-fill: var(--accent-badge);
 }
 
 :root.dark-mode.time-night {
-    /* Night accent colors (dark mode) - Bright, electric blues and cyans */
-    --accent: #3B82F6;  /* Bright blue */
-    --accent-hover: #60A5FA;  /* Light blue */
-    --accent-muted: rgba(59, 130, 246, 0.20);
-    --accent-subtle: rgba(59, 130, 246, 0.10);
-    --accent-button: #3B82F6;
-    --accent-active: #22D3EE;  /* Cyan */
-    --accent-border: rgba(96, 165, 250, 0.30);
-    --accent-highlight: #06B6D4;  /* Bright cyan */
-    --accent-link: #60A5FA;
-    --accent-badge: #0EA5E9;  /* Sky blue badge */
-    --accent-progress: #06B6D4;  /* Cyan progress */
-    --accent-icon: #22D3EE;
-    --accent-stroke: var(--accent-button);
-    --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
-    --accent-badge-fill: var(--accent-badge);
+  /* Night accent colors (dark mode) - Bright, electric blues and cyans */
+  --accent: #3b82f6; /* Bright blue */
+  --accent-hover: #60a5fa; /* Light blue */
+  --accent-muted: rgba(59, 130, 246, 0.2);
+  --accent-subtle: rgba(59, 130, 246, 0.1);
+  --accent-button: #3b82f6;
+  --accent-active: #22d3ee; /* Cyan */
+  --accent-border: rgba(96, 165, 250, 0.3);
+  --accent-highlight: #06b6d4; /* Bright cyan */
+  --accent-link: #60a5fa;
+  --accent-badge: #0ea5e9; /* Sky blue badge */
+  --accent-progress: #06b6d4; /* Cyan progress */
+  --accent-icon: #22d3ee;
+  --accent-stroke: var(--accent-button);
+  --accent-fill: var(--accent-button);
+  --accent-fill-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  --accent-badge-fill: var(--accent-badge);
 }
 
 /* ===================================
@@ -566,85 +601,95 @@
    =================================== */
 
 :root {
-    /* Liquid spacing & layout */
-    --liquid-section-gap: 24px;
-    --liquid-item-gap: 12px;
-    --liquid-stack-rotation: 2.5deg;
-    --liquid-stack-offset-y: 4px;
-    --liquid-stack-offset-x: 2px;
+  /* Liquid spacing & layout */
+  --liquid-section-gap: 24px;
+  --liquid-item-gap: 12px;
+  --liquid-stack-rotation: 2.5deg;
+  --liquid-stack-offset-y: 4px;
+  --liquid-stack-offset-x: 2px;
 
-    /* Liquid glass effects */
-    --liquid-glass-blur: 12px;
-    --liquid-glass-bg: rgba(242, 247, 246, 0.75);
-    --liquid-glass-border: rgba(31, 45, 42, 0.12);
-    --liquid-glass-shine: rgba(255, 255, 255, 0.3);
+  /* Liquid glass effects */
+  --liquid-glass-blur: 12px;
+  --liquid-glass-bg: rgba(242, 247, 246, 0.75);
+  --liquid-glass-border: rgba(31, 45, 42, 0.12);
+  --liquid-glass-shine: rgba(255, 255, 255, 0.3);
 
-    /* Liquid animations */
-    --liquid-shimmer-duration: 2s;
-    --liquid-ripple-duration: 600ms;
-    --liquid-transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    --liquid-transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  /* Liquid animations */
+  --liquid-shimmer-duration: 2s;
+  --liquid-ripple-duration: 600ms;
+  --liquid-transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --liquid-transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    /* Liquid typography */
-    --font-display-liquid: 'Outfit', system-ui, -apple-system, sans-serif;
-    --font-body-liquid: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    --font-mono-liquid: 'Space Mono', 'JetBrains Mono', monospace;
+  /* Liquid typography */
+  --font-display-liquid: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-body-liquid: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono-liquid: "Space Mono", "JetBrains Mono", monospace;
 
-    /* Shimmer gradient (iridescent rainbow effect) */
-    --shimmer-gradient: linear-gradient(
-        135deg,
-        rgba(56, 189, 248, 0.0) 0%,
-        rgba(56, 189, 248, 0.3) 25%,
-        rgba(192, 132, 252, 0.5) 50%,
-        rgba(251, 146, 60, 0.3) 75%,
-        rgba(251, 146, 60, 0.0) 100%
-    );
+  /* Shimmer gradient (iridescent rainbow effect) */
+  --shimmer-gradient: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0) 0%,
+    rgba(56, 189, 248, 0.3) 25%,
+    rgba(192, 132, 252, 0.5) 50%,
+    rgba(251, 146, 60, 0.3) 75%,
+    rgba(251, 146, 60, 0) 100%
+  );
 
-    /* Time-based gradients (set by LiquidEffects) */
-    --liquid-gradient-primary: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #43e97b 100%);
-    --liquid-accent: #38bdf8;
-    --liquid-glow: rgba(56, 189, 248, 0.15);
+  /* Time-based gradients (set by LiquidEffects) */
+  --liquid-gradient-primary: linear-gradient(
+    135deg,
+    #4facfe 0%,
+    #00f2fe 50%,
+    #43e97b 100%
+  );
+  --liquid-accent: #38bdf8;
+  --liquid-glow: rgba(56, 189, 248, 0.15);
 
-    /* Context card colors */
-    --context-vision-color: #a78bfa; /* Purple */
-    --context-milestone-color: #38bdf8; /* Sky blue */
-    --context-focus-color: #fb923c; /* Orange */
+  /* Context card colors */
+  --context-vision-color: #a78bfa; /* Purple */
+  --context-milestone-color: #38bdf8; /* Sky blue */
+  --context-focus-color: #fb923c; /* Orange */
 
-    /* Intention pill styles */
-    --intention-pill-radius: 24px;
-    --intention-pill-padding: 8px 16px;
-    --intention-pill-bg: var(--liquid-glass-bg);
-    --intention-pill-border: 1px solid var(--liquid-glass-border);
+  /* Intention pill styles */
+  --intention-pill-radius: 24px;
+  --intention-pill-padding: 8px 16px;
+  --intention-pill-bg: var(--liquid-glass-bg);
+  --intention-pill-border: 1px solid var(--liquid-glass-border);
 
-    /* Task item styles */
-    --task-item-radius: 16px;
-    --task-item-padding: 12px;
-    --task-item-bg: var(--surface-1);
-    --task-item-expanded-bg: var(--surface-2);
+  /* Task item styles */
+  --task-item-radius: 16px;
+  --task-item-padding: 12px;
+  --task-item-bg: var(--surface-1);
+  --task-item-expanded-bg: var(--surface-2);
 
-    /* Customization panel */
-    --panel-width: 520px;
-    --panel-bg: var(--liquid-glass-bg);
-    --panel-backdrop: rgba(0, 0, 0, 0.6);
+  /* Customization panel */
+  --panel-width: 520px;
+  --panel-bg: var(--liquid-glass-bg);
+  --panel-backdrop: rgba(0, 0, 0, 0.6);
 
-    /* Lift effect (hover elevate) */
-    --lift-offset: -2px;
-    --lift-shadow: var(--shadow-md);
+  /* Lift effect (hover elevate) */
+  --lift-offset: -2px;
+  --lift-shadow: var(--shadow-md);
 }
 
 /* Liquid glass effects for dark mode */
 :root.dark-mode {
-    --liquid-glass-blur: 16px;
-    --liquid-glass-bg: rgba(17, 30, 45, 0.65);
-    --liquid-glass-border: rgba(140, 183, 217, 0.24); /* Increased to 0.24 for WCAG AA contrast */
-    --liquid-glass-shine: rgba(180, 210, 240, 0.08);
+  --liquid-glass-blur: 16px;
+  --liquid-glass-bg: rgba(17, 30, 45, 0.65);
+  --liquid-glass-border: rgba(
+    140,
+    183,
+    217,
+    0.24
+  ); /* Increased to 0.24 for WCAG AA contrast */
+  --liquid-glass-shine: rgba(180, 210, 240, 0.08);
 
-    --intention-pill-bg: var(--liquid-glass-bg);
-    --intention-pill-border: 1px solid var(--liquid-glass-border);
+  --intention-pill-bg: var(--liquid-glass-bg);
+  --intention-pill-border: 1px solid var(--liquid-glass-border);
 
-    --task-item-bg: var(--surface-1);
-    --task-item-expanded-bg: var(--surface-2);
+  --task-item-bg: var(--surface-1);
+  --task-item-expanded-bg: var(--surface-2);
 
-    --panel-bg: rgba(12, 22, 36, 0.85);
-    --panel-backdrop: rgba(0, 0, 0, 0.8);
+  --panel-bg: rgba(12, 22, 36, 0.85);
+  --panel-backdrop: rgba(0, 0, 0, 0.8);
 }

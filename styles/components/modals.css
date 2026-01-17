@@ -52,7 +52,8 @@
 :root:not(.dark-mode) .modal {
   background: color-mix(in srgb, var(--bg-elevated) 85%, #ffffff 15%);
   border-color: var(--divider);
-  box-shadow: 0 22px 56px rgba(31, 45, 42, 0.18),
+  box-shadow:
+    0 22px 56px rgba(31, 45, 42, 0.18),
     0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
@@ -197,6 +198,41 @@
   background: rgba(10, 22, 18, 0.7);
   border-color: rgba(140, 183, 217, 0.4);
   box-shadow: 0 0 0 3px rgba(140, 183, 217, 0.15);
+}
+
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: var(--danger) !important;
+  background: var(--danger-subtle);
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
+  font-weight: 500;
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }
 
 .form-row {
@@ -1340,8 +1376,8 @@ html.dark-mode .goal-more-options-btn:hover {
   font-size: 1.75rem;
   text-align: center;
   cursor: pointer;
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
-    sans-serif;
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   caret-color: var(--accent);
 }
 
@@ -1396,8 +1432,8 @@ html.dark-mode .goal-more-options-btn:hover {
   align-items: center;
   justify-content: center;
   transition: all var(--duration-fast);
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
-    sans-serif;
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 }
 
 .vision-emoji-option:hover {

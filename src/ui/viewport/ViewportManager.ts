@@ -23,14 +23,22 @@ class ViewportManager {
   private _mobileLayoutRaf: number | null = null;
   private callbacks: ViewportChangeCallbacks = {};
   private readonly mobileQuery =
-    "(max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse))";
+    "(max-width: 767px), ((max-width: 932px) and (max-height: 440px) and (pointer: coarse))";
 
   /**
-   * Check if current viewport is mobile
+   * Check if current viewport is mobile (Phone or small handheld)
    */
   isMobileViewport(): boolean {
     if (this._mobileMql) return this._mobileMql.matches;
     return window.matchMedia(this.mobileQuery).matches;
+  }
+
+  /**
+   * Check if current viewport is tablet
+   */
+  isTabletViewport(): boolean {
+    return window.matchMedia("(min-width: 768px) and (max-width: 1024px)")
+      .matches;
   }
 
   /**
@@ -57,7 +65,7 @@ class ViewportManager {
 
       // Show/hide mobile support panel button
       const mobileSupportBtn = document.getElementById(
-        "supportPanelToggleBtnMobile"
+        "supportPanelToggleBtnMobile",
       );
       if (mobileSupportBtn) {
         if (isMobile) {
@@ -72,7 +80,7 @@ class ViewportManager {
         this._initialMobileDefaultsApplied = true;
         document.body.classList.toggle(
           "mobile-home-view",
-          State.currentView === VIEWS.HOME
+          State.currentView === VIEWS.HOME,
         );
       }
 
@@ -123,10 +131,10 @@ class ViewportManager {
   syncMobileDateNavPlacement(isMobile: boolean): void {
     const dateNav = document.querySelector(".date-nav") as HTMLElement | null;
     const controlCenter = document.querySelector(
-      ".control-center"
+      ".control-center",
     ) as HTMLElement | null;
     const headerSlot = document.getElementById(
-      "headerMobileNav"
+      "headerMobileNav",
     ) as HTMLElement | null;
 
     if (!dateNav || !controlCenter || !headerSlot) return;
@@ -172,7 +180,7 @@ class ViewportManager {
       const isMobileHomeView =
         document.body.classList.contains("mobile-home-view");
       const timeStats = document.querySelector(
-        ".time-stats"
+        ".time-stats",
       ) as HTMLElement | null;
       const statsHeight =
         isMobileHomeView && timeStats

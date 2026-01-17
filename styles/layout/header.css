@@ -2,91 +2,108 @@
    Header
    =================================== */
 .header {
-    grid-area: header;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-3) var(--space-6);
-    background: transparent;
-    /* Seamless top */
-    border-bottom: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    position: relative;
-    z-index: 400;
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-6);
+  background: transparent;
+  /* Seamless top */
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  position: relative;
+  z-index: 400;
 }
 
 /* The app currently uses a dedicated header only on mobile. */
 .mobile-header {
-    display: none;
+  display: none;
 }
 
 .header-mobile-nav {
-    display: none;
+  display: none;
 }
 
 /* Light theme: sunny, grounded header (less "faded") */
 :root:not(.dark-mode) .header {
-    background:
-        radial-gradient(1100px 250px at 12% -30%,
-            rgba(74, 144, 226, 0.26) 0%,
-            transparent 75%),
-        radial-gradient(900px 300px at 55% -40%,
-            rgba(90, 155, 141, 0.22) 0%,
-            transparent 70%),
-        radial-gradient(800px 200px at 95% 0%,
-            rgba(240, 180, 41, 0.18) 0%,
-            transparent 60%),
-        var(--glass-bg);
-    border: 1px solid var(--divider);
-    box-shadow: 0 16px 48px rgba(74, 144, 226, 0.1), var(--shadow-sm);
-    backdrop-filter: blur(14px) saturate(1.25);
-    -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  background:
+    radial-gradient(
+      1100px 250px at 12% -30%,
+      rgba(74, 144, 226, 0.26) 0%,
+      transparent 75%
+    ),
+    radial-gradient(
+      900px 300px at 55% -40%,
+      rgba(90, 155, 141, 0.22) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      800px 200px at 95% 0%,
+      rgba(240, 180, 41, 0.18) 0%,
+      transparent 60%
+    ),
+    var(--glass-bg);
+  border: 1px solid var(--divider);
+  box-shadow:
+    0 16px 48px rgba(74, 144, 226, 0.1),
+    var(--shadow-sm);
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
 }
 
 /* Dark mode: moonlit header with atmospheric depth */
 .dark-mode .header {
-    background:
-        radial-gradient(1100px 250px at 12% -30%,
-            rgba(140, 183, 217, 0.22) 0%,
-            transparent 75%),
-        radial-gradient(900px 300px at 55% -40%,
-            rgba(164, 185, 217, 0.18) 0%,
-            transparent 70%),
-        radial-gradient(800px 200px at 95% 0%,
-            rgba(107, 168, 169, 0.15) 0%,
-            transparent 60%),
-        rgba(10, 22, 18, 0.85);
-    border: 1px solid rgba(140, 183, 217, 0.18);
-    border-bottom-color: rgba(140, 183, 217, 0.15);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3),
-                0 4px 12px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(14px) saturate(1.3);
-    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  background:
+    radial-gradient(
+      1100px 250px at 12% -30%,
+      rgba(140, 183, 217, 0.22) 0%,
+      transparent 75%
+    ),
+    radial-gradient(
+      900px 300px at 55% -40%,
+      rgba(164, 185, 217, 0.18) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      800px 200px at 95% 0%,
+      rgba(107, 168, 169, 0.15) 0%,
+      transparent 60%
+    ),
+    rgba(10, 22, 18, 0.85);
+  border: 1px solid rgba(140, 183, 217, 0.18);
+  border-bottom-color: rgba(140, 183, 217, 0.15);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
 }
 
 .header::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(135deg, var(--glass-shine) 0%, transparent 50%);
-    pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--glass-shine) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 :root:not(.dark-mode) .header::before {
-    background:
-        linear-gradient(135deg,
-            rgba(250, 252, 251, 0.55) 0%,
-            transparent 55%);
-    opacity: 0.45;
+  background: linear-gradient(
+    135deg,
+    rgba(250, 252, 251, 0.55) 0%,
+    transparent 55%
+  );
+  opacity: 0.45;
 }
 
 .dark-mode .header::before {
-    background:
-        linear-gradient(135deg,
-            rgba(255, 255, 255, 0.08) 0%,
-            transparent 55%);
-    opacity: 0.35;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 55%
+  );
+  opacity: 0.35;
 }
 
 /* Light mode time themes - reduce header brightness */
@@ -94,520 +111,574 @@
 :root.time-morning:not(.dark-mode) .header,
 :root.time-afternoon:not(.dark-mode) .header,
 :root.time-evening:not(.dark-mode) .header {
-    background:
-        radial-gradient(1100px 250px at 12% -30%,
-            rgba(74, 144, 226, 0.18) 0%,
-            transparent 75%),
-        radial-gradient(900px 300px at 55% -40%,
-            rgba(90, 155, 141, 0.16) 0%,
-            transparent 70%),
-        radial-gradient(800px 200px at 95% 0%,
-            rgba(240, 180, 41, 0.12) 0%,
-            transparent 60%),
-        var(--glass-bg);
-    border: 1px solid var(--divider);
-    box-shadow: 0 8px 32px rgba(26, 43, 47, 0.08);
+  background:
+    radial-gradient(
+      1100px 250px at 12% -30%,
+      rgba(74, 144, 226, 0.18) 0%,
+      transparent 75%
+    ),
+    radial-gradient(
+      900px 300px at 55% -40%,
+      rgba(90, 155, 141, 0.16) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      800px 200px at 95% 0%,
+      rgba(240, 180, 41, 0.12) 0%,
+      transparent 60%
+    ),
+    var(--glass-bg);
+  border: 1px solid var(--divider);
+  box-shadow: 0 8px 32px rgba(26, 43, 47, 0.08);
 }
 
 :root.time-dawn:not(.dark-mode) .header::before,
 :root.time-morning:not(.dark-mode) .header::before,
 :root.time-afternoon:not(.dark-mode) .header::before,
 :root.time-evening:not(.dark-mode) .header::before {
-    background:
-        linear-gradient(135deg,
-            rgba(250, 252, 251, 0.40) 0%,
-            transparent 55%);
-    opacity: 0.35;
+  background: linear-gradient(
+    135deg,
+    rgba(250, 252, 251, 0.4) 0%,
+    transparent 55%
+  );
+  opacity: 0.35;
 }
 
 .logo {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .logo-icon {
-    font-size: 1.5rem;
-    line-height: 1;
-    filter: drop-shadow(0 0 12px rgba(74, 144, 226, 0.4)) drop-shadow(0 4px 6px rgba(90, 155, 141, 0.3));
-    transition: transform var(--duration-normal) var(--ease-out);
+  font-size: 1.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 12px rgba(74, 144, 226, 0.4))
+    drop-shadow(0 4px 6px rgba(90, 155, 141, 0.3));
+  transition: transform var(--duration-normal) var(--ease-out);
 }
 
 .logo:hover .logo-icon {
-    transform: rotate(-8deg) scale(1.1);
+  transform: rotate(-8deg) scale(1.1);
 }
 
 .logo-text {
-    font-size: var(--text-xl);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    font-family: var(--font-display);
-    background: linear-gradient(135deg,
-            var(--teal) 0%,
-            var(--sage) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.08));
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  background: linear-gradient(135deg, var(--teal) 0%, var(--sage) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.08));
 }
 
 :root:not(.dark-mode) .logo-text {
-    background: linear-gradient(110deg,
-            #4A90E2 0%,
-            #4A90E2 30%,
-            #5A9B8D 80%,
-            #F0B429 110%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    transition: all var(--duration-normal) var(--ease-out);
+  background: linear-gradient(
+    110deg,
+    #4a90e2 0%,
+    #4a90e2 30%,
+    #5a9b8d 80%,
+    #f0b429 110%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
 .logo:hover .logo-text {
-    filter: drop-shadow(0 4px 12px rgba(74, 144, 226, 0.15));
-    letter-spacing: -0.02em;
+  filter: drop-shadow(0 4px 12px rgba(74, 144, 226, 0.15));
+  letter-spacing: -0.02em;
 }
 
 .dark-mode .logo-text {
-    background: linear-gradient(110deg,
-            #E2E8F0 0%,
-            /* moon white */
-            #E2E8F0 40%,
-            #94A3B8 70%,
-            #64748B 110%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
+  background: linear-gradient(
+    110deg,
+    #e2e8f0 0%,
+    /* moon white */ #e2e8f0 40%,
+    #94a3b8 70%,
+    #64748b 110%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
 }
 
 .dark-mode .logo-icon {
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25)) drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25))
+    drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
 }
 
 /* Time-based logo gradients - matches sky gradients (applies to both light and dark mode) */
 /* Dawn: Soft lavender pink to warm peach */
 :root.time-dawn .logo-text {
-    background: linear-gradient(110deg,
-            #B8A5D4 0%,
-            #D4A5B8 35%,
-            #E8C8B8 70%,
-            #F0D8C8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 8px rgba(184, 165, 212, 0.25));
+  background: linear-gradient(
+    110deg,
+    #b8a5d4 0%,
+    #d4a5b8 35%,
+    #e8c8b8 70%,
+    #f0d8c8 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(184, 165, 212, 0.25));
 }
 
 :root.time-dawn .logo-icon {
-    filter: drop-shadow(0 0 12px rgba(232, 200, 216, 0.5)) drop-shadow(0 4px 6px rgba(184, 165, 212, 0.3));
+  filter: drop-shadow(0 0 12px rgba(232, 200, 216, 0.5))
+    drop-shadow(0 4px 6px rgba(184, 165, 212, 0.3));
 }
 
 /* Morning: Fresh sky blue to powder teal */
 :root.time-morning .logo-text {
-    background: linear-gradient(110deg,
-            #5BA3D0 0%,
-            #6CB8D0 35%,
-            #7DCEC0 70%,
-            #98D8C8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 8px rgba(91, 163, 208, 0.25));
+  background: linear-gradient(
+    110deg,
+    #5ba3d0 0%,
+    #6cb8d0 35%,
+    #7dcec0 70%,
+    #98d8c8 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(91, 163, 208, 0.25));
 }
 
 :root.time-morning .logo-icon {
-    filter: drop-shadow(0 0 12px rgba(108, 184, 208, 0.5)) drop-shadow(0 4px 6px rgba(125, 206, 192, 0.3));
+  filter: drop-shadow(0 0 12px rgba(108, 184, 208, 0.5))
+    drop-shadow(0 4px 6px rgba(125, 206, 192, 0.3));
 }
 
 /* Afternoon: Rich blue to teal with golden accent */
 :root.time-afternoon .logo-text {
-    background: linear-gradient(110deg,
-            #4A90E2 0%,
-            #4A90E2 30%,
-            #5A9B8D 80%,
-            #F0B429 110%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 8px rgba(74, 144, 226, 0.2));
+  background: linear-gradient(
+    110deg,
+    #4a90e2 0%,
+    #4a90e2 30%,
+    #5a9b8d 80%,
+    #f0b429 110%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(74, 144, 226, 0.2));
 }
 
 :root.time-afternoon .logo-icon {
-    filter: drop-shadow(0 0 12px rgba(74, 144, 226, 0.4)) drop-shadow(0 4px 6px rgba(90, 155, 141, 0.3));
+  filter: drop-shadow(0 0 12px rgba(74, 144, 226, 0.4))
+    drop-shadow(0 4px 6px rgba(90, 155, 141, 0.3));
 }
 
 /* Evening: Warm sunset orange to coral */
 :root.time-evening .logo-text {
-    background: linear-gradient(110deg,
-            #E87040 0%,
-            #F09050 35%,
-            #F5A860 70%,
-            #F0C070 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 8px rgba(232, 112, 64, 0.3));
+  background: linear-gradient(
+    110deg,
+    #e87040 0%,
+    #f09050 35%,
+    #f5a860 70%,
+    #f0c070 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(232, 112, 64, 0.3));
 }
 
 :root.time-evening .logo-icon {
-    filter: drop-shadow(0 0 12px rgba(240, 144, 80, 0.5)) drop-shadow(0 4px 6px rgba(245, 168, 96, 0.4));
+  filter: drop-shadow(0 0 12px rgba(240, 144, 80, 0.5))
+    drop-shadow(0 4px 6px rgba(245, 168, 96, 0.4));
 }
 
 /* Night: Keep moon white/silver gradient (same as dark mode) */
 :root.time-night .logo-text {
-    background: linear-gradient(110deg,
-            #E2E8F0 0%,
-            #E2E8F0 40%,
-            #94A3B8 70%,
-            #64748B 110%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
+  background: linear-gradient(
+    110deg,
+    #e2e8f0 0%,
+    #e2e8f0 40%,
+    #94a3b8 70%,
+    #64748b 110%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
 }
 
 :root.time-night .logo-icon {
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25)) drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25))
+    drop-shadow(0 0 5px rgba(164, 185, 217, 0.4));
 }
 
 .profile-section {
-    padding: var(--space-3) var(--space-4);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--bg-base);
-    border-radius: var(--radius-md);
-    margin: var(--space-1);
-    border: 1px solid var(--glass-border);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-base);
+  border-radius: var(--radius-md);
+  margin: var(--space-1);
+  border: 1px solid var(--glass-border);
 }
 
 .sync-status {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-    padding: var(--space-2) var(--space-3);
-    background: var(--accent-subtle);
-    border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent-subtle);
+  border-radius: var(--radius-full);
 }
 
 .sync-status.offline {
-    background: var(--accent-muted);
-    color: var(--text-secondary);
+  background: var(--accent-muted);
+  color: var(--text-secondary);
 }
 
 .sync-status.error {
-    background: var(--warning-muted);
+  background: var(--warning-muted);
 }
 
 .user-profile {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .user-avatar {
-    width: 28px;
-    height: 28px;
-    background: var(--accent-muted);
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--text-xs);
-    font-weight: 600;
+  width: 28px;
+  height: 28px;
+  background: var(--accent-muted);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: 600;
 }
 
 .user-name {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 /* Garden Bloom (Floral Progress) */
 .garden-bloom {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-6);
-    background: rgba(242, 240, 236, 0.55);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    margin-bottom: var(--space-6);
-    box-shadow: var(--shadow-sm);
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: rgba(242, 240, 236, 0.55);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
 }
 
 .dark-mode .garden-bloom {
-    background: rgba(17, 30, 45, 0.65);
+  background: rgba(17, 30, 45, 0.65);
 }
 
 .flower-container {
-    width: 120px;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .flower-svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .flower-stem {
-    stroke-linecap: round;
-    transition: d var(--duration-slow) var(--ease-in-out);
+  stroke-linecap: round;
+  transition: d var(--duration-slow) var(--ease-in-out);
 }
 
 .flower-petals {
-    transition: transform var(--duration-slow) var(--ease-in-out);
-    transform-origin: 50% 60%;
+  transition: transform var(--duration-slow) var(--ease-in-out);
+  transform-origin: 50% 60%;
 }
 
 .petal {
-    transform-origin: 50% 60%;
-    transition: transform var(--duration-slow) var(--ease-in-out), opacity var(--duration-slow);
-    opacity: 0.8;
+  transform-origin: 50% 60%;
+  transition:
+    transform var(--duration-slow) var(--ease-in-out),
+    opacity var(--duration-slow);
+  opacity: 0.8;
 }
 
 .flower-center {
-    transition: r var(--duration-slow) var(--ease-in-out);
+  transition: r var(--duration-slow) var(--ease-in-out);
 }
 
 .bloom-stats {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .bloom-label {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .bloom-value {
-    font-size: var(--text-xl);
-    font-weight: 700;
-    color: var(--text-primary);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 /* Mobile-specific bloom improvements */
-@media (max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
-    .garden-bloom {
-        gap: var(--mobile-space-5);
-        padding: var(--mobile-space-8);
-        margin-bottom: var(--mobile-space-8);
-    }
+@media (max-width: 600px),
+  ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
+  .garden-bloom {
+    gap: var(--mobile-space-5);
+    padding: var(--mobile-space-8);
+    margin-bottom: var(--mobile-space-8);
+  }
 
-    .flower-container {
-        width: 140px;
-        height: 140px;
-    }
+  .flower-container {
+    width: 140px;
+    height: 140px;
+  }
 
-    .bloom-label {
-        font-size: var(--text-sm);
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        color: var(--text-secondary);
-    }
+  .bloom-label {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+  }
 
-    .bloom-value {
-        font-size: var(--text-2xl);
-        font-weight: 800;
-    }
+  .bloom-value {
+    font-size: var(--text-2xl);
+    font-weight: 800;
+  }
 }
 
 /* Animations for Blooming */
 @keyframes petal-glow {
-    0% {
-        opacity: 0.85;
-        transform: scale(1);
-    }
+  0% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
 
-    100% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
+  100% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 }
 
 .garden-bloom.full-bloom .petal {
-    opacity: 1;
-    animation: petal-glow 2s infinite alternate;
-    will-change: transform, opacity;
+  opacity: 1;
+  animation: petal-glow 2s infinite alternate;
+  will-change: transform, opacity;
 }
 
 /* Pollen Sparkle Particles */
 .pollen-sparkle {
-    position: fixed;
-    pointer-events: none;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    z-index: 9999;
+  position: fixed;
+  pointer-events: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  z-index: 9999;
 }
 
 @keyframes pollen-drift {
-    0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-    }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
 
-    100% {
-        transform: translate(var(--tx), var(--ty)) scale(0);
-        opacity: 0;
-    }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
 }
 
 /* Garden Capacity Warning */
 .garden-capacity-warning {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-6);
-    background: var(--warning-muted);
-    border: 1px solid var(--warning);
-    border-radius: var(--radius-lg);
-    margin: var(--space-6) 0;
-    color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  background: var(--warning-muted);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius-lg);
+  margin: var(--space-6) 0;
+  color: var(--text-primary);
 }
 
 .warning-icon {
-    font-size: var(--text-2xl);
-    flex-shrink: 0;
+  font-size: var(--text-2xl);
+  flex-shrink: 0;
 }
 
 .warning-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .warning-text strong {
-    font-size: var(--text-sm);
-    color: var(--warning);
+  font-size: var(--text-sm);
+  color: var(--warning);
 }
 
 .warning-text span {
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-    line-height: 1.4;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: 1.4;
 }
 
 /* Streak - More Minimal */
 .streak-display {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    transition: background var(--duration-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: background var(--duration-fast);
 }
 
 .streak-display:hover {
-    background: var(--warning-muted);
+  background: var(--warning-muted);
 }
 
 .streak-fire {
-    font-size: 1rem;
-    line-height: 1;
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .streak-icon {
-    display: none;
-    width: 16px;
-    height: 16px;
-    background: var(--warning);
-    border-radius: 50%;
-    position: relative;
+  display: none;
+  width: 16px;
+  height: 16px;
+  background: var(--warning);
+  border-radius: 50%;
+  position: relative;
 }
 
 .streak-icon::before {
-    content: "▲";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 8px;
-    color: var(--bg-base);
+  content: "▲";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8px;
+  color: var(--bg-base);
 }
 
 body.reduce-emojis .streak-fire {
-    display: none;
+  display: none;
 }
 
 body.reduce-emojis .streak-icon {
-    display: block;
+  display: block;
 }
 
 .streak-count {
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
 }
 
 .streak-display:hover .streak-count {
-    color: var(--warning);
+  color: var(--warning);
 }
 
 .streak-label {
-    color: var(--text-tertiary);
-    font-weight: 400;
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+/* Help Button (Shortcut Discoverability) */
+.help-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-tertiary);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: var(--space-2);
+  transition: all var(--duration-fast);
+  padding: 0;
+}
+
+.help-btn:hover {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.1);
 }
 
 /* Year Progress */
 .year-progress {
-    width: 100%;
-    margin: var(--space-4) 0;
+  width: 100%;
+  margin: var(--space-4) 0;
 }
 
 .year-progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: var(--space-1);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-1);
 }
 
 .year-progress-label {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 500;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
 }
 
 .year-progress-value {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
 }
 
 .year-progress-bar {
-    height: 4px;
-    background: var(--bg-hover);
-    border-radius: var(--radius-full);
-    overflow: hidden;
+  height: 4px;
+  background: var(--bg-hover);
+  border-radius: var(--radius-full);
+  overflow: hidden;
 }
 
 .year-progress-fill {
-    height: 100%;
-    background: var(--accent-fill);
-    border-radius: inherit;
-    transition: width var(--duration-slow) var(--ease-out);
+  height: 100%;
+  background: var(--accent-fill);
+  border-radius: inherit;
+  transition: width var(--duration-slow) var(--ease-out);
 }
 
 /* Energy Selector - Subtle Design */

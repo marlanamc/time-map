@@ -96,6 +96,7 @@ export const State: AppState & {
     // Apply persisted preferences to runtime state
     this.focusMode = !!this.data?.preferences?.focusMode;
     const preferredView = this.data?.preferences?.defaultView;
+
     this.currentView = Object.values(VIEWS).includes(preferredView)
       ? preferredView
       : VIEWS.YEAR;
@@ -142,6 +143,7 @@ export const State: AppState & {
   // Navigate views
   setView(view: ViewType) {
     this.currentView = view;
+
     eventBus.emit("view:changed", { view, transition: true });
     eventBus.emit("view:sync-buttons");
   },
@@ -468,7 +470,10 @@ export const State: AppState & {
                 `[State] Merged ${mergedCount} local goal(s) from IndexedDB into cloud data`,
               );
               try {
-                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
+                localStorage.setItem(
+                  CONFIG.STORAGE_KEY,
+                  JSON.stringify(this.data),
+                );
               } catch (storageError) {
                 console.warn(
                   "[State] Failed to persist merged goals to localStorage:",

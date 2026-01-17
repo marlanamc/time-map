@@ -1,8 +1,12 @@
 import { State } from "../../core/State";
 import { Events } from "../../core/Events";
 import { eventBus } from "../../core/EventBus";
-import { renderAccordionSection, setupAccordionSectionToggles } from "./shared/AccordionSection";
+import {
+  renderAccordionSection,
+  setupAccordionSectionToggles,
+} from "./shared/AccordionSection";
 import { setupModalA11y, type ModalA11yCleanup } from "./shared/modalA11y";
+import { haptics } from "../../utils/haptics";
 import type { CalendarEvent, EventRecurrence } from "../../types";
 
 type ShowOptions = {
@@ -23,7 +27,12 @@ function parseYmdLocal(ymd: string): Date | null {
   const year = Number(match[1]);
   const monthIndex = Number(match[2]) - 1;
   const day = Number(match[3]);
-  if (!Number.isFinite(year) || !Number.isFinite(monthIndex) || !Number.isFinite(day)) return null;
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(monthIndex) ||
+    !Number.isFinite(day)
+  )
+    return null;
   const d = new Date(year, monthIndex, day);
   return Number.isNaN(d.getTime()) ? null : d;
 }
@@ -97,7 +106,10 @@ function ensureModal(): HTMLElement {
               <label>Days of week</label>
               <div class="modal-pill-row event-weekdays">
                 ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-                  .map((label, idx) => `<button type="button" class="modal-pill" data-action="toggle-weekday" data-weekday="${idx}">${label}</button>`)
+                  .map(
+                    (label, idx) =>
+                      `<button type="button" class="modal-pill" data-action="toggle-weekday" data-weekday="${idx}">${label}</button>`,
+                  )
                   .join("")}
               </div>
             </div>
@@ -183,31 +195,75 @@ class EventModalManager {
     overlay.classList.add("active");
     this.currentId = opts.eventId ?? null;
 
-    const titleEl = overlay.querySelector("#eventModalTitle") as HTMLElement | null;
-    const saveBtn = overlay.querySelector("#eventSaveBtn") as HTMLButtonElement | null;
-    const deleteBtn = overlay.querySelector("#eventDeleteBtn") as HTMLButtonElement | null;
+    const titleEl = overlay.querySelector(
+      "#eventModalTitle",
+    ) as HTMLElement | null;
+    const saveBtn = overlay.querySelector(
+      "#eventSaveBtn",
+    ) as HTMLButtonElement | null;
+    const deleteBtn = overlay.querySelector(
+      "#eventDeleteBtn",
+    ) as HTMLButtonElement | null;
 
-    const titleInput = overlay.querySelector("#eventTitle") as HTMLInputElement | null;
-    const dateInput = overlay.querySelector("#eventDate") as HTMLInputElement | null;
-    const allDayInput = overlay.querySelector("#eventAllDay") as HTMLInputElement | null;
-    const startTimeInput = overlay.querySelector("#eventStartTime") as HTMLInputElement | null;
-    const endTimeInput = overlay.querySelector("#eventEndTime") as HTMLInputElement | null;
-    const endDateInput = overlay.querySelector("#eventEndDate") as HTMLInputElement | null;
-    const notesInput = overlay.querySelector("#eventNotes") as HTMLTextAreaElement | null;
+    const titleInput = overlay.querySelector(
+      "#eventTitle",
+    ) as HTMLInputElement | null;
+    const dateInput = overlay.querySelector(
+      "#eventDate",
+    ) as HTMLInputElement | null;
+    const allDayInput = overlay.querySelector(
+      "#eventAllDay",
+    ) as HTMLInputElement | null;
+    const startTimeInput = overlay.querySelector(
+      "#eventStartTime",
+    ) as HTMLInputElement | null;
+    const endTimeInput = overlay.querySelector(
+      "#eventEndTime",
+    ) as HTMLInputElement | null;
+    const endDateInput = overlay.querySelector(
+      "#eventEndDate",
+    ) as HTMLInputElement | null;
+    const notesInput = overlay.querySelector(
+      "#eventNotes",
+    ) as HTMLTextAreaElement | null;
 
-    const freqSelect = overlay.querySelector("#eventFreq") as HTMLSelectElement | null;
-    const intervalInput = overlay.querySelector("#eventInterval") as HTMLInputElement | null;
-    const endsSelect = overlay.querySelector("#eventEnds") as HTMLSelectElement | null;
-    const untilInput = overlay.querySelector("#eventUntil") as HTMLInputElement | null;
-    const countInput = overlay.querySelector("#eventCount") as HTMLInputElement | null;
+    const freqSelect = overlay.querySelector(
+      "#eventFreq",
+    ) as HTMLSelectElement | null;
+    const intervalInput = overlay.querySelector(
+      "#eventInterval",
+    ) as HTMLInputElement | null;
+    const endsSelect = overlay.querySelector(
+      "#eventEnds",
+    ) as HTMLSelectElement | null;
+    const untilInput = overlay.querySelector(
+      "#eventUntil",
+    ) as HTMLInputElement | null;
+    const countInput = overlay.querySelector(
+      "#eventCount",
+    ) as HTMLInputElement | null;
 
-    const timeRow = overlay.querySelector("#eventTimeRow") as HTMLElement | null;
-    const endDateRow = overlay.querySelector("#eventEndDateRow") as HTMLElement | null;
-    const repeatDetailsRow = overlay.querySelector("#eventRepeatDetailsRow") as HTMLElement | null;
-    const endsRow = overlay.querySelector("#eventEndsRow") as HTMLElement | null;
-    const untilGroup = overlay.querySelector("#eventUntilGroup") as HTMLElement | null;
-    const countGroup = overlay.querySelector("#eventCountGroup") as HTMLElement | null;
-    const weekdaysGroup = overlay.querySelector("#eventWeekdaysGroup") as HTMLElement | null;
+    const timeRow = overlay.querySelector(
+      "#eventTimeRow",
+    ) as HTMLElement | null;
+    const endDateRow = overlay.querySelector(
+      "#eventEndDateRow",
+    ) as HTMLElement | null;
+    const repeatDetailsRow = overlay.querySelector(
+      "#eventRepeatDetailsRow",
+    ) as HTMLElement | null;
+    const endsRow = overlay.querySelector(
+      "#eventEndsRow",
+    ) as HTMLElement | null;
+    const untilGroup = overlay.querySelector(
+      "#eventUntilGroup",
+    ) as HTMLElement | null;
+    const countGroup = overlay.querySelector(
+      "#eventCountGroup",
+    ) as HTMLElement | null;
+    const weekdaysGroup = overlay.querySelector(
+      "#eventWeekdaysGroup",
+    ) as HTMLElement | null;
 
     const updateAllDay = () => {
       const allDay = !!allDayInput?.checked;
@@ -221,7 +277,8 @@ class EventModalManager {
       repeatDetailsRow?.toggleAttribute("hidden", !enabled);
 
       const endsMode = endsSelect?.value ?? "never";
-      const showEndsRow = enabled && (endsMode === "until" || endsMode === "count");
+      const showEndsRow =
+        enabled && (endsMode === "until" || endsMode === "count");
       endsRow?.toggleAttribute("hidden", !showEndsRow);
       untilGroup?.toggleAttribute("hidden", !(enabled && endsMode === "until"));
       countGroup?.toggleAttribute("hidden", !(enabled && endsMode === "count"));
@@ -231,10 +288,12 @@ class EventModalManager {
     };
 
     const applyWeekdayButtons = () => {
-      overlay.querySelectorAll<HTMLElement>('[data-action="toggle-weekday"]').forEach((btn) => {
-        const idx = Number(btn.dataset.weekday);
-        btn.classList.toggle("is-selected", this.weekdays.has(idx));
-      });
+      overlay
+        .querySelectorAll<HTMLElement>('[data-action="toggle-weekday"]')
+        .forEach((btn) => {
+          const idx = Number(btn.dataset.weekday);
+          btn.classList.toggle("is-selected", this.weekdays.has(idx));
+        });
     };
 
     const resetRepeat = () => {
@@ -272,8 +331,10 @@ class EventModalManager {
           endDateInput.value = startYmd === endYmd ? "" : endYmd;
         }
       } else {
-        if (startTimeInput) startTimeInput.value = start.toTimeString().slice(0, 5);
-        if (endTimeInput && end) endTimeInput.value = end.toTimeString().slice(0, 5);
+        if (startTimeInput)
+          startTimeInput.value = start.toTimeString().slice(0, 5);
+        if (endTimeInput && end)
+          endTimeInput.value = end.toTimeString().slice(0, 5);
       }
 
       resetRepeat();
@@ -283,7 +344,9 @@ class EventModalManager {
         if (intervalInput) intervalInput.value = String(rec.interval ?? 1);
         if (rec.freq === "weekly") {
           this.weekdays.clear();
-          (rec.byWeekday ?? [start.getDay()]).forEach((d) => this.weekdays.add(d));
+          (rec.byWeekday ?? [start.getDay()]).forEach((d) =>
+            this.weekdays.add(d),
+          );
           applyWeekdayButtons();
         }
         if (rec.until && untilInput) {
@@ -316,12 +379,16 @@ class EventModalManager {
     // Bind events
     const close = () => this.hide();
 
-    overlay.querySelectorAll<HTMLElement>('[data-action="close-event-modal"], [data-action="cancel-event-modal"]').forEach((btn) => {
-      btn.onclick = (e) => {
-        e.preventDefault();
-        close();
-      };
-    });
+    overlay
+      .querySelectorAll<HTMLElement>(
+        '[data-action="close-event-modal"], [data-action="cancel-event-modal"]',
+      )
+      .forEach((btn) => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          close();
+        };
+      });
 
     overlay.onclick = (e) => {
       if (e.target === overlay) close();
@@ -334,29 +401,82 @@ class EventModalManager {
     freqSelect?.addEventListener("change", updateRepeatVisibility);
     endsSelect?.addEventListener("change", updateRepeatVisibility);
 
-    overlay.querySelectorAll<HTMLElement>('[data-action="toggle-weekday"]').forEach((btn) => {
-      btn.onclick = (e) => {
-        e.preventDefault();
-        const idx = Number(btn.dataset.weekday);
-        if (!Number.isFinite(idx)) return;
-        if (this.weekdays.has(idx)) this.weekdays.delete(idx);
-        else this.weekdays.add(idx);
-        applyWeekdayButtons();
-      };
-    });
+    overlay
+      .querySelectorAll<HTMLElement>('[data-action="toggle-weekday"]')
+      .forEach((btn) => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          const idx = Number(btn.dataset.weekday);
+          if (!Number.isFinite(idx)) return;
+          if (this.weekdays.has(idx)) this.weekdays.delete(idx);
+          else this.weekdays.add(idx);
+          applyWeekdayButtons();
+        };
+      });
 
-    const form = overlay.querySelector("#eventModalForm") as HTMLFormElement | null;
+    const form = overlay.querySelector(
+      "#eventModalForm",
+    ) as HTMLFormElement | null;
     if (form) {
       form.onsubmit = (ev) => {
         ev.preventDefault();
 
         const title = titleInput?.value.trim() ?? "";
         const dateYmd = dateInput?.value.trim() ?? "";
-        if (!title || !dateYmd) return;
+
+        if (!title) {
+          if (titleInput) {
+            haptics.impact("medium");
+            titleInput.setAttribute("aria-invalid", "true");
+            titleInput.classList.add("error");
+            let errorMsg = titleInput.parentElement?.querySelector(
+              ".form-error",
+            ) as HTMLElement | null;
+            if (!errorMsg) {
+              errorMsg = document.createElement("div");
+              errorMsg.className = "form-error";
+              errorMsg.textContent = "Event title is required";
+              titleInput.parentElement?.appendChild(errorMsg);
+            }
+            titleInput.focus();
+            titleInput.oninput = () => {
+              titleInput.classList.remove("error");
+              titleInput.removeAttribute("aria-invalid");
+              titleInput.parentElement?.querySelector(".form-error")?.remove();
+              titleInput.oninput = null;
+            };
+          }
+          return;
+        }
+
+        if (!dateYmd) {
+          if (dateInput) {
+            haptics.impact("medium");
+            dateInput.setAttribute("aria-invalid", "true");
+            dateInput.classList.add("error");
+            let errorMsg = dateInput.parentElement?.querySelector(
+              ".form-error",
+            ) as HTMLElement | null;
+            if (!errorMsg) {
+              errorMsg = document.createElement("div");
+              errorMsg.className = "form-error";
+              errorMsg.textContent = "Date is required";
+              dateInput.parentElement?.appendChild(errorMsg);
+            }
+            dateInput.focus();
+            dateInput.oninput = () => {
+              dateInput.classList.remove("error");
+              dateInput.removeAttribute("aria-invalid");
+              dateInput.parentElement?.querySelector(".form-error")?.remove();
+              dateInput.oninput = null;
+            };
+          }
+          return;
+        }
 
         const allDay = !!allDayInput?.checked;
-        const startTime = allDay ? null : (startTimeInput?.value || null);
-        const endTime = allDay ? null : (endTimeInput?.value || null);
+        const startTime = allDay ? null : startTimeInput?.value || null;
+        const endTime = allDay ? null : endTimeInput?.value || null;
 
         const startAt = buildDateTimeIso(dateYmd, startTime);
         const endAt = (() => {
@@ -371,19 +491,28 @@ class EventModalManager {
         const freq = (freqSelect?.value ?? "") as EventRecurrence["freq"] | "";
         const recurrence = (() => {
           if (!freq) return null;
-          const interval = Math.max(1, Math.floor(Number(intervalInput?.value ?? 1)));
+          const interval = Math.max(
+            1,
+            Math.floor(Number(intervalInput?.value ?? 1)),
+          );
           const endsMode = endsSelect?.value ?? "never";
           const rec: EventRecurrence = { freq, interval };
           if (freq === "weekly") {
             const byWeekday = Array.from(this.weekdays.values()).sort();
-            rec.byWeekday = byWeekday.length > 0 ? byWeekday : [parseYmdLocal(dateYmd)?.getDay() ?? 1];
+            rec.byWeekday =
+              byWeekday.length > 0
+                ? byWeekday
+                : [parseYmdLocal(dateYmd)?.getDay() ?? 1];
           }
           if (endsMode === "until") {
             const untilYmd = (untilInput?.value || "").trim();
             if (untilYmd) rec.until = endOfDayIso(untilYmd);
           }
           if (endsMode === "count") {
-            const count = Math.max(1, Math.floor(Number(countInput?.value ?? 1)));
+            const count = Math.max(
+              1,
+              Math.floor(Number(countInput?.value ?? 1)),
+            );
             rec.count = count;
           }
           return rec;
@@ -427,7 +556,9 @@ class EventModalManager {
     }
 
     // Setup accessibility: ESC to close, focus trap, initial focus
-    const modalContainer = overlay.querySelector(".modal") as HTMLElement | null;
+    const modalContainer = overlay.querySelector(
+      ".modal",
+    ) as HTMLElement | null;
     if (modalContainer) {
       // Clean up previous setup if showing again
       if (this.a11yCleanup) {

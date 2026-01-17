@@ -169,7 +169,7 @@ export const UI = {
             openGoalModal: (
               level: GoalLevel,
               month: number | null,
-              year: number
+              year: number,
             ) => this.openGoalModal(level, month, year),
             updateYearDisplay: () => this.updateYearDisplay(),
           });
@@ -178,7 +178,7 @@ export const UI = {
           level: any,
           month: number,
           year: number,
-          options?: any
+          options?: any,
         ) => this.openGoalModal(level, month, year, options),
         escapeHtml: (text: string) => escapeHtmlUtil(text),
         dayViewController: this.dayViewController,
@@ -190,7 +190,7 @@ export const UI = {
 
   getLevelLabel(
     level: GoalLevel,
-    opts?: { lowercase?: boolean; plural?: boolean }
+    opts?: { lowercase?: boolean; plural?: boolean },
   ): string {
     const base = (() => {
       switch (level) {
@@ -288,7 +288,7 @@ export const UI = {
   },
 
   updateSyncStatus(
-    status: "syncing" | "synced" | "error" | "local" | "offline"
+    status: "syncing" | "synced" | "error" | "local" | "offline",
   ): void {
     const el = document.getElementById("syncStatus");
 
@@ -401,7 +401,7 @@ export const UI = {
       const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw.trim());
       const date = match
         ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
-        : State.viewingDate ?? new Date();
+        : (State.viewingDate ?? new Date());
       eventModal.show({ date, eventId: ev.detail?.eventId });
     });
   },
@@ -457,6 +457,8 @@ export const UI = {
         transition: true,
         ...data,
       };
+      // Persist the view to localStorage
+      this._uiState.saveView(data.view || State.currentView);
       this.scheduleRender(transitionOptions);
     });
 
@@ -499,7 +501,7 @@ export const UI = {
       Toast.show(
         this.elements,
         "🌥️",
-        `We'll keep trying to save your changes. ${message}`
+        `We'll keep trying to save your changes. ${message}`,
       );
       this.syncSyncIssuesBadge();
     }) as EventListener);
@@ -511,7 +513,7 @@ export const UI = {
       Toast.show(
         this.elements,
         "🌥️",
-        `We hit a hiccup saving changes. ${message}`
+        `We hit a hiccup saving changes. ${message}`,
       );
     }) as EventListener);
 
@@ -606,7 +608,9 @@ export const UI = {
         this.render();
       },
       onUpdateSyncStatus: (status) => {
-        this.updateSyncStatus(status as "syncing" | "synced" | "error" | "local" | "offline");
+        this.updateSyncStatus(
+          status as "syncing" | "synced" | "error" | "local" | "offline",
+        );
       },
       onShowToast: (icon, message) => {
         Toast.show(this.elements, icon, message);
@@ -744,8 +748,8 @@ export const UI = {
         this.openGoalModal(
           this.getCurrentLevel(),
           State.viewingMonth,
-          State.viewingYear
-        )
+          State.viewingYear,
+        ),
       );
 
     // Modal controls
@@ -761,7 +765,7 @@ export const UI = {
 
     // Goal form submission
     this.elements.goalForm?.addEventListener("submit", (e: Event) =>
-      this.handleGoalSubmit(e)
+      this.handleGoalSubmit(e),
     );
 
     // Level context bar interactions (Vision/Milestone/Focus/Intention)
@@ -777,7 +781,7 @@ export const UI = {
       }
 
       const addEl = target.closest(
-        '[data-action="add-level"]'
+        '[data-action="add-level"]',
       ) as HTMLElement | null;
       const level = addEl?.dataset.level as GoalLevel | undefined;
       if (!level) return;
@@ -847,32 +851,38 @@ export const UI = {
       .getElementById("brainDumpBtn")
       ?.addEventListener(
         "click",
-        () => void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal())
+        () => void this.ensureNDSupport().then((nd) => nd.showBrainDumpModal()),
       );
     document
       .getElementById("bodyDoubleBtn")
       ?.addEventListener(
         "click",
-        () => void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal())
+        () =>
+          void this.ensureNDSupport().then((nd) => nd.showBodyDoubleModal()),
       );
     document
       .getElementById("ndSettingsBtn")
       ?.addEventListener(
         "click",
-        () => void this.ensureNDSupport().then((nd) => nd.showSettingsPanel())
+        () => void this.ensureNDSupport().then((nd) => nd.showSettingsPanel()),
       );
     document
       .getElementById("appearanceBtn")
       ?.addEventListener(
         "click",
-        () => void this.ensureNDSupport().then((nd) => nd.showAppearancePanel())
+        () =>
+          void this.ensureNDSupport().then((nd) => nd.showAppearancePanel()),
       );
     document
       .getElementById("dopamineMenuBtn")
       ?.addEventListener(
         "click",
-        () => void this.ensureNDSupport().then((nd) => nd.showDopamineMenu())
+        () => void this.ensureNDSupport().then((nd) => nd.showDopamineMenu()),
       );
+
+    document
+      .getElementById("showShortcutsBtn")
+      ?.addEventListener("click", () => this.showKeyboardShortcuts());
 
     // Body double stop button
     document.getElementById("bdStop")?.addEventListener("click", () => {
@@ -881,7 +891,7 @@ export const UI = {
       const active = sessions[sessions.length - 1];
       if (active && !active.endedAt) {
         void this.ensureNDSupport().then((nd) =>
-          nd.endBodyDouble(active.id, false)
+          nd.endBodyDouble(active.id, false),
         );
         document
           .getElementById("bodyDoubleDisplay")
@@ -945,7 +955,7 @@ export const UI = {
       Toast.show(
         this.elements,
         "📡",
-        "You appear to be offline. Changes will sync when you’re back online."
+        "You appear to be offline. Changes will sync when you’re back online.",
       );
       this.updateSyncStatus("local");
       return;
@@ -955,7 +965,7 @@ export const UI = {
       Toast.show(
         this.elements,
         "⚙️",
-        "Cloud sync is disabled (missing Supabase credentials)."
+        "Cloud sync is disabled (missing Supabase credentials).",
       );
       this.updateSyncStatus("local");
       return;
@@ -1042,7 +1052,7 @@ export const UI = {
           this.zoom(e.deltaY < 0 ? 10 : -10);
         }
       },
-      { passive: false }
+      { passive: false },
     );
   },
 
@@ -1073,15 +1083,13 @@ export const UI = {
     if (State.currentView !== VIEWS.HOME) return;
     if (!this.elements.mobileHomeView) return;
 
-    HomeRenderer.render(
-      this.elements,
-      this.escapeHtml.bind(this),
-      (goalId) => goalDetailModal.show(goalId)
+    HomeRenderer.render(this.elements, this.escapeHtml.bind(this), (goalId) =>
+      goalDetailModal.show(goalId),
     );
     MobileHereRenderer.render(
       this.elements,
       this.escapeHtml.bind(this),
-      (goalId) => goalDetailModal.show(goalId)
+      (goalId) => goalDetailModal.show(goalId),
     );
   },
 
@@ -1099,7 +1107,7 @@ export const UI = {
         text = State.viewingYear.toString();
         display.classList.toggle(
           "is-today",
-          State.viewingYear === now.getFullYear()
+          State.viewingYear === now.getFullYear(),
         );
         break;
       case VIEWS.MONTH:
@@ -1107,13 +1115,13 @@ export const UI = {
         display.classList.toggle(
           "is-today",
           State.viewingMonth === now.getMonth() &&
-            State.viewingYear === now.getFullYear()
+            State.viewingYear === now.getFullYear(),
         );
         break;
       case VIEWS.WEEK:
         const weekStart = State.getWeekStart(
           State.viewingYear,
-          State.viewingWeek || 1
+          State.viewingWeek || 1,
         );
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 6);
@@ -1126,7 +1134,7 @@ export const UI = {
         })}`;
         display.classList.toggle(
           "is-today",
-          now >= weekStart && now <= weekEnd
+          now >= weekStart && now <= weekEnd,
         );
         break;
       case VIEWS.DAY:
@@ -1240,12 +1248,12 @@ export const UI = {
             // Re-render to update the view
             if (this.dayViewController) {
               const contextGoals = this.getContextGoalsForDate(
-                State.viewingDate
+                State.viewingDate,
               );
               this.dayViewController.setGoals(
                 State.viewingDate,
                 State.data?.goals || [],
-                contextGoals
+                contextGoals,
               );
             }
           },
@@ -1275,7 +1283,7 @@ export const UI = {
         {
           timeWindowStart,
           timeWindowEnd,
-        }
+        },
       );
 
       // Mount the controller
@@ -1300,19 +1308,18 @@ export const UI = {
     if (this._uiState.dayViewControllerLoading)
       return this._uiState.dayViewControllerLoading;
 
-    this._uiState.dayViewControllerLoading = import(
-      "../components/dayView/DayViewController"
-    )
-      .then((mod) => {
-        this._uiState.dayViewControllerCtor = mod.DayViewController as any;
-      })
-      .catch((err) => {
-        console.error("Failed to load DayViewController:", err);
-        this.showToast("⚠️", "Couldn’t load Day view");
-      })
-      .finally(() => {
-        this._uiState.dayViewControllerLoading = null;
-      });
+    this._uiState.dayViewControllerLoading =
+      import("../components/dayView/DayViewController")
+        .then((mod) => {
+          this._uiState.dayViewControllerCtor = mod.DayViewController as any;
+        })
+        .catch((err) => {
+          console.error("Failed to load DayViewController:", err);
+          this.showToast("⚠️", "Couldn’t load Day view");
+        })
+        .finally(() => {
+          this._uiState.dayViewControllerLoading = null;
+        });
 
     return this._uiState.dayViewControllerLoading;
   },
@@ -1320,7 +1327,7 @@ export const UI = {
   // Render a single goal card for day view
   renderDayGoalCard(
     goal: Goal,
-    opts?: { variant?: "planter" | "seed" | "compost"; style?: string }
+    opts?: { variant?: "planter" | "seed" | "compost"; style?: string },
   ) {
     const cat = goal.category ? CONFIG.CATEGORIES[goal.category] : undefined;
     const isCompleted = goal.status === "done";
@@ -1330,15 +1337,15 @@ export const UI = {
       variant === "planter"
         ? "day-goal-variant-planter"
         : variant === "compost"
-        ? "day-goal-variant-compost"
-        : "day-goal-variant-seed";
+          ? "day-goal-variant-compost"
+          : "day-goal-variant-seed";
     const styleAttr = opts?.style ? ` style="${opts.style}"` : "";
     const dragAttrs =
       variant === "seed" && !isCompleted
         ? ` draggable="true" aria-grabbed="false"`
         : variant === "planter" && !isCompleted
-        ? ` draggable="true" aria-grabbed="false"`
-        : "";
+          ? ` draggable="true" aria-grabbed="false"`
+          : "";
 
     const resizeHandles =
       variant === "planter" && !isCompleted
@@ -1350,10 +1357,10 @@ export const UI = {
 
     return `
       <div class="day-goal-card ${variantClass} ${
-      isCompleted ? "completed" : ""
-    }" data-goal-id="${
-      goal.id
-    }" role="button" tabindex="0"${styleAttr}${dragAttrs}>
+        isCompleted ? "completed" : ""
+      }" data-goal-id="${
+        goal.id
+      }" role="button" tabindex="0"${styleAttr}${dragAttrs}>
         ${resizeHandles}
         <div class="day-goal-checkbox ${isCompleted ? "checked" : ""}"></div>
         <div class="day-goal-content">
@@ -1365,7 +1372,7 @@ export const UI = {
           ${
             goal.description
               ? `<div class="day-goal-desc">${this.escapeHtml(
-                  goal.description
+                  goal.description,
                 )}</div>`
               : ""
           }
@@ -1428,8 +1435,8 @@ export const UI = {
               <div class="goal-title">${this.escapeHtml(g.title)}</div>
               <div class="goal-tags">
                 <span class="goal-tag">${cat?.emoji ?? ""} ${
-          cat?.label ?? ""
-        }</span>
+                  cat?.label ?? ""
+                }</span>
               </div>
             </div>
           </div>
@@ -1448,7 +1455,7 @@ export const UI = {
       this.elements.yearDisplay.textContent = String(State.viewingYear);
       this.elements.yearDisplay.classList.toggle(
         "current-year",
-        State.viewingYear === currentYear
+        State.viewingYear === currentYear,
       );
     }
   },
@@ -1488,7 +1495,7 @@ export const UI = {
                 >
                   ${cat.emoji} ${cat.label}
                 </button>
-              `
+              `,
             )
             .join("")}
         </div>
@@ -1496,10 +1503,10 @@ export const UI = {
     `;
 
     const dropdown = container.querySelector(
-      ".filter-dropdown"
+      ".filter-dropdown",
     ) as HTMLElement | null;
     const trigger = container.querySelector(
-      ".filter-trigger"
+      ".filter-trigger",
     ) as HTMLElement | null;
     const menu = container.querySelector(".filter-menu") as HTMLElement | null;
 
@@ -1514,7 +1521,7 @@ export const UI = {
       menu.hidden = false;
       trigger.setAttribute("aria-expanded", "true");
       const activeBtn = menu.querySelector(
-        ".category-filter.active"
+        ".category-filter.active",
       ) as HTMLElement | null;
       (
         activeBtn ||
@@ -1525,11 +1532,11 @@ export const UI = {
     if (this._uiState.filterDocListeners) {
       document.removeEventListener(
         "click",
-        this._uiState.filterDocListeners.onDocClick
+        this._uiState.filterDocListeners.onDocClick,
       );
       document.removeEventListener(
         "keydown",
-        this._uiState.filterDocListeners.onDocKeydown
+        this._uiState.filterDocListeners.onDocKeydown,
       );
       this._uiState.filterDocListeners = null;
     }
@@ -1581,7 +1588,7 @@ export const UI = {
           openGoalModal: (
             level: GoalLevel,
             month: number | null,
-            year: number
+            year: number,
           ) => this.openGoalModal(level, month, year),
           updateYearDisplay: () => this.updateYearDisplay(),
         });
@@ -1608,7 +1615,7 @@ export const UI = {
     container.innerHTML = upcoming
       .map((goal) => {
         const cat = goal.category
-          ? CONFIG.CATEGORIES[goal.category] ?? null
+          ? (CONFIG.CATEGORIES[goal.category] ?? null)
           : null;
         const monthName = CONFIG.MONTHS[goal.month];
 
@@ -1651,7 +1658,7 @@ export const UI = {
           }" data-tooltip="${this.escapeHtml(ach.desc)}">
             ${ach.emoji}
           </div>
-        `
+        `,
       )
       .join("");
   },
@@ -1663,14 +1670,14 @@ export const UI = {
     level: GoalLevel = "milestone",
     preselectedMonth: number | null = null,
     preselectedYear: number | null = null,
-    link?: { parentId: string; parentLevel: GoalLevel } | null
+    link?: { parentId: string; parentLevel: GoalLevel } | null,
   ): void {
     goalModal.openGoalModal(
       this,
       level,
       preselectedMonth,
       preselectedYear,
-      link
+      link,
     );
   },
 
@@ -1730,10 +1737,10 @@ export const UI = {
     ];
     const effectiveView: ViewType =
       State.currentView === VIEWS.HOME
-        ? homeScopeViews[this._uiState.homeProgressScopeIndex] ?? VIEWS.YEAR
+        ? (homeScopeViews[this._uiState.homeProgressScopeIndex] ?? VIEWS.YEAR)
         : State.currentView === VIEWS.GARDEN
-        ? VIEWS.YEAR // Garden view shows year stats
-        : State.currentView;
+          ? VIEWS.YEAR // Garden view shows year stats
+          : State.currentView;
 
     // Use current date/year for HOME and GARDEN views, otherwise use State viewing values
     const scopeYear =
@@ -1757,7 +1764,7 @@ export const UI = {
         const msLeft = Math.max(0, end.getTime() - now.getTime());
         const hoursLeft = Math.floor(msLeft / (1000 * 60 * 60));
         const minutesLeft = Math.floor(
-          (msLeft % (1000 * 60 * 60)) / (1000 * 60)
+          (msLeft % (1000 * 60 * 60)) / (1000 * 60),
         );
         daysLeft = hoursLeft;
         weeksLeft = minutesLeft;
@@ -1780,7 +1787,7 @@ export const UI = {
         }
         const daysInWeek = Math.max(
           0,
-          Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+          Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
         );
 
         // Weeks left in current month
@@ -1791,13 +1798,13 @@ export const UI = {
           23,
           59,
           59,
-          999
+          999,
         );
         const daysInMonth = Math.max(
           0,
           Math.ceil(
-            (monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-          )
+            (monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+          ),
         );
         const weeksInMonth = Math.floor(daysInMonth / 7);
 
@@ -1818,13 +1825,13 @@ export const UI = {
           23,
           59,
           59,
-          999
+          999,
         );
         const daysInMonth = Math.max(
           0,
           Math.ceil(
-            (monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-          )
+            (monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+          ),
         );
         const weeksInMonth = Math.floor(daysInMonth / 7);
 
@@ -1847,7 +1854,7 @@ export const UI = {
         end = new Date(scopeYear, 11, 31, 23, 59, 59, 999);
         daysLeft = Math.max(
           0,
-          Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+          Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
         );
         weeksLeft = Math.floor(daysLeft / 7);
         daysLeftLabel = "Days Left";
@@ -1892,7 +1899,7 @@ export const UI = {
     ];
     const effectiveView: ViewType =
       State.currentView === VIEWS.HOME
-        ? homeScopeViews[this._uiState.homeProgressScopeIndex] ?? VIEWS.YEAR
+        ? (homeScopeViews[this._uiState.homeProgressScopeIndex] ?? VIEWS.YEAR)
         : State.currentView;
 
     const isHome = State.currentView === VIEWS.HOME;
@@ -1978,7 +1985,7 @@ export const UI = {
       this.elements.timeProgress.setAttribute("aria-label", label);
       this.elements.timeProgress.setAttribute(
         "aria-valuenow",
-        String(progress)
+        String(progress),
       );
       this.elements.timeProgress.setAttribute("aria-valuetext", `${progress}%`);
     }
@@ -2058,13 +2065,19 @@ export const UI = {
 
   setFocusMode(
     enabled: boolean,
-    options: { silent?: boolean; persist?: boolean } = {}
+    options: { silent?: boolean; persist?: boolean } = {},
   ) {
     focusMode.setFocusMode(this, enabled, options);
   },
 
   applySavedUIState() {
     focusMode.applySavedUIState(this);
+
+    // Restore last active view from localStorage
+    const savedView = this._uiState.loadView();
+    if (savedView && savedView !== State.currentView) {
+      State.setView(savedView);
+    }
   },
 
   syncSupportPanelAppearanceControls() {
@@ -2085,7 +2098,7 @@ export const UI = {
         "hide-header",
         "hide-control-bar",
         "hide-sidebar",
-        "hide-now-panel"
+        "hide-now-panel",
       );
       document.getElementById("layoutHandle")?.setAttribute("hidden", "");
       document.getElementById("sidebarHandle")?.setAttribute("hidden", "");
@@ -2098,15 +2111,15 @@ export const UI = {
     document.body.classList.toggle("hide-header", layout.showHeader === false);
     document.body.classList.toggle(
       "hide-control-bar",
-      layout.showControlBar === false
+      layout.showControlBar === false,
     );
     document.body.classList.toggle(
       "hide-sidebar",
-      layout.showSidebar === false
+      layout.showSidebar === false,
     );
     document.body.classList.toggle(
       "hide-now-panel",
-      layout.showNowPanel === false
+      layout.showNowPanel === false,
     );
 
     const layoutHandle = document.getElementById("layoutHandle");
@@ -2136,15 +2149,15 @@ export const UI = {
 
     document.body.classList.toggle(
       "hide-affirmation",
-      sidebar.showAffirmation === false
+      sidebar.showAffirmation === false,
     );
     document.body.classList.toggle(
       "hide-whats-next",
-      sidebar.showWhatsNext === false
+      sidebar.showWhatsNext === false,
     );
     document.body.classList.toggle(
       "hide-achievements",
-      sidebar.showAchievements === false
+      sidebar.showAchievements === false,
     );
   },
 
@@ -2193,7 +2206,7 @@ export const UI = {
         this.openGoalModal(
           this.getCurrentLevel(),
           State.viewingMonth,
-          State.viewingYear
+          State.viewingYear,
         ),
       toggleFocusMode: () => this.toggleFocusMode(),
       showBrainDumpModal: () =>
@@ -2232,7 +2245,7 @@ export const UI = {
       "time-morning",
       "time-afternoon",
       "time-evening",
-      "time-night"
+      "time-night",
     );
 
     if (timeOfDay === "auto") {

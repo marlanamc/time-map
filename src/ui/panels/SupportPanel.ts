@@ -20,6 +20,7 @@ type SupportPanelCallbacks = {
 export class SupportPanel {
   private hideTimer: ReturnType<typeof setTimeout> | null = null;
   private callbacks: SupportPanelCallbacks;
+  private isLoading: boolean = false;
 
   constructor(callbacks: SupportPanelCallbacks) {
     this.callbacks = callbacks;
@@ -62,41 +63,51 @@ export class SupportPanel {
       ?.addEventListener("click", (e) => {
         if (e.target === e.currentTarget) this.close();
       });
-    document.getElementById("supportPanel")?.addEventListener("click", (e) => {
-      const target = e.target as Element | null;
-      const actionEl = target?.closest("[data-action]") as HTMLElement | null;
-      const action = actionEl?.dataset.action;
-      if (!action) return;
 
-      this.close();
+    document
+      .getElementById("supportPanel")
+      ?.addEventListener("click", async (e) => {
+        if (this.isLoading) return;
 
-      switch (action) {
-        case "brainDump":
-          void this.callbacks.onShowBrainDump();
-          break;
-        case "bodyDouble":
-          void this.callbacks.onShowBodyDouble();
-          break;
-        case "quickWins":
-          void this.callbacks.onShowQuickWins();
-          break;
-        case "ndSettings":
-          void this.callbacks.onShowNDSettings();
-          break;
-        case "settings":
-          void this.callbacks.onShowSettings();
-          break;
-        case "install":
-          void this.callbacks.onPromptInstall();
-          break;
-        case "syncIssues":
-          this.callbacks.onShowSyncIssues();
-          break;
-        case "logout":
-          void this.callbacks.onHandleLogout();
-          break;
-      }
-    });
+        const target = e.target as Element | null;
+        const actionEl = target?.closest("[data-action]") as HTMLElement | null;
+        const action = actionEl?.dataset.action;
+        if (!action) return;
+
+        this.setLoading(actionEl, true);
+
+        try {
+          switch (action) {
+            case "brainDump":
+              await this.callbacks.onShowBrainDump();
+              break;
+            case "bodyDouble":
+              await this.callbacks.onShowBodyDouble();
+              break;
+            case "quickWins":
+              await this.callbacks.onShowQuickWins();
+              break;
+            case "ndSettings":
+              await this.callbacks.onShowNDSettings();
+              break;
+            case "settings":
+              await this.callbacks.onShowSettings();
+              break;
+            case "install":
+              await this.callbacks.onPromptInstall();
+              break;
+            case "syncIssues":
+              this.callbacks.onShowSyncIssues();
+              break;
+            case "logout":
+              await this.callbacks.onHandleLogout();
+              break;
+          }
+        } finally {
+          this.setLoading(actionEl, false);
+          this.close();
+        }
+      });
 
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
@@ -412,6 +423,20 @@ export class SupportPanel {
           const isActive = btn.dataset.time === devTimeOverride;
           btn.setAttribute("aria-checked", String(isActive));
         });
+    }
+  }
+
+  private setLoading(el: HTMLElement, loading: boolean) {
+    this.isLoading = loading;
+    el.classList.toggle("loading", loading);
+    const desc = el.querySelector(".support-panel-desc");
+    if (desc) {
+      if (loading) {
+        el.dataset.originalDesc = desc.textContent || "";
+        desc.textContent = "Loading...";
+      } else if (el.dataset.originalDesc) {
+        desc.textContent = el.dataset.originalDesc;
+      }
     }
   }
 }

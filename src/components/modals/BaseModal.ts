@@ -5,7 +5,7 @@
 
 export interface ModalOptions {
   title: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  size?: "sm" | "md" | "lg" | "xl" | "full";
   closeOnOutsideClick?: boolean;
   showCloseButton?: boolean;
   className?: string;
@@ -24,24 +24,25 @@ export abstract class BaseModal {
   protected overlay: HTMLElement | null = null;
   private previousActiveElement: Element | null = null;
   private focusTrapCleanup: (() => void) | null = null;
+  private scrollPosition: number = 0;
 
   constructor(
     protected options: ModalOptions,
-    protected a11yOptions: ModalA11yOptions = {}
+    protected a11yOptions: ModalA11yOptions = {},
   ) {
     this.options = {
       closeOnOutsideClick: true,
       showCloseButton: true,
-      size: 'md',
-      ...options
+      size: "md",
+      ...options,
     };
 
     this.a11yOptions = {
-      announceOnOpen: '',
-      announceOnClose: '',
+      announceOnOpen: "",
+      announceOnClose: "",
       restoreFocus: true,
       trapFocus: true,
-      ...a11yOptions
+      ...a11yOptions,
     };
   }
 
@@ -71,9 +72,9 @@ export abstract class BaseModal {
 
     // Add to DOM and animate in
     document.body.appendChild(this.overlay!);
-    
-    // Prevent body scroll
-    document.body.style.overflow = 'hidden';
+
+    // Prevent body scroll (with iOS-specific handling)
+    this.lockScroll();
 
     // Focus management
     requestAnimationFrame(() => {
@@ -90,8 +91,8 @@ export abstract class BaseModal {
 
     // Animate in
     requestAnimationFrame(() => {
-      this.overlay?.classList.add('active');
-      this.element?.classList.add('active');
+      this.overlay?.classList.add("active");
+      this.element?.classList.add("active");
     });
   }
 
@@ -107,8 +108,8 @@ export abstract class BaseModal {
     }
 
     // Animate out
-    this.overlay?.classList.remove('active');
-    this.element?.classList.remove('active');
+    this.overlay?.classList.remove("active");
+    this.element?.classList.remove("active");
 
     // Remove after animation
     setTimeout(() => {
@@ -120,27 +121,31 @@ export abstract class BaseModal {
    * Create modal DOM structure
    */
   private createModal(): void {
-    this.overlay = document.createElement('div');
-    this.overlay.className = 'modal-overlay';
-    this.overlay.setAttribute('role', 'dialog');
-    this.overlay.setAttribute('aria-modal', 'true');
-    
+    this.overlay = document.createElement("div");
+    this.overlay.className = "modal-overlay";
+    this.overlay.setAttribute("role", "dialog");
+    this.overlay.setAttribute("aria-modal", "true");
+
     if (this.options.ariaLabel) {
-      this.overlay.setAttribute('aria-label', this.options.ariaLabel);
+      this.overlay.setAttribute("aria-label", this.options.ariaLabel);
     }
 
-    const sizeClass = this.options.size ? `modal-${this.options.size}` : '';
-    const customClass = this.options.className || '';
+    const sizeClass = this.options.size ? `modal-${this.options.size}` : "";
+    const customClass = this.options.className || "";
 
     this.overlay.innerHTML = `
       <div class="modal ${sizeClass} ${customClass}" role="document">
         <div class="modal-header">
           <h2 class="modal-title" id="modal-title-${this.getModalId()}">${this.escapeHtml(this.options.title)}</h2>
-          ${this.options.showCloseButton ? `
+          ${
+            this.options.showCloseButton
+              ? `
             <button type="button" class="modal-close" aria-label="Close modal" data-action="close-modal">
               <span aria-hidden="true">×</span>
             </button>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
         <div class="modal-body">
           ${this.renderContent()}
@@ -151,7 +156,7 @@ export abstract class BaseModal {
       </div>
     `;
 
-    this.element = this.overlay.querySelector('.modal') as HTMLElement;
+    this.element = this.overlay.querySelector(".modal") as HTMLElement;
   }
 
   /**
@@ -161,13 +166,15 @@ export abstract class BaseModal {
     if (!this.overlay) return;
 
     // Close buttons
-    this.overlay.querySelectorAll('[data-action="close-modal"]').forEach(btn => {
-      btn.addEventListener('click', () => this.close());
-    });
+    this.overlay
+      .querySelectorAll('[data-action="close-modal"]')
+      .forEach((btn) => {
+        btn.addEventListener("click", () => this.close());
+      });
 
     // Click outside to close
     if (this.options.closeOnOutsideClick) {
-      this.overlay.addEventListener('click', (e) => {
+      this.overlay.addEventListener("click", (e) => {
         if (e.target === this.overlay) {
           this.close();
         }
@@ -176,14 +183,14 @@ export abstract class BaseModal {
 
     // Escape key
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         this.close();
       }
     };
-    
-    document.addEventListener('keydown', handleKeyDown);
+
+    document.addEventListener("keydown", handleKeyDown);
     this.focusTrapCleanup = () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }
 
@@ -194,7 +201,7 @@ export abstract class BaseModal {
     if (!this.element) return;
 
     const focusableElements = this.element.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     ) as NodeListOf<HTMLElement>;
 
     if (focusableElements.length > 0) {
@@ -211,7 +218,7 @@ export abstract class BaseModal {
     if (!this.element) return;
 
     const focusableElements = this.element.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     ) as NodeListOf<HTMLElement>;
 
     if (focusableElements.length === 0) return;
@@ -220,7 +227,7 @@ export abstract class BaseModal {
     const lastElement = focusableElements[focusableElements.length - 1];
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== "Tab") return;
 
       if (e.shiftKey) {
         if (document.activeElement === firstElement) {
@@ -235,13 +242,13 @@ export abstract class BaseModal {
       }
     };
 
-    this.element.addEventListener('keydown', handleKeyDown);
-    
+    this.element.addEventListener("keydown", handleKeyDown);
+
     // Update cleanup function
     const existingCleanup = this.focusTrapCleanup || (() => {});
     this.focusTrapCleanup = () => {
       existingCleanup();
-      this.element?.removeEventListener('keydown', handleKeyDown);
+      this.element?.removeEventListener("keydown", handleKeyDown);
     };
   }
 
@@ -261,7 +268,7 @@ export abstract class BaseModal {
     }
 
     // Restore body scroll
-    document.body.style.overflow = '';
+    this.unlockScroll();
 
     // Remove from DOM
     this.overlay?.remove();
@@ -273,16 +280,19 @@ export abstract class BaseModal {
   /**
    * Announce message to screen readers
    */
-  protected announce(message: string, priority: 'polite' | 'assertive' = 'polite'): void {
+  protected announce(
+    message: string,
+    priority: "polite" | "assertive" = "polite",
+  ): void {
     const liveRegionId = `live-region-${priority}`;
     let liveRegion = document.getElementById(liveRegionId);
 
     if (!liveRegion) {
-      liveRegion = document.createElement('div');
+      liveRegion = document.createElement("div");
       liveRegion.id = liveRegionId;
-      liveRegion.setAttribute('aria-live', priority);
-      liveRegion.setAttribute('aria-atomic', 'true');
-      liveRegion.className = 'sr-only';
+      liveRegion.setAttribute("aria-live", priority);
+      liveRegion.setAttribute("aria-atomic", "true");
+      liveRegion.className = "sr-only";
       document.body.appendChild(liveRegion);
     }
 
@@ -300,7 +310,7 @@ export abstract class BaseModal {
    * Escape HTML to prevent XSS
    */
   protected escapeHtml(text: string): string {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
@@ -316,7 +326,7 @@ export abstract class BaseModal {
    * Update modal title
    */
   public updateTitle(title: string): void {
-    const titleElement = this.element?.querySelector('.modal-title');
+    const titleElement = this.element?.querySelector(".modal-title");
     if (titleElement) {
       titleElement.textContent = title;
     }
@@ -325,21 +335,59 @@ export abstract class BaseModal {
   /**
    * Add action button to modal footer
    */
-  public addActionButton(text: string, className: string = 'btn-primary', action?: () => void): void {
-    const actionsContainer = this.element?.querySelector('.modal-actions');
+  public addActionButton(
+    text: string,
+    className: string = "btn-primary",
+    action?: () => void,
+  ): void {
+    const actionsContainer = this.element?.querySelector(".modal-actions");
     if (!actionsContainer) return;
 
-    const button = document.createElement('button');
-    button.type = 'button';
+    const button = document.createElement("button");
+    button.type = "button";
     button.className = `btn ${className}`;
     button.textContent = text;
 
     if (action) {
-      button.addEventListener('click', action);
+      button.addEventListener("click", action);
     } else {
-      button.addEventListener('click', () => this.close());
+      button.addEventListener("click", () => this.close());
     }
 
     actionsContainer.appendChild(button);
+  }
+
+  /**
+   * Lock body scroll, preserving scroll position for iOS
+   */
+  private lockScroll(): void {
+    this.scrollPosition = window.pageYOffset;
+
+    // Check if we're on iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    if (isIOS) {
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${this.scrollPosition}px`;
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.overflow = "hidden";
+    }
+  }
+
+  /**
+   * Unlock body scroll, restoring scroll position for iOS
+   */
+  private unlockScroll(): void {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    if (isIOS) {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, this.scrollPosition);
+    } else {
+      document.body.style.overflow = "";
+    }
   }
 }

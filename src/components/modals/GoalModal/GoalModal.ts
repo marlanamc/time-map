@@ -46,7 +46,7 @@ export type GoalModalContext = {
   showToast: (iconOrMessage: string, messageOrType?: string) => void;
   getLevelLabel: (
     level: GoalLevel,
-    opts?: { lowercase?: boolean; plural?: boolean }
+    opts?: { lowercase?: boolean; plural?: boolean },
   ) => string;
 };
 
@@ -168,7 +168,7 @@ function populateContextSection(
   ctx: GoalModalContext,
   level: GoalLevel,
   suggestionChips: ReturnType<typeof getSuggestionChips>,
-  focusEasyMode: boolean
+  focusEasyMode: boolean,
 ) {
   const suggestionsEl = document.getElementById("goalSuggestionsBody");
   const bodyHtml =
@@ -184,7 +184,7 @@ function populateContextSection(
 function populateEnergySection(
   _ctx: GoalModalContext,
   level: GoalLevel,
-  rerender: () => void
+  rerender: () => void,
 ) {
   const container = document.getElementById("goalEnergyBody");
   if (!container) return;
@@ -213,7 +213,7 @@ function populateLinkSection(
   level: GoalLevel,
   visions: { id: string; title: string }[],
   milestones: { id: string; title: string }[],
-  focuses: { id: string; title: string }[]
+  focuses: { id: string; title: string }[],
 ) {
   const linkContainer = document.getElementById("goalLinkBody");
   if (!linkContainer) return;
@@ -242,7 +242,7 @@ function moveCategoryOutsideAccordion() {
   const categoryGroup = document.querySelector('label[for="goalCategory"]')
     ?.parentElement as HTMLElement | null;
   const categoryLabel = document.querySelector(
-    'label[for="goalCategory"]'
+    'label[for="goalCategory"]',
   ) as HTMLElement | null;
   const goalHero = document.getElementById("goalHero");
   const accordionContainer = document.getElementById("goalAccordionContainer");
@@ -260,12 +260,12 @@ function moveCategoryOutsideAccordion() {
       if (accordionContainer && accordionContainer.parentElement) {
         accordionContainer.parentElement.insertBefore(
           categoryContainer,
-          accordionContainer
+          accordionContainer,
         );
       } else if (goalHero.parentElement) {
         goalHero.parentElement.insertBefore(
           categoryContainer,
-          goalHero.nextSibling
+          goalHero.nextSibling,
         );
       }
     }
@@ -326,12 +326,12 @@ function populateDetailsSection(_level: GoalLevel) {
 
 function syncEasyModeBadge() {
   const titleInput = document.getElementById(
-    "goalTitle"
+    "goalTitle",
   ) as HTMLInputElement | null;
   const wrap = titleInput?.parentElement;
   if (!wrap) return;
   const existing = wrap.querySelector(
-    ".goal-title-badge"
+    ".goal-title-badge",
   ) as HTMLElement | null;
   if (modalMetaDraft.easyMode) {
     if (!existing) {
@@ -360,7 +360,7 @@ export function closeGoalModal(ctx: GoalModalContext) {
   setInlineHelp(
     document.getElementById("milestoneDurationGroup"),
     "milestoneDurationHelp",
-    null
+    null,
   );
   setLinkageHelpVisible(false);
   Object.keys(sectionStates).forEach((key) => {
@@ -377,7 +377,7 @@ export function closeGoalModal(ctx: GoalModalContext) {
 export function populateMonthSelect(
   ctx: GoalModalContext,
   preselectedMonth: number | null = null,
-  year: number | null = null
+  year: number | null = null,
 ) {
   const select = ctx.elements.goalMonth;
   if (!select) return;
@@ -408,7 +408,7 @@ export function updateGoalModalTimeBreakdown(ctx: GoalModalContext) {
   const level = ctx.goalModalLevel;
   if (!level) return;
   const breakdownContainer = document.getElementById(
-    "goalContextTime"
+    "goalContextTime",
   ) as HTMLElement | null;
   if (!breakdownContainer) return;
 
@@ -420,7 +420,7 @@ export function updateGoalModalTimeBreakdown(ctx: GoalModalContext) {
     html = "";
   } else if (level === "focus") {
     const startDateEl = document.getElementById(
-      "goalStartDate"
+      "goalStartDate",
     ) as HTMLInputElement | null;
     const startDate = startDateEl?.value
       ? parseYmdLocal(startDateEl.value)
@@ -462,13 +462,13 @@ export function updateGoalModalTimeBreakdown(ctx: GoalModalContext) {
   } else if (level === "milestone") {
     const select = ctx.elements.goalMonth;
     const durationEl = document.getElementById(
-      "milestoneDurationMonths"
+      "milestoneDurationMonths",
     ) as HTMLSelectElement | null;
     if (!select) return;
     const selectedMonth = Number.parseInt(select.value, 10);
     const durationMonths = Math.max(
       1,
-      Math.floor(Number(durationEl?.value ?? 1))
+      Math.floor(Number(durationEl?.value ?? 1)),
     );
     if (!Number.isFinite(selectedMonth)) return;
     const start = new Date(currentYear, selectedMonth, 1);
@@ -479,11 +479,11 @@ export function updateGoalModalTimeBreakdown(ctx: GoalModalContext) {
       23,
       59,
       59,
-      999
+      999,
     );
     const days = Math.max(
       1,
-      Math.round((end.getTime() - start.getTime()) / 86400000) + 1
+      Math.round((end.getTime() - start.getTime()) / 86400000) + 1,
     );
     const weeks = Math.max(1, Math.round(days / 7));
     const fact =
@@ -525,7 +525,7 @@ export function openGoalModal(
   level: GoalLevel = "milestone",
   preselectedMonth: number | null = null,
   preselectedYear: number | null = null,
-  link?: { parentId: string; parentLevel: GoalLevel } | null
+  link?: { parentId: string; parentLevel: GoalLevel } | null,
 ): void {
   const isFreshOpen = !ctx.elements.goalModal?.classList.contains("active");
   haptics.impact("light");
@@ -578,13 +578,36 @@ export function openGoalModal(
   const monthGroup = document.querySelector('label[for="goalMonth"]')
     ?.parentElement as HTMLElement;
   const monthLabel = document.querySelector(
-    'label[for="goalMonth"]'
+    'label[for="goalMonth"]',
   ) as HTMLElement;
   const monthSelect = document.getElementById("goalMonth") as HTMLSelectElement;
+  if (monthSelect) {
+    monthSelect.classList.remove("error");
+    monthSelect.removeAttribute("aria-invalid");
+    const existing = monthSelect.parentElement?.querySelector(".form-error");
+    existing?.remove();
+  }
+  const titleInput = document.getElementById("goalTitle") as HTMLInputElement;
+  if (titleInput) {
+    titleInput.classList.remove("error");
+    titleInput.removeAttribute("aria-invalid");
+    const existing = titleInput.parentElement?.querySelector(".form-error");
+    existing?.remove();
+    titleInput.addEventListener(
+      "input",
+      () => {
+        titleInput.classList.remove("error");
+        titleInput.removeAttribute("aria-invalid");
+        titleInput.parentElement?.querySelector(".form-error")?.remove();
+      },
+      { once: true },
+    );
+  }
+
   const categoryGroup = document.querySelector('label[for="goalCategory"]')
     ?.parentElement as HTMLElement;
   const categoryLabel = document.querySelector(
-    'label[for="goalCategory"]'
+    'label[for="goalCategory"]',
   ) as HTMLElement | null;
 
   const timeGroup = document
@@ -593,40 +616,40 @@ export function openGoalModal(
   const priorityGroup = document.querySelector('label[for="goalPriority"]')
     ?.parentElement as HTMLElement;
   const priorityLabel = document.querySelector(
-    'label[for="goalPriority"]'
+    'label[for="goalPriority"]',
   ) as HTMLElement | null;
   const yearGroup = document.getElementById(
-    "goalYearGroup"
+    "goalYearGroup",
   ) as HTMLElement | null;
   const yearInput = document.getElementById(
-    "goalYear"
+    "goalYear",
   ) as HTMLInputElement | null;
   const startDateGroup = document.getElementById(
-    "goalStartDateGroup"
+    "goalStartDateGroup",
   ) as HTMLElement | null;
   const startDateInput = document.getElementById(
-    "goalStartDate"
+    "goalStartDate",
   ) as HTMLInputElement | null;
   const startDateLabel = document.querySelector(
-    'label[for="goalStartDate"]'
+    'label[for="goalStartDate"]',
   ) as HTMLElement | null;
   const milestoneDurationGroup = document.getElementById(
-    "milestoneDurationGroup"
+    "milestoneDurationGroup",
   ) as HTMLElement | null;
   const milestoneDurationSelect = document.getElementById(
-    "milestoneDurationMonths"
+    "milestoneDurationMonths",
   ) as HTMLSelectElement | null;
   const focusDurationGroup = document.getElementById(
-    "focusDurationGroup"
+    "focusDurationGroup",
   ) as HTMLElement | null;
   const focusDurationSelect = document.getElementById(
-    "focusDurationWeeks"
+    "focusDurationWeeks",
   ) as HTMLSelectElement | null;
   const submitBtn = document.querySelector(
-    '#goalForm button[type="submit"]'
+    '#goalForm button[type="submit"]',
   ) as HTMLElement;
   const durationRow = document.getElementById(
-    "goalDurationRow"
+    "goalDurationRow",
   ) as HTMLElement | null;
 
   if (submitBtn) {
@@ -659,7 +682,7 @@ export function openGoalModal(
 
   const visions = Goals.getForRange(
     new Date(ctx.goalModalYear ?? new Date().getFullYear(), 0, 1),
-    new Date(ctx.goalModalYear ?? new Date().getFullYear(), 11, 31)
+    new Date(ctx.goalModalYear ?? new Date().getFullYear(), 11, 31),
   )
     .filter((g) => g.level === "vision" && g.status !== "done")
     .slice()
@@ -728,7 +751,7 @@ export function openGoalModal(
 
         // Re-setup accordion toggles for all sections
         const updatedAccordionContainer = document.getElementById(
-          "goalAccordionContainer"
+          "goalAccordionContainer",
         );
         if (updatedAccordionContainer) {
           setupAccordionSectionToggles(
@@ -737,7 +760,7 @@ export function openGoalModal(
               const entry = (
                 Object.entries(SECTION_IDS) as [
                   keyof typeof SECTION_IDS,
-                  string
+                  string,
                 ][]
               ).find(([, value]) => value === id);
               if (!entry) return;
@@ -748,9 +771,9 @@ export function openGoalModal(
                 level,
                 preselectedMonth,
                 preselectedYear,
-                link
+                link,
               );
-            }
+            },
           );
         }
 
@@ -759,7 +782,7 @@ export function openGoalModal(
           ctx,
           level,
           getSuggestionChips(level),
-          !!modalMetaDraft.easyMode
+          !!modalMetaDraft.easyMode,
         );
         populateEnergySection(ctx, level, rerender);
         populateDetailsSection(level);
@@ -793,7 +816,7 @@ export function openGoalModal(
     ctx,
     level,
     getSuggestionChips(level),
-    !!modalMetaDraft.easyMode
+    !!modalMetaDraft.easyMode,
   );
   populateEnergySection(ctx, level, rerender);
   populateLinkSection(level, visions, milestones, focuses);
@@ -841,7 +864,7 @@ export function openGoalModal(
     setInlineHelp(
       milestoneDurationGroup,
       "milestoneDurationHelp",
-      "You can adjust this later."
+      "You can adjust this later.",
     );
   } else if (level === "focus") {
     monthGroup.style.display = "none";
@@ -857,7 +880,7 @@ export function openGoalModal(
         State.getWeekNumber(State.viewingDate ?? new Date());
       const weekStart = State.getWeekStart(
         State.viewingYear ?? new Date().getFullYear(),
-        weekNum
+        weekNum,
       );
       startDateInput.value = toYmdLocal(weekStart);
     }
@@ -979,7 +1002,7 @@ export function openGoalModal(
   if (viewportManager.isMobileViewport()) {
     setTimeout(() => {
       const firstInput = ctx.elements.goalModal?.querySelector(
-        "input, select, textarea"
+        "input, select, textarea",
       ) as HTMLElement | null;
       if (firstInput) {
         firstInput.focus();
@@ -1019,42 +1042,59 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
   e.preventDefault();
 
   const titleEl = document.getElementById(
-    "goalTitle"
+    "goalTitle",
   ) as HTMLInputElement | null;
   const monthEl = document.getElementById(
-    "goalMonth"
+    "goalMonth",
   ) as HTMLSelectElement | null;
   const yearEl = document.getElementById("goalYear") as HTMLInputElement | null;
   const startDateEl = document.getElementById(
-    "goalStartDate"
+    "goalStartDate",
   ) as HTMLInputElement | null;
   const milestoneDurationEl = document.getElementById(
-    "milestoneDurationMonths"
+    "milestoneDurationMonths",
   ) as HTMLSelectElement | null;
   const focusDurationEl = document.getElementById(
-    "focusDurationWeeks"
+    "focusDurationWeeks",
   ) as HTMLSelectElement | null;
   const categoryEl = document.getElementById(
-    "goalCategory"
+    "goalCategory",
   ) as HTMLSelectElement | null;
   const priorityEl = document.getElementById(
-    "goalPriority"
+    "goalPriority",
   ) as HTMLSelectElement | null;
   const startTimeEl = document.getElementById(
-    "goalStartTime"
+    "goalStartTime",
   ) as HTMLInputElement | null;
   const endTimeEl = document.getElementById(
-    "goalEndTime"
+    "goalEndTime",
   ) as HTMLInputElement | null;
   const visionAccentEl = document.getElementById(
-    "visionAccent"
+    "visionAccent",
   ) as HTMLSelectElement | null;
   const visionIconEl = document.getElementById(
-    "visionIcon"
+    "visionIcon",
   ) as HTMLInputElement | null;
 
   const title = titleEl?.value.trim() ?? "";
-  if (!title) return;
+  if (!title) {
+    if (titleEl) {
+      haptics.impact("medium");
+      titleEl.setAttribute("aria-invalid", "true");
+      titleEl.classList.add("error");
+      let errorMsg = titleEl.parentElement?.querySelector(
+        ".form-error",
+      ) as HTMLElement | null;
+      if (!errorMsg) {
+        errorMsg = document.createElement("div");
+        errorMsg.className = "form-error";
+        errorMsg.textContent = "Title is required";
+        titleEl.parentElement?.appendChild(errorMsg);
+      }
+      titleEl.focus();
+    }
+    return;
+  }
   haptics.impact("medium");
 
   let month = NaN;
@@ -1223,7 +1263,7 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
       hasMeta = true;
     }
     const focusEasyModeEl = document.getElementById(
-      "focusEasyMode"
+      "focusEasyMode",
     ) as HTMLInputElement | null;
     if (focusEasyModeEl?.checked) {
       meta.easyMode = true;
@@ -1262,7 +1302,7 @@ export class GoalModal {
   populateMonthSelect(
     ctx: GoalModalContext,
     preselectedMonth: number | null = null,
-    year: number | null = null
+    year: number | null = null,
   ): void {
     populateMonthSelect(ctx, preselectedMonth, year);
   }
@@ -1276,7 +1316,7 @@ export class GoalModal {
     level: GoalLevel = "milestone",
     preselectedMonth: number | null = null,
     preselectedYear: number | null = null,
-    link?: { parentId: string; parentLevel: GoalLevel } | null
+    link?: { parentId: string; parentLevel: GoalLevel } | null,
   ): void {
     openGoalModal(ctx, level, preselectedMonth, preselectedYear, link);
   }

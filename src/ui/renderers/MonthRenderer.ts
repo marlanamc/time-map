@@ -27,7 +27,7 @@ export const MonthRenderer = {
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
     const milestoneGoals = Goals.getForRange(monthStart, monthEnd).filter(
-      (g) => g.level === "milestone" && g.status !== "done"
+      (g) => g.level === "milestone" && g.status !== "done",
     );
     const primaryMilestone = milestoneGoals[0];
 
@@ -64,8 +64,8 @@ export const MonthRenderer = {
                         <button type="button" class="year-vision-icon-only" ${
                           milestoneAccentAttrs.dataAttr
                         }${milestoneAccentAttrs.styleAttr} data-goal-id="${
-                  primaryMilestone.id
-                }" aria-label="${escapeHtmlFn(primaryMilestone.title)}">
+                          primaryMilestone.id
+                        }" aria-label="${escapeHtmlFn(primaryMilestone.title)}">
                           <span class="vision-icon-large">${icon}</span>
                         </button>
                       `;
@@ -83,7 +83,7 @@ export const MonthRenderer = {
             ${dayNames
               .map(
                 (name) =>
-                  `<div class="month-calendar-header" role="columnheader">${name}</div>`
+                  `<div class="month-calendar-header" role="columnheader">${name}</div>`,
               )
               .join("")}
           </div>
@@ -152,10 +152,10 @@ export const MonthRenderer = {
       const eventCount = eventCountByYmd.get(ymd) ?? 0;
       return `
         <div class="month-day ${isOtherMonth ? "other-month" : ""} ${
-        isToday ? "today" : ""
-      } ${
-        isSelected ? "selected" : ""
-      }" data-date="${ymd}" role="gridcell" aria-label="${date.toDateString()}">
+          isToday ? "today" : ""
+        } ${
+          isSelected ? "selected" : ""
+        }" data-date="${ymd}" role="gridcell" aria-label="${date.toDateString()}">
           <div class="month-day-number">${dayNum}</div>
           ${
             eventCount > 0
@@ -175,7 +175,7 @@ export const MonthRenderer = {
       const weekEnd = new Date(weekDates[6]);
 
       const focusGoals = Goals.getForRange(weekStart, weekEnd).filter(
-        (g) => g.level === "focus" && g.status !== "done"
+        (g) => g.level === "focus" && g.status !== "done",
       );
       const primaryFocus = focusGoals[0];
 
@@ -188,8 +188,9 @@ export const MonthRenderer = {
             primaryFocus
               ? `
             <div class="month-week-focus-banner" aria-label="This week focus">
+              <span class="month-week-focus-icon">${primaryFocus.icon || "🔎"}</span>
               <span class="month-week-focus-text">This week: ${escapeHtmlFn(
-                primaryFocus.title
+                primaryFocus.title,
               )}</span>
               <button type="button" class="month-week-focus-edit" data-goal-id="${
                 primaryFocus.id
@@ -241,7 +242,7 @@ export const MonthRenderer = {
     });
 
     const addMilestoneBtn = container.querySelector<HTMLButtonElement>(
-      '[data-action="add-milestone"]'
+      '[data-action="add-milestone"]',
     );
     if (addMilestoneBtn) {
       addMilestoneBtn.addEventListener("click", (e) => {
@@ -256,7 +257,7 @@ export const MonthRenderer = {
 
     container
       .querySelectorAll<HTMLButtonElement>(
-        ".month-week-focus-edit[data-goal-id]"
+        ".month-week-focus-edit[data-goal-id]",
       )
       .forEach((btn) => {
         btn.addEventListener("click", (e) => {

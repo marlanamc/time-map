@@ -16,4 +16,29 @@ export class UIStateManager {
   goalModalYear: number | null = null;
   goalModalLevel: GoalLevel = "milestone";
   lastNonHomeView: ViewType = VIEWS.YEAR;
+
+  saveView(view: ViewType) {
+    if (view === VIEWS.HOME) return;
+    this.lastNonHomeView = view;
+    try {
+      localStorage.setItem("gardenFence.lastView", view);
+    } catch (_e) {
+      // Ignore
+    }
+  }
+
+  loadView(): ViewType | null {
+    try {
+      const saved = localStorage.getItem(
+        "gardenFence.lastView",
+      ) as ViewType | null;
+      if (saved && Object.values(VIEWS).includes(saved)) {
+        this.lastNonHomeView = saved;
+        return saved;
+      }
+    } catch (_e) {
+      // Ignore
+    }
+    return null;
+  }
 }
