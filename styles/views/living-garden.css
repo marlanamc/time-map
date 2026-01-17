@@ -2,11 +2,65 @@
    Living Garden - A Unified Ecosystem Design
    =================================== */
 
+/* Animation Definitions */
+@keyframes growIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes sproutUp {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: bottom center;
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: bottom center;
+  }
+}
+
+@keyframes leafUnfold {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes breeze {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1deg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
+}
+
 .living-garden {
   min-height: 100vh;
   background: transparent;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   color: #1a202c !important;
+  perspective: 1000px;
 }
 
 /* Force dark text in light mode - override any parent color inheritance */
@@ -31,6 +85,7 @@ html.dark-mode .living-garden {
   max-width: 1400px;
   margin: 0 auto;
   padding: var(--space-6);
+  animation: growIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* ===================================
@@ -40,98 +95,86 @@ html.dark-mode .living-garden {
   text-align: center;
   margin-bottom: var(--space-12);
   padding: var(--space-8) 0;
+  position: relative;
 }
 
 .living-garden-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   margin: 0 0 var(--space-4);
   display: inline-block;
-  background-image: linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #8b5cf6 100%);
+  background-image: linear-gradient(
+    135deg,
+    #10b981 0%,
+    #3b82f6 50%,
+    #8b5cf6 100%
+  );
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   position: relative;
+  z-index: 10;
 }
 
-/* Dawn theme - matches background gradient */
+/* Time-aware Title Gradients */
+/* Dawn */
 :root.time-dawn:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #A9C6D8 0%, #D7C1CD 50%, #EAF4F2 100%);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  background-image: linear-gradient(
+    135deg,
+    #ff9a9e 0%,
+    #fecfef 50%,
+    #eaf4f2 100%
+  );
 }
-
 :root.dark-mode.time-dawn .living-garden-title {
-  background-image: linear-gradient(135deg, #B8D4E8 0%, #E8C8D8 50%, #F0E8D8 100%);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  background-image: linear-gradient(
+    135deg,
+    #ffb7b2 0%,
+    #ffdac1 50%,
+    #e0f7fa 100%
+  );
 }
 
-/* Morning theme - matches background gradient */
+/* Morning */
 :root.time-morning:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #79B6D2 0%, #A2CBD3 50%, #EAF4F2 100%);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  background-image: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
-
 :root.dark-mode.time-morning .living-garden-title {
-  background-image: linear-gradient(135deg, #87CEEB 0%, #B0E0E6 50%, #E8F4F8 100%);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  background-image: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
 }
 
-/* Afternoon theme - matches background gradient */
+/* Afternoon */
 :root.time-afternoon:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #3E7FC6 0%, #79B6D2 50%, #EAF4F2 100%);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  background-image: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
-
 :root.dark-mode.time-afternoon .living-garden-title {
-  background-image: linear-gradient(135deg, #4A90E2 0%, #87CEEB 50%, #E8F4F8 100%);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  background-image: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
 }
 
-/* Evening theme - matches background gradient */
+/* Evening */
 :root.time-evening:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #E48A5B 0%, #EFB57A 30%, #E7B09C 70%, #EAF4F2 100%);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  background-image: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 }
-
 :root.dark-mode.time-evening .living-garden-title {
-  background-image: linear-gradient(135deg, #FF8C42 0%, #FFB347 30%, #F4A989 70%, #D9C8B8 100%);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))
-          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  background-image: linear-gradient(
+    135deg,
+    #f78ca0 0%,
+    #f9748f 19%,
+    #fd868c 60%,
+    #fe9a8b 100%
+  );
 }
 
-/* Night theme - matches background gradient */
+/* Night */
 :root.time-night:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #0A1A2E 0%, #16213E 40%, #1A2332 100%);
-  filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.4)) 
-          drop-shadow(0 1px 2px rgba(255, 255, 255, 0.3))
-          drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+  background-image: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
 }
-
 :root.dark-mode.time-night .living-garden-title {
-  background-image: linear-gradient(135deg, #0A1A2E 0%, #16213E 40%, #1A2332 100%);
-  filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.3)) 
-          drop-shadow(0 1px 2px rgba(255, 255, 255, 0.2))
-          drop-shadow(0 0 8px rgba(255, 255, 255, 0.15));
+  background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+  filter: drop-shadow(0 0 15px rgba(142, 197, 252, 0.4));
 }
 
 .living-garden-subtitle {
@@ -140,29 +183,36 @@ html.dark-mode .living-garden {
   margin: 0 0 var(--space-4);
   font-weight: 500;
   opacity: 0.95;
+  animation: growIn 1s ease-out 0.2s backwards;
 }
 
 /* Force dark text in light mode */
 :root:not(.dark-mode) .living-garden-subtitle {
-  color: #1A2B2F !important;
+  color: #1a2b2f !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-  opacity: 1;
 }
-
 .dark-mode .living-garden-subtitle {
   color: rgba(255, 255, 255, 0.95);
-  opacity: 1;
 }
 
 .living-garden-summary {
   font-size: var(--text-base);
   color: var(--text-tertiary);
   padding: var(--space-3) var(--space-6);
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: var(--radius-full);
   display: inline-block;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  animation: growIn 1s ease-out 0.4s backwards;
+  transition:
+    transform 0.3s ease,
+    background 0.3s ease;
+}
+.living-garden-summary:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 html.dark-mode .living-garden-summary {
@@ -178,12 +228,15 @@ html.dark-mode .living-garden-summary {
   padding: var(--space-16) var(--space-8);
   max-width: 600px;
   margin: 0 auto;
+  animation: growIn 1s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .living-garden-empty-icon {
   font-size: 6rem;
   margin-bottom: var(--space-6);
-  opacity: 0.8;
+  display: inline-block;
+  animation: breeze 6s ease-in-out infinite;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
 }
 
 .living-garden-empty h2 {
@@ -192,13 +245,10 @@ html.dark-mode .living-garden-summary {
   margin: 0 0 var(--space-4);
   color: var(--text-primary);
 }
-
-/* Force dark text in light mode */
 :root:not(.dark-mode) .living-garden-empty h2 {
-  color: #0A1113 !important;
+  color: #0a1113 !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
-
 .dark-mode .living-garden-empty h2 {
   color: rgba(255, 255, 255, 0.98);
 }
@@ -208,88 +258,13 @@ html.dark-mode .living-garden-summary {
   color: var(--text-primary);
   margin: 0 0 var(--space-8);
   line-height: 1.6;
-  opacity: 0.9;
 }
-
-/* Force dark text in light mode */
 :root:not(.dark-mode) .living-garden-empty p {
-  color: #1A2B2F !important;
+  color: #1a2b2f !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
-  opacity: 1;
 }
-
 .dark-mode .living-garden-empty p {
   color: rgba(255, 255, 255, 0.95);
-  opacity: 1;
-}
-
-/* Ensure visibility in light mode time themes */
-:root.time-dawn:not(.dark-mode) .living-garden-empty h2,
-:root.time-morning:not(.dark-mode) .living-garden-empty h2,
-:root.time-afternoon:not(.dark-mode) .living-garden-empty h2,
-:root.time-evening:not(.dark-mode) .living-garden-empty h2 {
-  color: #0A1113 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
-}
-
-:root.time-dawn:not(.dark-mode) .living-garden-empty p,
-:root.time-morning:not(.dark-mode) .living-garden-empty p,
-:root.time-afternoon:not(.dark-mode) .living-garden-empty p,
-:root.time-evening:not(.dark-mode) .living-garden-empty p {
-  color: #1A2B2F !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
-}
-
-/* Time theme overrides for subtitle */
-:root.time-dawn:not(.dark-mode) .living-garden-subtitle,
-:root.time-morning:not(.dark-mode) .living-garden-subtitle,
-:root.time-afternoon:not(.dark-mode) .living-garden-subtitle,
-:root.time-evening:not(.dark-mode) .living-garden-subtitle {
-  color: #0A1113 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
-}
-
-/* Mobile view - ensure darker text with !important to override any other rules */
-/* Target all possible combinations to ensure styles apply - maximum specificity */
-.living-garden-mobile .living-garden-subtitle,
-.living-garden--mobile .living-garden-subtitle,
-.living-garden-mobile .living-garden-header .living-garden-subtitle,
-.garden-view-container .living-garden-mobile .living-garden-subtitle,
-.garden-view-container.living-garden--mobile .living-garden-subtitle,
-#calendarGrid .living-garden-mobile .living-garden-subtitle,
-#calendarGrid .living-garden--mobile .living-garden-subtitle,
-:root:not(.dark-mode) .living-garden-mobile .living-garden-subtitle,
-:root:not(.dark-mode) .living-garden--mobile .living-garden-subtitle,
-:root:not(.dark-mode) .living-garden-mobile .living-garden-header .living-garden-subtitle {
-  color: #0A1113 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
-  opacity: 1 !important;
-}
-
-.living-garden-mobile .living-garden-empty h2,
-.living-garden--mobile .living-garden-empty h2,
-.garden-view-container .living-garden-mobile .living-garden-empty h2,
-.garden-view-container.living-garden--mobile .living-garden-empty h2,
-#calendarGrid .living-garden-mobile .living-garden-empty h2,
-#calendarGrid .living-garden--mobile .living-garden-empty h2,
-:root:not(.dark-mode) .living-garden-mobile .living-garden-empty h2,
-:root:not(.dark-mode) .living-garden--mobile .living-garden-empty h2 {
-  color: #0A1113 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
-  opacity: 1 !important;
-}
-
-.living-garden-mobile .living-garden-empty p,
-.living-garden--mobile .living-garden-empty p,
-.garden-view-container .living-garden-mobile .living-garden-empty p,
-.garden-view-container.living-garden--mobile .living-garden-empty p,
-#calendarGrid .living-garden-mobile .living-garden-empty p,
-#calendarGrid .living-garden--mobile .living-garden-empty p,
-:root:not(.dark-mode) .living-garden-mobile .living-garden-empty p,
-:root:not(.dark-mode) .living-garden--mobile .living-garden-empty p {
-  color: #1A2B2F !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
-  opacity: 1 !important;
 }
 
 /* ===================================
@@ -297,55 +272,88 @@ html.dark-mode .living-garden-summary {
    =================================== */
 .living-garden-ecosystem {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: var(--space-8);
   margin-bottom: var(--space-12);
+  perspective: 1000px;
 }
 
 .living-garden-plot {
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 28px;
   padding: var(--space-8);
-  border: 2px solid transparent;
-  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   position: relative;
   overflow: hidden;
-  transition: all 0.4s ease;
-  min-height: 400px;
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  min-height: 420px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.02),
+    0 12px 24px rgba(0, 0, 0, 0.04);
+  animation: growIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+/* Staggered animation for plots */
+.living-garden-plot:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.living-garden-plot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.living-garden-plot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.living-garden-plot:nth-child(4) {
+  animation-delay: 0.4s;
 }
 
 .living-garden-plot::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: var(--garden-accent-gradient, linear-gradient(135deg, var(--garden-accent, #10b981) 0%, transparent 70%));
-  opacity: 0.1;
+  background: var(
+    --garden-accent-gradient,
+    linear-gradient(135deg, var(--garden-accent, #10b981) 0%, transparent 80%)
+  );
+  opacity: 0.08;
   pointer-events: none;
+  transition: opacity 0.5s ease;
 }
 
 .living-garden-plot:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px) scale(1.01);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
   border-color: var(--garden-accent, #10b981);
+  z-index: 5;
+}
+.living-garden-plot:hover::before {
+  opacity: 0.15;
 }
 
 html.dark-mode .living-garden-plot {
-  background: rgba(0, 0, 0, 0.4);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(20, 30, 40, 0.5);
+  border-color: rgba(255, 255, 255, 0.08);
 }
-
 html.dark-mode .living-garden-plot:hover {
-  background: rgba(0, 0, 0, 0.5);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-}
-
-.living-garden-plot.is-thriving {
-  border-color: var(--garden-accent, #10b981);
+  background: rgba(20, 30, 40, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 0 0 1px var(--garden-accent, rgba(255, 255, 255, 0.1));
 }
 
 .living-garden-plot.is-dormant {
-  opacity: 0.7;
+  opacity: 0.85;
   border-style: dashed;
+  filter: grayscale(0.4);
+}
+.living-garden-plot.is-dormant:hover {
+  opacity: 1;
+  filter: grayscale(0);
+  border-style: solid;
 }
 
 /* ===================================
@@ -358,29 +366,36 @@ html.dark-mode .living-garden-plot:hover {
 }
 
 .living-garden-trunk {
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
+  position: relative;
+  z-index: 2;
 }
 
 .living-garden-vision {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  font-size: var(--text-xl);
+  gap: var(--space-4);
+  font-size: 1.35rem;
   font-weight: 800;
   color: var(--text-primary);
-  padding: var(--space-4);
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: var(--space-5) var(--space-6);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease;
+}
+.living-garden-vision:hover {
+  transform: scale(1.02);
 }
 
 html.dark-mode .living-garden-vision {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .living-garden-vision-text {
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 /* ===================================
@@ -389,83 +404,137 @@ html.dark-mode .living-garden-vision {
 .living-garden-branches {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-6);
   flex: 1;
+  position: relative;
+  padding-left: var(--space-8);
+}
+
+/* Connection Line */
+.living-garden-branches::before {
+  content: "";
+  position: absolute;
+  left: 24px; /* Adjust based on padding/icon size */
+  top: -20px;
+  bottom: 20px;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--garden-accent, #10b981) 0%,
+    transparent 100%
+  );
+  opacity: 0.3;
+  border-radius: 2px;
 }
 
 .living-garden-branch {
-  padding: var(--space-4);
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  position: relative;
+  animation: sproutUp 0.6s ease-out backwards;
+}
+.living-garden-branch:nth-child(1) {
+  animation-delay: 0.3s;
+}
+.living-garden-branch:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.living-garden-branch:nth-child(3) {
+  animation-delay: 0.7s;
 }
 
-html.dark-mode .living-garden-branch {
-  background: rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.living-garden-branch--milestones {
-  border-left: 4px solid #3b82f6;
-}
-
-.living-garden-branch--focuses {
-  border-left: 4px solid #8b5cf6;
-}
-
-.living-garden-branch--intentions {
-  border-left: 4px solid #10b981;
+.living-garden-branch::before {
+  content: "";
+  position: absolute;
+  left: -26px; /* Connect to main line */
+  top: 18px;
+  width: 20px;
+  height: 2px;
+  background: var(--garden-accent, #10b981);
+  opacity: 0.3;
 }
 
 .living-garden-branch-label {
-  font-size: var(--text-sm);
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 800;
   color: var(--text-tertiary);
   margin-bottom: var(--space-3);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.living-garden-branch-label::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: currentColor;
+  opacity: 0.2;
 }
 
 .living-garden-branch-items {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .living-garden-branch-item {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3);
-  background: rgba(255, 255, 255, 0.6);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   font-weight: 600;
   color: var(--text-primary);
+  border: 1px solid transparent;
+  animation: leafUnfold 0.5s ease-out backwards;
+}
+
+/* Stagger items */
+.living-garden-branch-item:nth-child(1) {
+  animation-delay: 0.4s;
+}
+.living-garden-branch-item:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.living-garden-branch-item:nth-child(3) {
+  animation-delay: 0.6s;
 }
 
 html.dark-mode .living-garden-branch-item {
   background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .living-garden-branch-item:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateX(6px) scale(1.02);
+  border-color: var(--garden-accent, #10b981);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 html.dark-mode .living-garden-branch-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--garden-accent, #10b981);
 }
 
 .living-garden-branch-item.is-complete {
-  opacity: 0.7;
+  opacity: 0.6;
   text-decoration: line-through;
+  filter: grayscale(1);
+}
+.living-garden-branch-item.is-complete:hover {
+  opacity: 0.9;
+  filter: grayscale(0);
+  text-decoration: none;
 }
 
 .living-garden-emoji {
-  font-size: 1.1em;
+  font-size: 1.25em;
   line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 /* ===================================
@@ -479,18 +548,27 @@ html.dark-mode .living-garden-branch-item:hover {
   text-align: center;
   height: 100%;
   color: var(--text-secondary);
+  opacity: 0;
+  animation: growIn 0.8s ease-out 0.5s forwards;
 }
 
 .living-garden-dormant-icon {
   font-size: 4rem;
   margin-bottom: var(--space-4);
-  opacity: 0.6;
+  opacity: 0.5;
+  filter: grayscale(0.5);
+  transition: all 0.5s ease;
+}
+.living-garden-plot:hover .living-garden-dormant-icon {
+  filter: grayscale(0) drop-shadow(0 0 10px var(--garden-accent, #10b981));
+  transform: scale(1.1) rotate(5deg);
 }
 
 .living-garden-dormant-state p {
   font-size: var(--text-lg);
   margin: 0 0 var(--space-6);
   line-height: 1.5;
+  max-width: 80%;
 }
 
 /* ===================================
@@ -501,8 +579,9 @@ html.dark-mode .living-garden-branch-item:hover {
   justify-content: space-between;
   align-items: center;
   padding: var(--space-6) 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   margin-bottom: var(--space-8);
+  margin-top: var(--space-4);
 }
 
 html.dark-mode .living-garden-actions {
@@ -522,21 +601,38 @@ html.dark-mode .living-garden-actions {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--space-8);
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 16px;
   font-weight: 700;
   font-size: var(--text-base);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.living-garden-btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .living-garden-btn-primary:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
   box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+.living-garden-btn-primary:hover::before {
+  opacity: 1;
 }
 
 .living-garden-btn-secondary {
@@ -544,28 +640,30 @@ html.dark-mode .living-garden-actions {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.6);
   color: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
   font-weight: 600;
   font-size: var(--text-sm);
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 
 html.dark-mode .living-garden-btn-secondary {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .living-garden-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.85);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 html.dark-mode .living-garden-btn-secondary:hover {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .living-garden-btn-ghost {
@@ -574,32 +672,39 @@ html.dark-mode .living-garden-btn-secondary:hover {
   color: var(--text-tertiary);
   font-weight: 600;
   cursor: pointer;
-  padding: var(--space-2);
-  transition: color 0.2s ease;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .living-garden-btn-ghost:hover {
   color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.03);
+}
+html.dark-mode .living-garden-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .living-garden-btn-icon {
-  font-size: 1.1em;
+  font-size: 1.2em;
 }
 
 /* ===================================
    Reflection Panel
    =================================== */
 .living-garden-reflection {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  padding: var(--space-6);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 24px;
+  padding: var(--space-8);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(20px);
   margin-bottom: var(--space-8);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  animation: growIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 html.dark-mode .living-garden-reflection {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(20, 25, 40, 0.6);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -608,13 +713,21 @@ html.dark-mode .living-garden-reflection {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-6);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding-bottom: var(--space-4);
+}
+html.dark-mode .living-garden-reflection-header {
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .living-garden-reflection-header h3 {
-  font-size: var(--text-xl);
+  font-size: var(--text-2xl);
   font-weight: 800;
   margin: 0;
   color: var(--text-primary);
+  background: linear-gradient(to right, #10b981, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .living-garden-reflection-close {
@@ -629,19 +742,20 @@ html.dark-mode .living-garden-reflection {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 50%;
   transition: all 0.2s ease;
 }
 
 .living-garden-reflection-close:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.05);
+  color: #ef4444;
+  transform: rotate(90deg);
 }
 
 .living-garden-reflection-body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-8);
 }
 
 .living-garden-reflection-question h4 {
@@ -658,42 +772,42 @@ html.dark-mode .living-garden-reflection {
 }
 
 .living-garden-reflection-option {
-  padding: var(--space-3) var(--space-4);
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: var(--space-3) var(--space-5);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 600;
   color: var(--text-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 html.dark-mode .living-garden-reflection-option {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .living-garden-reflection-option:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateY(-1px);
-}
-
-html.dark-mode .living-garden-reflection-option:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .living-garden-reflection-option.is-selected {
   background: var(--garden-accent, #10b981);
   color: white;
   border-color: var(--garden-accent, #10b981);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: scale(1.05);
 }
 
 .living-garden-reflection-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: var(--space-4);
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: var(--space-6);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 html.dark-mode .living-garden-reflection-actions {
@@ -704,6 +818,14 @@ html.dark-mode .living-garden-reflection-actions {
   color: var(--text-tertiary);
   font-size: var(--text-sm);
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.living-garden-reflection-note::before {
+  content: "🔒";
+  font-size: 0.8em;
+  opacity: 0.6;
 }
 
 /* ===================================
@@ -711,37 +833,48 @@ html.dark-mode .living-garden-reflection-actions {
    =================================== */
 @media (max-width: 768px) {
   .living-garden-container {
-    padding: var(--space-4);
+    padding: var(--space-3);
   }
-  
+
   .living-garden-ecosystem {
     grid-template-columns: 1fr;
-    gap: var(--space-6);
-  }
-  
-  .living-garden-plot {
-    padding: var(--space-6);
-    min-height: 300px;
-  }
-  
-  .living-garden-actions {
-    flex-direction: column;
     gap: var(--space-4);
   }
-  
+
+  .living-garden-plot {
+    padding: var(--space-6);
+    min-height: auto;
+  }
+
+  .living-garden-actions {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
   .living-garden-actions-left,
   .living-garden-actions-right {
     width: 100%;
     justify-content: center;
   }
-  
+
+  .living-garden-btn-primary,
+  .living-garden-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
   .living-garden-reflection-options {
     flex-direction: column;
   }
-  
+
   .living-garden-reflection-option {
     width: 100%;
     text-align: center;
+    padding: var(--space-4);
+  }
+
+  .living-garden-title {
+    font-size: 2.5rem;
   }
 }
 
@@ -751,20 +884,14 @@ html.dark-mode .living-garden-reflection-actions {
 .living-garden--mobile .living-garden-plots {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
+  padding: 0 var(--space-2);
 }
 
-.living-garden-plot {
-  position: relative;
-  border-radius: 16px;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 2px solid var(--garden-accent, #10b981);
-}
-
-html.dark-mode .living-garden-plot {
-  background: rgba(0, 0, 0, 0.4);
+.living-garden--mobile .living-garden-plot {
+  min-height: auto;
+  padding: var(--space-5);
+  border-radius: 20px;
 }
 
 .living-garden-plot-header {
@@ -786,12 +913,13 @@ html.dark-mode .living-garden-plot {
 .living-garden-plot-life {
   font-size: 1.5rem;
   opacity: 0.8;
+  animation: breeze 3s ease-in-out infinite;
 }
 
 .living-garden-plot-growth {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .living-garden-sprouts,
@@ -805,80 +933,22 @@ html.dark-mode .living-garden-plot {
 .living-garden-sprout,
 .living-garden-bud,
 .living-garden-leaf {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 8px;
-  cursor: pointer;
   font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--text-primary);
-  transition: all 0.2s ease;
-}
-
-html.dark-mode .living-garden-sprout,
-html.dark-mode .living-garden-bud,
-html.dark-mode .living-garden-leaf {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.living-garden-sprout:hover,
-.living-garden-bud:hover,
-.living-garden-leaf:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateY(-1px);
-}
-
-html.dark-mode .living-garden-sprout:hover,
-html.dark-mode .living-garden-bud:hover,
-html.dark-mode .living-garden-leaf:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.living-garden-leaf.is-bloomed {
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .living-garden-more {
+  font-size: var(--text-xs);
   color: var(--text-tertiary);
-  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-2);
   font-weight: 600;
-  padding: var(--space-2) var(--space-3);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px dashed rgba(255, 255, 255, 0.4);
-}
-
-.living-garden-plot-dormant {
-  text-align: center;
-  color: var(--text-secondary);
-  padding: var(--space-4);
-}
-
-.living-garden-plot-dormant p {
-  margin: 0 0 var(--space-4);
-  line-height: 1.5;
-}
-
-/* ===================================
-   FINAL OVERRIDE - Maximum Specificity
-   Force dark text in light mode for mobile garden view
-   =================================== */
-#calendarGrid .garden-view-container.living-garden--mobile .living-garden-mobile .living-garden-subtitle,
-#calendarGrid .garden-view-container.living-garden--mobile .living-garden-mobile .living-garden-empty h2,
-#calendarGrid .garden-view-container.living-garden--mobile .living-garden-mobile .living-garden-empty p,
-body:not(.dark-mode) #calendarGrid .living-garden-mobile .living-garden-subtitle,
-body:not(.dark-mode) #calendarGrid .living-garden-mobile .living-garden-empty h2,
-body:not(.dark-mode) #calendarGrid .living-garden-mobile .living-garden-empty p {
-  color: #0A1113 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
-  opacity: 1 !important;
-}
-
-body:not(.dark-mode) #calendarGrid .living-garden-mobile .living-garden-empty p {
-  color: #1A2B2F !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
 }

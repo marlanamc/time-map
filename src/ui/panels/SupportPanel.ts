@@ -37,10 +37,10 @@ export class SupportPanel {
       });
 
     const supportPanelToggleBtn = document.getElementById(
-      "supportPanelToggleBtn"
+      "supportPanelToggleBtn",
     );
     const supportPanelToggleBtnMobile = document.getElementById(
-      "supportPanelToggleBtnMobile"
+      "supportPanelToggleBtnMobile",
     );
 
     supportPanelToggleBtn?.addEventListener("click", (e) => {
@@ -127,7 +127,7 @@ export class SupportPanel {
       });
 
     const supportPanelThemePicker = document.getElementById(
-      "supportPanelThemePicker"
+      "supportPanelThemePicker",
     );
     supportPanelThemePicker?.addEventListener("click", (e) => {
       const target = e.target as Element | null;
@@ -219,14 +219,14 @@ export class SupportPanel {
     const timeOfDay = root.classList.contains("time-dawn")
       ? "dawn"
       : root.classList.contains("time-morning")
-      ? "morning"
-      : root.classList.contains("time-afternoon")
-      ? "afternoon"
-      : root.classList.contains("time-evening")
-      ? "evening"
-      : root.classList.contains("time-night")
-      ? "night"
-      : null;
+        ? "morning"
+        : root.classList.contains("time-afternoon")
+          ? "afternoon"
+          : root.classList.contains("time-evening")
+            ? "evening"
+            : root.classList.contains("time-night")
+              ? "night"
+              : null;
 
     const accentThemes = ND_CONFIG.ACCENT_THEMES as Record<
       AccentTheme,
@@ -237,11 +237,52 @@ export class SupportPanel {
     // Colors are grouped by color theory to match each time-of-day gradient
     // Will be sorted in ROYGBIV order after filtering
     const timeThemeAccentMap: Record<string, AccentTheme[]> = {
-      dawn: ["rose", "violet", "indigo", "dawn", "evening"], // Purple/pink family - soft, cool tones
-      morning: ["mint", "sage", "sky", "teal", "morning"], // Blue/cyan/green family - fresh, energetic
-      afternoon: ["rose", "coral", "amber", "afternoon", "violet"], // Warm pink/yellow/peach + warm purple - vibrant, warm
-      evening: ["rose", "violet", "indigo", "dawn", "evening"], // Purple/pink family - warmer than dawn
-      night: ["sky", "teal", "indigo", "violet", "night"], // Deep blue/cyan family - cool, calm
+      dawn: ["rose", "violet", "indigo", "dawn", "evening", "fuchsia", "pink"], // Purple/pink family - soft, cool tones
+      morning: [
+        "mint",
+        "sage",
+        "sky",
+        "teal",
+        "morning",
+        "lime",
+        "cyan",
+        "emerald",
+        "yellow",
+        "pink",
+      ], // Blue/cyan/green family - fresh, energetic
+      afternoon: [
+        "rose",
+        "coral",
+        "amber",
+        "afternoon",
+        "violet",
+        "orange",
+        "pink",
+        "yellow",
+        "fuchsia",
+      ], // Warm pink/yellow/peach + warm purple - vibrant, warm
+      evening: [
+        "rose",
+        "violet",
+        "indigo",
+        "dawn",
+        "evening",
+        "fuchsia",
+        "emerald",
+        "orange",
+        "pink",
+      ], // Purple/pink family - warmer than dawn
+      night: [
+        "sky",
+        "teal",
+        "indigo",
+        "violet",
+        "night",
+        "cyan",
+        "lime",
+        "fuchsia",
+        "pink",
+      ], // Deep blue/cyan family - cool, calm
     };
 
     // Helper function to get hue from hex color for ROYGBIV sorting
@@ -300,13 +341,13 @@ export class SupportPanel {
           return theme
             ? ([key, theme] as [
                 AccentTheme,
-                (typeof accentThemes)[AccentTheme]
+                (typeof accentThemes)[AccentTheme],
               ])
             : null;
         })
         .filter(
           (item): item is [AccentTheme, (typeof accentThemes)[AccentTheme]] =>
-            item !== null
+            item !== null,
         );
 
       // Always include rainbow
@@ -315,7 +356,7 @@ export class SupportPanel {
       // No time theme active, show all
       themesToShow = Object.entries(accentThemes) as [
         AccentTheme,
-        { label: string; emoji: string; color: string }
+        { label: string; emoji: string; color: string },
       ][];
     }
 
@@ -353,7 +394,7 @@ export class SupportPanel {
                 }></span>
                 <span class="swatch-emoji">${theme.emoji}</span>
               </button>
-            `
+            `,
       )
       .join("");
 

@@ -1,6 +1,6 @@
 // Color Theming for accent colors
-import { State } from '../../core/State';
-import type { AccentTheme, NDSupportCallbacks } from './types';
+import { State } from "../../core/State";
+import type { AccentTheme, NDSupportCallbacks } from "./types";
 
 export class ColorTheming {
   setCallbacks(_callbacks: NDSupportCallbacks): void {
@@ -10,7 +10,7 @@ export class ColorTheming {
   apply(preference?: AccentTheme): void {
     if (!State.data) return;
     const accentTheme = preference || State.data.preferences.nd.accentTheme;
-    
+
     if (!accentTheme) return;
 
     const themeClasses = [
@@ -23,6 +23,13 @@ export class ColorTheming {
       "theme-teal",
       "theme-indigo",
       "theme-violet",
+      "theme-lime",
+      "theme-emerald",
+      "theme-fuchsia",
+      "theme-pink",
+      "theme-cyan",
+      "theme-yellow",
+      "theme-orange",
       "theme-rainbow",
       "theme-dawn",
       "theme-morning",

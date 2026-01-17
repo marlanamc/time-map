@@ -2,7 +2,11 @@ import { State } from "../../core/State";
 import { VIEWS } from "../../config";
 import { viewportManager } from "../viewport/ViewportManager";
 import type { UIElements } from "../../types";
-import { MonthRenderer, WeekRenderer, LivingGardenRenderer } from "../renderers";
+import {
+  MonthRenderer,
+  WeekRenderer,
+  LivingGardenRenderer,
+} from "../renderers";
 import { goalDetailModal } from "../../components/modals/GoalDetailModal";
 
 type RenderCoordinatorCallbacks = {
@@ -17,7 +21,12 @@ type RenderCoordinatorCallbacks = {
   syncViewButtons: () => void;
   renderDayView: () => void;
   renderCalendar: () => void;
-  openGoalModal: (level: any, month: number, year: number, options?: any) => void;
+  openGoalModal: (
+    level: any,
+    month: number,
+    year: number,
+    options?: any,
+  ) => void;
   escapeHtml: (text: string) => string;
   dayViewController: any;
 };
@@ -76,7 +85,7 @@ export class RenderCoordinator {
         } catch (error) {
           console.warn(
             "View transition failed, falling back to regular render:",
-            error
+            error,
           );
         }
       }
@@ -147,9 +156,6 @@ export class RenderCoordinator {
 
     // Show loading state for main content during navigation
     const calendarGrid = this.elements.calendarGrid;
-    if (calendarGrid && shouldResetScroll) {
-      calendarGrid.classList.add("loading");
-    }
 
     // Collect all DOM updates
     updates.push(() => this.renderCurrentView());
@@ -201,13 +207,12 @@ export class RenderCoordinator {
       // Remove loading state with smooth transition
       if (calendarGrid && shouldResetScroll) {
         requestAnimationFrame(() => {
-          calendarGrid.classList.remove("loading");
-          calendarGrid.classList.add("view-transitioning");
-
+          // calendarGrid.classList.remove("loading");
+          // calendarGrid.classList.add("view-transitioning");
           // Remove transitioning class after animation
-          setTimeout(() => {
-            calendarGrid.classList.remove("view-transitioning");
-          }, 200);
+          // setTimeout(() => {
+          //   calendarGrid.classList.remove("view-transitioning");
+          // }, 200);
         });
       }
 
@@ -267,7 +272,7 @@ export class RenderCoordinator {
     if (!container) {
       console.error(
         "renderCurrentView: calendarGrid element not found! Current view:",
-        State.currentView
+        State.currentView,
       );
       return;
     }
@@ -303,14 +308,18 @@ export class RenderCoordinator {
           this.callbacks.escapeHtml.bind(this),
           (goalId) => goalDetailModal.show(goalId),
           (level) =>
-            this.callbacks.openGoalModal(level, State.viewingMonth, State.viewingYear),
+            this.callbacks.openGoalModal(
+              level,
+              State.viewingMonth,
+              State.viewingYear,
+            ),
           (opts) =>
             this.callbacks.openGoalModal(
               opts.level,
               opts.preselectedMonth ?? State.viewingMonth,
               opts.preselectedYear ?? State.viewingYear,
-              { parentId: opts.parentId, parentLevel: opts.parentLevel }
-            )
+              { parentId: opts.parentId, parentLevel: opts.parentLevel },
+            ),
         );
         break;
       default:

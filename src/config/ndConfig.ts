@@ -15,13 +15,25 @@ export const ND_CONFIG = {
     teal: { label: "Daylight Blue", emoji: "🌊", color: "#1E6FB8" },
     indigo: { label: "Deep Indigo", emoji: "🌌", color: "#4F46E5" },
     violet: { label: "Violet", emoji: "💜", color: "#6D28D9" },
-    rainbow: { label: "Rainbow", emoji: "🌈", color: "linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)" },
+    lime: { label: "Fresh Lime", emoji: "🍋", color: "#65A30D" },
+    emerald: { label: "Deep Emerald", emoji: "🌲", color: "#059669" },
+    fuchsia: { label: "Neon Fuchsia", emoji: "🔮", color: "#C026D3" },
+    pink: { label: "Hot Pink", emoji: "💖", color: "#DB2777" },
+    cyan: { label: "Bright Cyan", emoji: "💎", color: "#0891B2" },
+    yellow: { label: "Golden Hour", emoji: "🌻", color: "#CA8A04" },
+    orange: { label: "Burnt Orange", emoji: "🍊", color: "#EA580C" },
+    rainbow: {
+      label: "Rainbow",
+      emoji: "🌈",
+      color:
+        "linear-gradient(90deg, #E11D48, #D96320, #F4A460, #10B981, #0EA5E9, #4F46E5, #6D28D9)",
+    },
     // Time-of-day themes - match background gradients
-    dawn: { label: "Dawn", emoji: "🌅", color: "#A78BFA" },  // Soft lavender purple
-    morning: { label: "Morning", emoji: "🌄", color: "#38BDF8" },  // Sky blue
-    afternoon: { label: "Afternoon", emoji: "☀️", color: "#FB7185" },  // Warm rose pink
-    evening: { label: "Evening", emoji: "🌆", color: "#C084FC" },  // Warm lavender
-    night: { label: "Night", emoji: "🌙", color: "#3B82F6" },  // Bright blue
+    dawn: { label: "Dawn", emoji: "🌅", color: "#A78BFA" }, // Soft lavender purple
+    morning: { label: "Morning", emoji: "🌄", color: "#38BDF8" }, // Sky blue
+    afternoon: { label: "Afternoon", emoji: "☀️", color: "#FB7185" }, // Warm rose pink
+    evening: { label: "Evening", emoji: "🌆", color: "#C084FC" }, // Warm lavender
+    night: { label: "Night", emoji: "🌙", color: "#3B82F6" }, // Bright blue
   },
 
   // Body doubling / coworking timer options

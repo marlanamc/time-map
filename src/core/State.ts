@@ -1,19 +1,23 @@
 // ===================================
 // State Management
 // ===================================
-import type { AppState, AppData, ViewType } from '../types';
-import { CONFIG, VIEWS } from '../config';
-import { SupabaseService } from '../services/supabase';
-import { AuthComponent } from '../components/Auth';
-import { batchSaveService } from '../services/BatchSaveService';
-import { cacheService } from '../services/CacheService';
-import { warmCache } from '../services/cacheWarmup';
-import { syncQueue } from '../services/SyncQueue';
-import { throttledPreferencesAndAnalyticsSync, throttledStreakSync } from '../services/sync/syncHelpers';
-import { eventBus } from './EventBus';
-import { isSupabaseConfigured } from '../supabaseClient';
+import type { AppState, AppData, ViewType } from "../types";
+import { CONFIG, VIEWS } from "../config";
+import { SupabaseService } from "../services/supabase";
+import { AuthComponent } from "../components/Auth";
+import { batchSaveService } from "../services/BatchSaveService";
+import { cacheService } from "../services/CacheService";
+import { warmCache } from "../services/cacheWarmup";
+import { syncQueue } from "../services/SyncQueue";
+import {
+  throttledPreferencesAndAnalyticsSync,
+  throttledStreakSync,
+} from "../services/sync/syncHelpers";
+import { eventBus } from "./EventBus";
+import { isSupabaseConfigured } from "../supabaseClient";
+import { BadgingService } from "../services/pwa/BadgingService";
 
-const AUTH_MODAL_DONT_SHOW_KEY = 'gardenFence.authModal.dontShow';
+const AUTH_MODAL_DONT_SHOW_KEY = "gardenFence.authModal.dontShow";
 
 export const State: AppState & {
   init: () => void;
@@ -29,6 +33,7 @@ export const State: AppState & {
   load: () => void;
   save: () => void;
   cleanup: () => Promise<void>;
+  updateAppBadge: () => void;
 } = {
   data: null,
   currentView: VIEWS.YEAR as ViewType,
@@ -49,14 +54,15 @@ export const State: AppState & {
     if (!user) {
       let suppressAuthModal = false;
       try {
-        suppressAuthModal = localStorage.getItem(AUTH_MODAL_DONT_SHOW_KEY) === '1';
+        suppressAuthModal =
+          localStorage.getItem(AUTH_MODAL_DONT_SHOW_KEY) === "1";
       } catch {
         suppressAuthModal = false;
       }
 
       if (!suppressAuthModal) {
         // Show Auth Modal if not logged in
-        console.log('No user found, showing auth modal...');
+        console.log("No user found, showing auth modal...");
         const auth = new AuthComponent();
         auth.render();
         // Ensure modal is visible
@@ -64,14 +70,17 @@ export const State: AppState & {
       }
     } else {
       // Load cloud data
-      console.log('User logged in, loading cloud data...');
+      console.log("User logged in, loading cloud data...");
       await this.load();
 
       // Start optimization services
       batchSaveService.start();
       await warmCache(user.id);
-      console.log('✓ Performance optimization services started');
+      console.log("✓ Performance optimization services started");
+      console.log("✓ Performance optimization services started");
     }
+
+    this.updateAppBadge();
 
     if (!this.data) {
       // Fallback to defaults if no cloud data (new user)
@@ -134,8 +143,8 @@ export const State: AppState & {
   // Navigate views
   setView(view: ViewType) {
     this.currentView = view;
-    eventBus.emit('view:changed', { view, transition: true });
-    eventBus.emit('view:sync-buttons');
+    eventBus.emit("view:changed", { view, transition: true });
+    eventBus.emit("view:sync-buttons");
   },
 
   // Navigate to specific date
@@ -166,7 +175,7 @@ export const State: AppState & {
         this.goToDate(d);
         break;
     }
-    eventBus.emit('view:changed', { transition: true });
+    eventBus.emit("view:changed", { transition: true });
   },
 
   getDefaultData(): AppData {
@@ -199,8 +208,8 @@ export const State: AppState & {
         },
         sidebarSections: {
           affirmation: false, // Collapsed by default in medium energy
-          upcoming: true,     // Expanded by default
-          achievements: false // Collapsed by default in medium energy
+          upcoming: true, // Expanded by default
+          achievements: false, // Collapsed by default in medium energy
         },
         // Neurodivergent accessibility preferences
         nd: {
@@ -264,8 +273,10 @@ export const State: AppState & {
     const defaults = this.getDefaultData();
     let changed = false;
     const isUuid = (value: unknown): value is string =>
-      typeof value === 'string' &&
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+      typeof value === "string" &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        value,
+      );
 
     if (!this.data || typeof this.data !== "object") {
       this.data = defaults;
@@ -294,7 +305,7 @@ export const State: AppState & {
     } else {
       // Ensure IDs are UUIDs for Supabase compatibility (brain_dump.id is UUID)
       this.data.brainDump.forEach((entry) => {
-        if (!entry || typeof entry !== 'object') return;
+        if (!entry || typeof entry !== "object") return;
         const id = (entry as { id?: unknown }).id;
         if (!isUuid(id)) {
           (entry as { id: string }).id = crypto.randomUUID();
@@ -317,10 +328,16 @@ export const State: AppState & {
       this.data.preferences = { ...defaults.preferences };
       changed = true;
     } else {
-      this.data.preferences = { ...defaults.preferences, ...this.data.preferences };
+      this.data.preferences = {
+        ...defaults.preferences,
+        ...this.data.preferences,
+      };
     }
 
-    if (!this.data.preferences.layout || typeof this.data.preferences.layout !== "object") {
+    if (
+      !this.data.preferences.layout ||
+      typeof this.data.preferences.layout !== "object"
+    ) {
       this.data.preferences.layout = { ...defaults.preferences.layout };
       changed = true;
     } else {
@@ -343,7 +360,10 @@ export const State: AppState & {
       };
     }
 
-    if (!this.data.preferences.nd || typeof this.data.preferences.nd !== "object") {
+    if (
+      !this.data.preferences.nd ||
+      typeof this.data.preferences.nd !== "object"
+    ) {
       this.data.preferences.nd = { ...defaults.preferences.nd };
       changed = true;
     } else {
@@ -370,18 +390,20 @@ export const State: AppState & {
 
   async load(): Promise<void> {
     try {
-      console.log('[State] Loading data from cloud...');
+      console.log("[State] Loading data from cloud...");
       const cloudData = await SupabaseService.loadAllData();
       if (cloudData) {
         // Merge cloud data with defaults to ensure complete state
         this.data = { ...this.getDefaultData(), ...cloudData } as AppData;
-        console.log('[State] ✓ Data loaded from cloud:', {
+        console.log("[State] ✓ Data loaded from cloud:", {
           goals: this.data.goals.length,
           brainDump: this.data.brainDump.length,
           achievements: this.data.achievements.length,
           weeklyReviews: this.data.weeklyReviews.length,
-          hasPreferences: !!this.data.preferences
+          hasPreferences: !!this.data.preferences,
         });
+
+        this.updateAppBadge();
 
         // PR1.5: Persist the cloud-loaded snapshot locally so an offline refresh doesn't
         // fall back to empty localStorage before any normal save path runs.
@@ -389,22 +411,28 @@ export const State: AppState & {
         try {
           localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
         } catch (storageError) {
-          console.error('[State] Failed to persist cloud snapshot to localStorage:', storageError);
+          console.error(
+            "[State] Failed to persist cloud snapshot to localStorage:",
+            storageError,
+          );
         }
       } else {
         // Fallback to local or default
-        console.log('[State] No cloud data found, checking localStorage...');
+        console.log("[State] No cloud data found, checking localStorage...");
         const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
         if (stored) {
           try {
             this.data = JSON.parse(stored) as AppData;
-            console.log('[State] ✓ Data loaded from localStorage');
+            console.log("[State] ✓ Data loaded from localStorage");
           } catch (parseError) {
-            console.error('[State] Failed to parse localStorage data:', parseError);
+            console.error(
+              "[State] Failed to parse localStorage data:",
+              parseError,
+            );
             this.data = null;
           }
         } else {
-          console.log('[State] No local data found, will use defaults');
+          console.log("[State] No local data found, will use defaults");
           this.data = null;
         }
       }
@@ -414,7 +442,7 @@ export const State: AppState & {
         console.error("[State] Error details:", {
           message: e.message,
           stack: e.stack,
-          name: e.name
+          name: e.name,
         });
       }
       // Try to fallback to localStorage on error
@@ -422,12 +450,17 @@ export const State: AppState & {
         const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
         if (stored) {
           this.data = JSON.parse(stored) as AppData;
-          console.log('[State] ✓ Fallback: Data loaded from localStorage after error');
+          console.log(
+            "[State] ✓ Fallback: Data loaded from localStorage after error",
+          );
         } else {
           this.data = null;
         }
       } catch (fallbackError) {
-        console.error("[State] Fallback to localStorage also failed:", fallbackError);
+        console.error(
+          "[State] Fallback to localStorage also failed:",
+          fallbackError,
+        );
         this.data = null;
       }
     }
@@ -446,9 +479,12 @@ export const State: AppState & {
         // Local backup always
         try {
           localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
-          console.log('[State] ✓ Data saved to localStorage');
+          console.log("[State] ✓ Data saved to localStorage");
         } catch (storageError) {
-          console.error("[State] Failed to save to localStorage:", storageError);
+          console.error(
+            "[State] Failed to save to localStorage:",
+            storageError,
+          );
           // Continue with cloud save even if localStorage fails
         }
 
@@ -456,24 +492,33 @@ export const State: AppState & {
         try {
           const user = await SupabaseService.getUser();
           if (user && this.data.preferences) {
-            throttledPreferencesAndAnalyticsSync(this.data.preferences, this.data.analytics);
-            throttledStreakSync(this.data.streak, this.data.analytics?.streakBest);
+            throttledPreferencesAndAnalyticsSync(
+              this.data.preferences,
+              this.data.analytics,
+            );
+            throttledStreakSync(
+              this.data.streak,
+              this.data.analytics?.streakBest,
+            );
           } else if (!user) {
-            console.log('[State] Not authenticated, skipping cloud save');
+            console.log("[State] Not authenticated, skipping cloud save");
           }
         } catch (cloudError) {
-          console.error("[State] Failed to save preferences to cloud:", cloudError);
+          console.error(
+            "[State] Failed to save preferences to cloud:",
+            cloudError,
+          );
           if (cloudError instanceof Error) {
             console.error("[State] Cloud save error details:", {
               message: cloudError.message,
               stack: cloudError.stack,
-              name: cloudError.name
+              name: cloudError.name,
             });
           }
           // Don't throw - local save succeeded, cloud save is best-effort
         }
       } else {
-        console.warn('[State] Cannot save: data is null');
+        console.warn("[State] Cannot save: data is null");
       }
     } catch (e) {
       console.error("[State] Failed to save data:", e);
@@ -481,7 +526,7 @@ export const State: AppState & {
         console.error("[State] Save error details:", {
           message: e.message,
           stack: e.stack,
-          name: e.name
+          name: e.name,
         });
       }
       // Don't throw - this is a best-effort save operation
@@ -493,7 +538,7 @@ export const State: AppState & {
    * Should be called before signing out to properly cleanup services
    */
   async cleanup(): Promise<void> {
-    console.log('Cleaning up State resources...');
+    console.log("Cleaning up State resources...");
 
     // Stop batch save service
     batchSaveService.stop();
@@ -504,6 +549,25 @@ export const State: AppState & {
     // Clear cache
     cacheService.clear();
 
-    console.log('✓ State resources cleaned up');
+    console.log("✓ State resources cleaned up");
+  },
+
+  updateAppBadge() {
+    if (!this.data?.goals) return;
+
+    // Count pending intentions (not completed, level 'intention', and for today or past)
+    // Actually, usually badges are for "today's tasks".
+    // Let's count incomplete intentions for the current view date context, or just all incomplete intentions?
+    // User request was "pending tasks". Let's stick to incomplete intentions for "today" if possible,
+    // but State doesn't easily know "today" in terms of "what's relevant".
+    // Let's just count ALL incomplete intentions for now as a simple metric.
+    // Or better: Incomplete intentions that are active.
+
+    // Let's filter for: level=intention AND !completed
+    const pendingCount = this.data.goals.filter(
+      (g) => g.level === "intention" && g.status !== "done",
+    ).length;
+
+    BadgingService.set(pendingCount);
   },
 };
