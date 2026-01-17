@@ -67,12 +67,13 @@ class ViewportManager {
         }
       }
 
-      // First-load defaults: mobile always starts on Home view.
-      // (We don't persist this so desktop preferences don't get overwritten.)
+      // On first mobile load, align layout classes with the active view.
       if (isMobile && !this._initialMobileDefaultsApplied) {
         this._initialMobileDefaultsApplied = true;
-        document.body.classList.add("mobile-home-view");
-        State.currentView = VIEWS.HOME;
+        document.body.classList.toggle(
+          "mobile-home-view",
+          State.currentView === VIEWS.HOME
+        );
       }
 
       // Notify callback that viewport changed (for canvas/render updates)

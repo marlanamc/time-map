@@ -148,12 +148,6 @@ export class RenderCoordinator {
       document.body.classList.toggle("mobile-garden-view", isMobileGarden);
     });
 
-    if (this.elements.mobileHomeView) {
-      updates.push(() => {
-        this.elements.mobileHomeView!.setAttribute("hidden", "");
-      });
-    }
-
     if (isMobileHome) {
       updates.push(() => this.callbacks.updateMobileHomeView());
     }
@@ -268,7 +262,7 @@ export class RenderCoordinator {
         this.callbacks.renderDayView();
         break;
       case VIEWS.HOME:
-        // Do nothing for main grid, overlay is handled in render()
+        // Home view uses the sidebar layout; nothing to render on the main grid.
         break;
       case VIEWS.GARDEN:
         LivingGardenRenderer.render(

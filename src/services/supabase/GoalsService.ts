@@ -8,12 +8,18 @@ import type { GoalRow } from '../../types/database';
 
 export class GoalsService {
   async getGoals(): Promise<Goal[]> {
-    const cacheKey = 'goals:all';
+    const user = await authService.getUser();
+    const cacheKey = user ? `goals:${user.id}` : 'goals:anonymous';
     const cached = cacheService.get<Goal[]>(cacheKey);
 
     if (cached) {
       console.log('✓ Goals loaded from cache');
       return cached;
+    }
+
+    if (!user) {
+      console.warn('[GoalsService] getGoals called without authenticated user; returning empty array');
+      return [];
     }
 
     try {

@@ -156,8 +156,6 @@ test("visual: mobile tab bar stays visible", async ({ page, browserName }) => {
       if (isMobile) {
         document.body.classList.add("is-mobile");
         document.body.classList.remove("is-desktop");
-        // Force mobile home view for testing
-        document.body.classList.add("mobile-home-view");
         console.log("Forced mobile classes applied");
       }
     }, 3000);
@@ -192,17 +190,7 @@ test("visual: mobile tab bar stays visible", async ({ page, browserName }) => {
   console.log("Body classes before clicking:", bodyClassesBefore);
 
   const hereTab = page.locator('.mobile-tab[data-view="home"]');
-  await expect(hereTab).toBeVisible();
-  await hereTab.click();
-
-  // Wait a moment for the view change to process
-  await page.waitForTimeout(1000);
-
-  // Debug: check what classes are on the body
-  const bodyClasses = await page.locator("body").getAttribute("class");
-  console.log("Body classes after clicking home tab:", bodyClasses);
-
-  await expect(page.locator("body")).toHaveClass(/mobile-home-view/);
+  await expect(hereTab).toHaveCount(0);
 
   await expect(page.locator("#mobileTabBar")).toHaveScreenshot(
     "mobile-tab-bar.png",

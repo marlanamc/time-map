@@ -298,6 +298,41 @@
     display: none;
   }
 
+  #appLogo {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Keep the emoji visible on all pages; default to icon-only on mobile */
+  .mobile-header .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .mobile-header .logo-icon {
+    display: block;
+    font-size: 1.5rem;
+  }
+
+  .mobile-header .logo-text {
+    display: none;
+  }
+
+  .mobile-header .logo.here-logo-pulse {
+    animation: here-logo-pulse 1.6s ease-out;
+    box-shadow: 0 0 0 0 rgba(88, 132, 147, 0.25);
+  }
+
+  @keyframes here-logo-pulse {
+    from {
+      box-shadow: 0 0 0 0 rgba(88, 132, 147, 0.25);
+    }
+    to {
+      box-shadow: 0 0 0 14px rgba(88, 132, 147, 0);
+    }
+  }
+
   body.mobile-home-view .header-mobile-nav {
     display: none !important;
   }
@@ -309,8 +344,8 @@
     align-items: center !important;
   }
 
-  /* Hide logo when date nav is in header (day, week, month, year views) */
-  body.mobile-date-nav-in-header .header .logo {
+  /* When date nav sits in the header, keep the emoji but hide the wordmark */
+  body.mobile-date-nav-in-header .header .logo-text {
     display: none !important;
   }
 

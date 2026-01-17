@@ -76,6 +76,14 @@
   color: #1a202c !important;
 }
 
+/* Override for empty state - must be pure black */
+:root:not(.dark-mode) .living-garden-empty h2,
+:root:not(.dark-mode) .living-garden-empty p,
+:root:not(.dark-mode) .living-garden .living-garden-empty h2,
+:root:not(.dark-mode) .living-garden .living-garden-empty p {
+  color: #000000 !important;
+}
+
 html.dark-mode .living-garden {
   background: transparent;
   color: #f8fafc !important;
@@ -92,29 +100,77 @@ html.dark-mode .living-garden {
    Garden Header
    =================================== */
 .living-garden-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  margin-bottom: var(--space-12);
-  padding: var(--space-8) 0;
+  margin-bottom: var(--space-10);
+  padding: var(--space-6) 0;
   position: relative;
+  isolation: isolate;
+  gap: var(--space-4);
+}
+
+.living-garden-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 820px);
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.32),
+    rgba(255, 255, 255, 0.18)
+  );
+  border-radius: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+html.dark-mode .living-garden-header::before {
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.24),
+    rgba(30, 41, 59, 0.18)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+}
+
+.living-garden-header > * {
+  position: relative;
+  z-index: 2;
 }
 
 .living-garden-title {
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 800;
   letter-spacing: -0.04em;
-  margin: 0 0 var(--space-4);
-  display: inline-block;
+  margin: 0;
+  display: block;
+  text-align: center;
   background-image: linear-gradient(
     135deg,
-    #10b981 0%,
-    #3b82f6 50%,
-    #8b5cf6 100%
+    #059669 0%,
+    #0284c7 50%,
+    #7c3aed 100%
   );
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+  text-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 2px 12px rgba(255, 255, 255, 0.6),
+    0 0 2px rgba(0, 0, 0, 0.3);
+  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 10;
 }
@@ -124,57 +180,65 @@ html.dark-mode .living-garden {
 :root.time-dawn:not(.dark-mode) .living-garden-title {
   background-image: linear-gradient(
     135deg,
-    #ff9a9e 0%,
-    #fecfef 50%,
-    #eaf4f2 100%
+    #e91e63 0%,
+    #ec4899 50%,
+    #f472b6 100%
   );
 }
 :root.dark-mode.time-dawn .living-garden-title {
   background-image: linear-gradient(
     135deg,
-    #ffb7b2 0%,
-    #ffdac1 50%,
-    #e0f7fa 100%
+    #ff8a95 0%,
+    #ffb3ba 50%,
+    #ffe0e3 100%
   );
 }
 
 /* Morning */
 :root.time-morning:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background-image: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
 }
 :root.dark-mode.time-morning .living-garden-title {
-  background-image: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+  background-image: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%);
 }
 
 /* Afternoon */
 :root.time-afternoon:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background-image: linear-gradient(135deg, #059669 0%, #10b981 100%);
 }
 :root.dark-mode.time-afternoon .living-garden-title {
-  background-image: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+  background-image: linear-gradient(135deg, #34d399 0%, #4ade80 100%);
 }
 
 /* Evening */
 :root.time-evening:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  background-image: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
 }
 :root.dark-mode.time-evening .living-garden-title {
   background-image: linear-gradient(
     135deg,
-    #f78ca0 0%,
-    #f9748f 19%,
-    #fd868c 60%,
-    #fe9a8b 100%
+    #f87171 0%,
+    #fb923c 50%,
+    #fbbf24 100%
   );
 }
 
 /* Night */
 :root.time-night:not(.dark-mode) .living-garden-title {
-  background-image: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  background-image: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
 }
 :root.dark-mode.time-night .living-garden-title {
-  background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-  filter: drop-shadow(0 0 15px rgba(142, 197, 252, 0.4));
+  background-image: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+  filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5));
+}
+
+html.dark-mode .living-garden-title {
+  text-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.5),
+    0 4px 16px rgba(255, 255, 255, 0.3),
+    0 0 4px rgba(255, 255, 255, 0.2);
+  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.25);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
 }
 
 .living-garden-subtitle {
@@ -197,18 +261,22 @@ html.dark-mode .living-garden {
 
 .living-garden-summary {
   font-size: var(--text-base);
-  color: var(--text-tertiary);
+  color: rgba(15, 23, 42, 0.8);
   padding: var(--space-3) var(--space-6);
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: var(--radius-full);
   display: inline-block;
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(255, 255, 255, 0.2);
   animation: growIn 1s ease-out 0.4s backwards;
   transition:
     transform 0.3s ease,
     background 0.3s ease;
+  text-align: center;
+  margin: 0 auto;
 }
 .living-garden-summary:hover {
   transform: translateY(-2px);
@@ -216,8 +284,12 @@ html.dark-mode .living-garden {
 }
 
 html.dark-mode .living-garden-summary {
-  background: rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.28);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.18),
+    0 1px 2px rgba(255, 255, 255, 0.08);
 }
 
 /* ===================================
@@ -243,28 +315,48 @@ html.dark-mode .living-garden-summary {
   font-size: var(--text-3xl);
   font-weight: 800;
   margin: 0 0 var(--space-4);
-  color: var(--text-primary);
+  color: #000000 !important;
 }
-:root:not(.dark-mode) .living-garden-empty h2 {
-  color: #0a1113 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+:root:not(.dark-mode) .living-garden-empty h2,
+:root:not(.dark-mode) .living-garden .living-garden-empty h2 {
+  color: #000000 !important;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    0 1px 4px rgba(0, 0, 0, 0.2);
+  -webkit-text-stroke: 0.2px rgba(0, 0, 0, 0.05);
 }
-.dark-mode .living-garden-empty h2 {
-  color: rgba(255, 255, 255, 0.98);
+.dark-mode .living-garden-empty h2,
+.dark-mode .living-garden .living-garden-empty h2 {
+  color: #ffffff !important;
+  text-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.7),
+    0 2px 8px rgba(255, 255, 255, 0.2),
+    0 0 4px rgba(255, 255, 255, 0.1);
+  -webkit-text-stroke: 0.3px rgba(255, 255, 255, 0.15);
 }
 
 .living-garden-empty p {
   font-size: var(--text-lg);
-  color: var(--text-primary);
+  color: #000000 !important;
   margin: 0 0 var(--space-8);
   line-height: 1.6;
 }
-:root:not(.dark-mode) .living-garden-empty p {
-  color: #1a2b2f !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+:root:not(.dark-mode) .living-garden-empty p,
+:root:not(.dark-mode) .living-garden .living-garden-empty p {
+  color: #000000 !important;
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+  -webkit-text-stroke: 0.1px rgba(0, 0, 0, 0.05);
 }
-.dark-mode .living-garden-empty p {
-  color: rgba(255, 255, 255, 0.95);
+.dark-mode .living-garden-empty p,
+.dark-mode .living-garden .living-garden-empty p {
+  color: #f1f5f9 !important;
+  text-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.6),
+    0 1px 6px rgba(255, 255, 255, 0.15),
+    0 0 3px rgba(255, 255, 255, 0.1);
+  -webkit-text-stroke: 0.2px rgba(255, 255, 255, 0.1);
 }
 
 /* ===================================

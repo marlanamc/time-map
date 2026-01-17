@@ -1,21 +1,43 @@
 /* Mobile Home View Styles - Clean, Professional Design */
 #mobileHomeView {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.18s ease, transform 0.2s ease;
     position: fixed;
     inset: 0;
     z-index: 100;
-    background: transparent;
+    background: linear-gradient(180deg, rgba(31, 78, 108, 0.92), rgba(30, 86, 104, 0.9));
+    backdrop-filter: blur(10px);
     overflow-y: auto;
     overflow-x: visible;
     padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) calc(var(--space-3) + env(safe-area-inset-right, 0px)) calc(var(--mobile-tab-bar-height) + var(--space-3)) calc(var(--space-3) + env(safe-area-inset-left, 0px));
     -webkit-overflow-scrolling: touch;
     width: 100%;
     box-sizing: border-box;
+    border-radius: 32px 32px 0 0;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.dark-mode #mobileHomeView {
+    background: linear-gradient(180deg, rgba(10, 26, 46, 0.88), rgba(10, 26, 46, 0.8));
+}
+
+.here-overlay-open #mobileHomeView {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+body.here-overlay-open {
+    overflow: hidden;
 }
 
 #mobileHomeView .mobile-home-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: var(--space-2);
     padding-bottom: var(--space-2);
     margin-bottom: var(--space-1);
 }
@@ -35,6 +57,24 @@
 
 .dark-mode #mobileHomeView .current-date-small {
     color: var(--text-tertiary);
+}
+
+#mobileHomeView #mobileHereCloseBtn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-weight: 700;
+    line-height: 1;
+    padding: 0;
+}
+
+.dark-mode #mobileHomeView #mobileHereCloseBtn {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
 }
 
 #mobileHomeView .mobile-home-content {
@@ -75,12 +115,12 @@
 }
 
 #mobileHomeView .card-label {
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-tertiary);
-    font-weight: 600;
-    margin-bottom: var(--space-2);
+    letter-spacing: 0.18em;
+    color: #d5e0ec;
+    font-weight: 650;
+    margin-bottom: var(--space-3);
     overflow: visible !important;
     text-overflow: clip;
     white-space: normal;
@@ -100,8 +140,13 @@
 /* Time Card */
 #mobileHomeView .time-card {
     overflow: visible !important;
-    padding-left: var(--space-3);
-    padding-right: var(--space-3);
+    padding: var(--space-4);
+    background: radial-gradient(120% 120% at 50% 10%, rgba(18, 52, 77, 0.96), rgba(8, 25, 38, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 24px 60px rgba(4, 10, 22, 0.4);
+    border-radius: 28px;
+    align-items: center;
+    text-align: center;
 }
 
 #mobileHomeView .time-card .card-label,
@@ -117,47 +162,121 @@
     box-sizing: border-box;
 }
 
+#mobileHomeView .time-card .card-label {
+    text-align: center;
+}
+
 #mobileHomeView .now-context-mobile {
-    font-size: 24px;
+    font-size: 16px;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #d5e0ec;
     margin-bottom: var(--space-2);
-    letter-spacing: -0.02em;
-    overflow: visible;
-    white-space: normal;
-    word-wrap: break-word;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    max-width: 100%;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.here-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
     width: 100%;
-    box-sizing: border-box;
+}
+
+.here-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.here-weekday {
+    font-size: 16px;
+    font-weight: 500;
+    color: #d5e0ec;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+.here-weekday-secondary {
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.88);
+    letter-spacing: 0.01em;
+}
+
+.here-date-large {
+    font-size: 28px;
+    font-weight: 750;
+    color: #f5f7fb;
+    letter-spacing: -0.015em;
+}
+
+.here-bloom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0;
+}
+
+.here-bud {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: #f47c56;
+    box-shadow:
+        0 6px 14px rgba(244, 124, 86, 0.38),
+        0 0 22px rgba(244, 124, 86, 0.45);
+}
+
+.here-stem {
+    width: 6px;
+    height: 56px;
+    background: #4f9c8b;
+    border-radius: 999px;
+}
+
+.here-label {
+    margin-top: 6px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #d5e0ec;
+    font-weight: 650;
+}
+
+.here-value {
+    font-size: 28px;
+    font-weight: 750;
+    color: #ffffff;
 }
 
 #mobileHomeView .time-stats-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3);
-    margin-top: var(--space-1);
+    display: none;
 }
 
 #mobileHomeView .time-stat-mobile {
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 #mobileHomeView .stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--accent);
+    font-size: 32px;
+    font-weight: 800;
+    color: #f5f7fb;
     line-height: 1;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     letter-spacing: -0.03em;
 }
 
 #mobileHomeView .stat-label {
-    font-size: 11px;
-    color: var(--text-secondary);
-    font-weight: 500;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 650;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
 /* Bloom Card */
@@ -167,6 +286,12 @@
     min-height: 120px;
     justify-content: center;
     padding: var(--space-4) var(--space-3);
+    background: #0c2236;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 16px 36px rgba(4, 10, 22, 0.32);
+    border-radius: 24px;
+    color: #d5e0ec;
+    gap: var(--space-3);
 }
 
 #mobileHomeView .garden-bloom-mobile {

@@ -358,73 +358,17 @@
       </span>
     </button>
 
-    <!-- Mobile Home View (Distinct from Desktop Sidebar) -->
-    <div id="mobileHomeView" class="mobile-home-view" hidden>
-      <!-- Content will be populated by JS or replicated here -->
-      <header class="mobile-home-header">
-        <div class="logo-text">The Garden Fence</div>
-        <div class="current-date-small" id="mobileDateDisplay"></div>
-      </header>
-
-      <div class="mobile-home-content">
-        <!-- You Are Here -->
-        <section class="mobile-card time-card">
-          <div class="card-label">You Are Here</div>
-          <div class="now-context-mobile" id="mobileNowContext"></div>
-          <div class="time-visualization-mobile" id="mobileTimeVis"></div>
-          <div class="time-stats-row" id="mobileTimeStats">
-            <!-- populated by JS -->
-          </div>
-        </section>
-
-        <!-- All Items -->
-        <section class="mobile-card goals-card">
-          <div class="card-label">Your Garden</div>
-          <div class="goals-by-level" id="mobileGoalsByLevel">
-            <!-- populated by JS -->
-          </div>
-        </section>
-
-        <!-- Daily Bloom -->
-        <section class="mobile-card bloom-card">
-          <div class="card-label">Daily Bloom</div>
-          <div class="garden-bloom-mobile" id="mobileGardenBloom">
-            <!-- Clone of flower SVG will go here -->
-          </div>
-          <div class="bloom-stats-mobile">
-            <span id="mobileBloomText">Growing...</span>
-          </div>
-        </section>
-
-        <!-- Affirmation -->
-        <section
-          class="mobile-card affirmation-card"
-          id="mobileAffirmationCard"
-        >
-          <div class="card-icon">✨</div>
-          <div class="affirmation-text-mobile" id="mobileAffirmationText">
-            "You're doing better than you think."
-          </div>
-        </section>
-
-        <!-- What's Next -->
-        <section class="mobile-card upcoming-card">
-          <div class="card-header-row">
-            <div class="card-label">Coming Up</div>
-            <button class="btn-xs btn-ghost" id="mobileSurpriseBtn">
-              Surprise Me
-            </button>
-          </div>
-          <div id="mobileUpcomingList" class="upcoming-list-mobile"></div>
-        </section>
-      </div>
-    </div>
-
     <!-- Main App -->
     <div class="app">
       <!-- Mobile Header Slot (date nav is moved here on mobile) -->
       <header class="header mobile-header" id="mobileHeader" role="banner">
-        <div class="logo">
+        <div
+          class="logo"
+          id="appLogo"
+          role="button"
+          tabindex="0"
+          aria-label="Open You Are Here"
+        >
           <div class="logo-icon" aria-hidden="true">🌱</div>
           <span class="logo-text">The Garden Fence</span>
         </div>
@@ -1532,28 +1476,6 @@
       aria-label="Main navigation"
     >
       <button
-        class="mobile-tab active"
-        data-view="home"
-        role="tab"
-        aria-selected="true"
-      >
-        <span class="mobile-tab-icon" aria-hidden="true">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"
-            ></path>
-          </svg>
-        </span>
-        <span class="mobile-tab-label">Here</span>
-      </button>
-      <button
         class="mobile-tab"
         data-view="garden"
         role="tab"
@@ -1651,10 +1573,10 @@
         <span class="mobile-tab-label">Month</span>
       </button>
       <button
-        class="mobile-tab"
+        class="mobile-tab active"
         data-view="year"
         role="tab"
-        aria-selected="false"
+        aria-selected="true"
       >
         <span class="mobile-tab-icon" aria-hidden="true">
           <svg

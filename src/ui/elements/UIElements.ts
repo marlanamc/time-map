@@ -93,6 +93,9 @@ export function cacheElements(): UIElements {
     mobileHomeView: document.getElementById(
       "mobileHomeView"
     ) as HTMLElement | null,
+    mobileHereCloseBtn: document.getElementById(
+      "mobileHereCloseBtn"
+    ) as HTMLButtonElement | null,
     mobileDateDisplay: document.getElementById(
       "mobileDateDisplay"
     ) as HTMLElement | null,
@@ -129,6 +132,7 @@ export function cacheElements(): UIElements {
     mobileHereGarden: document.getElementById(
       "mobileHereGarden"
     ) as HTMLElement | null,
+    headerLogo: document.getElementById("appLogo") as HTMLElement | null,
 
     // ND Support elements (may not exist yet)
     brainDumpBtn: document.getElementById("brainDumpBtn") as HTMLElement | null,

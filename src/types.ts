@@ -462,6 +462,7 @@ export interface UIElements {
 
   // Mobile Home Elements
   mobileHomeView: HTMLElement | null;
+  mobileHereCloseBtn: HTMLButtonElement | null;
   mobileDateDisplay: HTMLElement | null;
   mobileNowContext: HTMLElement | null;
   mobileTimeVis: HTMLElement | null;
@@ -474,6 +475,7 @@ export interface UIElements {
   mobileTabHome: HTMLElement | null;
   mobileGoalsByLevel: HTMLElement | null;
   mobileHereGarden: HTMLElement | null;
+  headerLogo: HTMLElement | null;
 
   goalModal: HTMLElement | null;
   goalForm: HTMLFormElement | null;

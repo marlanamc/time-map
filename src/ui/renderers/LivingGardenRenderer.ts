@@ -35,22 +35,6 @@ function getWeekRangeFor(date: Date): {
   return { weekStart, weekEnd, weekNum, weekYear };
 }
 
-function formatWeekRangeLong(weekStart: Date, weekEnd: Date): string {
-  const startYear = weekStart.getFullYear();
-  const endYear = weekEnd.getFullYear();
-  const startFormatted = weekStart.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: startYear !== endYear ? "numeric" : undefined,
-  });
-  const endFormatted = weekEnd.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-  return `${startFormatted} - ${endFormatted}`;
-}
-
 function getVisionIdForGoal(goal: Goal): string | null {
   let cur: Goal | null = goal;
   const seen = new Set<string>();
@@ -77,7 +61,6 @@ export const LivingGardenRenderer = {
 
     const viewDate = State.viewingDate ?? new Date();
     const { weekStart, weekEnd, weekNum, weekYear } = getWeekRangeFor(viewDate);
-    const weekRangeLabel = formatWeekRangeLong(weekStart, weekEnd);
 
     const visions = Goals.getForRange(
       new Date(weekYear, 0, 1),
@@ -161,15 +144,14 @@ export const LivingGardenRenderer = {
         <div class="living-garden-mobile">
           <div class="living-garden-header">
             <h1 class="living-garden-title">Your Garden</h1>
-            <p class="living-garden-subtitle">${weekRangeLabel}</p>
           </div>
           ${
             visions.length === 0
               ? `
             <div class="living-garden-empty">
               <div class="living-garden-empty-icon">🌱</div>
-              <h2>Start your garden</h2>
-              <p>Plant one vision to begin growing something meaningful.</p>
+              <h2 style="color: #000 !important;">Start your garden</h2>
+              <p style="color: #1e293b !important;">Plant one vision to begin growing something meaningful.</p>
               ${onAddGoal ? `<button class="living-garden-btn-primary" data-action="add-vision">Plant Your First Vision</button>` : ""}
             </div>
           `
@@ -283,7 +265,6 @@ export const LivingGardenRenderer = {
         <div class="living-garden-container">
           <header class="living-garden-header">
             <h1 class="living-garden-title">Your Living Garden</h1>
-            <p class="living-garden-subtitle">${weekRangeLabel}</p>
             <div class="living-garden-summary">
               ${visions.length} vision${visions.length === 1 ? "" : "s"} • 
               ${milestonesToday.length} active milestone${milestonesToday.length === 1 ? "" : "s"} • 
@@ -296,8 +277,8 @@ export const LivingGardenRenderer = {
               ? `
             <div class="living-garden-empty">
               <div class="living-garden-empty-icon">🌱</div>
-              <h2>Start your garden</h2>
-              <p>Every great garden begins with a single vision. Plant yours and watch it grow.</p>
+              <h2 style="color: #000 !important;">Start your garden</h2>
+              <p style="color: #1e293b !important;">Every great garden begins with a single vision. Plant yours and watch it grow.</p>
               ${onAddGoal ? `<button class="living-garden-btn-primary" data-action="add-vision">Plant Your First Vision</button>` : ""}
             </div>
           `

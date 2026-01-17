@@ -1,5 +1,6 @@
 import type { DayViewController } from "../../components/dayView/DayViewController";
-import type { FilterDocListeners, GoalLevel } from "../../types";
+import { VIEWS } from "../../config";
+import type { FilterDocListeners, GoalLevel, ViewType } from "../../types";
 
 type DayViewControllerCtor = new (...args: any[]) => DayViewController;
 
@@ -14,4 +15,5 @@ export class UIStateManager {
   focusRevealHideTimer: ReturnType<typeof setTimeout> | null = null;
   goalModalYear: number | null = null;
   goalModalLevel: GoalLevel = "milestone";
+  lastNonHomeView: ViewType = VIEWS.YEAR;
 }

@@ -122,8 +122,6 @@ test("support panel time range selects stay readable in dark-mode + morning them
       if (isMobile) {
         document.body.classList.add("is-mobile");
         document.body.classList.remove("is-desktop");
-        // Force mobile home view for testing
-        document.body.classList.add("mobile-home-view");
         console.log("Forced mobile classes applied");
 
         // Force mobile support button to be visible

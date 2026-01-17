@@ -62,7 +62,6 @@ const CSS_FILES = [
   'styles/animations/keyframes.css',
   'styles/responsive/mobile.css',
   'styles/responsive/mobile-tabs.css',
-  'styles/mobile/home.css',
   'styles/utilities/print.css',
   'styles/utilities/sound-controls.css',
   'styles/custom/garden-menu.css',
@@ -107,7 +106,6 @@ syncCssLinks().catch(err => {
   console.error('❌ Failed to sync CSS links:', err);
   process.exit(1);
 });
-
 
 
 

@@ -27,30 +27,51 @@ export const HomeRenderer = {
       });
     }
 
-    // 2. Update Context
+    // 2. Update Context (weekday)
+    const now = new Date();
     if (elements.mobileNowContext) {
-      const now = new Date();
-      const hour = now.getHours();
-      let context = "";
-      if (hour < 12) context = "Good Morning";
-      else if (hour < 18) context = "Good Afternoon";
-      else context = "Good Evening";
-      elements.mobileNowContext.textContent = context;
+      const weekday = now.toLocaleDateString("en-US", { weekday: "long" });
+      elements.mobileNowContext.textContent = weekday;
     }
 
     // 3. Update Time Stats
     if (elements.mobileTimeVis) {
-      const breakdown = TimeBreakdown.calculate(State.viewingMonth, State.viewingYear);
-      if (breakdown.isCurrentMonth) {
-        elements.mobileTimeVis.innerHTML = `
-          <div class="time-stat-mobile">
-            <span class="stat-value">${breakdown.days}</span>
-            <span class="stat-label">Days Left</span>
+      const dateLabel = now.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+      });
+      const weekday = now.toLocaleDateString("en-US", { weekday: "long" });
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear() + 1, 0, 1);
+      const ratio = Math.min(
+        1,
+        Math.max(
+          0,
+          (now.getTime() - start.getTime()) / (end.getTime() - start.getTime())
+        )
+      );
+      const yearPercent = Math.round(ratio * 100);
+
+      elements.mobileTimeVis.innerHTML = `
+        <div class="here-hero">
+          <div class="here-date">
+            <div class="here-weekday">${weekday.toUpperCase()}</div>
+            <div class="here-weekday-secondary">${weekday}</div>
+            <div class="here-date-large">${dateLabel}</div>
           </div>
-        `;
-      } else {
-        elements.mobileTimeVis.innerHTML = '';
-      }
+          <div class="here-bloom">
+            <div class="here-bud"></div>
+            <div class="here-stem"></div>
+          </div>
+          <div class="here-label">Year Position</div>
+          <div class="here-value">${yearPercent}%</div>
+        </div>
+      `;
+    }
+
+    // Hide the legacy time stats row inside the hero for this layout
+    if (elements.mobileTimeStats) {
+      elements.mobileTimeStats.innerHTML = "";
     }
 
     // 4. Update Bloom Progress
@@ -73,75 +94,7 @@ export const HomeRenderer = {
       elements.mobileAffirmationText.textContent = affirmation;
     }
 
-    // 6. Update Goals By Level
-    if (elements.mobileGoalsByLevel) {
-      const today = new Date();
-      const todayGoals = Goals.getForDate(today).filter(g => g.status !== 'done');
-
-      const intentions = todayGoals.filter(g => g.level === 'intention');
-      const focus = todayGoals.filter(g => g.level === 'focus');
-      const milestones = todayGoals.filter(g => g.level === 'milestone');
-      const visions = todayGoals.filter(g => g.level === 'vision');
-
-      let html = '';
-
-      const renderGoalSection = (goals: any[], levelKey: 'intention' | 'focus' | 'milestone' | 'vision', label: string) => {
-        if (goals.length === 0) return '';
-        
-      let section = `
-          <div class="goals-level-section">
-            <div class="goals-level-header">
-              <span class="goals-level-emoji">${CONFIG.LEVELS[levelKey].emoji}</span>
-              <span class="goals-level-label">${label}</span>
-              <span class="goals-level-descriptor">${LEVEL_DESCRIPTORS[levelKey]}</span>
-              <span class="goals-level-count">${goals.length}</span>
-            </div>
-            <div class="goals-level-list">
-        `;
-        
-        goals.slice(0, 5).forEach(g => {
-          section += `
-            <div class="mobile-goal-item" data-goal-id="${g.id}">
-              <span class="goal-title">${escapeHtmlFn(g.title)}</span>
-            </div>
-          `;
-        });
-        
-        if (goals.length > 5) {
-          section += `<div class="goals-more">+${goals.length - 5} more</div>`;
-        }
-        
-        section += `
-            </div>
-          </div>
-        `;
-        
-        return section;
-      };
-
-      html += renderGoalSection(intentions, 'intention', 'Intentions');
-      html += renderGoalSection(focus, 'focus', 'Focus');
-      html += renderGoalSection(milestones, 'milestone', 'Milestones');
-      html += renderGoalSection(visions, 'vision', 'Visions');
-
-      if (html === '') {
-        html = '<div class="empty-state-small">No active goals</div>';
-      }
-
-      elements.mobileGoalsByLevel.innerHTML = html;
-
-      // Add click handlers
-      elements.mobileGoalsByLevel.querySelectorAll('.mobile-goal-item[data-goal-id]').forEach((item: Element) => {
-        item.addEventListener('click', () => {
-          const goalId = (item as HTMLElement).dataset.goalId;
-          if (goalId) {
-            onGoalClick(goalId);
-          }
-        });
-      });
-    }
-
-    // 7. Update Upcoming List
+    // 6. Update Upcoming List
     if (elements.mobileUpcomingList) {
       const goals = Goals.getAll().filter(g => g.status !== 'done' && g.dueDate);
       goals.sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime());

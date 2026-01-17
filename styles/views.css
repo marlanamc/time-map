@@ -6,5 +6,5 @@
 @import './views/year.css';
 @import './views/week.css';
 @import './views/day.css';
-@import './views/garden.css';
+/* Note: garden.css removed - using living-garden.css instead (imported in main.css) */
 

@@ -11,7 +11,7 @@ import { cacheElements } from "./elements/UIElements";
 import { Toast } from "../components/feedback/Toast";
 import { Celebration } from "../components/feedback/Celebration";
 import { TimeVisualizations } from "../garden/timeVisualizations";
-import { MobileHereRenderer, YearRenderer } from "./renderers";
+import { HomeRenderer, MobileHereRenderer, YearRenderer } from "./renderers";
 import type { DayViewController } from "../components/dayView/DayViewController";
 import { ThemeManager } from "../theme/ThemeManager";
 import { eventBus } from "../core/EventBus";
@@ -260,6 +260,9 @@ export const UI = {
         }
         this.setupSwipeNavigation();
         this.setupPullToRefresh();
+        if (!viewportManager.isMobileViewport()) {
+          document.body.classList.remove("mobile-home-view");
+        }
       },
       onRenderRequired: () => {
         // Re-render current view to adjust to new dimensions
@@ -359,7 +362,15 @@ export const UI = {
     this.deferNDSupportInit();
 
     // Set up periodic updates
-    setInterval(() => this.updateTimeDisplay(), 60000);
+    setInterval(() => {
+      this.updateTimeDisplay();
+      if (
+        viewportManager.isMobileViewport() &&
+        State.currentView === VIEWS.HOME
+      ) {
+        this.updateMobileHomeView();
+      }
+    }, 60000);
 
     // Update body double timer display
     setInterval(() => this.updateBodyDoubleDisplay(), 1000);
@@ -649,6 +660,19 @@ export const UI = {
     this.elements = cacheElements();
   },
 
+  navigateToMobileHomeView() {
+    if (!viewportManager.isMobileViewport()) return;
+    // Toggle: if already on Home, return to the last non-Home view; otherwise remember current view and go Home.
+    if (State.currentView === VIEWS.HOME) {
+      const targetView = this._uiState.lastNonHomeView || VIEWS.YEAR;
+      State.setView(targetView);
+    } else {
+      this._uiState.lastNonHomeView = State.currentView;
+      State.setView(VIEWS.HOME);
+    }
+    viewportManager.updateMobileLayoutVars();
+  },
+
   bindEvents() {
     ViewNavigator.bindViewSwitchers({
       onSyncViewButtons: () => this.syncViewButtons(),
@@ -657,6 +681,15 @@ export const UI = {
 
     DateNavigator.bindDateNavigation({
       onRender: () => this.render(),
+    });
+
+    const goToHomeView = () => this.navigateToMobileHomeView();
+    this.elements.headerLogo?.addEventListener("click", goToHomeView);
+    this.elements.headerLogo?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goToHomeView();
+      }
     });
 
     // Mobile Home: cycle time position scope when tapping the flower.
@@ -1017,6 +1050,15 @@ export const UI = {
   },
 
   updateMobileHomeView() {
+    if (!viewportManager.isMobileViewport()) return;
+    if (State.currentView !== VIEWS.HOME) return;
+    if (!this.elements.mobileHomeView) return;
+
+    HomeRenderer.render(
+      this.elements,
+      this.escapeHtml.bind(this),
+      (goalId) => goalDetailModal.show(goalId)
+    );
     MobileHereRenderer.render(
       this.elements,
       this.escapeHtml.bind(this),

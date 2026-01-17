@@ -50,7 +50,7 @@ export class TouchHandler {
       };
 
       const viewOrder: ViewType[] = [
-        VIEWS.HOME,
+        VIEWS.GARDEN,
         VIEWS.DAY,
         VIEWS.WEEK,
         VIEWS.MONTH,

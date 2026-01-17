@@ -8,9 +8,15 @@ import type { EventRow } from '../../types/database';
 
 export class EventsService {
   async getEvents(): Promise<CalendarEvent[]> {
-    const cacheKey = 'events:all';
+    const user = await authService.getUser();
+    const cacheKey = user ? `events:${user.id}` : 'events:anonymous';
     const cached = cacheService.get<CalendarEvent[]>(cacheKey);
     if (cached) return cached;
+
+    if (!user) {
+      console.warn('[EventsService] getEvents called without authenticated user; returning empty array');
+      return [];
+    }
 
     try {
       const supabase = await getSupabaseClient();
