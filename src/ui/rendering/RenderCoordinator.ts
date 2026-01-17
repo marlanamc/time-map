@@ -55,42 +55,10 @@ export class RenderCoordinator {
 
     this.renderRaf = window.requestAnimationFrame(() => {
       this.renderRaf = null;
-      const useViewTransition = this.pendingViewTransition;
       this.pendingViewTransition = false;
 
-      const doc = document as unknown as {
-        startViewTransition?: (cb: () => void) => void;
-      };
-
-      // Use View Transition API for smoother navigation
-      if (useViewTransition && typeof doc.startViewTransition === "function") {
-        try {
-          doc.startViewTransition(() => {
-            // Add transitioning class for custom animations
-            const calendarGrid = this.elements.calendarGrid;
-            if (calendarGrid) {
-              calendarGrid.classList.add("view-transitioning");
-            }
-
-            this.render();
-
-            // Remove transitioning class after render
-            requestAnimationFrame(() => {
-              if (calendarGrid) {
-                calendarGrid.classList.remove("view-transitioning");
-              }
-            });
-          });
-          return;
-        } catch (error) {
-          console.warn(
-            "View transition failed, falling back to regular render:",
-            error,
-          );
-        }
-      }
-
-      // Fallback to regular render with optimizations
+      // Document-level view transitions were causing full-page flashes on tab changes.
+      // Render directly to keep the layout stable for motion-sensitive users.
       this.render();
     });
   }

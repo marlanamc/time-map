@@ -112,6 +112,15 @@
     transition: opacity 2s ease-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .garden-background,
+    .garden-sky,
+    .garden-backdrop,
+    .garden-midground {
+        transition: none !important;
+    }
+}
+
 .garden-effects {
     display: none;
     /* Replaced by global overlay */

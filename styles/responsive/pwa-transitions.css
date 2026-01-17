@@ -7,9 +7,9 @@
   /* Create a stacking context to prevent layout shifts */
   transform: translateZ(0);
   /* Enable hardware acceleration */
-  will-change: transform, opacity;
-  /* Ensure smooth transitions */
-  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+  will-change: transform;
+  /* Keep motion subtle to avoid flashing large areas */
+  transition: transform 0.15s ease-out;
 }
 
 /* Optimize app container for smooth transitions */
