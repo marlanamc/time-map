@@ -1,7 +1,7 @@
 // ===================================
 // State Management
 // ===================================
-import type { AppState, AppData, ViewType } from "../types";
+import type { AppState, AppData, ViewType, Goal } from "../types";
 import { CONFIG, VIEWS } from "../config";
 import { SupabaseService } from "../services/supabase";
 import { AuthComponent } from "../components/Auth";
@@ -438,6 +438,50 @@ export const State: AppState & {
               parseError,
             );
           }
+        }
+      }
+
+      if (this.data?.goals) {
+        try {
+          const localGoals = (await DB.getAll(DB_STORES.GOALS)) as Goal[];
+          if (Array.isArray(localGoals) && localGoals.length > 0) {
+            const mergedGoals = new Map<string, Goal>();
+            this.data.goals.forEach((goal) => mergedGoals.set(goal.id, goal));
+            let mergedCount = 0;
+            localGoals.forEach((localGoal) => {
+              if (!localGoal?.id) return;
+              const existing = mergedGoals.get(localGoal.id);
+              const localUpdated = localGoal.updatedAt
+                ? new Date(localGoal.updatedAt).getTime()
+                : 0;
+              const remoteUpdated = existing?.updatedAt
+                ? new Date(existing.updatedAt).getTime()
+                : 0;
+              if (!existing || localUpdated > remoteUpdated) {
+                mergedGoals.set(localGoal.id, localGoal);
+                mergedCount++;
+              }
+            });
+            if (mergedCount > 0 && mergedGoals.size > 0) {
+              this.data.goals = Array.from(mergedGoals.values());
+              console.log(
+                `[State] Merged ${mergedCount} local goal(s) from IndexedDB into cloud data`,
+              );
+              try {
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
+              } catch (storageError) {
+                console.warn(
+                  "[State] Failed to persist merged goals to localStorage:",
+                  storageError,
+                );
+              }
+            }
+          }
+        } catch (mergeError) {
+          console.warn(
+            "[State] Failed to merge local IndexedDB goals:",
+            mergeError,
+          );
         }
       }
 

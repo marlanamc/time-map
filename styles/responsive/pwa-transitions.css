@@ -166,6 +166,11 @@
     /* Contain layout operations */
     contain: layout style paint;
   }
+
+  .calendar-grid.view-transitioning {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 /* High DPI display optimizations */
