@@ -12,11 +12,15 @@ function normalizeThemePreference(value: ThemePreference): ThemeMode | null {
 }
 
 function getSystemTheme(): ThemeMode {
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "night" : "day";
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+    ? "night"
+    : "day";
 }
 
 function setMetaThemeColor(color: string): void {
-  const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+  const meta = document.querySelector(
+    'meta[name="theme-color"]',
+  ) as HTMLMetaElement | null;
   if (!meta) return;
   meta.content = color;
 }
@@ -34,7 +38,11 @@ export const ThemeManager = {
   },
 
   resolveTheme(preference: ThemePreference): ThemeMode {
-    return normalizeThemePreference(preference) ?? this.readStoredTheme() ?? getSystemTheme();
+    return (
+      normalizeThemePreference(preference) ??
+      this.readStoredTheme() ??
+      getSystemTheme()
+    );
   },
 
   apply(theme: ThemeMode): void {
@@ -47,6 +55,9 @@ export const ThemeManager = {
     root.classList.toggle("light-mode", !isNight);
     root.classList.toggle("dark-mode", isNight);
     root.style.colorScheme = isNight ? "dark" : "light";
+
+    // Set a solid background color on the root to prevent PWA "black flash"
+    root.style.backgroundColor = isNight ? "#0A1A2E" : "#E8F4F8";
 
     // Match the app's primary surfaces (helps mobile browser chrome).
     setMetaThemeColor(isNight ? "#0A1A2E" : "#E8F4F8");

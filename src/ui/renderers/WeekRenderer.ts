@@ -33,12 +33,6 @@ export const WeekRenderer = {
       return `${y}-${m}-${day}`;
     };
 
-    const visionGoals = Goals.getForRange(
-      new Date(weekStart.getFullYear(), 0, 1),
-      new Date(weekStart.getFullYear(), 11, 31)
-    ).filter((g) => g.level === "vision" && g.status !== "done");
-    const primaryVision = visionGoals[0];
-
     const focusGoals = Goals.getForRange(weekStart, weekEnd)
       .filter((g) => g.level === "focus" && g.status !== "done")
       .slice();
@@ -46,13 +40,10 @@ export const WeekRenderer = {
 
     const goalsById = new Map<string, any>();
     (State.data?.goals ?? []).forEach((g) => goalsById.set(g.id, g));
-    const visionAccentAttrs = primaryVision
-      ? buildAccentAttributes(getInheritedAccent(primaryVision, goalsById))
-      : { dataAttr: "", styleAttr: "" };
+
     const focusAccentAttrs = primaryFocus
       ? buildAccentAttributes(getInheritedAccent(primaryFocus, goalsById))
       : { dataAttr: "", styleAttr: "" };
-
 
     const weekStartYmd = formatYmd(weekStart);
     const eventsForWeek = State.data?.events
@@ -101,29 +92,6 @@ export const WeekRenderer = {
         <div class="week-view-header">
           <h2 class="week-view-title">Week ${weekNum}</h2>
           <div class="week-header-icons">
-            ${
-              primaryVision
-                ? (() => {
-                    const icon = primaryVision.icon || "✨";
-                    return `
-                      <button type="button" class="year-vision-icon-only" ${
-                        visionAccentAttrs.dataAttr
-                      }${visionAccentAttrs.styleAttr} data-goal-id="${
-                        primaryVision.id
-                      }" aria-label="${escapeHtmlFn(primaryVision.title)}">
-                        <span class="vision-icon-large">${icon}</span>
-                        ${
-                          visionGoals.length > 1
-                            ? `<span class="vision-icon-badge">+${
-                                visionGoals.length - 1
-                              }</span>`
-                            : ""
-                        }
-                      </button>
-                `;
-                  })()
-                : ""
-            }
             <div class="week-focus-banner year-vision-banner--pill">
               ${(() => {
                 if (primaryFocus) {
@@ -132,8 +100,8 @@ export const WeekRenderer = {
                             <button type="button" class="year-vision-icon-only" ${
                               focusAccentAttrs.dataAttr
                             }${focusAccentAttrs.styleAttr} data-goal-id="${
-                      primaryFocus.id
-                    }" aria-label="${escapeHtmlFn(primaryFocus.title)}">
+                              primaryFocus.id
+                            }" aria-label="${escapeHtmlFn(primaryFocus.title)}">
                               <span class="vision-icon-large">${icon}</span>
                             </button>
                           `;
@@ -186,11 +154,11 @@ export const WeekRenderer = {
                     (ev) => `
                   <div class="week-event-item" role="note">
                     <div class="week-event-title">${escapeHtmlFn(
-                      ev.title
+                      ev.title,
                     )}</div>
                     <div class="week-event-meta">${escapeHtmlFn(ev.label)}</div>
                   </div>
-                `
+                `,
                   )
                   .join("")}
               </div>
@@ -202,17 +170,19 @@ export const WeekRenderer = {
 
       if (dayGoals.length > 0) {
         dayGoals.forEach((g) => {
-          const cat = g.category ? CONFIG.CATEGORIES[g.category] ?? null : null;
+          const cat = g.category
+            ? (CONFIG.CATEGORIES[g.category] ?? null)
+            : null;
           const completedClass = g.status === "done" ? "completed" : "";
           const accentAttrs = buildAccentAttributes(
-            getInheritedAccent(g, goalsById)
+            getInheritedAccent(g, goalsById),
           );
           html += `
               <div class="week-goal-item ${completedClass}"${
-            accentAttrs.dataAttr
-          }${accentAttrs.styleAttr} data-goal-id="${
-            g.id
-          }" role="button" tabindex="0">
+                accentAttrs.dataAttr
+              }${accentAttrs.styleAttr} data-goal-id="${
+                g.id
+              }" role="button" tabindex="0">
                 <div class="week-goal-title">
                   ${
                     g.status === "done"
@@ -259,7 +229,7 @@ export const WeekRenderer = {
       });
 
     const addFocusBtn = container.querySelector<HTMLButtonElement>(
-      '[data-action="add-focus"]'
+      '[data-action="add-focus"]',
     );
     if (addFocusBtn) {
       addFocusBtn.addEventListener("click", (e) => {

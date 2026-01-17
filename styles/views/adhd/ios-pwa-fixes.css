@@ -67,6 +67,20 @@
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
+  background-color: var(--bg-surface, #f8fafc);
+}
+
+.ios.dark-mode body {
+  background-color: var(--bg-surface, #0f172a);
+}
+
+/* Force solid background on html to prevent "through-painting" flashes */
+.ios html {
+  background-color: var(--bg-surface, #f8fafc) !important;
+}
+
+.ios.dark-mode html {
+  background-color: var(--bg-surface, #0f172a) !important;
 }
 
 /* Smooth scrolling for iOS */
@@ -86,7 +100,8 @@
 
 /* Safe area padding for content */
 .ios .safe-area-content {
-  padding: calc(var(--safe-area-top) + 20px) calc(var(--safe-area-right) + 20px) calc(var(--safe-area-bottom) + 20px) calc(var(--safe-area-left) + 20px);
+  padding: calc(var(--safe-area-top) + 20px) calc(var(--safe-area-right) + 20px)
+    calc(var(--safe-area-bottom) + 20px) calc(var(--safe-area-left) + 20px);
 }
 
 /* ===================================
@@ -266,7 +281,7 @@
 }
 
 .ios .haptic-enabled::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -290,7 +305,7 @@
 }
 
 .ios .audio-enabled::before {
-  content: '🔊';
+  content: "🔊";
   position: absolute;
   top: -8px;
   right: -8px;
@@ -429,7 +444,7 @@
   .ios .dopamine-feedback {
     border: 2px solid #000;
   }
-  
+
   .ios .achievement-notification,
   .ios .reward-notification {
     border: 2px solid #000;
@@ -454,15 +469,15 @@
     background: #1a1a1a;
     color: white;
   }
-  
+
   .ios .ios-file-message h3 {
     color: white;
   }
-  
+
   .ios .ios-file-message p {
     color: #94a3b8;
   }
-  
+
   .ios .ios-file-message li {
     color: #cbd5e1;
   }
@@ -478,7 +493,7 @@
     max-width: 280px;
     padding: 16px;
   }
-  
+
   .ios .ios-file-alternative {
     max-width: 280px;
     padding: 20px;
@@ -490,7 +505,7 @@
   .ios .ios-install-prompt {
     max-width: 400px;
   }
-  
+
   .ios .ios-file-alternative {
     max-width: 400px;
   }
