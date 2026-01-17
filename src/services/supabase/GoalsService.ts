@@ -71,6 +71,7 @@ export class GoalsService {
   }
 
   async saveGoal(goal: Goal): Promise<void> {
+    // Verify authentication first
     const user = await authService.getUser();
     if (!user) {
       const error = new AuthenticationError('Cannot save goal: User not authenticated');
@@ -78,8 +79,42 @@ export class GoalsService {
       throw error;
     }
 
+    // Verify user ID matches (additional safety check)
+    if (!user.id || typeof user.id !== 'string') {
+      const error = new AuthenticationError('Invalid user ID: user authentication is invalid');
+      console.error('[GoalsService] saveGoal failed:', error.message, { userId: user.id });
+      throw error;
+    }
+
+    // Validate required fields
+    if (typeof goal.month !== 'number' || !Number.isFinite(goal.month)) {
+      throw new DatabaseError(`Invalid month value: ${goal.month}. Month must be a valid number.`, null);
+    }
+    if (typeof goal.year !== 'number' || !Number.isFinite(goal.year)) {
+      throw new DatabaseError(`Invalid year value: ${goal.year}. Year must be a valid number.`, null);
+    }
+    if (goal.year < 1900 || goal.year > 2100) {
+      throw new DatabaseError(`Invalid year value: ${goal.year}. Year must be between 1900 and 2100.`, null);
+    }
+    if (goal.month < 0 || goal.month > 11) {
+      throw new DatabaseError(`Invalid month value: ${goal.month}. Month must be between 0 (January) and 11 (December).`, null);
+    }
+
     try {
       const supabase = await getSupabaseClient();
+      
+      // Verify schema before attempting save (only log warning, don't block)
+      // This helps diagnose issues but doesn't prevent saves if schema is partially correct
+      try {
+        const schemaCheck = await this.verifySchema();
+        if (!schemaCheck.success && schemaCheck.missingColumns && schemaCheck.missingColumns.length > 0) {
+          console.warn('[GoalsService] Schema verification found missing columns:', schemaCheck.missingColumns);
+          console.warn('[GoalsService] This may cause save failures. Please run migrations 009_add_goal_meta.sql and 010_add_goal_activity_id.sql');
+        }
+      } catch (schemaErr) {
+        // Don't fail the save if schema check fails, just log it
+        console.warn('[GoalsService] Schema verification failed (non-blocking):', schemaErr);
+      }
       
       // Prepare the data object
       const goalData = {
@@ -115,7 +150,11 @@ export class GoalsService {
         goalId: goal.id,
         goalTitle: goal.title,
         userId: user.id,
-        level: goal.level
+        level: goal.level,
+        month: goal.month,
+        year: goal.year,
+        hasMeta: !!goal.meta,
+        hasActivityId: !!goal.activityId
       });
 
       const { data, error } = await supabase
@@ -127,27 +166,64 @@ export class GoalsService {
         .select();
 
       if (error) {
-        console.error('[GoalsService] Failed to save goal:', {
+        // Enhanced error logging with full context
+        const errorContext = {
           goalId: goal.id,
           goalTitle: goal.title,
           userId: user.id,
+          level: goal.level,
+          month: goal.month,
+          year: goal.year,
           message: error.message,
           details: error.details,
           hint: error.hint,
           code: error.code,
-          goalData: goalData
-        });
-        throw new DatabaseError(`Failed to save goal "${goal.title}": ${error.message}`, error);
+          // Include schema-related fields that might be missing
+          hasMeta: 'meta' in goalData,
+          hasActivityId: 'activity_id' in goalData,
+          // Log a subset of goalData (avoid logging large JSONB fields)
+          goalDataSummary: {
+            id: goalData.id,
+            user_id: goalData.user_id,
+            title: goalData.title,
+            level: goalData.level,
+            month: goalData.month,
+            year: goalData.year,
+            meta: goalData.meta ? (typeof goalData.meta === 'object' ? Object.keys(goalData.meta) : goalData.meta) : null,
+            activity_id: goalData.activity_id
+          }
+        };
+        
+        console.error('[GoalsService] Failed to save goal:', errorContext);
+        
+        // Provide more helpful error messages based on error code
+        let userFriendlyMessage = error.message;
+        if (error.code === '42703' || error.message.includes('column') || error.message.includes('does not exist')) {
+          userFriendlyMessage = `Database schema mismatch: ${error.message}. Please ensure migrations 009_add_goal_meta.sql and 010_add_goal_activity_id.sql have been run.`;
+        } else if (error.code === '42501' || error.message.includes('permission') || error.message.includes('policy')) {
+          userFriendlyMessage = `Permission denied: ${error.message}. Please check Row Level Security policies.`;
+        } else if (error.code === '23502' || error.message.includes('null value')) {
+          userFriendlyMessage = `Missing required field: ${error.message}`;
+        }
+        
+        throw new DatabaseError(`Failed to save goal "${goal.title}": ${userFriendlyMessage}`, error);
       }
 
       // Verify the save was successful
       if (!data || data.length === 0) {
         console.warn('[GoalsService] Upsert returned no data - goal may not have been saved:', {
           goalId: goal.id,
-          goalTitle: goal.title
+          goalTitle: goal.title,
+          level: goal.level,
+          userId: user.id
         });
+        // This could indicate RLS policy blocking the return, even if insert succeeded
+        // Log a warning but don't throw - the goal might still be saved
       } else {
-        console.log(`✓ Saved goal: "${goal.title}" (${goal.id}) - Database confirmed`);
+        console.log(`✓ Saved goal: "${goal.title}" (${goal.id}) - Database confirmed`, {
+          level: goal.level,
+          returnedData: data.length > 0 ? { id: data[0].id, level: data[0].level } : null
+        });
       }
 
       // Invalidate goals cache after save
@@ -250,6 +326,70 @@ export class GoalsService {
     } catch (err) {
       console.error('[GoalsService] Error in saveGoals:', err);
       throw err;
+    }
+  }
+
+  /**
+   * Diagnostic function to verify database schema matches expected columns
+   */
+  async verifySchema(): Promise<{ success: boolean; missingColumns?: string[]; error?: string }> {
+    try {
+      const user = await authService.getUser();
+      if (!user) {
+        return { success: false, error: 'Not authenticated' };
+      }
+
+      const supabase = await getSupabaseClient();
+      
+      // Try to query with all expected columns to see which ones exist
+      // We'll use a SELECT query with a limit of 0 to just check schema
+      const expectedColumns = [
+        'id', 'user_id', 'title', 'level', 'description', 'month', 'year',
+        'category', 'priority', 'status', 'progress', 'due_date',
+        'start_time', 'end_time', 'completed_at', 'last_worked_on',
+        'created_at', 'updated_at', 'subtasks', 'notes', 'time_log',
+        'tags', 'parent_id', 'parent_level', 'meta', 'activity_id'
+      ];
+
+      // Try selecting all columns - if a column doesn't exist, we'll get an error
+      const { error } = await supabase
+        .from('goals')
+        .select(expectedColumns.join(', '))
+        .limit(0);
+
+      if (error) {
+        // Parse error to see which columns are missing
+        const missingColumns: string[] = [];
+        
+        // Check for specific column errors
+        if (error.message.includes('meta') || error.code === '42703') {
+          // Try to determine which specific column is missing
+          if (error.message.includes('meta')) missingColumns.push('meta');
+          if (error.message.includes('activity_id')) missingColumns.push('activity_id');
+        }
+
+        // If we can't determine specific columns, return the error
+        if (missingColumns.length === 0) {
+          return {
+            success: false,
+            error: error.message,
+            missingColumns: error.message.includes('column') ? ['unknown'] : []
+          };
+        }
+
+        return {
+          success: false,
+          missingColumns
+        };
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      console.error('[GoalsService] Schema verification error:', err);
+      return {
+        success: false,
+        error: err.message || 'Unknown error'
+      };
     }
   }
 

@@ -10,6 +10,7 @@ import "../styles/main.css";
 import type { GardenEngine } from "./garden/gardenEngine";
 import { State, Goals, Planning, Analytics } from "./core";
 import { SupabaseService } from "./services/supabase";
+import { syncQueue } from "./services/SyncQueue";
 import { VIEWS } from "./config";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
@@ -216,17 +217,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     };
 
+    const flushQueueSafely = async () => {
+      if (!navigator.onLine) return;
+      try {
+        UI.updateSyncStatus?.("syncing");
+        await syncQueue.forceSync();
+      } catch (error) {
+        console.warn("[App] Background sync retry failed:", error);
+      }
+    };
+
     const applyConnectionState = async (opts?: { toast?: boolean }) => {
       const online = navigator.onLine;
 
       if (!online) {
         connectionStatusEl?.removeAttribute("hidden");
         UI.updateSyncStatus?.("offline");
-        if (opts?.toast) UI.showToast?.("📴", "Offline");
+        if (opts?.toast) {
+          UI.showToast?.("🌙", "Working offline. We'll keep everything safe.");
+        }
       } else {
         connectionStatusEl?.setAttribute("hidden", "");
+        await flushQueueSafely();
         await refreshSyncBadgeFromAuth();
-        if (opts?.toast && !lastOnline) UI.showToast?.("📶", "Back online");
+        if (opts?.toast && !lastOnline) {
+          UI.showToast?.("🌤️", "Back online. Saving your changes.");
+        }
       }
 
       lastOnline = online;

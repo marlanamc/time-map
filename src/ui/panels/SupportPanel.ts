@@ -9,7 +9,6 @@ type SupportPanelCallbacks = {
   onShowQuickWins: () => void | Promise<void>;
   onShowNDSettings: () => void | Promise<void>;
   onShowSettings: () => void | Promise<void>;
-  onForceCloudSync: () => void;
   onPromptInstall: () => void | Promise<void>;
   onShowSyncIssues: () => void;
   onHandleLogout: () => void | Promise<void>;
@@ -86,9 +85,6 @@ export class SupportPanel {
           break;
         case "settings":
           void this.callbacks.onShowSettings();
-          break;
-        case "syncNow":
-          this.callbacks.onForceCloudSync();
           break;
         case "install":
           void this.callbacks.onPromptInstall();

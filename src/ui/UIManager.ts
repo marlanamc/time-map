@@ -113,7 +113,6 @@ export const UI = {
       onShowNDSettings: () =>
         this.ensureNDSupport().then((nd) => nd.showSettingsPanel()),
       onShowSettings: () => this.showSettingsPanel(),
-      onForceCloudSync: () => this.forceCloudSync(),
       onPromptInstall: () => this.promptInstall(),
       onShowSyncIssues: () => {
         syncIssues.showSyncIssuesModal({
@@ -292,7 +291,6 @@ export const UI = {
     status: "syncing" | "synced" | "error" | "local" | "offline"
   ): void {
     const el = document.getElementById("syncStatus");
-    const supportPanelEl = document.getElementById("supportPanelSyncStatus");
 
     const updateElement = (element: HTMLElement | null) => {
       if (!element) return;
@@ -303,36 +301,28 @@ export const UI = {
 
       if (status === "syncing") {
         element.classList.add("syncing");
-        if (icon) icon.textContent = "⏳";
-        if (text) text.textContent = "Syncing...";
+        if (icon) icon.textContent = "…";
+        if (text) text.textContent = "Saving in background";
       } else if (status === "synced") {
         element.classList.add("synced");
-        if (icon) icon.textContent = "✅";
-        if (text) text.textContent = "Cloud Saved";
-        // Revert to subtle synced look after 3s
-        setTimeout(() => {
-          if (icon && element.classList.contains("synced"))
-            icon.textContent = "☁️";
-          if (text && element.classList.contains("synced"))
-            text.textContent = "Synced";
-        }, 3000);
+        if (icon) icon.textContent = "☁️";
+        if (text) text.textContent = "All changes saved";
       } else if (status === "error") {
         element.classList.add("error");
-        if (icon) icon.textContent = "❌";
-        if (text) text.textContent = "Sync Error";
+        if (icon) icon.textContent = "⚠️";
+        if (text) text.textContent = "Having trouble syncing";
       } else if (status === "offline") {
         element.classList.add("offline");
-        if (icon) icon.textContent = "📴";
-        if (text) text.textContent = "Offline";
+        if (icon) icon.textContent = "📡";
+        if (text) text.textContent = "Working offline";
       } else {
-        if (icon) icon.textContent = "☁️";
-        if (text) text.textContent = "Local Only";
+        if (icon) icon.textContent = "💾";
+        if (text) text.textContent = "Saved on this device";
       }
     };
 
-    // Update both elements
+    // Update header sync status only (support panel sync status removed)
     updateElement(el);
-    updateElement(supportPanelEl);
   },
 
   init() {
@@ -343,6 +333,7 @@ export const UI = {
     this.setupEventBusListeners(); // Set up EventBus communication
     this.setupSyncEventListeners(); // Set up sync status event listeners
     this.setupInstallPrompt(); // Set up PWA install prompt handling
+    this.setupGoalsCallbacks(); // Set up Goals callbacks (toast, sync status, etc.)
     void this.setupZenFocusCallbacks(); // Set up ZenFocus feature callbacks
     this.setupGoalDetailModalCallbacks(); // Set up GoalDetailModal callbacks
     void this.setupQuickAddCallbacks(); // Set up QuickAdd callbacks
@@ -505,7 +496,11 @@ export const UI = {
     window.addEventListener("sync-error", ((e: CustomEvent) => {
       const message = e.detail?.message || "Sync failed";
       this.updateSyncStatus("error");
-      Toast.show(this.elements, "⚠️", `Sync needs attention: ${message}`);
+      Toast.show(
+        this.elements,
+        "🌥️",
+        `We'll keep trying to save your changes. ${message}`
+      );
       this.syncSyncIssuesBadge();
     }) as EventListener);
 
@@ -513,7 +508,11 @@ export const UI = {
     window.addEventListener("sync-storage-error", ((e: CustomEvent) => {
       const message = e.detail?.message || "Sync queue corrupted";
       this.updateSyncStatus("error");
-      Toast.show(this.elements, "⚠️", `Sync error: ${message}`);
+      Toast.show(
+        this.elements,
+        "🌥️",
+        `We hit a hiccup saving changes. ${message}`
+      );
     }) as EventListener);
 
     // Generic sync status events (syncing/synced/error/local)
@@ -549,13 +548,13 @@ export const UI = {
       btn.removeAttribute("hidden");
       const desc = btn.querySelector(".support-panel-desc");
       if (desc)
-        desc.textContent = `${count} change${
+        desc.textContent = `We're retrying ${count} change${
           count === 1 ? "" : "s"
-        } need review`;
+        }`;
     } else {
       btn.setAttribute("hidden", "");
       const desc = btn.querySelector(".support-panel-desc");
-      if (desc) desc.textContent = "Resolve failed sync changes";
+      if (desc) desc.textContent = "Automatic sync & backup";
     }
   },
 
@@ -592,6 +591,26 @@ export const UI = {
       onToast: (icon, message) => Toast.show(this.elements, icon, message),
       onCelebrate: (icon, title, message) =>
         Celebration.show(this.elements, icon, title, message),
+    });
+  },
+
+  /**
+   * Set up Goals callbacks for error handling and sync status
+   */
+  setupGoalsCallbacks() {
+    Goals.setCallbacks({
+      onCelebrate: (emoji, title, message) => {
+        Celebration.show(this.elements, emoji, title, message);
+      },
+      onScheduleRender: () => {
+        this.render();
+      },
+      onUpdateSyncStatus: (status) => {
+        this.updateSyncStatus(status as "syncing" | "synced" | "error" | "local" | "offline");
+      },
+      onShowToast: (icon, message) => {
+        Toast.show(this.elements, icon, message);
+      },
     });
   },
 

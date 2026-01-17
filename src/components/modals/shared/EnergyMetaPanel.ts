@@ -54,28 +54,15 @@ export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
           <input
             type="text"
             id="visionIcon"
-            class="modal-input"
-            placeholder="✨"
-            maxlength="2"
+            class="modal-input vision-emoji-input"
+            placeholder="Tap to choose emoji"
+            maxlength="10"
             value="${escapeHtml(icon ?? "")}"
-            inputmode="emoji"
-            pattern="[\\p{Emoji}]{1,2}"
-            title="Click to open emoji keyboard"
+            readonly
+            aria-label="Tap to open emoji keyboard"
           />
-          <button type="button" class="vision-emoji-keyboard-btn" aria-label="Open emoji keyboard">
-            😊
-          </button>
         </div>
-        <div class="vision-icon-presets">
-          <button type="button" class="icon-preset-btn" data-icon="✨">✨</button>
-          <button type="button" class="icon-preset-btn" data-icon="🎯">🎯</button>
-          <button type="button" class="icon-preset-btn" data-icon="🚀">🚀</button>
-          <button type="button" class="icon-preset-btn" data-icon="💎">💎</button>
-          <button type="button" class="icon-preset-btn" data-icon="🌟">🌟</button>
-          <button type="button" class="icon-preset-btn" data-icon="🔥">🔥</button>
-          <button type="button" class="icon-preset-btn" data-icon="🎨">🎨</button>
-          <button type="button" class="icon-preset-btn" data-icon="🌱">🌱</button>
-        </div>
+        <p class="vision-icon-hint">Tap the field, then use the emoji key on your keyboard</p>
       </div>
       <div class="form-group">
         <label for="visionAccent">Vision color (optional)</label>
@@ -180,35 +167,23 @@ export function setupEnergyMetaPanel(
       );
     });
 
-    // Handle icon input change
-    iconInput?.addEventListener("input", () => {
-      onIconChange?.(iconInput.value);
-    });
-
-    // Handle emoji keyboard button - trigger native emoji picker
-    const emojiKeyboardBtn = container.querySelector(
-      ".vision-emoji-keyboard-btn"
-    ) as HTMLElement;
-
-    emojiKeyboardBtn?.addEventListener("click", () => {
-      if (iconInput) {
-        // Focus the input and trigger the emoji keyboard
-        iconInput.focus();
-        // Try to trigger the emoji keyboard on iOS/macOS
-        (iconInput as any).showPicker?.();
-      }
-    });
-
-    // Handle icon preset buttons
-    container.querySelectorAll(".icon-preset-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const icon = (btn as HTMLElement).dataset.icon;
-        if (iconInput && icon) {
-          iconInput.value = icon;
-          onIconChange?.(icon);
-        }
+    // Handle icon input - tap to open native emoji keyboard
+    if (iconInput) {
+      // Remove readonly on focus to allow input
+      iconInput.addEventListener("focus", () => {
+        iconInput.removeAttribute("readonly");
       });
-    });
+
+      // Re-add readonly on blur to maintain tap-to-open behavior
+      iconInput.addEventListener("blur", () => {
+        iconInput.setAttribute("readonly", "");
+      });
+
+      // Handle icon input change
+      iconInput.addEventListener("input", () => {
+        onIconChange?.(iconInput.value);
+      });
+    }
 
     return;
   }

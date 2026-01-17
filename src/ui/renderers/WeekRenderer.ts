@@ -236,8 +236,13 @@ export const WeekRenderer = {
         e.preventDefault();
         e.stopPropagation();
         const date = addFocusBtn.dataset.date ?? weekStartYmd;
-        const event = new CustomEvent("goal-create", {
-          detail: { level: "focus", date },
+        const dateObj = new Date(date);
+        const event = new CustomEvent("open-goal-modal", {
+          detail: {
+            level: "focus",
+            month: dateObj.getMonth(),
+            year: dateObj.getFullYear(),
+          },
         });
         container.dispatchEvent(event);
       });

@@ -29,6 +29,7 @@ class SyncQueue {
   private readonly MAX_RETRIES = 3;
   private readonly STORAGE_KEY = 'sync_queue';
   private readonly FAILURES_KEY = 'sync_queue_failures';
+  private lastStatus: 'syncing' | 'synced' | 'error' | 'offline' | null = null;
 
   // Resource tracking for cleanup
   private autoSyncInterval: number | null = null;
@@ -42,6 +43,9 @@ class SyncQueue {
       typeof process !== "undefined" && process.env?.NODE_ENV === "test";
     if (!isTestEnv) {
       this.startAutoSync();
+      if (navigator.onLine) {
+        void this.processQueue();
+      }
     }
   }
 
@@ -146,6 +150,14 @@ class SyncQueue {
     }
   }
 
+  private emitStatus(status: 'syncing' | 'synced' | 'error' | 'offline'): void {
+    if (this.lastStatus === status) return;
+    this.lastStatus = status;
+    window.dispatchEvent(
+      new CustomEvent('sync-status', { detail: { status } })
+    );
+  }
+
   private registerBackgroundSync(): void {
     try {
       const nav: any = navigator;
@@ -179,6 +191,7 @@ class SyncQueue {
     this.registerBackgroundSync();
 
     console.log(`📥 Queued ${operation.type} operation for ${operation.entity}`);
+    this.emitStatus(navigator.onLine ? 'syncing' : 'offline');
 
     // Try to process immediately if online
     if (navigator.onLine) {
@@ -199,17 +212,23 @@ class SyncQueue {
     this.autoSyncInterval = window.setInterval(() => {
       if (navigator.onLine && this.queue.length > 0) {
         this.processQueue();
+      } else if (navigator.onLine && this.queue.length === 0) {
+        this.emitStatus('synced');
       }
     }, 30000);
 
     // Create bound handlers for proper cleanup
     this.boundOnlineHandler = () => {
       console.log('🌐 Back online! Processing sync queue...');
-      this.processQueue();
+      this.emitStatus('syncing');
+      this.processQueue().catch(() => {
+        // Errors are handled internally
+      });
     };
 
     this.boundOfflineHandler = () => {
       console.log('📡 Offline - Operations will be queued');
+      this.emitStatus('offline');
     };
 
     // Process when coming back online
@@ -225,13 +244,19 @@ class SyncQueue {
    * Process all queued operations
    */
   async processQueue(): Promise<void> {
-    if (this.processing || this.queue.length === 0) return;
+    if (this.processing) return;
+    if (this.queue.length === 0) {
+      this.emitStatus(navigator.onLine ? 'synced' : 'offline');
+      return;
+    }
 
     this.processing = true;
+    this.emitStatus('syncing');
 
     const operations = [...this.queue];
     const retryable: QueuedOperation[] = [];
     let succeededCount = 0;
+    let hadFailure = false;
 
     console.log(`🔄 Processing ${operations.length} queued operations...`);
 
@@ -245,6 +270,7 @@ class SyncQueue {
         console.log(`  ✓ Synced ${op.entity} ${op.type}`);
       } catch (error) {
         console.error(`  ✗ Failed to sync ${op.entity}:`, error);
+        hadFailure = true;
 
         op.retries++;
         if (op.retries < this.MAX_RETRIES) {
@@ -268,6 +294,12 @@ class SyncQueue {
     }
 
     this.processing = false;
+
+    if (hadFailure) {
+      this.emitStatus('error');
+    } else {
+      this.emitStatus(navigator.onLine ? 'synced' : 'offline');
+    }
   }
 
   /**

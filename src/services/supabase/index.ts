@@ -42,6 +42,7 @@ export const SupabaseService = {
   deleteGoal: goalsService.deleteGoal.bind(goalsService),
   saveGoals: goalsService.saveGoals.bind(goalsService),
   diagnosticGetAllGoals: goalsService.diagnosticGetAllGoals.bind(goalsService),
+  verifySchema: goalsService.verifySchema.bind(goalsService),
 
   // Events methods
   getEvents: eventsService.getEvents.bind(eventsService),

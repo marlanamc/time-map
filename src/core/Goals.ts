@@ -128,6 +128,7 @@ interface GoalsCallbacks {
   onCelebrate?: (emoji: string, title: string, message: string) => void;
   onScheduleRender?: () => void;
   onUpdateSyncStatus?: (status: string) => void;
+  onShowToast?: (icon: string, message: string) => void;
 }
 
 let callbacks: GoalsCallbacks = {};
@@ -280,17 +281,30 @@ export const Goals = {
         console.log(`✓ Goal "${goal.title}" created and synced`);
         if (callbacks.onUpdateSyncStatus)
           callbacks.onUpdateSyncStatus("synced");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to sync new goal:", error);
+        
+        // Show user-visible error notification
+        const errorMessage = error?.message || error?.toString() || "Failed to save to cloud";
+        const userFriendlyMessage = errorMessage.includes("authenticated") 
+          ? "Please sign in to save to cloud"
+          : errorMessage.includes("column") || errorMessage.includes("schema")
+          ? "Database schema mismatch. Please check migrations."
+          : `Couldn't save to cloud: ${errorMessage}`;
+        
+        if (callbacks.onShowToast) {
+          callbacks.onShowToast("⚠️", userFriendlyMessage);
+        }
+        
+        // Also update sync status to show error
+        if (callbacks.onUpdateSyncStatus) {
+          callbacks.onUpdateSyncStatus("error");
+        }
+        
         // Fallback to debounce if force fails
         debouncedGoalSync(goal);
       }
     })();
-
-    // UI will update to 'synced' after successful cloud sync
-    setTimeout(() => {
-      if (callbacks.onUpdateSyncStatus) callbacks.onUpdateSyncStatus("synced");
-    }, 2100); // After debounce completes
 
     this.checkAchievements();
     if (callbacks.onScheduleRender) callbacks.onScheduleRender();

@@ -997,349 +997,79 @@
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="support-panel-body" role="menu" aria-label="Support tools">
-          <!-- User Profile Section -->
-          <div
-            class="support-panel-profile-section enhanced"
-            aria-label="User profile"
-          >
-            <div class="support-panel-avatar-wrapper">
-              <div
-                class="user-avatar gradient-border"
-                id="supportPanelUserAvatar"
-              >
-                U
+        <div class="support-panel-body" role="menu" aria-label="Menu">
+          <!-- Section 1: Account -->
+          <div class="support-panel-section" data-section="account">
+            <div class="support-panel-section-label" aria-hidden="true">Account</div>
+
+            <div class="support-panel-profile-section compact" aria-label="User profile">
+              <div class="support-panel-avatar-wrapper">
+                <div class="user-avatar" id="supportPanelUserAvatar">U</div>
+              </div>
+              <div class="support-panel-profile-info">
+                <div class="user-name" id="supportPanelUserName">User</div>
               </div>
             </div>
-            <div class="support-panel-profile-info">
-              <div class="user-name" id="supportPanelUserName">User</div>
-              <div
-                class="sync-status"
-                id="supportPanelSyncStatus"
-                title="Cloud Sync Status"
-              >
-                <span class="sync-icon">☁️</span>
-                <span class="sync-text">Local Only</span>
-              </div>
-              <button
-                class="support-panel-item secondary support-panel-sync-now"
-                type="button"
-                role="menuitem"
-                data-action="syncNow"
-              >
-                <span class="support-panel-icon" aria-hidden="true">🔄</span>
-                <span class="support-panel-text">
-                  <span class="support-panel-name">Sync Now</span>
-                  <span class="support-panel-desc"
-                    >Push local changes to cloud</span
-                  >
-                </span>
-              </button>
-            </div>
-          </div>
 
-          <div class="support-panel-group-label" aria-hidden="true">
-            Preferences
-          </div>
-
-          <!-- Settings Button -->
-          <button
-            class="support-panel-item primary"
-            type="button"
-            role="menuitem"
-            id="supportPanelSettingsBtn"
-            data-action="settings"
-          >
-            <span class="support-panel-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
-                <path
-                  d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z"
-                ></path>
-              </svg>
-            </span>
-            <span class="support-panel-text">
-              <span class="support-panel-name">Settings</span>
-              <span class="support-panel-desc">App preferences & layout</span>
-            </span>
-            <span class="support-panel-chevron" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                width="20"
-                height="20"
-              >
-                <path d="m9 18 6-6-6-6"></path>
-              </svg>
-            </span>
-          </button>
-
-          <button
-            class="support-panel-item secondary"
-            type="button"
-            role="menuitem"
-            id="installAppBtn"
-            data-action="install"
-            hidden
-          >
-            <span class="support-panel-icon" aria-hidden="true">⬇️</span>
-            <span class="support-panel-text">
-              <span class="support-panel-name">Install App</span>
-              <span class="support-panel-desc">Add to your home screen</span>
-            </span>
-          </button>
-
-          <button
-            class="support-panel-item secondary"
-            type="button"
-            role="menuitem"
-            id="syncIssuesBtn"
-            data-action="syncIssues"
-            hidden
-          >
-            <span class="support-panel-icon" aria-hidden="true">🧩</span>
-            <span class="support-panel-text">
-              <span class="support-panel-name">Sync Issues</span>
-              <span class="support-panel-desc"
-                >Resolve failed sync changes</span
-              >
-            </span>
-          </button>
-
-          <!-- Logout Button -->
-          <button
-            class="support-panel-item danger"
-            type="button"
-            role="menuitem"
-            id="logoutBtn"
-            data-action="logout"
-          >
-            <span class="support-panel-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-            </span>
-            <span class="support-panel-text">
-              <span class="support-panel-name">Log Out</span>
-              <span class="support-panel-desc">Sign out of your account</span>
-            </span>
-          </button>
-
-          <!-- Focus Mode Toggle -->
-          <div class="support-panel-focus-toggle secondary">
-            <label
-              for="supportPanelFocusToggle"
-              class="support-panel-focus-label"
-              id="support-panel-focus-label"
-            >
-              Focus (reduce visual noise)
-            </label>
             <button
-              class="toggle-switch"
-              id="supportPanelFocusToggle"
-              role="switch"
-              aria-checked="false"
-              aria-labelledby="support-panel-focus-label"
-              aria-describedby="support-panel-focus-desc"
-            ></button>
-            <span class="sr-only" id="support-panel-focus-desc"
-              >Focus reduces visual noise. It doesn't track productivity.</span
-            >
-          </div>
-
-          <div class="support-panel-group-label" aria-hidden="true">
-            Appearance
-          </div>
-
-          <div
-            class="support-panel-focus-toggle secondary support-panel-theme-toggle"
-          >
-            <label
-              for="supportPanelThemeToggle"
-              class="support-panel-focus-label"
-              id="support-panel-theme-label"
-            >
-              Dark Garden Mode
-            </label>
-            <button
-              class="toggle-switch"
-              id="supportPanelThemeToggle"
-              role="switch"
-              aria-checked="false"
-              aria-labelledby="support-panel-theme-label"
-            ></button>
-          </div>
-
-          <div class="support-panel-appearance-card" aria-label="Accent color">
-            <div class="support-panel-appearance-label">Accent color</div>
-            <div
-              class="theme-picker support-panel-theme-picker"
-              id="supportPanelThemePicker"
-              role="radiogroup"
-              aria-label="Choose accent color"
-            ></div>
-          </div>
-
-          <div
-            class="support-panel-appearance-card"
-            aria-label="Time of day theme"
-          >
-            <div class="support-panel-appearance-label">Time Theme (Dev)</div>
-            <div
-              class="time-theme-picker"
-              id="timeThemePicker"
-              role="radiogroup"
-              aria-label="Choose time of day theme"
-            >
-              <button
-                class="time-theme-btn"
-                data-time="auto"
-                role="radio"
-                aria-checked="true"
-                title="Auto (follows system time)"
-              >
-                Auto
-              </button>
-              <button
-                class="time-theme-btn"
-                data-time="dawn"
-                role="radio"
-                aria-checked="false"
-                title="Dawn (5-7 AM)"
-              >
-                🌅
-              </button>
-              <button
-                class="time-theme-btn"
-                data-time="morning"
-                role="radio"
-                aria-checked="false"
-                title="Morning (7-12 PM)"
-              >
-                🌄
-              </button>
-              <button
-                class="time-theme-btn"
-                data-time="afternoon"
-                role="radio"
-                aria-checked="false"
-                title="Afternoon (12-5 PM)"
-              >
-                ☀️
-              </button>
-              <button
-                class="time-theme-btn"
-                data-time="evening"
-                role="radio"
-                aria-checked="false"
-                title="Evening (5-8 PM)"
-              >
-                🌇
-              </button>
-              <button
-                class="time-theme-btn"
-                data-time="night"
-                role="radio"
-                aria-checked="false"
-                title="Night (8 PM-5 AM)"
-              >
-                🌙
-              </button>
-            </div>
-          </div>
-
-          <div
-            class="support-panel-appearance-card"
-            aria-label="Time Range Configuration"
-          >
-            <div class="support-panel-appearance-label">Daily Time Range</div>
-            <div class="time-range-config">
-              <div class="time-range-inputs">
-                <div class="time-range-input-group">
-                  <label for="timeRangeStart">Start</label>
-                  <select id="timeRangeStart" class="time-range-select">
-                    <option value="0">12 AM</option>
-                    <option value="1">1 AM</option>
-                    <option value="2">2 AM</option>
-                    <option value="3">3 AM</option>
-                    <option value="4">4 AM</option>
-                    <option value="5">5 AM</option>
-                    <option value="6">6 AM</option>
-                    <option value="7">7 AM</option>
-                    <option value="8" selected>8 AM</option>
-                    <option value="9">9 AM</option>
-                    <option value="10">10 AM</option>
-                    <option value="11">11 AM</option>
-                    <option value="12">12 PM</option>
-                    <option value="13">1 PM</option>
-                    <option value="14">2 PM</option>
-                    <option value="15">3 PM</option>
-                    <option value="16">4 PM</option>
-                    <option value="17">5 PM</option>
-                    <option value="18">6 PM</option>
-                  </select>
-                </div>
-                <div class="time-range-separator">to</div>
-                <div class="time-range-input-group">
-                  <label for="timeRangeEnd">End</label>
-                  <select id="timeRangeEnd" class="time-range-select">
-                    <option value="12">12 PM</option>
-                    <option value="13">1 PM</option>
-                    <option value="14">2 PM</option>
-                    <option value="15">3 PM</option>
-                    <option value="16">4 PM</option>
-                    <option value="17">5 PM</option>
-                    <option value="18">6 PM</option>
-                    <option value="19">7 PM</option>
-                    <option value="20">8 PM</option>
-                    <option value="21">9 PM</option>
-                    <option value="22" selected>10 PM</option>
-                    <option value="23">11 PM</option>
-                    <option value="24">12 AM</option>
-                  </select>
-                </div>
-              </div>
-              <div class="time-range-hint">
-                Configure the hours shown in "Time Remaining Today"
-              </div>
-            </div>
-          </div>
-
-          <div class="support-panel-group-label" aria-hidden="true">
-            Optional
-          </div>
-
-          <!-- Optional Tools (Collapsible Section) -->
-          <div class="support-panel-collapsible-section">
-            <button
-              class="support-panel-section-header"
+              class="support-panel-item secondary"
               type="button"
-              data-toggle="optional-tools"
-              aria-expanded="false"
+              role="menuitem"
+              id="logoutBtn"
+              data-action="logout"
             >
-              <div class="section-header-icon">🧰</div>
-              <div class="section-header-title">Tools (optional)</div>
-              <div class="section-header-chevron" aria-hidden="true">
+              <span class="support-panel-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+              </span>
+              <span class="support-panel-text">
+                <span class="support-panel-name">Log Out</span>
+                <span class="support-panel-desc">Sign out of your account</span>
+              </span>
+            </button>
+          </div>
+
+          <!-- Section 2: Preferences -->
+          <div class="support-panel-section" data-section="preferences">
+            <div class="support-panel-section-label" aria-hidden="true">Preferences</div>
+
+            <button
+              class="support-panel-item primary"
+              type="button"
+              role="menuitem"
+              id="supportPanelSettingsBtn"
+              data-action="settings"
+            >
+              <span class="support-panel-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+                  <path
+                    d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3.5a7.4 7.4 0 0 0-1.7-1L15 6.5h-6l-.5 2.3a7.4 7.4 0 0 0-1.7 1l-2.3-.5-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 1 7.8 7.8 0 0 0-.1 1l-2 1.2 2 3.5 2.3-.5a7.4 7.4 0 0 0 1.7 1L9 21.5h6l.5-2.3a7.4 7.4 0 0 0 1.7-1l2.3.5 2-3.5-2-1.2a7.8 7.8 0 0 0-.1-1Z"
+                  ></path>
+                </svg>
+              </span>
+              <span class="support-panel-text">
+                <span class="support-panel-name">Settings</span>
+                <span class="support-panel-desc">App preferences & layout</span>
+              </span>
+              <span class="support-panel-chevron" aria-hidden="true">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -1350,22 +1080,76 @@
                   width="20"
                   height="20"
                 >
-                  <path d="m6 9 6 6 6-6"></path>
+                  <path d="m9 18 6-6-6-6"></path>
                 </svg>
-              </div>
+              </span>
             </button>
 
-            <div
-              class="support-panel-section-content"
-              data-section="optional-tools"
-            >
-              <button
-                class="support-panel-item compact"
-                type="button"
-                role="menuitem"
-                data-action="brainDump"
+            <div class="support-panel-focus-toggle">
+              <label
+                for="supportPanelFocusToggle"
+                class="support-panel-focus-label"
+                id="support-panel-focus-label"
               >
-                <span class="support-panel-icon small" aria-hidden="true">
+                Focus (reduce visual noise)
+              </label>
+              <button
+                class="toggle-switch"
+                id="supportPanelFocusToggle"
+                role="switch"
+                aria-checked="false"
+                aria-labelledby="support-panel-focus-label"
+                aria-describedby="support-panel-focus-desc"
+              ></button>
+              <span class="sr-only" id="support-panel-focus-desc"
+                >Focus reduces visual noise. It doesn't track productivity.</span
+              >
+            </div>
+          </div>
+
+          <!-- Section 3: Appearance -->
+          <div class="support-panel-section" data-section="appearance">
+            <div class="support-panel-section-label" aria-hidden="true">Appearance</div>
+
+            <div class="support-panel-focus-toggle support-panel-theme-toggle">
+              <label
+                for="supportPanelThemeToggle"
+                class="support-panel-focus-label"
+                id="support-panel-theme-label"
+              >
+                Dark Garden Mode
+              </label>
+              <button
+                class="toggle-switch"
+                id="supportPanelThemeToggle"
+                role="switch"
+                aria-checked="false"
+                aria-labelledby="support-panel-theme-label"
+              ></button>
+            </div>
+
+            <div class="support-panel-appearance-card" aria-label="Accent color">
+              <div class="support-panel-appearance-label">Accent color</div>
+              <div
+                class="theme-picker support-panel-theme-picker"
+                id="supportPanelThemePicker"
+                role="radiogroup"
+                aria-label="Choose accent color"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Section 4: Advanced (collapsed by default) -->
+          <div class="support-panel-section" data-section="advanced-wrapper">
+            <div class="support-panel-collapsible-section">
+              <button
+                class="support-panel-section-header"
+                type="button"
+                data-toggle="advanced"
+                aria-expanded="false"
+              >
+                <div class="section-header-title">Advanced</div>
+                <div class="section-header-chevron" aria-hidden="true">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -1373,70 +1157,275 @@
                     stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
+                    width="20"
+                    height="20"
                   >
-                    <path d="M8 18a4 4 0 1 1 0-8"></path>
-                    <path d="M12 18a4 4 0 1 0 0-8"></path>
-                    <path d="M8 10a4 4 0 1 1 0-8"></path>
-                    <path d="M12 10a4 4 0 1 0 0-8"></path>
-                    <path d="M8 18h8"></path>
+                    <path d="m6 9 6 6 6-6"></path>
                   </svg>
-                </span>
-                <span class="support-panel-text">
-                  <span class="support-panel-name">Brain Dump</span>
-                  <span class="support-panel-desc"
-                    >Park intrusive thoughts</span
-                  >
-                </span>
+                </div>
               </button>
 
-              <button
-                class="support-panel-item compact"
-                type="button"
-                role="menuitem"
-                data-action="bodyDouble"
-              >
-                <span class="support-panel-icon small" aria-hidden="true">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+              <div class="support-panel-section-content" data-section="advanced">
+                <div
+                  class="support-panel-appearance-card"
+                  aria-label="Time of day theme"
+                >
+                  <div class="support-panel-appearance-label">Time Theme (Dev)</div>
+                  <div
+                    class="time-theme-picker"
+                    id="timeThemePicker"
+                    role="radiogroup"
+                    aria-label="Choose time of day theme"
                   >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 6v6l4 2"></path>
-                  </svg>
-                </span>
-                <span class="support-panel-text">
-                  <span class="support-panel-name">Body Double</span>
-                  <span class="support-panel-desc">Focused work sessions</span>
-                </span>
-              </button>
+                    <button
+                      class="time-theme-btn"
+                      data-time="auto"
+                      role="radio"
+                      aria-checked="true"
+                      title="Auto (follows system time)"
+                    >
+                      Auto
+                    </button>
+                    <button
+                      class="time-theme-btn"
+                      data-time="dawn"
+                      role="radio"
+                      aria-checked="false"
+                      title="Dawn (5-7 AM)"
+                    >
+                      Dawn
+                    </button>
+                    <button
+                      class="time-theme-btn"
+                      data-time="morning"
+                      role="radio"
+                      aria-checked="false"
+                      title="Morning (7-12 PM)"
+                    >
+                      Morning
+                    </button>
+                    <button
+                      class="time-theme-btn"
+                      data-time="afternoon"
+                      role="radio"
+                      aria-checked="false"
+                      title="Afternoon (12-5 PM)"
+                    >
+                      Afternoon
+                    </button>
+                    <button
+                      class="time-theme-btn"
+                      data-time="evening"
+                      role="radio"
+                      aria-checked="false"
+                      title="Evening (5-8 PM)"
+                    >
+                      Evening
+                    </button>
+                    <button
+                      class="time-theme-btn"
+                      data-time="night"
+                      role="radio"
+                      aria-checked="false"
+                      title="Night (8 PM-5 AM)"
+                    >
+                      Night
+                    </button>
+                  </div>
+                </div>
 
-              <button
-                class="support-panel-item compact"
-                type="button"
-                role="menuitem"
-                data-action="quickWins"
-              >
-                <span class="support-panel-icon small" aria-hidden="true">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M13 2 3 14h9l-1 8 10-12h-9z"></path>
-                  </svg>
-                </span>
-                <span class="support-panel-text">
-                  <span class="support-panel-name">Quick Wins</span>
-                  <span class="support-panel-desc">Low motivation tasks</span>
-                </span>
-              </button>
+                <div
+                  class="support-panel-appearance-card"
+                  aria-label="Time Range Configuration"
+                >
+                  <div class="support-panel-appearance-label">Daily Time Range</div>
+                  <div class="time-range-config">
+                    <div class="time-range-inputs">
+                      <div class="time-range-input-group">
+                        <label for="timeRangeStart">Start</label>
+                        <select id="timeRangeStart" class="time-range-select">
+                          <option value="0">12 AM</option>
+                          <option value="1">1 AM</option>
+                          <option value="2">2 AM</option>
+                          <option value="3">3 AM</option>
+                          <option value="4">4 AM</option>
+                          <option value="5">5 AM</option>
+                          <option value="6">6 AM</option>
+                          <option value="7">7 AM</option>
+                          <option value="8" selected>8 AM</option>
+                          <option value="9">9 AM</option>
+                          <option value="10">10 AM</option>
+                          <option value="11">11 AM</option>
+                          <option value="12">12 PM</option>
+                          <option value="13">1 PM</option>
+                          <option value="14">2 PM</option>
+                          <option value="15">3 PM</option>
+                          <option value="16">4 PM</option>
+                          <option value="17">5 PM</option>
+                          <option value="18">6 PM</option>
+                        </select>
+                      </div>
+                      <div class="time-range-separator">to</div>
+                      <div class="time-range-input-group">
+                        <label for="timeRangeEnd">End</label>
+                        <select id="timeRangeEnd" class="time-range-select">
+                          <option value="12">12 PM</option>
+                          <option value="13">1 PM</option>
+                          <option value="14">2 PM</option>
+                          <option value="15">3 PM</option>
+                          <option value="16">4 PM</option>
+                          <option value="17">5 PM</option>
+                          <option value="18">6 PM</option>
+                          <option value="19">7 PM</option>
+                          <option value="20">8 PM</option>
+                          <option value="21">9 PM</option>
+                          <option value="22" selected>10 PM</option>
+                          <option value="23">11 PM</option>
+                          <option value="24">12 AM</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="time-range-hint">
+                      Configure the hours shown in "Time Remaining Today"
+                    </div>
+                  </div>
+                </div>
+
+                <div class="support-panel-group-label" aria-hidden="true">Tools</div>
+
+                <button
+                  class="support-panel-item compact"
+                  type="button"
+                  role="menuitem"
+                  data-action="brainDump"
+                >
+                  <span class="support-panel-icon small" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M8 18a4 4 0 1 1 0-8"></path>
+                      <path d="M12 18a4 4 0 1 0 0-8"></path>
+                      <path d="M8 10a4 4 0 1 1 0-8"></path>
+                      <path d="M12 10a4 4 0 1 0 0-8"></path>
+                      <path d="M8 18h8"></path>
+                    </svg>
+                  </span>
+                  <span class="support-panel-text">
+                    <span class="support-panel-name">Brain Dump</span>
+                    <span class="support-panel-desc">Park intrusive thoughts</span>
+                  </span>
+                </button>
+
+                <button
+                  class="support-panel-item compact"
+                  type="button"
+                  role="menuitem"
+                  data-action="bodyDouble"
+                >
+                  <span class="support-panel-icon small" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M12 6v6l4 2"></path>
+                    </svg>
+                  </span>
+                  <span class="support-panel-text">
+                    <span class="support-panel-name">Body Double</span>
+                    <span class="support-panel-desc">Focused work sessions</span>
+                  </span>
+                </button>
+
+                <button
+                  class="support-panel-item compact"
+                  type="button"
+                  role="menuitem"
+                  data-action="quickWins"
+                >
+                  <span class="support-panel-icon small" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M13 2 3 14h9l-1 8 10-12h-9z"></path>
+                    </svg>
+                  </span>
+                  <span class="support-panel-text">
+                    <span class="support-panel-name">Quick Wins</span>
+                    <span class="support-panel-desc">Low motivation tasks</span>
+                  </span>
+                </button>
+
+                <button
+                  class="support-panel-item secondary"
+                  type="button"
+                  role="menuitem"
+                  id="installAppBtn"
+                  data-action="install"
+                  hidden
+                >
+                  <span class="support-panel-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  </span>
+                  <span class="support-panel-text">
+                    <span class="support-panel-name">Install App</span>
+                    <span class="support-panel-desc">Add to your home screen</span>
+                  </span>
+                </button>
+
+                <button
+                  class="support-panel-item secondary"
+                  type="button"
+                  role="menuitem"
+                  id="syncIssuesBtn"
+                  data-action="syncIssues"
+                  hidden
+                >
+                  <span class="support-panel-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                      <line x1="12" y1="9" x2="12" y2="13"></line>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                  </span>
+                  <span class="support-panel-text">
+                    <span class="support-panel-name">Sync Issues</span>
+                    <span class="support-panel-desc">Review unsynced changes</span>
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
