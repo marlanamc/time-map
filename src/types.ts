@@ -275,7 +275,15 @@ export type WeekReflection = {
   weekYear: number;
   weekNum: number;
   createdAt: number;
-  answers: { q1?: string; q2?: string; q3?: string };
+  answers: {
+    q1?: string;
+    q2?: string;
+    q3?: string;
+    wins?: string;
+    alignmentScore?: number;
+    growthNote?: string;
+    nextWeekPriorities?: string;
+  };
 };
 
 export type EventRecurrence = {
@@ -384,6 +392,11 @@ export interface NDPreferences {
   reduceEmojis: boolean;
   /** Whether the level context bar is collapsed */
   contextBarCollapsed?: boolean;
+  /** Custom intention templates for the Day View */
+  customIntentions?: CustomIntention[];
+  /** Weekly check-in schedule Settings */
+  checkInDay?: number; // 0=Sunday, 1=Monday...
+  checkInTime?: string; // HH:mm format
 }
 
 /**

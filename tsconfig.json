@@ -23,6 +23,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "types": ["vite/client"],
     "noEmit": false,
     "declaration": false,
     "sourceMap": true,

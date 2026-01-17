@@ -4,6 +4,7 @@
  */
 
 import type { CustomIntention, Category } from "../types";
+import { State } from "./State";
 
 const STORAGE_KEY = "gardenFence.customIntentions";
 
@@ -80,24 +81,19 @@ export class IntentionsManager {
    */
   static load(): CustomIntention[] {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        // Generate defaults and save them to localStorage so IDs are consistent
-        const defaults = this.getDefaults();
-        this.save(defaults);
-        return defaults;
-      }
+      // Use State as the source of truth
+      const intentions = State.data?.preferences?.nd?.customIntentions;
 
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        // Generate defaults and save them to localStorage so IDs are consistent
+      if (!intentions || intentions.length === 0) {
+        // If no intentions in state, check if we need to initialize with defaults
+        // (State.migrateDataIfNeeded already handles migration from old localStorage)
         const defaults = this.getDefaults();
         this.save(defaults);
         return defaults;
       }
 
       // Validate and sanitize
-      return parsed.filter((item): item is CustomIntention => {
+      return intentions.filter((item): item is CustomIntention => {
         return (
           typeof item === "object" &&
           item !== null &&
@@ -139,21 +135,18 @@ export class IntentionsManager {
         return false;
       }
 
+      // Update State
+      if (State.data && State.data.preferences && State.data.preferences.nd) {
+        State.data.preferences.nd.customIntentions = intentions;
+        State.save(); // Triggers both localStorage and cloud sync
+      }
+
+      // Keep legacy localStorage for fallback/migration safety for now
       localStorage.setItem(STORAGE_KEY, JSON.stringify(intentions));
+
       return true;
     } catch (error) {
       console.error("Failed to save custom intentions:", error);
-
-      // Check for quota exceeded
-      if (
-        error instanceof DOMException &&
-        error.name === "QuotaExceededError"
-      ) {
-        console.error(
-          "localStorage quota exceeded. Cannot save custom intentions."
-        );
-      }
-
       return false;
     }
   }
@@ -183,7 +176,7 @@ export class IntentionsManager {
     title: string,
     category: Category,
     duration: number,
-    emoji?: string
+    emoji?: string,
   ): CustomIntention | null {
     // Validation
     if (!title || title.trim().length === 0) {
@@ -199,7 +192,7 @@ export class IntentionsManager {
     const intentions = this.load();
     const maxOrder = intentions.reduce(
       (max, item) => Math.max(max, item.order),
-      -1
+      -1,
     );
 
     const newIntention: CustomIntention = {
@@ -229,7 +222,7 @@ export class IntentionsManager {
    */
   static update(
     id: string,
-    updates: Partial<Omit<CustomIntention, "id" | "createdAt">>
+    updates: Partial<Omit<CustomIntention, "id" | "createdAt">>,
   ): boolean {
     const intentions = this.load();
     const index = intentions.findIndex((item) => item.id === id);
@@ -301,7 +294,7 @@ export class IntentionsManager {
 
     // Validate that all IDs exist
     const allIdsExist = orderedIds.every((id) =>
-      intentions.some((item) => item.id === id)
+      intentions.some((item) => item.id === id),
     );
 
     if (!allIdsExist || orderedIds.length !== intentions.length) {
@@ -356,6 +349,11 @@ export class IntentionsManager {
    */
   static hasCustomized(): boolean {
     try {
+      // Check if State has any custom intentions beyond the count of defaults
+      // or if the legacy key exists
+      const intentions = State.data?.preferences?.nd?.customIntentions;
+      if (intentions && intentions.length > 0) return true;
+
       const raw = localStorage.getItem(STORAGE_KEY);
       return raw !== null;
     } catch {

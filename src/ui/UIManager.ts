@@ -2173,8 +2173,8 @@ export const UI = {
     ViewNavigator.syncViewButtons();
   },
 
-  showToast(iconOrMessage: string, messageOrType: string = "") {
-    Toast.show(this.elements, iconOrMessage, messageOrType);
+  showToast(iconOrMessage: string, messageOrType: string = "", options?: any) {
+    Toast.show(this.elements, iconOrMessage, messageOrType, options);
   },
 
   celebrate(emoji: string, title: string, text: string) {

@@ -13,6 +13,8 @@ import { SupabaseService } from "./services/supabase";
 import { syncQueue } from "./services/SyncQueue";
 import { VIEWS } from "./config";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
+import { ReminderService } from "./services/ReminderService";
+import { eventBus } from "./core/EventBus";
 
 // Removed duplicate interfaces - now imported from types.ts
 
@@ -130,6 +132,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   UI.init();
 
+  // Start reminder service
+  ReminderService.start();
+
+  // Handle check-in reminders
+  eventBus.on("ui:checkin-due", (data) => {
+    UI.showToast?.("🌱", data.message, {
+      timeoutMs: 15000,
+      type: "checkin-reminder",
+      onClick: () => {
+        State.setView(VIEWS.GARDEN);
+        // We can add more logic here to automatically open the reflection panel
+      },
+    } as any);
+  });
+
   // Initialize modular components
   void UI.initModular();
 
@@ -210,7 +227,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         const user = await SupabaseService.getUser();
         UI.updateSyncStatus?.(
-          user && isSupabaseConfigured ? "synced" : "local"
+          user && isSupabaseConfigured ? "synced" : "local",
         );
       } catch {
         UI.updateSyncStatus?.("local");
@@ -250,11 +267,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     window.addEventListener(
       "online",
-      () => void applyConnectionState({ toast: true })
+      () => void applyConnectionState({ toast: true }),
     );
     window.addEventListener(
       "offline",
-      () => void applyConnectionState({ toast: true })
+      () => void applyConnectionState({ toast: true }),
     );
     void applyConnectionState({ toast: !navigator.onLine });
   }
@@ -277,7 +294,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const showToast = (
         icon: string,
         message: string,
-        opts?: { timeoutMs?: number; type?: string }
+        opts?: { timeoutMs?: number; type?: string },
       ) => {
         if (!toastEl || !toastIconEl || !toastMessageEl) return;
         if (toastHideTimer) window.clearTimeout(toastHideTimer);
@@ -308,7 +325,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const actionsClass = "toast-actions";
         let actions = toastEl.querySelector(
-          `.${actionsClass}`
+          `.${actionsClass}`,
         ) as HTMLDivElement | null;
         if (!actions) {
           actions = document.createElement("div");
@@ -326,7 +343,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           (e) => {
             const target = e.target as Element | null;
             const btn = target?.closest(
-              "[data-sw-action]"
+              "[data-sw-action]",
             ) as HTMLElement | null;
             const action = btn?.dataset.swAction;
             if (!action) return;
@@ -340,7 +357,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               hideToast();
             }
           },
-          { once: true }
+          { once: true },
         );
 
         showToast("⬆️", "New version available.", { type: "sw-update" });
@@ -415,10 +432,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Header "More" Menu Toggle
   const headerMoreToggle = document.getElementById(
-    "headerMoreToggle"
+    "headerMoreToggle",
   ) as HTMLElement | null;
   const headerMoreDropdown = document.getElementById(
-    "headerMoreDropdown"
+    "headerMoreDropdown",
   ) as HTMLElement | null;
 
   if (headerMoreToggle && headerMoreDropdown) {
@@ -464,10 +481,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ND Menu Toggle
   const ndMenuToggle = document.getElementById(
-    "ndMenuToggle"
+    "ndMenuToggle",
   ) as HTMLElement | null;
   const ndDropdown = document.getElementById(
-    "ndDropdown"
+    "ndDropdown",
   ) as HTMLElement | null;
 
   if (ndMenuToggle && ndDropdown) {
@@ -490,7 +507,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Keyboard navigation
     ndDropdown.addEventListener("keydown", (e: KeyboardEvent) => {
       const items = Array.from(
-        ndDropdown.querySelectorAll<HTMLElement>(".nd-dropdown-item")
+        ndDropdown.querySelectorAll<HTMLElement>(".nd-dropdown-item"),
       );
       if (items.length === 0) return;
       const active = document.activeElement as HTMLElement | null;
@@ -524,7 +541,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Save preference
         const sectionEl = toggle.closest(
-          ".sidebar-section"
+          ".sidebar-section",
         ) as HTMLElement | null;
         const section = sectionEl?.dataset.section;
         if (!section || !State.data) return;
@@ -546,7 +563,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const preferences = State.data.preferences.sidebarSections;
     Object.entries(preferences).forEach(([section, expanded]) => {
       const toggle = document.querySelector(
-        `[data-section="${section}"] .section-toggle`
+        `[data-section="${section}"] .section-toggle`,
       ) as HTMLElement | null;
       if (toggle) {
         toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
@@ -562,9 +579,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ============================================
   const initGarden = async () => {
     try {
-      const { GardenEngine: GardenEngineCtor } = await import(
-        "./garden/gardenEngine"
-      );
+      const { GardenEngine: GardenEngineCtor } =
+        await import("./garden/gardenEngine");
       const savedGardenPrefs = GardenEngineCtor.loadPreferences();
       const garden = new GardenEngineCtor(savedGardenPrefs);
       garden.initialize();

@@ -11,6 +11,7 @@ export const Toast = {
     elements: UIElements,
     iconOrMessage: string,
     messageOrType: string = "",
+    options?: any,
   ) {
     const toast = elements.toast;
     const toastIcon = elements.toastIcon;
@@ -50,6 +51,7 @@ export const Toast = {
 
     toast.onclick = (e) => {
       if ((e.target as HTMLElement).id === "toastClose") return;
+      if (options?.onClick) options.onClick();
       hide();
     };
 
@@ -60,7 +62,7 @@ export const Toast = {
       };
     }
 
-    const duration = isReduced ? 2500 : 5000;
+    const duration = options?.timeoutMs || (isReduced ? 2500 : 5000);
 
     const startTimeout = () => {
       if (toastTimeout) window.clearTimeout(toastTimeout);

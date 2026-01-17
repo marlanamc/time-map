@@ -5,6 +5,7 @@ import { State } from "../../core/State";
 import { Goals } from "../../core/Goals";
 import { WeekReflections } from "../../core/WeekReflections";
 import { eventBus } from "../../core/EventBus";
+import { Analytics } from "../../core/Analytics";
 
 import type { Goal, GoalLevel, UIElements, WeekReflection } from "../../types";
 import { getVisionAccent } from "../../utils/goalLinkage";
@@ -76,6 +77,17 @@ export const LivingGardenRenderer = {
     const intentionsInWeek = Goals.getForRange(weekStart, weekEnd).filter(
       (g) => g.level === "intention",
     );
+
+    const statsOverview = Analytics.getOverview();
+    const intentionsCompletedThisWeek = intentionsInWeek.filter(
+      (i) => i.status === "done",
+    ).length;
+    const completionRate =
+      intentionsInWeek.length > 0
+        ? Math.round(
+            (intentionsCompletedThisWeek / intentionsInWeek.length) * 100,
+          )
+        : 0;
 
     // Build ecosystem data
     const ecosystem = visions.map((vision) => {
@@ -272,6 +284,41 @@ export const LivingGardenRenderer = {
             </div>
           </header>
 
+          <!-- Check-in CTA -->
+          ${
+            !cachedReflection
+              ? `
+            <div class="living-garden-checkin-cta" data-action="toggle-reflection">
+              <div class="living-garden-checkin-text">
+                <h3>Weekly Check-in Due</h3>
+                <p>Reflect on your growth and set intentions for the week ahead.</p>
+              </div>
+              <div class="living-garden-checkin-icon">🌱</div>
+            </div>
+          `
+              : ""
+          }
+
+          <!-- Weekly Stats -->
+          <div class="living-garden-stats">
+            <div class="living-garden-stat-card">
+              <span class="living-garden-stat-value">${intentionsCompletedThisWeek}</span>
+              <span class="living-garden-stat-label">Done this week</span>
+            </div>
+            <div class="living-garden-stat-card">
+              <span class="living-garden-stat-value">${completionRate}%</span>
+              <span class="living-garden-stat-label">Completion Rate</span>
+            </div>
+            <div class="living-garden-stat-card">
+              <span class="living-garden-stat-value">${statsOverview.currentStreak}🔥</span>
+              <span class="living-garden-stat-label">Current Streak</span>
+            </div>
+            <div class="living-garden-stat-card">
+              <span class="living-garden-stat-value">${statsOverview.totalGoals}</span>
+              <span class="living-garden-stat-label">Total Seeds Planted</span>
+            </div>
+          </div>
+
           ${
             visions.length === 0
               ? `
@@ -444,22 +491,41 @@ export const LivingGardenRenderer = {
                     </div>
                   </div>
                   <div class="living-garden-reflection-question">
-                    <h4>What needs more sunlight?</h4>
-                    <div class="living-garden-reflection-options">
-                      ${[
-                        "More time ⏰",
-                        "Better tools 🛠️",
-                        "Different approach 💡",
-                        "Rest and recovery 😴",
-                      ]
-                        .map((opt) => {
+                    <h4>How aligned do you feel with your visions?</h4>
+                    <div class="living-garden-alignment-score">
+                      ${[1, 2, 3, 4, 5]
+                        .map((score) => {
                           const selected =
-                            cachedReflection?.answers?.q2 === opt;
-                          return `<button class="living-garden-reflection-option ${selected ? "is-selected" : ""}" 
-                                       data-action="set-reflection" data-q="q2" data-value="${escapeHtmlFn(opt)}">${opt}</button>`;
+                            (cachedReflection?.answers?.alignmentScore || 0) ===
+                            score;
+                          return `<button class="living-garden-score-btn ${selected ? "is-selected" : ""}" 
+                                        data-action="set-reflection" data-q="alignmentScore" data-value="${score}">
+                                  ${score}
+                                </button>`;
                         })
                         .join("")}
                     </div>
+                  </div>
+
+                  <div class="living-garden-reflection-question">
+                    <h4>What were your biggest wins this week?</h4>
+                    <textarea class="living-garden-reflection-input" 
+                              data-action="input-reflection" data-q="wins" 
+                              placeholder="List your accomplishments...">${escapeHtmlFn(cachedReflection?.answers?.wins || "")}</textarea>
+                  </div>
+
+                  <div class="living-garden-reflection-question">
+                    <h4>Growth note (What did you learn?)</h4>
+                    <textarea class="living-garden-reflection-input" 
+                              data-action="input-reflection" data-q="growthNote" 
+                              placeholder="Reflect on challenges and learnings...">${escapeHtmlFn(cachedReflection?.answers?.growthNote || "")}</textarea>
+                  </div>
+
+                  <div class="living-garden-reflection-question">
+                    <h4>Priorities for next week</h4>
+                    <textarea class="living-garden-reflection-input" 
+                              data-action="input-reflection" data-q="nextWeekPriorities" 
+                              placeholder="What will you focus on next?">${escapeHtmlFn(cachedReflection?.answers?.nextWeekPriorities || "")}</textarea>
                   </div>
                   <div class="living-garden-reflection-actions">
                     <span class="living-garden-reflection-note">Saved locally for this week</span>
@@ -567,13 +633,42 @@ export const LivingGardenRenderer = {
           );
           void WeekReflections.upsert(weekYear, weekNum, nextAnswers).then(
             () => {
-              eventBus.emit("ui:toast", {
-                icon: "🌱",
-                message: "Reflection saved.",
-              });
+              // No toast for every click since we save on every selection
               eventBus.emit("view:changed", { transition: false });
             },
           );
+        });
+      });
+
+    container
+      .querySelectorAll<HTMLTextAreaElement>("[data-action='input-reflection']")
+      .forEach((input) => {
+        let timeout: any;
+        input.addEventListener("input", () => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            const q = input.dataset.q as string;
+            const value = input.value;
+            if (!q) return;
+
+            const nextAnswers: WeekReflection["answers"] = {
+              ...(cachedReflection?.answers ?? {}),
+              [q]: value,
+            };
+            reflectionCache.set(
+              reflectionId,
+              cachedReflection
+                ? { ...cachedReflection, answers: nextAnswers }
+                : {
+                    id: reflectionId,
+                    weekYear,
+                    weekNum,
+                    createdAt: Date.now(),
+                    answers: nextAnswers,
+                  },
+            );
+            void WeekReflections.upsert(weekYear, weekNum, nextAnswers);
+          }, 500);
         });
       });
 

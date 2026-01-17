@@ -231,6 +231,9 @@ export const State: AppState & {
           allowPartialProgress: true, // Can mark tasks as 10%, 20%, etc.
           reduceEmojis: false, // Minimize emoji usage for less visual noise
           contextBarCollapsed: false, // Level context bar expanded by default
+          customIntentions: [], // Cloud-synced intention templates
+          checkInDay: 0, // Sunday
+          checkInTime: "09:00",
         },
       },
       analytics: {
@@ -263,6 +266,29 @@ export const State: AppState & {
     if (accentTheme === ("violet" as any)) {
       this.data.preferences.nd.accentTheme = "amber";
       changed = true;
+    }
+
+    // Migrate custom intentions from legacy localStorage key to State if needed
+    if (
+      !this.data.preferences.nd.customIntentions ||
+      this.data.preferences.nd.customIntentions.length === 0
+    ) {
+      const LEGACY_INTENTIONS_KEY = "gardenFence.customIntentions";
+      try {
+        const raw = localStorage.getItem(LEGACY_INTENTIONS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            console.log(
+              "[State] Migrating custom intentions from legacy localStorage...",
+            );
+            this.data.preferences.nd.customIntentions = parsed;
+            changed = true;
+          }
+        }
+      } catch (e) {
+        console.warn("[State] Failed to migrate legacy intentions:", e);
+      }
     }
 
     if (changed) {
@@ -372,6 +398,22 @@ export const State: AppState & {
         ...defaults.preferences.nd,
         ...this.data.preferences.nd,
       };
+
+      if (!Array.isArray(this.data.preferences.nd.customIntentions)) {
+        this.data.preferences.nd.customIntentions = [];
+        changed = true;
+      }
+
+      if (this.data.preferences.nd.checkInDay === undefined) {
+        this.data.preferences.nd.checkInDay =
+          defaults.preferences.nd.checkInDay;
+        changed = true;
+      }
+      if (this.data.preferences.nd.checkInTime === undefined) {
+        this.data.preferences.nd.checkInTime =
+          defaults.preferences.nd.checkInTime;
+        changed = true;
+      }
     }
 
     if (!this.data.analytics || typeof this.data.analytics !== "object") {

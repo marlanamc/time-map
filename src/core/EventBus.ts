@@ -19,38 +19,39 @@ type EventHandler<T = any> = (data: T) => void;
  */
 export interface EventRegistry {
   // View change events
-  'view:changed': { view?: string; transition?: boolean };
-  'view:sync-buttons': void;
+  "view:changed": { view?: string; transition?: boolean };
+  "view:sync-buttons": void;
 
   // Navigation events
-  'navigation:forward': void;
-  'navigation:backward': void;
+  "navigation:forward": void;
+  "navigation:backward": void;
 
   // Data events
-  'data:loaded': void;
-  'data:saved': void;
-  'data:sync-started': void;
-  'data:sync-completed': void;
-  'data:sync-failed': { error: Error };
+  "data:loaded": void;
+  "data:saved": void;
+  "data:sync-started": void;
+  "data:sync-completed": void;
+  "data:sync-failed": { error: Error };
 
   // Goal events
-  'goal:created': { goalId: string };
-  'goal:updated': { goalId: string };
-  'goal:deleted': { goalId: string };
+  "goal:created": { goalId: string };
+  "goal:updated": { goalId: string };
+  "goal:deleted": { goalId: string };
 
   // UI events
-  'ui:render': { transition?: boolean };
-  'ui:toast': { icon: string; message: string };
-  'ui:celebrate': { icon: string; title: string; message: string };
+  "ui:render": { transition?: boolean };
+  "ui:toast": { icon: string; message: string; onClick?: () => void };
+  "ui:celebrate": { icon: string; title: string; message: string };
+  "ui:checkin-due": { weekNum: number; weekYear: number; message: string };
 
   // Auth events
-  'auth:login': { userId: string };
-  'auth:logout': void;
+  "auth:login": { userId: string };
+  "auth:logout": void;
 
   // Error events
-  'error:authentication': { message: string };
-  'error:database': { message: string; cause?: any };
-  'error:storage': { message: string };
+  "error:authentication": { message: string };
+  "error:database": { message: string; cause?: any };
+  "error:storage": { message: string };
 }
 
 class EventBus {
@@ -72,7 +73,7 @@ class EventBus {
    */
   on<K extends keyof EventRegistry>(
     event: K,
-    handler: EventHandler<EventRegistry[K]>
+    handler: EventHandler<EventRegistry[K]>,
   ): () => void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
@@ -97,7 +98,7 @@ class EventBus {
    */
   once<K extends keyof EventRegistry>(
     event: K,
-    handler: EventHandler<EventRegistry[K]>
+    handler: EventHandler<EventRegistry[K]>,
   ): void {
     const onceHandler = (data: EventRegistry[K]) => {
       handler(data);
@@ -114,7 +115,7 @@ class EventBus {
    */
   off<K extends keyof EventRegistry>(
     event: K,
-    handler: EventHandler<EventRegistry[K]>
+    handler: EventHandler<EventRegistry[K]>,
   ): void {
     const handlers = this.listeners.get(event);
     if (handlers) {
@@ -136,10 +137,7 @@ class EventBus {
    * @param event - Event name from EventRegistry
    * @param data - Event data
    */
-  emit<K extends keyof EventRegistry>(
-    event: K,
-    data?: EventRegistry[K]
-  ): void {
+  emit<K extends keyof EventRegistry>(event: K, data?: EventRegistry[K]): void {
     const handlers = this.listeners.get(event);
 
     if (this.debugMode) {
@@ -147,7 +145,7 @@ class EventBus {
     }
 
     if (handlers) {
-      handlers.forEach(handler => {
+      handlers.forEach((handler) => {
         try {
           handler(data);
         } catch (error) {
@@ -178,7 +176,7 @@ class EventBus {
     this.listeners.clear();
 
     if (this.debugMode) {
-      console.log('📡 EventBus: Cleared all listeners');
+      console.log("📡 EventBus: Cleared all listeners");
     }
   }
 

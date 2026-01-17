@@ -1,10 +1,17 @@
 // ===================================
 // App Settings Panel Module
 // ===================================
-import { State } from '../../core/State';
-import { CONFIG, VIEWS } from '../../config';
-import { NDSupport } from '../ndSupport';
-import type { AppData, ViewType, Goal, WeeklyReview, BrainDumpEntry, BodyDoubleSession } from '../../types';
+import { State } from "../../core/State";
+import { CONFIG, VIEWS } from "../../config";
+import { NDSupport } from "../ndSupport";
+import type {
+  AppData,
+  ViewType,
+  Goal,
+  WeeklyReview,
+  BrainDumpEntry,
+  BodyDoubleSession,
+} from "../../types";
 
 // Callback interface for UI interactions
 interface AppSettingsCallbacks {
@@ -27,7 +34,6 @@ export const AppSettings = {
     callbacks = cb;
   },
 
-
   showPanel() {
     if (!State.data) return;
     const isMobile = document.body.classList.contains("is-mobile");
@@ -46,7 +52,10 @@ export const AppSettings = {
           <div class="modal-body nd-settings-body">
             <div class="settings-section">
               <h3>General</h3>
-              ${isMobile ? "" : `
+              ${
+                isMobile
+                  ? ""
+                  : `
                 <div class="setting-row">
                   <label for="settingsDefaultView">Default view</label>
                   <select id="settingsDefaultView">
@@ -56,22 +65,30 @@ export const AppSettings = {
                     <option value="day" ${prefs.defaultView === VIEWS.DAY ? "selected" : ""}>Day</option>
                   </select>
                 </div>
-              `}
+              `
+              }
               <div class="setting-row checkbox-row">
                 <label>
                   <input type="checkbox" id="settingsFocusMode" ${prefs.focusMode ? "checked" : ""}>
                   Start in Focus (reduce visual noise)
                 </label>
               </div>
-              ${isMobile ? "" : `
+              ${
+                isMobile
+                  ? ""
+                  : `
                 <div class="setting-row">
                   <label>Help</label>
                   <button class="btn btn-ghost" id="settingsShortcutsBtn">Keyboard shortcuts</button>
                 </div>
-              `}
+              `
+              }
             </div>
 
-            ${isMobile ? "" : `
+            ${
+              isMobile
+                ? ""
+                : `
               <div class="settings-section">
                 <h3>Visibility</h3>
                 <div class="setting-row checkbox-row">
@@ -99,7 +116,28 @@ export const AppSettings = {
                   </label>
                 </div>
               </div>
-            `}
+            `
+            }
+
+            <div class="settings-section">
+              <h3>Garden & Growth</h3>
+              <div class="setting-row">
+                <label for="settingsCheckInDay">Weekly Check-in Day</label>
+                <select id="settingsCheckInDay">
+                  <option value="0" ${prefs.nd?.checkInDay === 0 ? "selected" : ""}>Sunday</option>
+                  <option value="1" ${prefs.nd?.checkInDay === 1 ? "selected" : ""}>Monday</option>
+                  <option value="2" ${prefs.nd?.checkInDay === 2 ? "selected" : ""}>Tuesday</option>
+                  <option value="3" ${prefs.nd?.checkInDay === 3 ? "selected" : ""}>Wednesday</option>
+                  <option value="4" ${prefs.nd?.checkInDay === 4 ? "selected" : ""}>Thursday</option>
+                  <option value="5" ${prefs.nd?.checkInDay === 5 ? "selected" : ""}>Friday</option>
+                  <option value="6" ${prefs.nd?.checkInDay === 6 ? "selected" : ""}>Saturday</option>
+                </select>
+              </div>
+              <div class="setting-row">
+                <label for="settingsCheckInTime">Check-in Time</label>
+                <input type="time" id="settingsCheckInTime" value="${prefs.nd?.checkInTime || "09:00"}">
+              </div>
+            </div>
 
             <div class="settings-section">
               <h3>Accessibility & Overwhelm Support</h3>
@@ -109,7 +147,10 @@ export const AppSettings = {
               </div>
             </div>
 
-            ${isMobile ? "" : `
+            ${
+              isMobile
+                ? ""
+                : `
               <div class="settings-section">
                 <h3>Sidebar</h3>
                 <div class="setting-row checkbox-row">
@@ -131,7 +172,8 @@ export const AppSettings = {
                   </label>
                 </div>
               </div>
-            `}
+            `
+            }
 
             <div class="settings-section">
               <h3>Data</h3>
@@ -183,16 +225,21 @@ export const AppSettings = {
 
     document.body.appendChild(modal);
 
-    const swVersionEl = modal.querySelector("#settingsSwVersion") as HTMLElement | null;
+    const swVersionEl = modal.querySelector(
+      "#settingsSwVersion",
+    ) as HTMLElement | null;
     if (swVersionEl) {
       try {
-        swVersionEl.textContent = localStorage.getItem("gardenFence.swVersion") || "—";
+        swVersionEl.textContent =
+          localStorage.getItem("gardenFence.swVersion") || "—";
       } catch {
         swVersionEl.textContent = "—";
       }
     }
 
-    const clearCacheBtn = modal.querySelector("#clearCacheBtn") as HTMLButtonElement | null;
+    const clearCacheBtn = modal.querySelector(
+      "#clearCacheBtn",
+    ) as HTMLButtonElement | null;
     clearCacheBtn?.addEventListener("click", async () => {
       if (!confirm("Clear offline cache and reload?")) return;
       if (clearCacheBtn) {
@@ -201,33 +248,44 @@ export const AppSettings = {
       }
 
       const clearViaWindow = async () => {
-        if (!("caches" in window)) throw new Error("Cache storage not available");
+        if (!("caches" in window))
+          throw new Error("Cache storage not available");
         const keys = await caches.keys();
         await Promise.all(
-          keys.filter((k) => k.startsWith("garden-fence-")).map((k) => caches.delete(k)),
+          keys
+            .filter((k) => k.startsWith("garden-fence-"))
+            .map((k) => caches.delete(k)),
         );
       };
 
       try {
-        if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+        if (
+          "serviceWorker" in navigator &&
+          navigator.serviceWorker.controller
+        ) {
           const controller = navigator.serviceWorker.controller;
-          const result = await new Promise<"ok" | "fail" | "timeout">((resolve) => {
-            let timeoutId: number | null = null;
-            const onMessage = (event: MessageEvent) => {
-              const type = event?.data?.type;
-              if (type === "CACHES_CLEARED") finish("ok");
-              if (type === "CACHES_CLEAR_FAILED") finish("fail");
-            };
-            const finish = (value: "ok" | "fail" | "timeout") => {
-              if (timeoutId) window.clearTimeout(timeoutId);
-              timeoutId = null;
-              navigator.serviceWorker.removeEventListener("message", onMessage);
-              resolve(value);
-            };
-            timeoutId = window.setTimeout(() => finish("timeout"), 4000);
-            navigator.serviceWorker.addEventListener("message", onMessage);
-            controller.postMessage({ type: "CLEAR_CACHES" });
-          });
+          const result = await new Promise<"ok" | "fail" | "timeout">(
+            (resolve) => {
+              let timeoutId: number | null = null;
+              const onMessage = (event: MessageEvent) => {
+                const type = event?.data?.type;
+                if (type === "CACHES_CLEARED") finish("ok");
+                if (type === "CACHES_CLEAR_FAILED") finish("fail");
+              };
+              const finish = (value: "ok" | "fail" | "timeout") => {
+                if (timeoutId) window.clearTimeout(timeoutId);
+                timeoutId = null;
+                navigator.serviceWorker.removeEventListener(
+                  "message",
+                  onMessage,
+                );
+                resolve(value);
+              };
+              timeoutId = window.setTimeout(() => finish("timeout"), 4000);
+              navigator.serviceWorker.addEventListener("message", onMessage);
+              controller.postMessage({ type: "CLEAR_CACHES" });
+            },
+          );
 
           if (result !== "ok") await clearViaWindow();
         } else {
@@ -256,12 +314,10 @@ export const AppSettings = {
       NDSupport.showSettingsPanel();
     });
 
-    modal
-      .querySelector("#downloadBackupBtn")
-      ?.addEventListener("click", () => {
-        this.downloadBackup();
-        callbacks.onShowToast?.("⬇️", "Backup downloaded");
-      });
+    modal.querySelector("#downloadBackupBtn")?.addEventListener("click", () => {
+      this.downloadBackup();
+      callbacks.onShowToast?.("⬇️", "Backup downloaded");
+    });
 
     modal
       .querySelector("#exportGoalsJsonBtn")
@@ -270,14 +326,14 @@ export const AppSettings = {
         callbacks.onShowToast?.("⬇️", "Goals exported");
       });
 
-    modal
-      .querySelector("#exportGoalsCsvBtn")
-      ?.addEventListener("click", () => {
-        this.downloadGoalsCsv();
-        callbacks.onShowToast?.("⬇️", "Goals exported");
-      });
+    modal.querySelector("#exportGoalsCsvBtn")?.addEventListener("click", () => {
+      this.downloadGoalsCsv();
+      callbacks.onShowToast?.("⬇️", "Goals exported");
+    });
 
-    const importFile = modal.querySelector("#importBackupFile") as HTMLInputElement | null;
+    const importFile = modal.querySelector(
+      "#importBackupFile",
+    ) as HTMLInputElement | null;
     modal.querySelector("#importBackupBtn")?.addEventListener("click", () => {
       importFile?.click();
     });
@@ -305,22 +361,52 @@ export const AppSettings = {
     });
 
     modal.querySelector("#resetAllBtn")?.addEventListener("click", () => {
-      if (!confirm("This will permanently delete ALL data on this device. Continue?"))
+      if (
+        !confirm(
+          "This will permanently delete ALL data on this device. Continue?",
+        )
+      )
         return;
       if (!confirm("Last check: delete everything?")) return;
       this.resetAllData();
     });
 
     modal.querySelector("#saveAppSettings")?.addEventListener("click", () => {
-      const defaultView = (modal.querySelector("#settingsDefaultView") as HTMLSelectElement | null)?.value;
-      const startFocusMode = !!(modal.querySelector("#settingsFocusMode") as HTMLInputElement)?.checked;
-      const showHeader = !!(modal.querySelector("#settingsShowHeader") as HTMLInputElement)?.checked;
-      const showControlBar = !!(modal.querySelector("#settingsShowControlBar") as HTMLInputElement)?.checked;
-      const showSidebar = !!(modal.querySelector("#settingsShowSidebar") as HTMLInputElement)?.checked;
-      const showNowPanel = !!(modal.querySelector("#settingsShowNowPanel") as HTMLInputElement)?.checked;
-      const showAffirmation = !!(modal.querySelector("#settingsShowAffirmation") as HTMLInputElement)?.checked;
-      const showWhatsNext = !!(modal.querySelector("#settingsShowWhatsNext") as HTMLInputElement)?.checked;
-      const showAchievements = !!(modal.querySelector("#settingsShowAchievements") as HTMLInputElement)?.checked;
+      const defaultView = (
+        modal.querySelector("#settingsDefaultView") as HTMLSelectElement | null
+      )?.value;
+      const startFocusMode = !!(
+        modal.querySelector("#settingsFocusMode") as HTMLInputElement
+      )?.checked;
+      const showHeader = !!(
+        modal.querySelector("#settingsShowHeader") as HTMLInputElement
+      )?.checked;
+      const showControlBar = !!(
+        modal.querySelector("#settingsShowControlBar") as HTMLInputElement
+      )?.checked;
+      const showSidebar = !!(
+        modal.querySelector("#settingsShowSidebar") as HTMLInputElement
+      )?.checked;
+      const showNowPanel = !!(
+        modal.querySelector("#settingsShowNowPanel") as HTMLInputElement
+      )?.checked;
+      const showAffirmation = !!(
+        modal.querySelector("#settingsShowAffirmation") as HTMLInputElement
+      )?.checked;
+      const showWhatsNext = !!(
+        modal.querySelector("#settingsShowWhatsNext") as HTMLInputElement
+      )?.checked;
+      const showAchievements = !!(
+        modal.querySelector("#settingsShowAchievements") as HTMLInputElement
+      )?.checked;
+      const checkInDay = parseInt(
+        (modal.querySelector("#settingsCheckInDay") as HTMLSelectElement | null)
+          ?.value || "0",
+        10,
+      );
+      const checkInTime =
+        (modal.querySelector("#settingsCheckInTime") as HTMLInputElement | null)
+          ?.value || "09:00";
 
       if (
         State.data &&
@@ -357,6 +443,12 @@ export const AppSettings = {
             showAchievements,
           };
         }
+
+        State.data.preferences.nd = {
+          ...State.data.preferences.nd,
+          checkInDay,
+          checkInTime,
+        };
 
         State.save();
       }
@@ -525,41 +617,43 @@ export const AppSettings = {
     }
 
     const data = candidate as Record<string, unknown>;
-    const normalized = defaults as AppData & { intentions?: Record<string, unknown> };
-    normalized.goals = Array.isArray(data.goals) ? data.goals as Goal[] : [];
+    const normalized = defaults as AppData & {
+      intentions?: Record<string, unknown>;
+    };
+    normalized.goals = Array.isArray(data.goals) ? (data.goals as Goal[]) : [];
     // Legacy: intentions no longer used; preserve only if present.
     normalized.intentions =
       data.intentions && typeof data.intentions === "object"
-        ? data.intentions as Record<string, unknown>
+        ? (data.intentions as Record<string, unknown>)
         : {};
     normalized.streak =
       data.streak && typeof data.streak === "object"
-        ? data.streak as typeof defaults.streak
+        ? (data.streak as typeof defaults.streak)
         : defaults.streak;
     normalized.achievements = Array.isArray(data.achievements)
-      ? data.achievements as string[]
+      ? (data.achievements as string[])
       : [];
     normalized.weeklyReviews = Array.isArray(data.weeklyReviews)
-      ? data.weeklyReviews as WeeklyReview[]
+      ? (data.weeklyReviews as WeeklyReview[])
       : [];
     normalized.brainDump = Array.isArray(data.brainDump)
-      ? data.brainDump as BrainDumpEntry[]
+      ? (data.brainDump as BrainDumpEntry[])
       : [];
     normalized.bodyDoubleHistory = Array.isArray(data.bodyDoubleHistory)
-      ? data.bodyDoubleHistory as BodyDoubleSession[]
+      ? (data.bodyDoubleHistory as BodyDoubleSession[])
       : [];
 
     normalized.preferences = {
       ...defaults.preferences,
       ...(data.preferences && typeof data.preferences === "object"
-        ? data.preferences as typeof defaults.preferences
+        ? (data.preferences as typeof defaults.preferences)
         : {}),
       nd: {
         ...defaults.preferences.nd,
         ...(data.preferences &&
-          typeof data.preferences === "object" &&
-          (data.preferences as any).nd &&
-          typeof (data.preferences as any).nd === "object"
+        typeof data.preferences === "object" &&
+        (data.preferences as any).nd &&
+        typeof (data.preferences as any).nd === "object"
           ? (data.preferences as any).nd
           : {}),
       },
@@ -567,7 +661,10 @@ export const AppSettings = {
 
     normalized.analytics =
       data.analytics && typeof data.analytics === "object"
-        ? { ...defaults.analytics, ...(data.analytics as typeof defaults.analytics) }
+        ? {
+            ...defaults.analytics,
+            ...(data.analytics as typeof defaults.analytics),
+          }
         : defaults.analytics;
 
     normalized.createdAt =
