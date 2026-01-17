@@ -73,6 +73,13 @@ export const AppSettings = {
                   Start in Focus (reduce visual noise)
                 </label>
               </div>
+              <div class="setting-row">
+                <label for="settingsThemeMode">Theme mode</label>
+                <select id="settingsThemeMode">
+                  <option value="auto" ${!localStorage.getItem("gardenFence.theme") && !prefs.theme ? "selected" : ""}>Automatic (time-based)</option>
+                  <option value="manual" ${localStorage.getItem("gardenFence.theme") || prefs.theme ? "selected" : ""}>Manual (user choice)</option>
+                </select>
+              </div>
               ${
                 isMobile
                   ? ""
@@ -407,6 +414,9 @@ export const AppSettings = {
       const checkInTime =
         (modal.querySelector("#settingsCheckInTime") as HTMLInputElement | null)
           ?.value || "09:00";
+      const themeMode =
+        (modal.querySelector("#settingsThemeMode") as HTMLSelectElement | null)
+          ?.value || "auto";
 
       if (
         State.data &&
@@ -449,6 +459,25 @@ export const AppSettings = {
           checkInDay,
           checkInTime,
         };
+
+        // Handle theme mode setting
+        if (themeMode === "auto") {
+          // Switch to automatic mode - clear manual theme
+          localStorage.removeItem("gardenFence.theme");
+          State.data.preferences.theme = "";
+          // Simplify the theme application by triggering a page reload which will apply the auto theme
+          window.location.reload();
+        } else if (themeMode === "manual") {
+          // Switch to manual mode - if no manual theme is set, use current system theme
+          if (
+            !State.data.preferences.theme &&
+            !localStorage.getItem("gardenFence.theme")
+          ) {
+            const currentHour = new Date().getHours();
+            const isNightTime = currentHour < 6 || currentHour >= 18;
+            State.data.preferences.theme = isNightTime ? "night" : "day";
+          }
+        }
 
         State.save();
       }

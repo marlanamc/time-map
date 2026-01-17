@@ -1,6 +1,7 @@
 import { State } from "../../core/State";
 import { ND_CONFIG } from "../../config";
 import { ThemeManager } from "../../theme/ThemeManager";
+import { LiquidEffects } from "../../components/dayView/LiquidEffects";
 import type { AccentTheme } from "../../types";
 
 type SupportPanelCallbacks = {
@@ -123,8 +124,27 @@ export class SupportPanel {
     // Support panel appearance controls
     document
       .getElementById("supportPanelThemeToggle")
-      ?.addEventListener("click", () => {
+      ?.addEventListener("click", (e) => {
         if (!State.data) return;
+
+        // Check if user has a manual theme set
+        const hasManualTheme = localStorage.getItem("gardenFence.theme");
+
+        if (hasManualTheme) {
+          // If long press (or shift+click), clear manual theme to revert to auto
+          if (e.shiftKey) {
+            localStorage.removeItem("gardenFence.theme");
+            State.data.preferences.theme = "";
+            State.save();
+
+            // Apply time-based theme immediately
+            LiquidEffects.applyTimeTheme();
+
+            this.syncAppearanceControls();
+            return;
+          }
+        }
+
         const current = ThemeManager.resolveTheme(State.data.preferences.theme);
         const next = current === "night" ? "day" : "night";
         State.data.preferences.theme = next;
@@ -216,6 +236,23 @@ export class SupportPanel {
         ThemeManager.resolveTheme(State.data.preferences.theme) === "night";
       themeToggle.classList.toggle("active", isNight);
       themeToggle.setAttribute("aria-checked", String(isNight));
+
+      // Add visual indicator for manual vs auto theme mode
+      const hasManualTheme =
+        localStorage.getItem("gardenFence.theme") ||
+        State.data.preferences.theme;
+      const isAutoMode = !hasManualTheme;
+
+      // Update title to show current mode
+      if (isAutoMode) {
+        themeToggle.title =
+          "Theme: Automatic (click to set manual, Shift+click to reset to auto)";
+      } else {
+        themeToggle.title = `Theme: Manual (${isNight ? "Night" : "Day"}) (click to toggle, Shift+click to reset to auto)`;
+      }
+
+      // Add visual class for auto mode
+      themeToggle.classList.toggle("auto-theme", isAutoMode);
     }
 
     const themePicker = document.getElementById("supportPanelThemePicker");
