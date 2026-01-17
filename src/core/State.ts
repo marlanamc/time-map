@@ -16,6 +16,7 @@ import {
 import { eventBus } from "./EventBus";
 import { isSupabaseConfigured } from "../supabaseClient";
 import { BadgingService } from "../services/pwa/BadgingService";
+import DB, { DB_STORES } from "../db";
 
 const AUTH_MODAL_DONT_SHOW_KEY = "gardenFence.authModal.dontShow";
 
@@ -48,7 +49,10 @@ export const State: AppState & {
   viewingDate: new Date(),
 
   async init() {
-    // Check for user (avoid loading Supabase client if not configured)
+    // 1. Always load data first (handles cloud, local, and IDB fallbacks)
+    await this.load();
+
+    // 2. Check for user (avoid loading Supabase client if not configured)
     const user = isSupabaseConfigured ? await SupabaseService.getUser() : null;
 
     if (!user) {
@@ -62,21 +66,16 @@ export const State: AppState & {
 
       if (!suppressAuthModal) {
         // Show Auth Modal if not logged in
-        console.log("No user found, showing auth modal...");
+        console.log("[State] No user found, showing auth modal...");
         const auth = new AuthComponent();
         auth.render();
-        // Ensure modal is visible
         auth.show();
       }
     } else {
-      // Load cloud data
-      console.log("User logged in, loading cloud data...");
-      await this.load();
-
-      // Start optimization services
+      // Start optimization services for logged-in users
+      console.log("[State] User logged in, starting optimization services...");
       batchSaveService.start();
       await warmCache(user.id);
-      console.log("✓ Performance optimization services started");
       console.log("✓ Performance optimization services started");
     }
 
@@ -91,8 +90,8 @@ export const State: AppState & {
 
     this.migrateDataIfNeeded();
     const changed = this.ensureDataShape();
-    // Only save if we have data and user is logged in
-    if (changed && user) this.save();
+    // Only save if data shape was corrected or migrated
+    if (changed) this.save();
 
     // Apply persisted preferences to runtime state
     this.focusMode = !!this.data?.preferences?.focusMode;
@@ -390,24 +389,31 @@ export const State: AppState & {
 
   async load(): Promise<void> {
     try {
-      console.log("[State] Loading data from cloud...");
+      console.log("[State] Starting data load...");
       const cloudData = await SupabaseService.loadAllData();
+
       if (cloudData) {
-        // Merge cloud data with defaults to ensure complete state
+        // Option A: Cloud Data Success
         this.data = { ...this.getDefaultData(), ...cloudData } as AppData;
         console.log("[State] ✓ Data loaded from cloud:", {
           goals: this.data.goals.length,
-          brainDump: this.data.brainDump.length,
-          achievements: this.data.achievements.length,
-          weeklyReviews: this.data.weeklyReviews.length,
           hasPreferences: !!this.data.preferences,
         });
 
-        this.updateAppBadge();
+        // Sync cloud goals to local IndexedDB for future offline resilience
+        if (this.data.goals.length > 0) {
+          try {
+            await DB.bulkUpdate(DB_STORES.GOALS, this.data.goals);
+            console.log("[State] ✓ Synced cloud goals to IndexedDB");
+          } catch (dbError) {
+            console.warn(
+              "[State] Failed to sync cloud goals to IndexedDB:",
+              dbError,
+            );
+          }
+        }
 
-        // PR1.5: Persist the cloud-loaded snapshot locally so an offline refresh doesn't
-        // fall back to empty localStorage before any normal save path runs.
-        // This is intentionally local-only (no State.save(), no cloud side effects).
+        // Persist the cloud-loaded snapshot locally for offline fallback
         try {
           localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
         } catch (storageError) {
@@ -417,8 +423,10 @@ export const State: AppState & {
           );
         }
       } else {
-        // Fallback to local or default
-        console.log("[State] No cloud data found, checking localStorage...");
+        // Option B: No Cloud Data - Checking LocalStorage
+        console.log(
+          "[State] No cloud data available, checking localStorage...",
+        );
         const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
         if (stored) {
           try {
@@ -429,39 +437,40 @@ export const State: AppState & {
               "[State] Failed to parse localStorage data:",
               parseError,
             );
-            this.data = null;
           }
-        } else {
-          console.log("[State] No local data found, will use defaults");
-          this.data = null;
         }
       }
-    } catch (e) {
-      console.error("[State] Failed to load data:", e);
-      if (e instanceof Error) {
-        console.error("[State] Error details:", {
-          message: e.message,
-          stack: e.stack,
-          name: e.name,
-        });
-      }
-      // Try to fallback to localStorage on error
-      try {
-        const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
-        if (stored) {
-          this.data = JSON.parse(stored) as AppData;
-          console.log(
-            "[State] ✓ Fallback: Data loaded from localStorage after error",
-          );
-        } else {
-          this.data = null;
-        }
-      } catch (fallbackError) {
-        console.error(
-          "[State] Fallback to localStorage also failed:",
-          fallbackError,
+
+      // Option C: IndexedDB Recovery (Fallback if goals are missing)
+      if (!this.data || !this.data.goals || this.data.goals.length === 0) {
+        console.log(
+          "[State] Data absent or empty, searching IndexedDB for goals...",
         );
-        this.data = null;
+        try {
+          const localGoals = await DB.getAll(DB_STORES.GOALS);
+          if (localGoals && localGoals.length > 0) {
+            if (!this.data) this.data = this.getDefaultData();
+            this.data.goals = localGoals;
+            console.log("[State] ✓ Recovered goals from IndexedDB");
+
+            // Save this recovered state to localStorage for faster future loading
+            localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.data));
+          }
+        } catch (dbError) {
+          console.error("[State] Failed to load from IndexedDB:", dbError);
+        }
+      }
+
+      if (!this.data) {
+        console.log("[State] No data found in any source, will use defaults");
+      }
+
+      this.updateAppBadge();
+    } catch (e) {
+      console.error("[State] Critical error during data load:", e);
+      if (!this.data) {
+        console.log("[State] Load failed, falling back to empty defaults");
+        this.data = this.getDefaultData();
       }
     }
   },
