@@ -101,6 +101,11 @@ export const LivingGardenRenderer = {
     const milestonesToday = Goals.getForRange(viewDate, viewDate).filter(
       (g) => g.level === "milestone" && g.status !== "done",
     );
+    // Check milestones for the entire year (like visions)
+    const milestonesInYear = Goals.getForRange(
+      new Date(weekYear, 0, 1),
+      new Date(weekYear, 11, 31),
+    ).filter((g) => g.level === "milestone" && g.status !== "done");
     const focusesInWeek = Goals.getForRange(weekStart, weekEnd).filter(
       (g) => g.level === "focus" && g.status !== "done",
     );
@@ -345,8 +350,9 @@ export const LivingGardenRenderer = {
         `;
 
         // Build hero section content - only show when there's nothing set
-        // Check if there are any active goals: visions, milestones, focuses, or intentions
-        const hasActivity = hasVisions || activeMilestones > 0 || hasFocuses || hasIntentions;
+        // Check if there are any active goals: visions, milestones (for year), focuses, or intentions
+        const hasMilestones = milestonesInYear.length > 0;
+        const hasActivity = hasVisions || hasMilestones || hasFocuses || hasIntentions;
         let heroSection = "";
         
         if (!hasActivity) {
