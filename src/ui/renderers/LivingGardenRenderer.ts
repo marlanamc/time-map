@@ -329,6 +329,8 @@ export const LivingGardenRenderer = {
         // Only show summary message when there's nothing set
         const activeMilestones = milestonesToday.length;
         const hasIntentions = intentionsInWeek.length > 0;
+        const hasFocuses = focusesInWeek.length > 0;
+        const hasVisions = visions.length > 0;
         let headerSummary = "";
         
         if (activeMilestones === 0 && !hasIntentions) {
@@ -343,7 +345,8 @@ export const LivingGardenRenderer = {
         `;
 
         // Build hero section content - only show when there's nothing set
-        const hasActivity = activeMilestones > 0 || hasIntentions;
+        // Check if there are any active goals: visions, milestones, focuses, or intentions
+        const hasActivity = hasVisions || activeMilestones > 0 || hasFocuses || hasIntentions;
         let heroSection = "";
         
         if (!hasActivity) {
