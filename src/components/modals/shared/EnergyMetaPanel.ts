@@ -1,27 +1,96 @@
 import { ND_CONFIG } from "../../../config/ndConfig";
 import type { AccentTheme, GoalLevel, GoalMeta } from "../../../types";
 
-type Option = {
-  value: string;
-  label: string;
-};
+const COMMON_EMOJIS = [
+  "🌟",
+  "🎯",
+  "🔭",
+  "🍎",
+  "🏃",
+  "🧘",
+  "🏠",
+  "🎨",
+  "💻",
+  "📚",
+  "❤️",
+  "💰",
+  "🌱",
+  "✈️",
+  "🎵",
+  "📷",
+  "🚀",
+  "🌈",
+  "🔥",
+  "⚡",
+  "🧩",
+  "🛠️",
+  "🤝",
+  "📣",
+];
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+function renderColorPicker(selectedTheme?: AccentTheme): string {
+  const options = Object.entries(ND_CONFIG.ACCENT_THEMES)
+    .filter(([key]) => key !== "rainbow")
+    .map(([key, meta]) => {
+      const isSelected = selectedTheme === key;
+      return `
+        <button 
+          type="button" 
+          class="color-swatch${isSelected ? " is-selected" : ""}" 
+          data-theme="${key}"
+          title="${meta.label}"
+          style="background-color: ${meta.color}"
+        ></button>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="form-group">
+      <label class="flat-section-title">Visual Identity</label>
+      <label>Accent Color</label>
+      <div class="color-picker-grid" id="visionColorPicker">
+        ${options}
+      </div>
+    </div>
+  `;
 }
 
-function themeOptions(): Option[] {
-  return Object.entries(ND_CONFIG.ACCENT_THEMES)
-    .filter(([key]) => key !== "rainbow")
-    .map(([key, meta]) => ({
-      value: key,
-      label: meta.label,
-    }));
+function renderEmojiPicker(level: GoalLevel, currentIcon: string): string {
+  const grid = COMMON_EMOJIS.map((emoji) => {
+    const isSelected = currentIcon === emoji;
+    return `
+      <button 
+        type="button" 
+        class="emoji-swatch${isSelected ? " is-selected" : ""}" 
+        data-emoji="${emoji}"
+      >${emoji}</button>
+    `;
+  }).join("");
+
+  const label = level.charAt(0).toUpperCase() + level.slice(1) + " Emoji";
+  const isCustom = currentIcon !== "" && !COMMON_EMOJIS.includes(currentIcon);
+
+  return `
+    <div class="form-group">
+      <label>${label}</label>
+      <div class="emoji-picker-container">
+        <div class="emoji-grid" id="${level}EmojiPicker">
+          ${grid}
+        </div>
+        <div class="custom-emoji-row">
+          <input 
+            type="text" 
+            id="${level}CustomEmoji" 
+            class="modal-input custom-emoji-input" 
+            placeholder="Or type/paste any emoji..." 
+            value="${isCustom ? currentIcon : ""}"
+            maxlength="10"
+          />
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 export type EnergyMetaPanelOptions = {
@@ -37,91 +106,31 @@ export type EnergyMetaPanelSetupOptions = EnergyMetaPanelOptions & {
   onIconChange?: (icon: string) => void; // Add icon change handler
 };
 
-function renderEmojiInput(id: string, label: string, value: string): string {
-  return `
-    <div class="form-group">
-      <label for="${id}">${label}</label>
-      <div class="vision-icon-input-group">
-        <input
-          type="text"
-          id="${id}"
-          class="modal-input vision-emoji-input"
-          placeholder="Tap to choose emoji"
-          maxlength="10"
-          value="${escapeHtml(value)}"
-          readonly
-          aria-label="Tap to open emoji keyboard"
-        />
-      </div>
-      <p class="vision-icon-hint">Tap the field, then use the emoji key on your keyboard</p>
-    </div>
-  `;
-}
-
 export function renderEnergyMetaPanel(opts: EnergyMetaPanelOptions): string {
   const { level, meta, icon } = opts;
 
   if (level === "vision") {
-    const options = themeOptions()
-      .map(({ value, label }) => {
-        const selected = meta?.accentTheme === value ? "selected" : "";
-        return `<option value="${value}" ${selected}>${label}</option>`;
-      })
-      .join("");
     return `
-      ${renderEmojiInput("visionIcon", "Vision emoji (optional)", icon ?? "")}
-      <div class="form-group">
-        <label for="visionAccent">Vision color (optional)</label>
-        <select id="visionAccent" class="modal-select">
-          <option value=""${
-            meta?.accentTheme ? "" : " selected"
-          }>Default</option>
-          ${options}
-        </select>
-      </div>
-    `;
-  }
-
-  if (level === "focus") {
-    return `
-      ${renderEmojiInput("focusIcon", "Focus emoji (optional)", icon ?? "")}
-      <div class="form-group">
-        <label class="toggle-label">
-          <input type="checkbox" id="focusEasyMode"${
-            meta?.easyMode ? " checked" : ""
-          } />
-          Easy mode week
-        </label>
-      </div>
-      <div class="form-group">
-        <label for="focusLowEnergy">Low-energy version (optional)</label>
-        <textarea id="focusLowEnergy" rows="2">${escapeHtml(
-          meta?.lowEnergyVersion ?? "",
-        )}</textarea>
-      </div>
-    `;
-  }
-
-  if (level === "intention") {
-    return `
-      <div class="form-group">
-        <label for="intentionTiny">Tiny version (optional)</label>
-        <input
-          type="text"
-          id="intentionTiny"
-          value="${escapeHtml(meta?.tinyVersion ?? "")}"
-        />
-      </div>
+      ${renderEmojiPicker("vision", icon ?? "")}
+      ${renderColorPicker(meta?.accentTheme)}
     `;
   }
 
   if (level === "milestone") {
     return `
-      ${renderEmojiInput(
-        "milestoneIcon",
-        "Milestone emoji (optional)",
-        icon ?? "",
-      )}
+      ${renderEmojiPicker("milestone", icon ?? "")}
+    `;
+  }
+
+  if (level === "focus") {
+    return `
+      ${renderEmojiPicker("focus", icon ?? "")}
+    `;
+  }
+
+  if (level === "intention") {
+    return `
+      ${renderEmojiPicker("intention", icon ?? "")}
     `;
   }
 
@@ -170,76 +179,75 @@ export function setupEnergyMetaPanel(
     }
   };
 
-  if (level === "vision") {
-    const accent = container.querySelector<HTMLSelectElement>("#visionAccent");
-    const iconInput = container.querySelector<HTMLInputElement>("#visionIcon");
+  // Helper to setup emoji grid clicks and custom input
+  const setupEmojiGrid = (level: string) => {
+    const grid = container.querySelector(`#${level}EmojiPicker`);
+    const customInput = container.querySelector<HTMLInputElement>(
+      `#${level}CustomEmoji`,
+    );
 
-    // Handle accent theme change
-    accent?.addEventListener("change", () => {
-      update(
-        {
-          accentTheme: accent.value ? (accent.value as AccentTheme) : undefined,
-        },
-        false,
-      );
+    const updateSelection = (emoji: string) => {
+      onIconChange?.(emoji);
+      // Update grid selection
+      grid?.querySelectorAll(".emoji-swatch").forEach((b) => {
+        const isMatch = (b as HTMLElement).dataset.emoji === emoji;
+        b.classList.toggle("is-selected", isMatch);
+      });
+      // Update custom input if the emoji is NOT in the grid or it's empty
+      if (customInput && emoji !== customInput.value) {
+        if (COMMON_EMOJIS.includes(emoji)) {
+          customInput.value = "";
+        } else {
+          customInput.value = emoji;
+        }
+      }
+    };
+
+    grid?.querySelectorAll(".emoji-swatch").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const emoji = (btn as HTMLElement).dataset.emoji;
+        if (emoji) {
+          updateSelection(emoji);
+        }
+      });
     });
 
-    setupEmojiField(iconInput, onIconChange);
+    customInput?.addEventListener("input", () => {
+      const emoji = customInput.value.trim();
+      updateSelection(emoji);
+    });
+  };
+
+  if (level === "vision") {
+    const colorPicker = container.querySelector("#visionColorPicker");
+    colorPicker?.querySelectorAll(".color-swatch").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const theme = (btn as HTMLElement).dataset.theme as AccentTheme;
+        update({ accentTheme: theme }, false);
+        // Update visualization
+        colorPicker
+          .querySelectorAll(".color-swatch")
+          .forEach((b) => b.classList.remove("is-selected"));
+        btn.classList.add("is-selected");
+      });
+    });
+
+    setupEmojiGrid("vision");
     return;
   }
 
   if (level === "milestone") {
-    const iconInput =
-      container.querySelector<HTMLInputElement>("#milestoneIcon");
-    setupEmojiField(iconInput, onIconChange);
+    setupEmojiGrid("milestone");
     return;
   }
 
   if (level === "focus") {
-    const easyMode =
-      container.querySelector<HTMLInputElement>("#focusEasyMode");
-    const lowEnergy =
-      container.querySelector<HTMLTextAreaElement>("#focusLowEnergy");
-    const iconInput = container.querySelector<HTMLInputElement>("#focusIcon");
-
-    easyMode?.addEventListener("change", () => {
-      update({ easyMode: easyMode.checked ? true : undefined }, true);
-    });
-
-    lowEnergy?.addEventListener("input", () => {
-      update({ lowEnergyVersion: lowEnergy.value }, false);
-    });
-
-    setupEmojiField(iconInput, onIconChange);
+    setupEmojiGrid("focus");
     return;
   }
 
   if (level === "intention") {
-    const tiny = container.querySelector<HTMLInputElement>("#intentionTiny");
-    tiny?.addEventListener("input", () => {
-      update({ tinyVersion: tiny.value }, false);
-    });
-  }
-}
-
-function setupEmojiField(
-  iconInput: HTMLInputElement | null,
-  onIconChange?: (icon: string) => void,
-) {
-  if (iconInput) {
-    // Remove readonly on focus to allow input
-    iconInput.addEventListener("focus", () => {
-      iconInput.removeAttribute("readonly");
-    });
-
-    // Re-add readonly on blur to maintain tap-to-open behavior
-    iconInput.addEventListener("blur", () => {
-      iconInput.setAttribute("readonly", "");
-    });
-
-    // Handle icon input change
-    iconInput.addEventListener("input", () => {
-      onIconChange?.(iconInput.value);
-    });
+    setupEmojiGrid("intention");
+    return;
   }
 }

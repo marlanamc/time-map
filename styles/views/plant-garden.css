@@ -1,0 +1,343 @@
+/* Plant Garden Design - Simple & Organic */
+/* Plant Garden Design - Simple & Organic */
+.plant-garden-view {
+  min-height: 100vh;
+  padding: var(--space-8) var(--space-4);
+  /* Use Grid for Desktop */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  column-gap: var(--space-4);
+  row-gap: var(--space-12);
+  align-items: start;
+  justify-items: center;
+  max-width: 1100px; /* Tighter container */
+  margin: 0 auto;
+
+  /* Use seasonal gradient background if available, or fallbacks */
+  background: transparent;
+}
+
+.plant-plot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  /* Entrance animation */
+  animation: sproutUp 0.8s ease-out;
+}
+
+/* --- The Vision (Base/Root) --- */
+.plant-base {
+  z-index: 10;
+  cursor: pointer;
+  /* Make it look ground-like or like a pot/seed */
+  background: var(--bg-surface);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-6);
+  box-shadow: var(--shadow-md);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  width: 100%; /* Fill grid cell */
+  min-height: 160px; /* Consistent height */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center; /* Center multi-line text */
+}
+
+.plant-base:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.plant-base.is-expanded {
+  border-color: var(--sage);
+}
+
+.plant-base-icon {
+  font-size: 2rem;
+  margin-bottom: var(--space-2);
+  display: block;
+}
+
+.plant-base-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.plant-base-meta {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+}
+
+/* --- The Main Stalk --- */
+.plant-stalk {
+  display: flex;
+  flex-direction: column-reverse; /* Grow upwards */
+  align-items: center;
+  width: 4px;
+  background: var(--sage);
+  margin-bottom: -10px; /* Connect to base inside styling if needed, or gap */
+  border-radius: 4px;
+  position: relative;
+  transition: height 0.5s ease;
+  z-index: 5;
+  /* The stalk grows out of the base */
+  margin-bottom: var(--space-4); /* Gap between base */
+}
+
+/* The connector from Base to Stalk */
+.plant-connector {
+  width: 4px;
+  height: var(--space-8);
+  background: var(--sage);
+  margin-top: -2px;
+}
+
+/* --- Milestones (Branches) --- */
+.plant-milestone-nodes {
+  display: flex;
+  flex-direction: column-reverse; /* Jan at bottom, Dec at top? Or Top-down? User said "base is vision", so bottom-up makes sense for growth. */
+  gap: var(--space-8);
+  padding-bottom: var(--space-4);
+  width: 100%;
+  align-items: center;
+}
+
+.plant-node {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Hiding nodes when vision collapsed */
+.plant-plot:not(.expanded) .plant-stalk,
+.plant-plot:not(.expanded) .plant-milestone-nodes {
+  display: none;
+}
+
+/* The wrapper for a milestone branch */
+.milestone-branch-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Branches alternate L/R? Or just one side? 
+     "Simple design" might mean straight up with alternating branches.
+  */
+}
+
+/* Alternating sides for visual interest */
+.plant-node:nth-child(odd) .milestone-branch-wrapper {
+  align-items: flex-start;
+  margin-right: 50%; /* Push to left */
+  padding-right: var(--space-4);
+}
+.plant-node:nth-child(even) .milestone-branch-wrapper {
+  align-items: flex-end;
+  margin-left: 50%; /* Push to right */
+  padding-left: var(--space-4);
+}
+
+/* The Horizontal Branch Line */
+.plant-node:nth-child(odd) .milestone-line {
+  /* Separated line removed for cleaner look with new cards */
+  display: none;
+}
+.plant-node:nth-child(even) .milestone-line {
+  /* Separated line removed for cleaner look with new cards */
+  display: none;
+}
+
+/* The Milestone Card */
+.milestone-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  padding: var(--space-4) var(--space-6); /* More padding */
+  border-radius: var(--radius-lg); /* Softer corners */
+  cursor: pointer;
+  min-width: 200px;
+  text-align: center; /* Center visuals */
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+  position: relative;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.milestone-card:hover {
+  transform: translateY(-2px);
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
+}
+
+.milestone-card.is-active {
+  border-color: var(--teal);
+  background: var(--bg-active);
+}
+
+.milestone-emoji {
+  font-size: 1.8rem;
+  margin-bottom: var(--space-1);
+}
+
+.milestone-title {
+  font-weight: 600;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+
+.milestone-month {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* --- Focuses (Sub-branches) --- */
+.focus-container {
+  /* Hidden by default */
+  display: none;
+  padding-top: var(--space-2);
+  /* Indent to look like sub-branch */
+  border-left: 2px dashed var(--accent-muted);
+  margin-top: var(--space-2);
+  padding-left: var(--space-3);
+  margin-left: var(--space-3); /* Connect to milestone */
+}
+
+.milestone-branch-wrapper.expanded .focus-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: growIn 0.3s ease-out;
+}
+
+.focus-card {
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
+}
+
+.focus-card:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.focus-card.is-active {
+  background: var(--bg-active);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* --- Intentions (Leaves) --- */
+.intention-container {
+  display: none;
+  margin-left: var(--space-3);
+  padding-top: var(--space-1);
+  gap: var(--space-1);
+}
+
+.focus-wrapper.expanded .intention-container {
+  display: flex;
+  flex-direction: column;
+  animation: leafUnfold 0.4s ease-out;
+}
+
+.intention-leaf {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  padding: 4px 8px;
+  background: var(--seasonal-flower); /* "Rose" or similar */
+  color: #fff; /* Assuming dark petail color, or adjust text */
+  border-radius: 12px 0 12px 0; /* Leaf shape */
+  margin-bottom: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.intention-leaf.is-done {
+  background: var(--success);
+  opacity: 0.8;
+}
+
+.intention-leaf-text {
+  /* color: var(--text-primary); -- usually white on petals */
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+/* --- Mobile Adjustments --- */
+@media (max-width: 600px) {
+  .plant-plot {
+    align-items: flex-start; /* Align left */
+    padding-left: var(--space-8); /* Stalk on left */
+  }
+
+  .plant-base {
+    width: 100%;
+    margin-left: -20px; /* Center-ish */
+  }
+
+  .plant-stalk {
+    /* Stalk on the left rail */
+    position: absolute;
+    left: 20px;
+    top: 100px; /* Below base */
+    bottom: 0;
+    width: 4px;
+    height: auto;
+    margin-bottom: 0;
+  }
+
+  .plant-milestone-nodes {
+    width: 100%;
+    padding-left: var(--space-4);
+    align-items: flex-start;
+  }
+
+  .plant-node {
+    justify-content: flex-start;
+  }
+
+  .milestone-branch-wrapper {
+    margin: 0 !important; /* No alternating */
+    align-items: flex-start !important;
+    padding: 0 !important;
+    width: 100%;
+    border-left: 2px solid var(--sage);
+    padding-left: var(--space-4) !important;
+  }
+
+  .milestone-line {
+    display: none; /* Simplification for mobile list */
+  }
+}

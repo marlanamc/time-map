@@ -95,11 +95,16 @@ export const State: AppState & {
 
     // Apply persisted preferences to runtime state
     this.focusMode = !!this.data?.preferences?.focusMode;
-    const preferredView = this.data?.preferences?.defaultView;
 
-    this.currentView = Object.values(VIEWS).includes(preferredView)
-      ? preferredView
-      : VIEWS.YEAR;
+    // IGNORE user preferred default view to avoid random resets.
+    // Always default to GARDEN unless URL overrides (which is handled in app.ts)
+    // const preferredView = this.data?.preferences?.defaultView;
+    // this.currentView = Object.values(VIEWS).includes(preferredView)
+    //   ? preferredView
+    //   : VIEWS.GARDEN;
+
+    // We set it to GARDEN here. App.ts routing logic will override this if a URL slug is present.
+    this.currentView = VIEWS.GARDEN;
     // Initialize viewing week to current week
     this.viewingWeek = this.getWeekNumber(new Date());
   },

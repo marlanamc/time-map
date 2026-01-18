@@ -82,7 +82,8 @@ import { showWeeklyReview } from "./features/weeklyReview";
 // Initialize App
 // ============================================
 document.addEventListener("DOMContentLoaded", async () => {
-  const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  const isIosDevice =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
   if (isIosDevice) {
     document.body.classList.add("ios");
   }
@@ -160,10 +161,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   initLiquidEffects();
 
   const handleSharedIntent = (payload: SharePayload) => {
-    const snippet =
-      (payload.title ?? payload.text ?? payload.url ?? "")
-        .trim()
-        .slice(0, 140);
+    const snippet = (payload.title ?? payload.text ?? payload.url ?? "")
+      .trim()
+      .slice(0, 140);
     UI.openQuickAdd({
       label: "Shared content",
       placeholder: "Describe what you want to do",
@@ -248,26 +248,56 @@ document.addEventListener("DOMContentLoaded", async () => {
     UI.updateSyncStatus?.("local");
   }
 
-  // Support PWA shortcut URLs (e.g. /?view=day or /?action=new-task)
+  // ============================================
+  // Routing & URL Management
+  // ============================================
   {
-    const params = new URLSearchParams(location.search);
-    const view = params.get("view");
-    const action = params.get("action");
-    let didHandleAction = false;
-
-    const viewMap: Record<string, (typeof VIEWS)[keyof typeof VIEWS]> = {
-      home: VIEWS.HOME,
+    const SLUG_MAP: Record<string, (typeof VIEWS)[keyof typeof VIEWS]> = {
+      garden: VIEWS.GARDEN,
+      home: VIEWS.GARDEN, // Map 'home' to Garden as requested
       day: VIEWS.DAY,
       week: VIEWS.WEEK,
       month: VIEWS.MONTH,
       year: VIEWS.YEAR,
     };
 
-    if (view && viewMap[view]) {
-      State.setView(viewMap[view]);
-      didHandleAction = true;
+    // Calculate reverse map for URL updating
+    const REVERSE_SLUG_MAP = Object.entries(SLUG_MAP).reduce(
+      (acc, [slug, view]) => {
+        if (slug !== "home") acc[view] = slug; // Prefer 'garden' over 'home' for the URL
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+
+    const params = new URLSearchParams(location.search);
+    const viewParam = params.get("view");
+    const action = params.get("action");
+    const pathSlug = location.pathname.slice(1); // remove leading slash
+
+    let didHandleAction = false;
+
+    // 1. Determine Initial View from URL
+    // Path takes precedence over query params
+    let targetView = SLUG_MAP[pathSlug];
+
+    // Fallback to query param (legacy/PWA)
+    if (!targetView && viewParam && SLUG_MAP[viewParam]) {
+      targetView = SLUG_MAP[viewParam];
     }
 
+    if (targetView) {
+      State.setView(targetView);
+      didHandleAction = true;
+
+      // If we loaded via query param or alias, canonicalize the URL to the verified slug
+      const canonicalSlug = REVERSE_SLUG_MAP[targetView];
+      if (canonicalSlug && pathSlug !== canonicalSlug) {
+        history.replaceState(null, "", `/${canonicalSlug}`);
+      }
+    }
+
+    // 2. Handle Actions
     if (action === "new-task") {
       State.setView(VIEWS.DAY);
       UI.openQuickAdd?.();
@@ -283,12 +313,43 @@ document.addEventListener("DOMContentLoaded", async () => {
       didHandleAction = true;
     }
 
-    if (didHandleAction && (view || action)) {
+    // Clean up query params if handled
+    if (didHandleAction && (viewParam || action)) {
       const url = new URL(location.href);
       url.searchParams.delete("view");
       url.searchParams.delete("action");
+      // Only replace if we haven't already set the path above, or if we need to clean params
+      // If we set path above, we used replaceState there already.
+      // But we might still have query params to kill.
+      // Safe to just replaceState again with current path (which might have been updated)
       history.replaceState(null, "", url.toString());
     }
+
+    // 3. Listen for View Changes -> Update URL
+    eventBus.on("view:changed", ({ view }) => {
+      const slug = REVERSE_SLUG_MAP[view];
+      if (slug) {
+        // Check if we need to update URL (avoid processing popstate events as new pushes)
+        const currentPath = location.pathname.slice(1);
+        if (currentPath !== slug) {
+          history.pushState(null, "", `/${slug}`);
+        }
+      }
+    });
+
+    // 4. Handle Browser Navigation (Back/Forward)
+    window.addEventListener("popstate", () => {
+      const rawSlug = location.pathname.slice(1);
+      const view = SLUG_MAP[rawSlug];
+      if (view) {
+        // Use internal setView but we know the URL is already correct so the listener won't pushState
+        State.setView(view);
+      } else if (rawSlug === "") {
+        // If user hits Back to root, we rely on whatever current state is?
+        // Or re-assert default.
+        // For now, this is safer than potentially broken emptyness.
+      }
+    });
   }
 
   // Offline indicator + sync badge behavior

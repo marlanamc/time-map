@@ -31,16 +31,16 @@ export const KeyboardHandler = {
       callbacks.closeModals();
     }
 
-    // View switching: 1 = Year, 2 = Month, 3 = Week, 4 = Day
+    // View switching: 1=Garden, 2=Day, 3=Week, 4=Month, 5=Year
     if (e.key === "1" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.YEAR);
+      State.setView(VIEWS.GARDEN);
       callbacks.syncViewButtons();
-      callbacks.showToast("", "Year view");
+      callbacks.showToast("🌿", "Garden view");
     }
     if (e.key === "2" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.MONTH);
+      State.setView(VIEWS.DAY);
       callbacks.syncViewButtons();
-      callbacks.showToast("", "Month view");
+      callbacks.showToast("", "Day view");
     }
     if (e.key === "3" && !e.ctrlKey && !e.metaKey) {
       State.setView(VIEWS.WEEK);
@@ -48,14 +48,14 @@ export const KeyboardHandler = {
       callbacks.showToast("", "Week view");
     }
     if (e.key === "4" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.DAY);
+      State.setView(VIEWS.MONTH);
       callbacks.syncViewButtons();
-      callbacks.showToast("", "Day view");
+      callbacks.showToast("", "Month view");
     }
-    if (e.key === "g" && !e.ctrlKey && !e.metaKey) {
-      State.setView(VIEWS.GARDEN);
+    if (e.key === "5" && !e.ctrlKey && !e.metaKey) {
+      State.setView(VIEWS.YEAR);
       callbacks.syncViewButtons();
-      callbacks.showToast("🌿", "Garden view");
+      callbacks.showToast("", "Year view");
     }
 
     // Arrow key navigation

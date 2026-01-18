@@ -2,11 +2,7 @@ import { State } from "../../core/State";
 import { VIEWS } from "../../config";
 import { viewportManager } from "../viewport/ViewportManager";
 import type { UIElements } from "../../types";
-import {
-  MonthRenderer,
-  WeekRenderer,
-  LivingGardenRenderer,
-} from "../renderers";
+import { MonthRenderer, WeekRenderer, PlantGardenRenderer } from "../renderers";
 import { goalDetailModal } from "../../components/modals/GoalDetailModal";
 
 type RenderCoordinatorCallbacks = {
@@ -265,7 +261,25 @@ export class RenderCoordinator {
         // Home view uses the sidebar layout; nothing to render on the main grid.
         break;
       case VIEWS.GARDEN:
-        LivingGardenRenderer.render(
+        // LivingGardenRenderer.render(
+        //   this.elements,
+        //   this.callbacks.escapeHtml.bind(this),
+        //   (goalId) => goalDetailModal.show(goalId),
+        //   (level) =>
+        //     this.callbacks.openGoalModal(
+        //       level,
+        //       State.viewingMonth,
+        //       State.viewingYear,
+        //     ),
+        //   (opts) =>
+        //     this.callbacks.openGoalModal(
+        //       opts.level,
+        //       opts.preselectedMonth ?? State.viewingMonth,
+        //       opts.preselectedYear ?? State.viewingYear,
+        //       { parentId: opts.parentId, parentLevel: opts.parentLevel },
+        //     ),
+        // );
+        PlantGardenRenderer.render(
           this.elements,
           this.callbacks.escapeHtml.bind(this),
           (goalId) => goalDetailModal.show(goalId),

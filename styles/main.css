@@ -5,27 +5,23 @@
  */
 
 /* Consolidated imports (keeps the same order) */
-@import './core.css';
-@import './background.css';
-@import './layout.css';
-@import './components.css';
-@import './views.css';
-@import './views/garden-redesign.css';
-@import './views/garden-reflection.css';
-@import './views/living-garden.css';
-@import './views/adhd/flow-state.css';
-@import './views/adhd/emotional-regulation.css';
-@import './views/adhd/dopamine-features.css';
-@import './views/adhd/ios-pwa-fixes.css';
-@import './day-planner.css';
-@import './features.css';
-@import './themes.css';
-@import './accessibility.css';
-@import './animations.css';
-@import './responsive.css';
-@import './utilities.css';
-
-
-
-
-
+@import "./core.css";
+@import "./background.css";
+@import "./layout.css";
+@import "./components.css";
+@import "./views.css";
+@import "./views/garden-redesign.css";
+@import "./views/garden-reflection.css";
+@import "./views/living-garden.css";
+@import "./views/plant-garden.css";
+@import "./views/adhd/flow-state.css";
+@import "./views/adhd/emotional-regulation.css";
+@import "./views/adhd/dopamine-features.css";
+@import "./views/adhd/ios-pwa-fixes.css";
+@import "./day-planner.css";
+@import "./features.css";
+@import "./themes.css";
+@import "./accessibility.css";
+@import "./animations.css";
+@import "./responsive.css";
+@import "./utilities.css";

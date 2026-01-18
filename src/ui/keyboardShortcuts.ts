@@ -11,10 +11,11 @@ export function showKeyboardShortcuts() {
         <div class="shortcuts-grid">
           <div class="shortcut-section">
             <h3>Views</h3>
-            <div class="shortcut-item"><kbd>1</kbd> Year view</div>
-            <div class="shortcut-item"><kbd>2</kbd> Month view</div>
+            <div class="shortcut-item"><kbd>1</kbd> Garden view</div>
+            <div class="shortcut-item"><kbd>2</kbd> Day view</div>
             <div class="shortcut-item"><kbd>3</kbd> Week view</div>
-            <div class="shortcut-item"><kbd>4</kbd> Day view</div>
+            <div class="shortcut-item"><kbd>4</kbd> Month view</div>
+            <div class="shortcut-item"><kbd>5</kbd> Year view</div>
           </div>
           <div class="shortcut-section">
             <h3>Navigation</h3>
@@ -38,4 +39,3 @@ export function showKeyboardShortcuts() {
     if (e.target === modal) modal.remove();
   });
 }
-

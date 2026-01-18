@@ -56,15 +56,7 @@ export const AppSettings = {
                 isMobile
                   ? ""
                   : `
-                <div class="setting-row">
-                  <label for="settingsDefaultView">Default view</label>
-                  <select id="settingsDefaultView">
-                    <option value="year" ${prefs.defaultView === VIEWS.YEAR ? "selected" : ""}>Year</option>
-                    <option value="month" ${prefs.defaultView === VIEWS.MONTH ? "selected" : ""}>Month</option>
-                    <option value="week" ${prefs.defaultView === VIEWS.WEEK ? "selected" : ""}>Week</option>
-                    <option value="day" ${prefs.defaultView === VIEWS.DAY ? "selected" : ""}>Day</option>
-                  </select>
-                </div>
+                <!-- Default view setting removed to prevent random refreshes -->
               `
               }
               <div class="setting-row checkbox-row">
@@ -437,14 +429,21 @@ export const AppSettings = {
 
       // Garden level emojis
       const emojiMilestone =
-        (modal.querySelector("#settingsEmojiMilestone") as HTMLInputElement | null)
-          ?.value?.trim() || "🎯";
+        (
+          modal.querySelector(
+            "#settingsEmojiMilestone",
+          ) as HTMLInputElement | null
+        )?.value?.trim() || "🎯";
       const emojiFocus =
-        (modal.querySelector("#settingsEmojiFocus") as HTMLInputElement | null)
-          ?.value?.trim() || "🌿";
+        (
+          modal.querySelector("#settingsEmojiFocus") as HTMLInputElement | null
+        )?.value?.trim() || "🌿";
       const emojiIntention =
-        (modal.querySelector("#settingsEmojiIntention") as HTMLInputElement | null)
-          ?.value?.trim() || "🌱";
+        (
+          modal.querySelector(
+            "#settingsEmojiIntention",
+          ) as HTMLInputElement | null
+        )?.value?.trim() || "🌱";
 
       const themeMode =
         (modal.querySelector("#settingsThemeMode") as HTMLSelectElement | null)

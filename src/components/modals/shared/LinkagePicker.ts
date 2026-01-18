@@ -1,6 +1,6 @@
 import type { GoalLevel } from "../../../types";
 
-type GoalSummary = { id: string; title: string };
+type GoalSummary = { id: string; title: string; icon?: string };
 type LinkageCandidate = GoalSummary & { level: GoalLevel };
 
 export type LinkagePickerSelection = {
@@ -18,13 +18,14 @@ export type LinkagePickerOptions = {
 
 const LEVEL_LABELS: Record<Exclude<GoalLevel, "vision">, string> = {
   milestone: "Which Vision does this support?",
-  focus: "What does this Focus support?",
-  intention: "Link to something (optional)",
+  focus: "Which Milestone does this support?",
+  intention: "Which Focus does this support? (optional)",
 };
 
 const HELP_TEXTS: Partial<Record<Exclude<GoalLevel, "vision">, string>> = {
   milestone: "Choose a Vision so this milestone has an anchor.",
-  focus: "Choose a Milestone or Vision so this focus has context.",
+  focus: "Choose a Milestone so this focus has context.",
+  intention: "Choose a Focus to link this intention to a bigger goal.",
 };
 
 const INTENTION_BADGE_TEXT = "Life task (still valid)";
@@ -38,30 +39,23 @@ function buildCandidates(opts: LinkagePickerOptions): LinkageCandidate[] {
     }));
   }
   if (level === "focus") {
-    return [
-      ...milestones.map((milestone) => ({
-        ...milestone,
-        level: "milestone" as GoalLevel,
-      })),
-      ...visions.map((vision) => ({ ...vision, level: "vision" as GoalLevel })),
-    ];
+    return milestones.map((milestone) => ({
+      ...milestone,
+      level: "milestone" as GoalLevel,
+    }));
   }
   if (level === "intention") {
-    return [
-      ...focuses.map((focus) => ({ ...focus, level: "focus" as GoalLevel })),
-      ...milestones.map((milestone) => ({
-        ...milestone,
-        level: "milestone" as GoalLevel,
-      })),
-      ...visions.map((vision) => ({ ...vision, level: "vision" as GoalLevel })),
-    ];
+    return focuses.map((focus) => ({
+      ...focus,
+      level: "focus" as GoalLevel,
+    }));
   }
   return [];
 }
 
 function shouldUsePills(
   _level: GoalLevel,
-  candidates: LinkageCandidate[]
+  candidates: LinkageCandidate[],
 ): boolean {
   return candidates.length > 0 && candidates.length <= 6;
 }
@@ -72,22 +66,20 @@ function buildOptionValue(candidate: LinkageCandidate): string {
 
 function renderCandidateButton(
   candidate: LinkageCandidate,
-  selected: LinkagePickerSelection
+  selected: LinkagePickerSelection,
 ): string {
   const isSelected =
     !!selected &&
     selected.parentId === candidate.id &&
     selected.parentLevel === candidate.level;
-  const prefix =
-    candidate.level === "milestone"
-      ? "Milestone"
-      : candidate.level === "vision"
-      ? "Vision"
-      : "Focus";
-  const label =
-    candidate.level === "focus"
-      ? candidate.title
-      : `${prefix}: ${candidate.title}`;
+  const emoji =
+    candidate.icon ??
+    (candidate.level === "vision"
+      ? "🌟"
+      : candidate.level === "milestone"
+        ? "🎯"
+        : "🔭");
+  const label = `${emoji} ${candidate.title}`;
   return `
     <button
       type="button"
@@ -104,7 +96,7 @@ function renderCandidateButton(
 function renderPills(
   candidates: LinkageCandidate[],
   selected: LinkagePickerSelection,
-  level: GoalLevel
+  level: GoalLevel,
 ): string {
   const noneSelected = !selected;
   const buttons = candidates
@@ -132,7 +124,7 @@ function renderPills(
 function renderSelect(
   opts: LinkagePickerOptions,
   candidates: LinkageCandidate[],
-  selected: LinkagePickerSelection
+  selected: LinkagePickerSelection,
 ): string {
   const { level } = opts;
   const noneSelected = !selected;
@@ -144,9 +136,10 @@ function renderSelect(
         !!selected &&
         selected.parentId === candidate.id &&
         selected.parentLevel === candidate.level;
+      const emoji = candidate.icon ?? "🎯";
       return `<option value="${buildOptionValue(candidate)}"${
         isSelected ? " selected" : ""
-      }>${candidate.title}</option>`;
+      }>${emoji} ${candidate.title}</option>`;
     })
     .join("");
 
@@ -157,9 +150,10 @@ function renderSelect(
         !!selected &&
         selected.parentId === candidate.id &&
         selected.parentLevel === candidate.level;
+      const emoji = candidate.icon ?? "🔭";
       return `<option value="${buildOptionValue(candidate)}"${
         isSelected ? " selected" : ""
-      }>${candidate.title}</option>`;
+      }>${emoji} ${candidate.title}</option>`;
     })
     .join("");
 
@@ -170,9 +164,10 @@ function renderSelect(
         !!selected &&
         selected.parentId === candidate.id &&
         selected.parentLevel === candidate.level;
+      const emoji = candidate.icon ?? "🌟";
       return `<option value="${buildOptionValue(candidate)}"${
         isSelected ? " selected" : ""
-      }>${candidate.title}</option>`;
+      }>${emoji} ${candidate.title}</option>`;
     })
     .join("");
 
