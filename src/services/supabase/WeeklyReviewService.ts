@@ -1,28 +1,33 @@
 // Weekly Review Service
-import { getSupabaseClient } from './client';
-import { AuthenticationError, DatabaseError } from '../errors';
-import { authService } from './AuthService';
-import type { WeeklyReview } from '../../types';
-import type { WeeklyReviewRow } from '../../types/database';
+import { getSupabaseClient } from "./client";
+import { AuthenticationError, DatabaseError } from "../errors";
+import { authService } from "./AuthService";
+import type { WeeklyReview } from "../../types";
+import type { WeeklyReviewRow } from "../../types/database";
 
 export class WeeklyReviewService {
   async getWeeklyReviews(): Promise<WeeklyReview[]> {
     try {
       const supabase = await getSupabaseClient();
-      const { data, error } = await supabase.from('weekly_reviews').select('*');
-      
+      const { data, error } = await supabase.from("weekly_reviews").select("*");
+
       if (error) {
-        console.error('[WeeklyReviewService] Failed to get weekly reviews:', {
+        console.error("[WeeklyReviewService] Failed to get weekly reviews:", {
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
         });
-        throw new DatabaseError(`Failed to load weekly reviews: ${error.message}`, error);
+        throw new DatabaseError(
+          `Failed to load weekly reviews: ${error.message}`,
+          error,
+        );
       }
 
       if (!data) {
-        console.warn('[WeeklyReviewService] getWeeklyReviews returned null data');
+        console.warn(
+          "[WeeklyReviewService] getWeeklyReviews returned null data",
+        );
         return [];
       }
 
@@ -39,13 +44,14 @@ export class WeeklyReviewService {
         learnings: w.learnings,
         nextWeekPriorities: w.next_week_priorities,
         mood: w.mood,
-        energyAvg: w.energy_avg
+        energyAvg: w.energy_avg,
+        archivedAt: w.archived_at ?? null,
       }));
 
       console.log(`✓ Loaded ${reviews.length} weekly reviews from database`);
       return reviews;
     } catch (err) {
-      console.error('[WeeklyReviewService] Error in getWeeklyReviews:', err);
+      console.error("[WeeklyReviewService] Error in getWeeklyReviews:", err);
       throw err;
     }
   }
@@ -53,12 +59,14 @@ export class WeeklyReviewService {
   async saveWeeklyReview(review: WeeklyReview): Promise<void> {
     const user = await authService.getUser();
     if (!user) {
-      throw new AuthenticationError('Cannot save weekly review: User not authenticated');
+      throw new AuthenticationError(
+        "Cannot save weekly review: User not authenticated",
+      );
     }
 
     try {
       const supabase = await getSupabaseClient();
-      const { error } = await supabase.from('weekly_reviews').upsert({
+      const { error } = await supabase.from("weekly_reviews").upsert({
         id: review.id,
         user_id: user.id,
         week_start: review.weekStart,
@@ -72,24 +80,28 @@ export class WeeklyReviewService {
         learnings: review.learnings,
         next_week_priorities: review.nextWeekPriorities,
         mood: review.mood,
-        energy_avg: review.energyAvg
+        energy_avg: review.energyAvg,
+        archived_at: review.archivedAt ?? null,
       });
-      
+
       if (error) {
-        console.error('[WeeklyReviewService] Failed to save weekly review:', {
+        console.error("[WeeklyReviewService] Failed to save weekly review:", {
           reviewId: review.id,
           weekStart: review.weekStart,
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
         });
-        throw new DatabaseError(`Failed to save weekly review: ${error.message}`, error);
+        throw new DatabaseError(
+          `Failed to save weekly review: ${error.message}`,
+          error,
+        );
       }
 
       console.log(`✓ Saved weekly review: ${review.id}`);
     } catch (err) {
-      console.error('[WeeklyReviewService] Error in saveWeeklyReview:', err);
+      console.error("[WeeklyReviewService] Error in saveWeeklyReview:", err);
       throw err;
     }
   }

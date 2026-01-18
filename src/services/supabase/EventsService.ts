@@ -1,38 +1,43 @@
 // Events Service
-import { getSupabaseClient } from './client';
-import { cacheService } from '../CacheService';
-import { AuthenticationError, DatabaseError } from '../errors';
-import { authService } from './AuthService';
-import type { CalendarEvent } from '../../types';
-import type { EventRow } from '../../types/database';
+import { getSupabaseClient } from "./client";
+import { cacheService } from "../CacheService";
+import { AuthenticationError, DatabaseError } from "../errors";
+import { authService } from "./AuthService";
+import type { CalendarEvent } from "../../types";
+import type { EventRow } from "../../types/database";
 
 export class EventsService {
   async getEvents(): Promise<CalendarEvent[]> {
     const user = await authService.getUser();
-    const cacheKey = user ? `events:${user.id}` : 'events:anonymous';
+    const cacheKey = user ? `events:${user.id}` : "events:anonymous";
     const cached = cacheService.get<CalendarEvent[]>(cacheKey);
     if (cached) return cached;
 
     if (!user) {
-      console.warn('[EventsService] getEvents called without authenticated user; returning empty array');
+      console.warn(
+        "[EventsService] getEvents called without authenticated user; returning empty array",
+      );
       return [];
     }
 
     try {
       const supabase = await getSupabaseClient();
       const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('start_at', { ascending: true });
+        .from("events")
+        .select("*")
+        .order("start_at", { ascending: true });
 
       if (error) {
-        console.error('[EventsService] Failed to get events:', {
+        console.error("[EventsService] Failed to get events:", {
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
         });
-        throw new DatabaseError(`Failed to load events: ${error.message}`, error);
+        throw new DatabaseError(
+          `Failed to load events: ${error.message}`,
+          error,
+        );
       }
 
       const events = (data || []).map((e: EventRow) => ({
@@ -44,13 +49,14 @@ export class EventsService {
         allDay: !!e.all_day,
         recurrence: (e.recurrence as any) ?? null,
         createdAt: e.created_at,
-        updatedAt: e.updated_at
+        updatedAt: e.updated_at,
+        archivedAt: e.archived_at ?? null,
       }));
 
       cacheService.set(cacheKey, events, cacheService.TTL.GOALS);
       return events;
     } catch (err) {
-      console.error('[EventsService] Error in getEvents:', err);
+      console.error("[EventsService] Error in getEvents:", err);
       throw err;
     }
   }
@@ -58,7 +64,9 @@ export class EventsService {
   async saveEvent(event: CalendarEvent): Promise<void> {
     const user = await authService.getUser();
     if (!user) {
-      throw new AuthenticationError('Cannot save event: User not authenticated');
+      throw new AuthenticationError(
+        "Cannot save event: User not authenticated",
+      );
     }
 
     try {
@@ -73,27 +81,31 @@ export class EventsService {
         all_day: !!event.allDay,
         recurrence: event.recurrence ?? null,
         created_at: event.createdAt,
-        updated_at: event.updatedAt
+        updated_at: event.updatedAt,
+        archived_at: event.archivedAt ?? null,
       };
 
       const { error } = await supabase
-        .from('events')
-        .upsert(payload, { onConflict: 'id', ignoreDuplicates: false });
+        .from("events")
+        .upsert(payload, { onConflict: "id", ignoreDuplicates: false });
 
       if (error) {
-        console.error('[EventsService] Failed to save event:', {
+        console.error("[EventsService] Failed to save event:", {
           eventId: event.id,
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
         });
-        throw new DatabaseError(`Failed to save event "${event.title}": ${error.message}`, error);
+        throw new DatabaseError(
+          `Failed to save event "${event.title}": ${error.message}`,
+          error,
+        );
       }
 
       cacheService.invalidate(/^events:/);
     } catch (err) {
-      console.error('[EventsService] Error in saveEvent:', err);
+      console.error("[EventsService] Error in saveEvent:", err);
       throw err;
     }
   }
@@ -102,24 +114,27 @@ export class EventsService {
     try {
       const supabase = await getSupabaseClient();
       const { error } = await supabase
-        .from('events')
+        .from("events")
         .delete()
-        .eq('id', eventId);
+        .eq("id", eventId);
 
       if (error) {
-        console.error('[EventsService] Failed to delete event:', {
+        console.error("[EventsService] Failed to delete event:", {
           eventId,
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
         });
-        throw new DatabaseError(`Failed to delete event: ${error.message}`, error);
+        throw new DatabaseError(
+          `Failed to delete event: ${error.message}`,
+          error,
+        );
       }
 
       cacheService.invalidate(/^events:/);
     } catch (err) {
-      console.error('[EventsService] Error in deleteEvent:', err);
+      console.error("[EventsService] Error in deleteEvent:", err);
       throw err;
     }
   }
@@ -127,7 +142,9 @@ export class EventsService {
   async saveEvents(events: CalendarEvent[]): Promise<void> {
     const user = await authService.getUser();
     if (!user) {
-      throw new AuthenticationError('Cannot batch save events: User not authenticated');
+      throw new AuthenticationError(
+        "Cannot batch save events: User not authenticated",
+      );
     }
 
     try {
@@ -142,27 +159,31 @@ export class EventsService {
         all_day: !!event.allDay,
         recurrence: event.recurrence ?? null,
         created_at: event.createdAt,
-        updated_at: event.updatedAt
+        updated_at: event.updatedAt,
+        archived_at: event.archivedAt ?? null,
       }));
 
       const { error } = await supabase
-        .from('events')
-        .upsert(payload, { onConflict: 'id', ignoreDuplicates: false });
+        .from("events")
+        .upsert(payload, { onConflict: "id", ignoreDuplicates: false });
 
       if (error) {
-        console.error('[EventsService] Failed to batch save events:', {
+        console.error("[EventsService] Failed to batch save events:", {
           count: events.length,
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
         });
-        throw new DatabaseError(`Failed to batch save events: ${error.message}`, error);
+        throw new DatabaseError(
+          `Failed to batch save events: ${error.message}`,
+          error,
+        );
       }
 
       cacheService.invalidate(/^events:/);
     } catch (err) {
-      console.error('[EventsService] Error in saveEvents:', err);
+      console.error("[EventsService] Error in saveEvents:", err);
       throw err;
     }
   }

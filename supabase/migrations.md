@@ -14,28 +14,46 @@
 
 ### Applying Migrations
 
-- Run SQL in order: `supabase/migrations/001_initial_schema.sql`, `supabase/migrations/002_enable_rls.sql`, `supabase/migrations/003_add_performance_indexes.sql`, `supabase/migrations/004_add_streaks.sql`, `supabase/migrations/005_add_goal_time_columns.sql`, `supabase/migrations/006_patch_goals_schema.sql`, `supabase/migrations/007_add_events.sql`, `supabase/migrations/008_enable_rls_events.sql`, `supabase/migrations/009_add_goal_meta.sql`, `supabase/migrations/010_add_goal_activity_id.sql`
-- If you’re using Supabase Dashboard: SQL Editor → New query → paste file contents → Run
+Run migrations in numerical order via Supabase Dashboard (SQL Editor → New query → paste file contents → Run):
 
-If you get an error like `Could not find the 'end_time' column of 'goals' in the schema cache` after running SQL:
-- Ensure `supabase/migrations/005_add_goal_time_columns.sql` has been applied
-- If you get an error like `Could not find the 'level' column of 'goals' in the schema cache`:
-  - Ensure `supabase/migrations/006_patch_goals_schema.sql` has been applied
-- Reload the PostgREST schema cache (Supabase Dashboard → Settings → API → Reload) or run:
+1. `001_initial_schema.sql` - Core tables
+2. `002_enable_rls.sql` - Row Level Security policies
+3. `003_add_performance_indexes.sql` - Indexes for query optimization
+4. `004_add_streaks.sql` - Streak tracking table
+5. `005_add_goal_time_columns.sql` - Time fields for goals
+6. `006_patch_goals_schema.sql` - Schema fixes for existing databases
+7. `007_add_events.sql` - Calendar events table
+8. `008_enable_rls_events.sql` - RLS for events
+9. `009_add_goal_meta.sql` - Metadata JSONB column for goals
+10. `010_add_goal_activity_id.sql` - Activity ID for emoji tracking
+11. `011_add_goal_icon.sql` - Icon/emoji for visions
+12. `012_scaling_improvements.sql` - **Scaling & data integrity improvements**
+
+**After running migrations**, reload the PostgREST schema cache:
+
+- Supabase Dashboard → Settings → API → Reload, or run:
+
 ```sql
-select pg_notify('pgrst', 'reload schema');
+SELECT pg_notify('pgrst', 'reload schema');
 ```
 
-| Data Type | Syncs to Cloud? | Notes |
-|-----------|-----------------|-------|
-| Goals | ✅ Yes | Hierarchy fields (`parent_id`, `parent_level`) now synced |
-| Brain Dump | ✅ Yes | Fully functional |
-| Preferences | ✅ Yes | Stored as JSONB blob |
-| Achievements | ✅ Yes | Fully functional |
-| Weekly Reviews | ✅ Yes | Fully functional |
-| Body Double Sessions | ✅ Yes | Fully functional |
-| Streaks | ✅ Yes | Stored in `streaks` table (004 migration) |
-| Analytics | ✅ Yes | Stored in `preferences.data._analytics` |
+**Common Errors:**
+
+- `Could not find the 'end_time' column` → Run `005_add_goal_time_columns.sql`
+- `Could not find the 'level' column` → Run `006_patch_goals_schema.sql`
+- `Could not find the 'icon' column` → Run `011_add_goal_icon.sql`
+- `Could not find the 'archived_at' column` → Run `012_scaling_improvements.sql`
+
+| Data Type            | Syncs to Cloud? | Notes                                                     |
+| -------------------- | --------------- | --------------------------------------------------------- |
+| Goals                | ✅ Yes          | Hierarchy fields (`parent_id`, `parent_level`) now synced |
+| Brain Dump           | ✅ Yes          | Fully functional                                          |
+| Preferences          | ✅ Yes          | Stored as JSONB blob                                      |
+| Achievements         | ✅ Yes          | Fully functional                                          |
+| Weekly Reviews       | ✅ Yes          | Fully functional                                          |
+| Body Double Sessions | ✅ Yes          | Fully functional                                          |
+| Streaks              | ✅ Yes          | Stored in `streaks` table (004 migration)                 |
+| Analytics            | ✅ Yes          | Stored in `preferences.data._analytics`                   |
 
 ---
 
@@ -89,13 +107,13 @@ select pg_notify('pgrst', 'reload schema');
 
 ### Sync Timing
 
-| Entity | Sync Strategy | Delay |
-|--------|---------------|-------|
-| Goals | Debounced | 2 seconds after last edit |
-| Brain Dump | Debounced | 1 second after last edit |
-| Preferences | Throttled | Max once per 5 seconds |
-| All dirty items | Batch | Every 30 seconds |
-| Offline failures | SyncQueue | Retry with backoff, max 3 attempts |
+| Entity           | Sync Strategy | Delay                              |
+| ---------------- | ------------- | ---------------------------------- |
+| Goals            | Debounced     | 2 seconds after last edit          |
+| Brain Dump       | Debounced     | 1 second after last edit           |
+| Preferences      | Throttled     | Max once per 5 seconds             |
+| All dirty items  | Batch         | Every 30 seconds                   |
+| Offline failures | SyncQueue     | Retry with backoff, max 3 attempts |
 
 ---
 
@@ -105,14 +123,14 @@ select pg_notify('pgrst', 'reload schema');
 
 Your schema is **well-designed** with proper constraints and relationships:
 
-| Table | Purpose | Key Features |
-|-------|---------|--------------|
-| `goals` | Vision board goals | JSONB for subtasks, notes, time_log; parent_id for hierarchy |
-| `brain_dump` | Quick capture thoughts | processed/archived flags for workflow |
-| `preferences` | User settings | JSONB blob for flexible schema |
-| `achievements` | Unlocked badges | Composite primary key (user_id, achievement_id) |
-| `weekly_reviews` | Reflection entries | Array fields for wins, challenges, learnings |
-| `body_double_sessions` | Focus session tracking | Links to goals via foreign key |
+| Table                  | Purpose                | Key Features                                                 |
+| ---------------------- | ---------------------- | ------------------------------------------------------------ |
+| `goals`                | Vision board goals     | JSONB for subtasks, notes, time_log; parent_id for hierarchy |
+| `brain_dump`           | Quick capture thoughts | processed/archived flags for workflow                        |
+| `preferences`          | User settings          | JSONB blob for flexible schema                               |
+| `achievements`         | Unlocked badges        | Composite primary key (user_id, achievement_id)              |
+| `weekly_reviews`       | Reflection entries     | Array fields for wins, challenges, learnings                 |
+| `body_double_sessions` | Focus session tracking | Links to goals via foreign key                               |
 
 ### Row Level Security (002_enable_rls.sql)
 
@@ -127,6 +145,7 @@ CREATE POLICY "Users can view their own goals"
 ```
 
 **Security Verification:**
+
 - ✅ All 6 tables have RLS enabled
 - ✅ All policies use `auth.uid() = user_id` pattern
 - ✅ INSERT policies use `WITH CHECK` for write validation
@@ -168,6 +187,7 @@ The app tracks streak data in `State.data.streak` but there's no corresponding d
 **Impact (before):** User's streak count and last activity date wouldn’t sync across devices.
 
 **Implemented:**
+
 - ✅ Migration added: `supabase/migrations/004_add_streaks.sql`
 - ✅ RLS policies included in the migration
 - ✅ Cloud load/save added: `SupabaseService.getStreak` / `SupabaseService.saveStreak`
@@ -179,6 +199,7 @@ The app tracks streak data in `State.data.streak` but there's no corresponding d
 **Location:** `State.data.analytics` is local-only
 
 Analytics includes:
+
 - `goalsCreated`
 - `goalsCompleted`
 - `totalTimeSpent`
@@ -209,7 +230,7 @@ This avoids adding a new table while ensuring analytics persists cross-device.
 The BatchSaveService reads dirty goals from IndexedDB:
 
 ```typescript
-const goalsPromises = dirtyGoalIds.map(id => DB.get(DB_STORES.GOALS, id));
+const goalsPromises = dirtyGoalIds.map((id) => DB.get(DB_STORES.GOALS, id));
 ```
 
 But goals are primarily stored in `State.data.goals` (in-memory), not IndexedDB.
@@ -227,6 +248,7 @@ But goals are primarily stored in `State.data.goals` (in-memory), not IndexedDB.
 ### 1. Authentication Flow
 
 The Auth component properly:
+
 - Handles email/password login and signup
 - Gracefully degrades when Supabase isn't configured
 - Shows helpful setup instructions for missing env vars
@@ -237,9 +259,9 @@ The Auth component properly:
 ```typescript
 // loadAllData uses Promise.allSettled for fault tolerance
 const results = await Promise.allSettled([
-    this.getGoals(),
-    this.getBrainDump(),
-    // ... other entities
+  this.getGoals(),
+  this.getBrainDump(),
+  // ... other entities
 ]);
 ```
 
@@ -248,6 +270,7 @@ If one entity fails to load, others still succeed.
 ### 3. Offline Support
 
 The SyncQueue provides robust offline handling:
+
 - Queues failed operations with retry logic
 - Persists queue to localStorage
 - Auto-syncs when coming back online
@@ -313,14 +336,14 @@ Run in Supabase SQL Editor:
 
 ```sql
 -- Check if your goals are being saved
-SELECT id, title, status, created_at, updated_at 
-FROM goals 
+SELECT id, title, status, created_at, updated_at
+FROM goals
 WHERE user_id = auth.uid()
 ORDER BY created_at DESC
 LIMIT 10;
 
 -- Check sync timing
-SELECT 
+SELECT
     title,
     created_at,
     updated_at,
@@ -338,13 +361,13 @@ SELECT COUNT(*) FROM goals;  -- Should only count YOUR goals
 
 ## Offline Behavior Summary
 
-| Scenario | Behavior |
-|----------|----------|
-| Create goal while offline | Saved to State.data + localStorage, queued for sync |
-| Edit goal while offline | Marked dirty, queued for sync on reconnect |
-| Page refresh while offline | Loads from localStorage backup |
-| Come back online | SyncQueue auto-processes, retries failed ops |
-| Sync fails 3 times | Operation moved to failures list, event emitted |
+| Scenario                   | Behavior                                            |
+| -------------------------- | --------------------------------------------------- |
+| Create goal while offline  | Saved to State.data + localStorage, queued for sync |
+| Edit goal while offline    | Marked dirty, queued for sync on reconnect          |
+| Page refresh while offline | Loads from localStorage backup                      |
+| Come back online           | SyncQueue auto-processes, retries failed ops        |
+| Sync fails 3 times         | Operation moved to failures list, event emitted     |
 
 ---
 
@@ -374,12 +397,118 @@ Your Supabase implementation is **production-ready** for core functionality. The
 **Confidence Level:** After implementing the fixes above, data persistence across devices and page refreshes will be reliable at >99% for all synced entity types.
 
 **Key Strengths:**
+
 - Proper RLS prevents data leaks between users
 - Layered sync strategy handles network issues gracefully
 - localStorage backup prevents data loss during outages
 
 **Action Items:**
-1. Fix `saveGoal` missing fields (30 min)
-2. Add streaks migration (1 hour)
-3. Add analytics to preferences sync (30 min)
-4. Verify IndexedDB integration (investigation)
+
+1. ~~Fix `saveGoal` missing fields (30 min)~~ ✅ Complete
+2. ~~Add streaks migration (1 hour)~~ ✅ Complete
+3. ~~Add analytics to preferences sync (30 min)~~ ✅ Complete
+4. ~~Verify IndexedDB integration (investigation)~~ ✅ Complete
+5. ~~Add scaling improvements (migration 012)~~ ✅ Complete
+
+---
+
+## Migration 012: Scaling Improvements Reference
+
+**File:** `supabase/migrations/012_scaling_improvements.sql`
+
+This migration prepares the database for multi-user scale with improved data integrity, archival support, and better query performance.
+
+### Changes Included
+
+| Feature                       | Description                                                               |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| **CHECK constraints**         | Enforces valid values for `goals.level`, `goals.status`, `goals.priority` |
+| **Archival columns**          | Adds `archived_at` to `goals`, `events`, `brain_dump`, `weekly_reviews`   |
+| **Archival indexes**          | Partial indexes for active vs. archived records                           |
+| **Preferences columns**       | Extracts `theme`, `notifications_enabled`, `timezone` from JSONB          |
+| **Weekly reviews uniqueness** | Prevents duplicate reviews with `UNIQUE(user_id, week_start)`             |
+| **Events date range index**   | Composite index for calendar view queries                                 |
+| **Streaks DELETE policy**     | Missing RLS policy for delete operations                                  |
+| **Auto-update triggers**      | Sets `updated_at` automatically on all updates                            |
+
+### Data Integrity Constraints Added
+
+```sql
+-- Valid goal levels
+CHECK (level IN ('vision', 'milestone', 'focus', 'intention', 'task', 'event'))
+
+-- Valid goal statuses
+CHECK (status IN ('not-started', 'in-progress', 'blocked', 'done', 'cancelled', 'archived'))
+
+-- Valid priorities
+CHECK (priority IN ('low', 'medium', 'high', 'urgent'))
+```
+
+### Soft Delete (Archival) Pattern
+
+Instead of hard-deleting records, set `archived_at` to a timestamp:
+
+```typescript
+// Archive a goal (soft delete)
+await goalsService.saveGoal({
+  ...goal,
+  status: 'archived',
+  archivedAt: new Date().toISOString()
+});
+
+// Query only active goals (most common)
+// The partial index idx_goals_user_not_archived optimizes this
+SELECT * FROM goals WHERE archived_at IS NULL;
+```
+
+### TypeScript Types Updated
+
+The following types were updated to support the new columns:
+
+| File                    | Changes                                                                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/types/database.ts` | Added `archived_at` to `GoalRow`, `BrainDumpRow`, `WeeklyReviewRow`, `EventRow`; added `theme`, `notifications_enabled`, `timezone` to `PreferencesRow` |
+| `src/types.ts`          | Added `archivedAt` to `Goal`, `WeeklyReview`, `CalendarEvent`, `BrainDumpEntry`; added `'cancelled' \| 'archived'` to `GoalStatus`                      |
+
+### Services Updated
+
+| Service                  | Changes                                                  |
+| ------------------------ | -------------------------------------------------------- |
+| `GoalsService.ts`        | Maps `archived_at` ↔ `archivedAt` in all CRUD operations |
+| `EventsService.ts`       | Maps `archived_at` ↔ `archivedAt` in all CRUD operations |
+| `BrainDumpService.ts`    | Maps `archived_at` ↔ `archivedAt` in all CRUD operations |
+| `WeeklyReviewService.ts` | Maps `archived_at` ↔ `archivedAt` in all CRUD operations |
+
+### Scalability Notes
+
+| User Count   | Status                                     |
+| ------------ | ------------------------------------------ |
+| 1-1,000      | ✅ Ready as-is                             |
+| 1,000-10,000 | ✅ Ready with 012 migration                |
+| 10,000+      | Consider read replicas, connection pooling |
+
+---
+
+## Schema Summary (After All Migrations)
+
+### Tables
+
+| Table                  | Purpose             | Key Columns                                                              |
+| ---------------------- | ------------------- | ------------------------------------------------------------------------ |
+| `goals`                | Vision board goals  | `id`, `user_id`, `title`, `level`, `status`, `parent_id`, `archived_at`  |
+| `events`               | Calendar events     | `id`, `user_id`, `title`, `start_at`, `end_at`, `all_day`, `archived_at` |
+| `brain_dump`           | Quick capture       | `id`, `user_id`, `text`, `processed`, `archived_at`                      |
+| `preferences`          | User settings       | `user_id`, `data` (JSONB), `theme`, `notifications_enabled`, `timezone`  |
+| `achievements`         | Unlocked badges     | `user_id`, `achievement_id`, `unlocked_at`                               |
+| `weekly_reviews`       | Weekly reflections  | `id`, `user_id`, `week_start`, `wins`, `challenges`, `archived_at`       |
+| `body_double_sessions` | Focus sessions      | `id`, `user_id`, `duration`, `goal_id`                                   |
+| `streaks`              | Engagement tracking | `user_id`, `count`, `last_date`, `best_streak`                           |
+
+### All RLS Policies
+
+All tables have complete CRUD policies following the pattern:
+
+```sql
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id)
+```

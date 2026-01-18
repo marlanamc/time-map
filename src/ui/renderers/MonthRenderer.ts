@@ -37,11 +37,6 @@ export const MonthRenderer = {
       ? buildAccentAttributes(getInheritedAccent(primaryMilestone, goalsById))
       : { dataAttr: "", styleAttr: "" };
 
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const _daysInMonth = lastDay.getDate();
-    const _startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
-    const _prevMonthDays = new Date(year, month, 0).getDate();
     const isMobile = document.body.classList.contains("is-mobile");
     const dayNames = isMobile
       ? ["M", "T", "W", "T", "F", "S", "S"]
@@ -100,16 +95,18 @@ export const MonthRenderer = {
     const daysToMonday = (firstDayDate.getDay() + 6) % 7; // How many days back to get to Monday
     const mondayOfFirstWeek = new Date(firstDayDate);
     mondayOfFirstWeek.setDate(mondayOfFirstWeek.getDate() - daysToMonday);
-    
+
     // Fill in all days from Monday of the first week through the last day of the month
-    const _currentDate = new Date(mondayOfFirstWeek);
     const lastDayDate = new Date(year, month + 1, 0); // Last day of current month
-    
+
     // Calculate how many weeks we need (always include full weeks)
-    const daysInRange = Math.ceil((lastDayDate.getTime() - mondayOfFirstWeek.getTime()) / 86400000) + 1;
+    const daysInRange =
+      Math.ceil(
+        (lastDayDate.getTime() - mondayOfFirstWeek.getTime()) / 86400000,
+      ) + 1;
     const weeksNeeded = Math.ceil(daysInRange / 7);
     const totalDays = weeksNeeded * 7;
-    
+
     for (let i = 0; i < totalDays; i++) {
       const date = new Date(mondayOfFirstWeek);
       date.setDate(date.getDate() + i);
@@ -185,6 +182,9 @@ export const MonthRenderer = {
         (g) => g.level === "focus" && g.status !== "done",
       );
       const primaryFocus = focusGoals[0];
+      const focusAccentAttrs = primaryFocus
+        ? buildAccentAttributes(getInheritedAccent(primaryFocus, goalsById))
+        : { dataAttr: "", styleAttr: "" };
 
       html += `
         <div class="month-week-row${
@@ -194,8 +194,12 @@ export const MonthRenderer = {
           ${
             primaryFocus
               ? `
-            <div class="month-week-focus-banner" aria-label="This week focus">
-              <span class="month-week-focus-icon">${primaryFocus.icon || "🔎"}</span>
+            <div class="month-week-focus-banner" ${focusAccentAttrs.dataAttr}${
+              focusAccentAttrs.styleAttr
+            } aria-label="This week focus">
+              <span class="month-week-focus-icon">${
+                primaryFocus.icon || "🔎"
+              }</span>
               <span class="month-week-focus-text">This week: ${escapeHtmlFn(
                 primaryFocus.title,
               )}</span>

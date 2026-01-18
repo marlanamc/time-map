@@ -3,6 +3,8 @@ import { Goals } from "../../core/Goals";
 import { eventBus } from "../../core/EventBus";
 import type { UIElements, Goal, GoalLevel } from "../../types";
 import { getVisionAccent } from "../../utils/goalLinkage";
+import { IntentionsManager } from "../../core/IntentionsManager";
+import "../../../styles/quick-intention-popover.css";
 
 /**
  * PlantGardenRenderer
@@ -581,6 +583,36 @@ export const PlantGardenRenderer = {
             <div class="plant-base-meta">${year} Vision</div>
           </div>
 
+          <div class="quick-plant-container" data-vision-container="${vision.id}">
+            <button class="living-garden-btn-quick" data-action="quick-plant-toggle" data-vision-id="${vision.id}">
+              <span>✨</span> Quick Plant
+            </button>
+            <div class="quick-plant-popover">
+              <div class="quick-plant-title">Quick Intention</div>
+              <div class="quick-plant-grid">
+                ${(() => {
+                  const templates = IntentionsManager.getSorted();
+                  if (templates.length === 0) {
+                    return `<div class="quick-plant-empty">No templates yet</div>`;
+                  }
+                  return templates
+                    .map(
+                      (t) => `
+                    <button class="quick-plant-item" data-action="quick-plant-create" data-vision-id="${vision.id}" data-template-id="${t.id}">
+                      <span class="quick-plant-item-emoji">${escapeHtmlFn(t.emoji || "🌱")}</span>
+                      <div class="quick-plant-item-text">
+                        <span class="quick-plant-item-title">${escapeHtmlFn(t.title)}</span>
+                        <span class="quick-plant-item-meta">${t.duration}m</span>
+                      </div>
+                    </button>
+                  `,
+                    )
+                    .join("");
+                })()}
+              </div>
+            </div>
+          </div>
+
           <div class="plant-milestone-nodes">
             ${milestones.map(renderMilestone).join("")}
             <div class="plant-node add-node">
@@ -635,6 +667,102 @@ export const PlantGardenRenderer = {
         }
       });
     });
+
+    // Quick Plant Toggle
+    container
+      .querySelectorAll('[data-action="quick-plant-toggle"]')
+      .forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const containerEl = btn.closest(".quick-plant-container");
+          const isOpen = containerEl?.classList.contains("open");
+
+          // Close all others
+          container
+            .querySelectorAll(".quick-plant-container")
+            .forEach((el) => el.classList.remove("open"));
+
+          if (!isOpen) {
+            containerEl?.classList.add("open");
+          }
+        });
+      });
+
+    // Close popovers on click outside
+    document.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".quick-plant-container")) {
+        container
+          .querySelectorAll(".quick-plant-container")
+          .forEach((el) => el.classList.remove("open"));
+      }
+    });
+
+    // Quick Plant Create
+    container
+      .querySelectorAll('[data-action="quick-plant-create"]')
+      .forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const visionId = (btn as HTMLElement).dataset.visionId;
+          const templateId = (btn as HTMLElement).dataset.templateId;
+          if (!visionId || !templateId) return;
+
+          const template = IntentionsManager.getById(templateId);
+          if (!template) return;
+
+          // Close popover
+          btn.closest(".quick-plant-container")?.classList.remove("open");
+
+          // Find active focus
+          const activeFocus = Goals.findActiveFocusForVision(visionId);
+
+          if (!activeFocus) {
+            // Fallback to manual goal creation if no active focus path exists
+            if (onAddGoalLinked) {
+              onAddGoalLinked({
+                level: "milestone",
+                parentId: visionId,
+                parentLevel: "vision",
+                preselectedYear: year,
+              });
+              // Show toast explaining why
+              eventBus.emit("ui:toast", {
+                icon: "🧭",
+                message:
+                  "No active focus found. Let's create a milestone first!",
+              });
+            }
+            return;
+          }
+
+          // Create the intention
+          const now = new Date();
+          const ymd = now.toISOString().split("T")[0]; // YYYY-MM-DD
+
+          Goals.create({
+            title: template.title,
+            level: "intention",
+            category: template.category,
+            parentId: activeFocus.id,
+            parentLevel: "focus",
+            startDate: ymd,
+            meta: {
+              accentTheme: activeFocus.meta?.accentTheme,
+            },
+            icon: template.emoji,
+          });
+
+          // Re-render
+          eventBus.emit("view:changed", { transition: false });
+
+          // Success Toast
+          eventBus.emit("ui:toast", {
+            icon: "✨",
+            message: `Planted "${template.title}"!`,
+          });
+        });
+      });
 
     // Milestone Interactions
     container

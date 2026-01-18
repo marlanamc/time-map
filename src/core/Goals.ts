@@ -116,7 +116,11 @@ function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
  * Both ranges are treated as inclusive on both ends after normalizing to local
  * start-of-day / end-of-day.
  */
-export function isGoalActiveInRange(goal: Goal, rangeStart: Date, rangeEnd: Date): boolean {
+export function isGoalActiveInRange(
+  goal: Goal,
+  rangeStart: Date,
+  rangeEnd: Date,
+): boolean {
   const start = startOfDay(rangeStart);
   const end = endOfDay(rangeEnd);
   const goalRange = getGoalDateRange(goal);
@@ -153,7 +157,9 @@ export const Goals = {
 
   getForRange(rangeStart: Date, rangeEnd: Date): Goal[] {
     if (!State.data) return [];
-    return State.data.goals.filter((g) => isGoalActiveInRange(g, rangeStart, rangeEnd));
+    return State.data.goals.filter((g) =>
+      isGoalActiveInRange(g, rangeStart, rangeEnd),
+    );
   },
 
   getStats() {
@@ -193,7 +199,7 @@ export const Goals = {
         year = inputYear;
         const durationMonths = Math.max(
           1,
-          Math.floor(goalData.durationMonths ?? 1)
+          Math.floor(goalData.durationMonths ?? 1),
         );
         const end = endOfDay(new Date(year, month + durationMonths, 0));
         dueDate = end.toISOString();
@@ -204,7 +210,7 @@ export const Goals = {
         // Week(s): start at week-start (Mon) of provided startDate (or today), end after N weeks.
         const durationWeeks = Math.max(
           1,
-          Math.floor(goalData.durationWeeks ?? 1)
+          Math.floor(goalData.durationWeeks ?? 1),
         );
         const startBase = goalData.startDate
           ? parseYmdLocal(goalData.startDate)
@@ -283,24 +289,25 @@ export const Goals = {
           callbacks.onUpdateSyncStatus("synced");
       } catch (error: any) {
         console.error("Failed to sync new goal:", error);
-        
+
         // Show user-visible error notification
-        const errorMessage = error?.message || error?.toString() || "Failed to save to cloud";
-        const userFriendlyMessage = errorMessage.includes("authenticated") 
+        const errorMessage =
+          error?.message || error?.toString() || "Failed to save to cloud";
+        const userFriendlyMessage = errorMessage.includes("authenticated")
           ? "Please sign in to save to cloud"
           : errorMessage.includes("column") || errorMessage.includes("schema")
-          ? "Database schema mismatch. Please check migrations."
-          : `Couldn't save to cloud: ${errorMessage}`;
-        
+            ? "Database schema mismatch. Please check migrations."
+            : `Couldn't save to cloud: ${errorMessage}`;
+
         if (callbacks.onShowToast) {
           callbacks.onShowToast("⚠️", userFriendlyMessage);
         }
-        
+
         // Also update sync status to show error
         if (callbacks.onUpdateSyncStatus) {
           callbacks.onUpdateSyncStatus("error");
         }
-        
+
         // Fallback to debounce if force fails
         debouncedGoalSync(goal);
       }
@@ -342,7 +349,7 @@ export const Goals = {
           newYear = now.getFullYear();
           newMonth = now.getMonth();
           newDueDate = endOfDay(
-            new Date(newYear, newMonth + 1, 0)
+            new Date(newYear, newMonth + 1, 0),
           ).toISOString();
           if (goal.meta?.startDate) {
             const nextMeta = { ...goal.meta };
@@ -423,7 +430,7 @@ export const Goals = {
     if (callbacks.onScheduleRender) callbacks.onScheduleRender();
     // Cloud Delete
     SupabaseService.deleteGoal(goalId).catch((err) =>
-      console.error("Failed to delete goal from cloud", err)
+      console.error("Failed to delete goal from cloud", err),
     );
   },
 
@@ -436,7 +443,7 @@ export const Goals = {
     if (!State.data) return [];
     return this.getForRange(
       new Date(year, month, 1),
-      new Date(year, month + 1, 0)
+      new Date(year, month + 1, 0),
     );
   },
 
@@ -510,7 +517,7 @@ export const Goals = {
       callbacks.onCelebrate(
         "✨",
         `${levelLabel} updated`,
-        `"${goal.title}" marked done.`
+        `"${goal.title}" marked done.`,
       );
     }
   },
@@ -614,7 +621,7 @@ export const Goals = {
     if (!State.data) return;
     const totalGoals = State.data.goals.length;
     const completedGoals = State.data.goals.filter(
-      (g) => g.status === "done"
+      (g) => g.status === "done",
     ).length;
     const hasSubtasks = State.data.goals.some((g) => g.subtasks.length > 0);
     const hasNotes = State.data.goals.some((g) => g.notes.length > 0);
@@ -663,8 +670,40 @@ export const Goals = {
       callbacks.onCelebrate(
         achievement.emoji,
         "Achievement Unlocked!",
-        achievement.label
+        achievement.label,
       );
     }
+  },
+
+  /**
+   * Finds the most relevant active Focus for a given Vision.
+   * Walks down: Vision -> Active Milestone -> Active Focus
+   * Returns null if no active path exists.
+   */
+  findActiveFocusForVision(visionId: string): Goal | null {
+    if (!State.data) return null;
+    const now = new Date();
+
+    // 1. Find active milestone for this vision
+    const activeMilestone = State.data.goals.find(
+      (g) =>
+        g.level === "milestone" &&
+        g.parentId === visionId &&
+        g.status !== "archived" &&
+        isGoalActiveInRange(g, now, now),
+    );
+
+    if (!activeMilestone) return null;
+
+    // 2. Find active focus for this milestone
+    const activeFocus = State.data.goals.find(
+      (g) =>
+        g.level === "focus" &&
+        g.parentId === activeMilestone.id &&
+        g.status !== "archived" &&
+        isGoalActiveInRange(g, now, now),
+    );
+
+    return activeFocus || null;
   },
 };

@@ -38,6 +38,8 @@ export interface GoalRow {
   parent_id?: string;
   parent_level?: string;
   icon?: string;
+  /** Soft delete timestamp - if set, goal is archived */
+  archived_at?: string;
 }
 
 /**
@@ -52,6 +54,8 @@ export interface BrainDumpRow {
   archived: boolean;
   processed_action?: string;
   processed_at?: string;
+  /** Soft delete timestamp */
+  archived_at?: string;
 }
 
 /**
@@ -81,6 +85,8 @@ export interface WeeklyReviewRow {
   next_week_priorities?: string[];
   mood?: string;
   energy_avg?: number;
+  /** Soft delete timestamp */
+  archived_at?: string;
 }
 
 /**
@@ -104,6 +110,12 @@ export interface PreferencesRow {
   user_id: string;
   data: any; // JSONB - stores the full Preferences object
   updated_at: string;
+  /** Extracted for indexed queries */
+  theme?: string;
+  /** Whether push notifications are enabled */
+  notifications_enabled?: boolean;
+  /** User timezone for notification scheduling */
+  timezone?: string;
 }
 
 /**
@@ -132,4 +144,6 @@ export interface EventRow {
   recurrence?: any;
   created_at: string;
   updated_at: string;
+  /** Soft delete timestamp */
+  archived_at?: string;
 }

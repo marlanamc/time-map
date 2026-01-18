@@ -10,7 +10,13 @@ export type ViewType = "year" | "month" | "week" | "day" | "home" | "garden";
 export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
 
 /** Possible status states for a goal */
-export type GoalStatus = "not-started" | "in-progress" | "done" | "blocked";
+export type GoalStatus =
+  | "not-started"
+  | "in-progress"
+  | "done"
+  | "blocked"
+  | "cancelled"
+  | "archived";
 
 /** Priority levels for goals */
 export type Priority = "low" | "medium" | "high" | "urgent";
@@ -191,6 +197,8 @@ export interface Goal {
   parentLevel?: GoalLevel | null;
   /** Optional icon/emoji for the goal (primarily for Visions) */
   icon?: string;
+  /** Soft delete timestamp - if set, goal is archived */
+  archivedAt?: string | null;
 }
 
 /**
@@ -264,6 +272,8 @@ export interface WeeklyReview {
   nextWeekPriorities?: string[];
   mood?: number;
   energyAvg?: string;
+  /** Soft delete timestamp */
+  archivedAt?: string | null;
 }
 
 /**
@@ -307,6 +317,8 @@ export interface CalendarEvent {
   recurrence?: EventRecurrence | null;
   createdAt: string;
   updatedAt: string;
+  /** Soft delete timestamp */
+  archivedAt?: string | null;
 }
 
 /**
@@ -321,6 +333,8 @@ export interface BrainDumpEntry {
   archived?: boolean;
   processedAction?: string;
   processedAt?: string;
+  /** Soft delete timestamp */
+  archivedAt?: string | null;
 }
 
 /**
