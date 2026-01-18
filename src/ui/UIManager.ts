@@ -8,6 +8,7 @@ import { Streaks } from "../core/Streaks";
 import { CONFIG, VIEWS } from "../config";
 import { TimeBreakdown } from "../utils/TimeBreakdown";
 import { cacheElements } from "./elements/UIElements";
+import { buildShareMessage, copyShareText, tryNativeShare } from "../utils/share";
 import { Toast } from "../components/feedback/Toast";
 import { Celebration } from "../components/feedback/Celebration";
 import { TimeVisualizations } from "../garden/timeVisualizations";
@@ -1650,17 +1651,74 @@ export const UI = {
 
     const unlocked = State.data.achievements;
 
-    container.innerHTML = Object.entries(CONFIG.ACHIEVEMENTS)
-      .map(
-        ([id, ach]) => `
-          <div class="achievement ${
-            unlocked.includes(id) ? "unlocked" : ""
-          }" data-tooltip="${this.escapeHtml(ach.desc)}">
-            ${ach.emoji}
+    const achievementConfig = CONFIG.ACHIEVEMENTS as Record<
+      string,
+      { emoji: string; label: string; desc: string }
+    >;
+
+    const shareAchievement = async (achievementId: string) => {
+      const achievement = achievementConfig[achievementId];
+      if (!achievement) return;
+
+      const payload = {
+        title: achievement.label,
+        text: `${achievement.emoji} ${achievement.label} — ${achievement.desc}\nCaptured in The Garden Fence.`,
+        url: location.href,
+      };
+
+      const result = await tryNativeShare(payload);
+      if (result === "shared") {
+        this.showToast("📤", `${achievement.label} shared`);
+        return;
+      }
+      if (result === "cancelled") {
+        return;
+      }
+
+      const fallbackText = buildShareMessage(payload);
+      const copied = await copyShareText(fallbackText);
+      this.showToast(
+        copied ? "📋" : "📄",
+        copied
+          ? `${achievement.label} ready to paste`
+          : "Tap and hold to copy this text manually",
+      );
+    };
+
+    container.innerHTML = Object.entries(achievementConfig)
+      .map(([id, ach]) => {
+        const isUnlocked = unlocked.includes(id);
+        const shareButton = isUnlocked
+          ? `<button
+              class="achievement-share-btn"
+              type="button"
+              data-achievement-id="${id}"
+              aria-label="Share ${ach.label}"
+              title="Share ${ach.label}"
+            >⤴</button>`
+          : "";
+        return `
+          <div class="achievement ${isUnlocked ? "unlocked" : ""}" data-tooltip="${this.escapeHtml(
+            ach.desc,
+          )}">
+            <span class="achievement-emoji">${ach.emoji}</span>
+            ${shareButton}
           </div>
-        `,
-      )
+        `;
+      })
       .join("");
+
+    container
+      .querySelectorAll<HTMLButtonElement>(".achievement-share-btn")
+      .forEach((btn) => {
+        btn.addEventListener("click", (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          const achievementId = btn.dataset.achievementId;
+          if (!achievementId) return;
+          void shareAchievement(achievementId);
+        });
+      });
   },
 
   // ============================================

@@ -5,8 +5,26 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#FDFBF7",
   "theme_color": "#6F9B86",
+  "screenshots": [
+    {
+      "src": "/splash/1290x2796.png",
+      "sizes": "1290x2796",
+      "type": "image/png"
+    },
+    {
+      "src": "/splash/1179x2556.png",
+      "sizes": "1179x2556",
+      "type": "image/png"
+    },
+    {
+      "src": "/splash/1170x2532.png",
+      "sizes": "1170x2532",
+      "type": "image/png"
+    }
+  ],
   "shortcuts": [
     {
       "name": "New intention",
@@ -21,8 +39,32 @@
       "description": "Go to today’s schedule",
       "url": "/?view=day",
       "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Garden view",
+      "short_name": "Garden",
+      "description": "See your living garden",
+      "url": "/?view=garden",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Weekly review",
+      "short_name": "Reflect",
+      "description": "Capture a quick weekly review",
+      "url": "/?action=weekly-review",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "icons": [
     {
       "src": "/icons/icon.svg",

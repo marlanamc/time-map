@@ -15,6 +15,7 @@ import { VIEWS } from "./config";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import { ReminderService } from "./services/ReminderService";
 import { eventBus } from "./core/EventBus";
+import type { SharePayload } from "./utils/share";
 
 // Removed duplicate interfaces - now imported from types.ts
 
@@ -75,11 +76,16 @@ import { UI } from "./ui/UIBridge";
 
 // Import Liquid Effects for sidebar animations
 import { initLiquidEffects } from "./components/dayView/LiquidEffects";
+import { showWeeklyReview } from "./features/weeklyReview";
 
 // ============================================
 // Initialize App
 // ============================================
 document.addEventListener("DOMContentLoaded", async () => {
+  const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  if (isIosDevice) {
+    document.body.classList.add("ios");
+  }
   // Start performance monitoring
   // performanceMonitor.markAppInitStart();
 
@@ -153,6 +159,64 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize liquid effects (time theming, shimmer, ripple)
   initLiquidEffects();
 
+  const handleSharedIntent = (payload: SharePayload) => {
+    const snippet =
+      (payload.title ?? payload.text ?? payload.url ?? "")
+        .trim()
+        .slice(0, 140);
+    UI.openQuickAdd({
+      label: "Shared content",
+      placeholder: "Describe what you want to do",
+      prefillTitle: snippet || undefined,
+    });
+    UI.showToast(
+      "📲",
+      snippet
+        ? "Shared content moved to Quick Add"
+        : "Shared item ready in Quick Add",
+      { timeoutMs: 3200, type: "share-target" },
+    );
+  };
+
+  const processShareQueryParams = () => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("sharedFrom") !== "share-target") return;
+
+    const payload: SharePayload = {
+      title: params.get("sharedTitle") ?? undefined,
+      text: params.get("sharedText") ?? undefined,
+      url: params.get("sharedUrl") ?? undefined,
+    };
+
+    handleSharedIntent(payload);
+
+    const cleanUrl = new URL(location.href);
+    ["sharedFrom", "sharedTitle", "sharedText", "sharedUrl"].forEach((key) =>
+      cleanUrl.searchParams.delete(key),
+    );
+    history.replaceState(null, "", cleanUrl.toString());
+  };
+
+  processShareQueryParams();
+
+  if ("visualViewport" in window) {
+    const viewport = window.visualViewport;
+    const updateKeyboardOffset = () => {
+      if (!viewport) return;
+      const rawOffset = Math.max(0, window.innerHeight - viewport.height);
+      const keyboardVisible = rawOffset > 140;
+      const offset = keyboardVisible ? rawOffset : 0;
+      document.documentElement.style.setProperty(
+        "--keyboard-offset",
+        `${offset}px`,
+      );
+      document.body.classList.toggle("keyboard-visible", keyboardVisible);
+    };
+    viewport.addEventListener("resize", updateKeyboardOffset);
+    viewport.addEventListener("scroll", updateKeyboardOffset);
+    updateKeyboardOffset();
+  }
+
   // Fallback: Ensure loading overlay is removed even if initialization fails
   setTimeout(() => {
     const loading = document.getElementById("appLoading");
@@ -207,6 +271,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (action === "new-task") {
       State.setView(VIEWS.DAY);
       UI.openQuickAdd?.();
+      didHandleAction = true;
+    }
+
+    if (action === "weekly-review") {
+      showWeeklyReview({
+        showToast: (iconOrMessage, messageOrType) =>
+          UI.showToast(iconOrMessage, messageOrType ?? ""),
+        render: () => UI.render(),
+      });
       didHandleAction = true;
     }
 
@@ -385,6 +458,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             .then((mod) => mod.syncQueue.forceSync())
             .catch(() => {});
         }
+        if (type === "SHARE_TARGET" && event.data.payload) {
+          handleSharedIntent(event.data.payload);
+        }
       });
 
       navigator.serviceWorker
@@ -393,6 +469,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           let refreshing = false;
 
           const requestUpdate = () => registration.update().catch(() => {});
+          const ensurePeriodicSync = () => {
+            const periodicSync = (registration as any).periodicSync;
+            if (!periodicSync?.register) return;
+            periodicSync
+              .getTags?.()
+              .then((tags: string[]) => {
+                if (!tags.includes("garden-fence-sync")) {
+                  return periodicSync.register("garden-fence-sync", {
+                    minInterval: 3 * 60 * 60 * 1000,
+                  });
+                }
+              })
+              .catch(() => {});
+          };
 
           // When a new SW takes control, reload once so the latest assets are used.
           navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -419,9 +509,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           // Proactively check for updates on launch and when returning to the app.
           requestUpdate();
+          ensurePeriodicSync();
           setInterval(requestUpdate, 60 * 60 * 1000); // hourly
           document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") requestUpdate();
+            if (document.visibilityState === "visible") {
+              requestUpdate();
+              ensurePeriodicSync();
+            }
           });
         })
         .catch((err) => {

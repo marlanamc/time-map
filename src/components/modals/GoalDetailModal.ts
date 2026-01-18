@@ -14,6 +14,7 @@ import { State } from "../../core/State";
 import { CONFIG } from "../../config";
 import { TimeBreakdown } from "../../utils/TimeBreakdown";
 import { ND_CONFIG } from "../../config/ndConfig";
+import { buildShareMessage, copyShareText, tryNativeShare } from "../../utils/share";
 import {
   renderAccordionSection,
   setupAccordionSectionToggles,
@@ -442,6 +443,7 @@ class GoalDetailModalManager {
           <div id="goalDetailAccordionContainer" class="goal-detail-accordion"></div>
         </div>
         <div class="modal-actions">
+          <button class="btn btn-ghost" id="shareGoalBtn" type="button">Share ${levelLabel}</button>
           <button class="btn btn-danger" id="deleteGoalBtn">Remove ${levelLabel}</button>
           <button class="btn btn-primary" id="saveGoalBtn">Save Changes</button>
         </div>
@@ -514,6 +516,49 @@ class GoalDetailModalManager {
     const setProgressUI = (progress: number) => {
       if (progressFill) progressFill.style.width = `${progress}%`;
       if (progressValue) progressValue.textContent = `${progress}%`;
+    };
+
+    const prepareSharePayload = () => {
+      const goal = Goals.getById(goalId);
+      if (!goal) return null;
+      const levelLabel = this.getLevelLabel(goal.level);
+      const category = goal.category ? CONFIG.CATEGORIES[goal.category] : null;
+      const timeLine = goal.startTime
+        ? `🕒 ${goal.startTime}${goal.endTime ? ` – ${goal.endTime}` : ""}`
+        : "";
+      const textParts = [
+        goal.description,
+        timeLine,
+        category ? `Area of life: ${category.label}` : null,
+        "Captured in The Garden Fence",
+      ].filter((part): part is string => Boolean(part));
+      return {
+        title: `${levelLabel}: ${goal.title}`,
+        text: textParts.length > 0 ? textParts.join("\n") : undefined,
+        url: location.href,
+      };
+    };
+
+    const handleShareGoal = async () => {
+      const payload = prepareSharePayload();
+      if (!payload) return;
+
+      const result = await tryNativeShare(payload);
+      if (result === "shared") {
+        callbacks.onToast("📤", "Share sheet opened");
+        return;
+      }
+      if (result === "cancelled") {
+        return;
+      }
+
+      const fallbackText = buildShareMessage(payload);
+      const copied = await copyShareText(fallbackText);
+      if (copied) {
+        callbacks.onToast("📋", "Share text copied to clipboard");
+      } else {
+        callbacks.onToast("📄", "Tap and hold the button to copy share text");
+      }
     };
 
     modal
@@ -641,6 +686,14 @@ class GoalDetailModalManager {
         callbacks.onToast("🗑️", `${levelLabel} removed`);
       }
     });
+
+    // Share goal
+    modal
+      .querySelector("#shareGoalBtn")
+      ?.addEventListener("click", (e: Event) => {
+        e.preventDefault();
+        void handleShareGoal();
+      });
 
     // Save changes
     modal.querySelector("#saveGoalBtn")?.addEventListener("click", () => {

@@ -11,6 +11,7 @@
   --safe-area-left: 0px;
   --safe-area-right: 0px;
   --status-bar-height: 44px;
+  --keyboard-offset: 0px;
 }
 
 /* iOS-specific viewport fixes */
@@ -54,8 +55,9 @@
 .ios a:active,
 .ios .clickable:active,
 .ios .swipeable:active {
-  transform: scale(0.98);
-  transition: transform 0.1s ease;
+  transform: scale(0.97);
+  transition: transform 0.15s ease;
+  will-change: transform;
 }
 
 /* ===================================
@@ -189,6 +191,42 @@
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+body {
+  transition: padding-bottom 0.28s ease, transform 0.28s ease;
+}
+
+body.keyboard-visible {
+  padding-bottom: calc(var(--safe-area-bottom) + var(--keyboard-offset));
+}
+
+.ios .modal-overlay {
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 12px calc(var(--mobile-tab-bar-height) + 10px);
+}
+
+.ios .modal {
+  width: min(560px, 100%);
+  border-radius: 20px 20px 8px 8px;
+  margin: 0 auto;
+  max-height: calc(92vh - var(--mobile-tab-bar-height));
+  animation: bottom-sheet-up 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: bottom center;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.28);
+  padding-bottom: calc(var(--mobile-tab-bar-height) + var(--space-4));
+}
+
+@keyframes bottom-sheet-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .install-icon {

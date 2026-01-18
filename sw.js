@@ -54,7 +54,60 @@ async function broadcastToClients(message) {
   clients.forEach((client) => client.postMessage(message));
 }
 
+function clampShareValue(value, max = 360) {
+  if (!value) return "";
+  return value.length > max ? value.slice(0, max) : value;
+}
+
+async function handleShareTargetRequest(event) {
+  try {
+    const formData = await event.request.formData();
+    const payload = {
+      title: clampShareValue(formData.get("title")?.toString() ?? ""),
+      text: clampShareValue(formData.get("text")?.toString() ?? "", 800),
+      url: clampShareValue(formData.get("url")?.toString() ?? "", 512),
+    };
+
+    const params = new URLSearchParams();
+    if (payload.title) params.set("sharedTitle", payload.title);
+    if (payload.text) params.set("sharedText", payload.text);
+    if (payload.url) params.set("sharedUrl", payload.url);
+    params.set("sharedFrom", "share-target");
+    const targetUrl = `/?${params.toString()}`;
+
+    await broadcastToClients({ type: "SHARE_TARGET", payload });
+
+    const matchedClients = await self.clients.matchAll({
+      type: "window",
+      includeUncontrolled: true,
+    });
+    if (matchedClients.length === 0) {
+      await self.clients.openWindow(targetUrl).catch(() => {});
+    } else {
+      matchedClients.forEach((client) => {
+        try {
+          client.focus?.();
+        } catch {
+          // ignore focus failures
+        }
+      });
+    }
+
+    return Response.redirect(targetUrl, 303);
+  } catch (error) {
+    console.warn("[SW] Share target failed:", error);
+    return new Response("Share target failed", { status: 500 });
+  }
+}
+
 self.addEventListener("sync", (event) => {
+  if (event.tag !== "garden-fence-sync") return;
+  event.waitUntil(
+    broadcastToClients({ type: "PROCESS_SYNC_QUEUE" }).catch(() => {}),
+  );
+});
+
+self.addEventListener("periodicsync", (event) => {
   if (event.tag !== "garden-fence-sync") return;
   event.waitUntil(
     broadcastToClients({ type: "PROCESS_SYNC_QUEUE" }).catch(() => {}),
@@ -110,9 +163,13 @@ self.addEventListener("message", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
+  const url = new URL(request.url);
+  if (request.method === "POST" && url.pathname === "/share-target") {
+    event.respondWith(handleShareTargetRequest(event));
+    return;
+  }
   if (request.method !== "GET") return;
 
-  const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
   const accept = request.headers.get("accept") || "";
