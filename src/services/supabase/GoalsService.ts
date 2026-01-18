@@ -59,6 +59,7 @@ export class GoalsService {
         parentLevel: (g.parent_level as unknown as Goal['parentLevel']) ?? null,
         meta: g.meta ?? undefined,
         activityId: g.activity_id ?? undefined,
+        icon: g.icon ?? undefined,
       }));
 
       cacheService.set(cacheKey, goals, cacheService.TTL.GOALS);
@@ -143,7 +144,8 @@ export class GoalsService {
         meta: goal.meta ?? {},
         activity_id: goal.activityId || null,
         parent_id: goal.parentId ?? null,
-        parent_level: goal.parentLevel ?? null
+        parent_level: goal.parentLevel ?? null,
+        icon: goal.icon || null
       };
 
       console.log('[GoalsService] Attempting to save goal:', {
@@ -299,7 +301,8 @@ export class GoalsService {
         tags: goal.tags,
         activity_id: goal.activityId ?? null,
         parent_id: goal.parentId ?? null,
-        parent_level: goal.parentLevel ?? null
+        parent_level: goal.parentLevel ?? null,
+        icon: goal.icon ?? null
       }));
 
       const { error } = await supabase
@@ -348,7 +351,7 @@ export class GoalsService {
         'category', 'priority', 'status', 'progress', 'due_date',
         'start_time', 'end_time', 'completed_at', 'last_worked_on',
         'created_at', 'updated_at', 'subtasks', 'notes', 'time_log',
-        'tags', 'parent_id', 'parent_level', 'meta', 'activity_id'
+        'tags', 'parent_id', 'parent_level', 'meta', 'activity_id', 'icon'
       ];
 
       // Try selecting all columns - if a column doesn't exist, we'll get an error
@@ -433,6 +436,7 @@ export class GoalsService {
         parentLevel: (g.parent_level as unknown as Goal['parentLevel']) ?? null,
         meta: g.meta ?? undefined,
         activityId: g.activity_id ?? undefined,
+        icon: g.icon ?? undefined,
       }));
 
       console.log(`[GoalsService] Diagnostic: Found ${goals.length} goals in database for user ${user.id}`);

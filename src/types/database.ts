@@ -37,6 +37,7 @@ export interface GoalRow {
   activity_id?: string;
   parent_id?: string;
   parent_level?: string;
+  icon?: string;
 }
 
 /**

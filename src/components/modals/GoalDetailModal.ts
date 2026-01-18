@@ -692,7 +692,9 @@ class GoalDetailModalManager {
             "#visionIconInput"
           ) as HTMLInputElement | null;
           if (iconInput) {
-            updates.icon = iconInput.value || "✨"; // Default if cleared
+            // Allow empty string to clear icon, only use default if not specified
+            const iconValue = iconInput.value.trim();
+            updates.icon = iconValue || undefined;
           }
         } else {
           // For non-vision levels, just apply the meta from detailState
