@@ -472,6 +472,26 @@
   }
 }
 
+@media (max-width: 768px) {
+  .mobile-header {
+    padding: calc(var(--space-3) + env(safe-area-inset-top, 0px))
+      var(--space-4);
+    border-radius: 0;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    box-shadow: 0 4px 26px rgba(0, 0, 0, 0.35);
+    background: var(--glass-bg);
+    position: sticky;
+    top: 0;
+    z-index: 600;
+  }
+
+  .mobile-header .logo-text {
+    display: none;
+  }
+}
+
 /* Animations for Blooming */
 @keyframes petal-glow {
   0% {

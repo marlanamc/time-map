@@ -51,7 +51,10 @@
     .support-panel {
         width: 100%;
         max-width: 100%;
-        height: 100%;
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
         border-left: none;
         border-top: 1px solid rgba(107, 168, 169, 0.3);
         box-shadow:
@@ -60,7 +63,7 @@
         transform: translateY(100%);
         border-radius: var(--radius-xl) var(--radius-xl) 0 0;
         padding-top: calc(var(--space-2) + env(safe-area-inset-top, 0px));
-        padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+        padding-bottom: 0;
     }
 
     .support-panel-overlay.active .support-panel {
@@ -72,12 +75,19 @@
         padding-left: var(--space-4);
         padding-right: var(--space-4);
         padding-bottom: var(--space-4);
+        flex-shrink: 0;
     }
 
     .support-panel-body {
         padding-left: var(--space-4);
         padding-right: var(--space-4);
-        padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+        padding-top: var(--space-5);
+        padding-bottom: calc(var(--space-6) + var(--mobile-tab-bar-height) + env(safe-area-inset-bottom, 0px));
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 }
 
@@ -282,11 +292,18 @@ body.is-mobile .support-panel-appearance-card[aria-label="Time of day theme"] {
 }
 
 .support-panel-icon svg {
-    width: 24px;
-    height: 24px;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
     stroke: currentColor;
     stroke-width: 2;
+    fill: none;
     transition: transform var(--duration-normal) var(--ease-out);
+    display: block;
+    flex-shrink: 0;
 }
 
 .support-panel-item:hover .support-panel-icon svg {

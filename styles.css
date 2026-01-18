@@ -6137,8 +6137,18 @@ body.focus-mode .sidebar-hide-btn {
         display: none;
     }
 
-    body.mobile-date-nav-in-header .header-mobile-nav {
+    body.mobile-date-nav-in-header .mobile-header {
         display: flex;
+        align-items: center;
+    }
+
+    body.mobile-date-nav-in-header .header-mobile-nav {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 1;
     }
 
     body.mobile-date-nav-in-header .control-bar {
@@ -6156,14 +6166,25 @@ body.focus-mode .sidebar-hide-btn {
     body.mobile-date-nav-in-header .header-mobile-nav .nav-btn {
         min-width: 44px;
         min-height: 44px;
+        width: 44px;
+        height: 44px;
         border-radius: var(--radius-full);
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--text-base);
     }
 
     body.mobile-date-nav-in-header .header-mobile-nav .today-btn {
         min-height: 44px;
+        height: 44px;
         border-radius: var(--radius-full);
-        padding: 0 var(--space-4);
-        font-weight: 650;
+        padding: 0 var(--space-3);
+        font-weight: 600;
+        font-size: var(--text-sm);
+        min-width: auto;
+        width: auto;
     }
 
     #hideHeaderBtn,

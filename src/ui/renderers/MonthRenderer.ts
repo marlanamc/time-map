@@ -39,10 +39,13 @@ export const MonthRenderer = {
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
-    const prevMonthDays = new Date(year, month, 0).getDate();
-    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const _daysInMonth = lastDay.getDate();
+    const _startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
+    const _prevMonthDays = new Date(year, month, 0).getDate();
+    const isMobile = document.body.classList.contains("is-mobile");
+    const dayNames = isMobile
+      ? ["M", "T", "W", "T", "F", "S", "S"]
+      : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const formatYmd = (d: Date) => {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -92,21 +95,25 @@ export const MonthRenderer = {
     const cellDates: Date[] = [];
 
     // Leading days from previous month
-    for (let i = 0; i < startDayOfWeek; i++) {
-      const dayNum = prevMonthDays - startDayOfWeek + i + 1;
-      cellDates.push(new Date(year, month - 1, dayNum));
-    }
-
-    // Current month days
-    for (let day = 1; day <= daysInMonth; day++) {
-      cellDates.push(new Date(year, month, day));
-    }
-
-    // Trailing days from next month to complete the last week row
-    const totalCells = startDayOfWeek + daysInMonth;
-    const trailing = (7 - (totalCells % 7)) % 7;
-    for (let i = 1; i <= trailing; i++) {
-      cellDates.push(new Date(year, month + 1, i));
+    // Calculate which day of the previous month should be in the Monday position
+    const firstDayDate = new Date(year, month, 1);
+    const daysToMonday = (firstDayDate.getDay() + 6) % 7; // How many days back to get to Monday
+    const mondayOfFirstWeek = new Date(firstDayDate);
+    mondayOfFirstWeek.setDate(mondayOfFirstWeek.getDate() - daysToMonday);
+    
+    // Fill in all days from Monday of the first week through the last day of the month
+    const _currentDate = new Date(mondayOfFirstWeek);
+    const lastDayDate = new Date(year, month + 1, 0); // Last day of current month
+    
+    // Calculate how many weeks we need (always include full weeks)
+    const daysInRange = Math.ceil((lastDayDate.getTime() - mondayOfFirstWeek.getTime()) / 86400000) + 1;
+    const weeksNeeded = Math.ceil(daysInRange / 7);
+    const totalDays = weeksNeeded * 7;
+    
+    for (let i = 0; i < totalDays; i++) {
+      const date = new Date(mondayOfFirstWeek);
+      date.setDate(date.getDate() + i);
+      cellDates.push(date);
     }
 
     const gridStart =
