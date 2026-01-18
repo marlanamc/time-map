@@ -1709,4 +1709,11 @@
   .app {
     padding-top: 0;
   }
+
+  /* Bottom tab bar - ensure it sits at actual bottom in PWA mode */
+  .mobile-tab-bar {
+    bottom: 0 !important;
+    /* Use fallback of 34px for home indicator on Face ID iPhones */
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 34px)) !important;
+  }
 }
