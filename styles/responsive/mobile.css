@@ -1683,3 +1683,30 @@
     padding: var(--space-2);
   }
 }
+
+/* ===================================
+   PWA Standalone Mode Fixes
+   =================================== */
+
+/* In PWA standalone mode, the status bar overlays the content.
+   Remove the negative margin that was pulling content up into the status bar area. */
+@media (display-mode: standalone) {
+  .header,
+  .mobile-header {
+    /* Remove the negative margin that extends background into safe area -
+       in standalone mode this causes content to shift under the status bar */
+    margin-top: 0 !important;
+    /* Ensure padding accounts for safe area */
+    padding-top: calc(var(--space-4) + env(safe-area-inset-top, 47px)) !important;
+  }
+
+  /* Fixed position elements also need safe area adjustment */
+  .header-mobile-support-btn {
+    top: calc(var(--space-4) + env(safe-area-inset-top, 47px)) !important;
+  }
+
+  /* Ensure the app container doesn't double-apply safe area padding */
+  .app {
+    padding-top: 0;
+  }
+}
