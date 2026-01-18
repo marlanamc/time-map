@@ -1788,6 +1788,62 @@ html.dark-mode .living-garden-reflection-actions {
   }
 }
 
+@media (max-width: 600px) {
+  .living-garden {
+    overflow-x: hidden;
+  }
+
+  .living-garden-lane {
+    padding: var(--space-4);
+    border-radius: 16px;
+  }
+
+  .living-garden-lane-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .living-garden-lane-name {
+    font-size: 1.05rem;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .living-garden-lane-sub {
+    font-size: var(--text-xs);
+  }
+
+  .living-garden-lane-growth {
+    width: 100%;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-size: 0.95rem;
+  }
+
+  .living-garden-lane-body {
+    padding-left: var(--space-1);
+  }
+
+  .living-garden-lane-spine {
+    left: 8px;
+  }
+
+  .living-garden-lane-column {
+    padding-left: var(--space-4);
+  }
+
+  .living-garden-chip {
+    padding: var(--space-3);
+  }
+
+  .living-garden-chip-title {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+}
+
 /* ===================================
    Mobile Garden Plots (Simplified)
    =================================== */
