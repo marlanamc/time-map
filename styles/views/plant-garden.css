@@ -217,37 +217,90 @@
 .focus-container {
   /* Hidden by default */
   display: none;
-  padding-top: var(--space-2);
+  padding-top: var(--space-4);
   /* Indent to look like sub-branch */
   border-left: 2px dashed var(--accent-muted);
-  margin-top: var(--space-2);
-  padding-left: var(--space-3);
+  margin-top: var(--space-3);
+  padding-left: var(--space-4);
   margin-left: var(--space-3); /* Connect to milestone */
 }
 
 .milestone-branch-wrapper.expanded .focus-container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-4);
   animation: growIn 0.3s ease-out;
 }
 
 .focus-card {
   font-size: var(--text-sm);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--bg-surface);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  color: var(--text-secondary);
+  gap: var(--space-3);
+  color: var(--text-primary);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  width: fit-content;
+  min-width: 180px;
 }
 
 .focus-card:hover {
   background: var(--bg-elevated);
-  color: var(--text-primary);
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.focus-icon {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.focus-title {
+  font-weight: 600;
+  flex: 1;
+}
+
+.focus-progress {
+  font-size: 10px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.add-intention-btn,
+.add-focus-btn {
+  align-self: flex-start;
+  margin-left: var(--space-6);
+  margin-top: 4px;
+  font-size: 11px !important;
+  color: var(--text-tertiary) !important;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  padding: 4px 10px !important;
+  border-radius: var(--radius-full) !important;
+  border: 1px solid transparent !important;
+}
+
+.add-intention-btn:hover,
+.add-focus-btn:hover {
+  opacity: 1;
+  color: var(--accent) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--glass-border) !important;
+}
+
+.add-focus-btn {
+  margin-left: var(--space-4);
+  margin-top: 8px;
+  font-size: 12px !important;
 }
 
 .focus-card.is-active {

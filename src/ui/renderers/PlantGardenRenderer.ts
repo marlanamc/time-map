@@ -516,17 +516,17 @@ export const PlantGardenRenderer = {
       return `
         <div class="focus-wrapper" data-focus-id="${goal.id}">
           <div class="focus-card ${progress >= 100 ? "is-done" : ""}" data-action="toggle-focus">
-            <span class="focus-icon">🔎</span>
+            <span class="focus-icon">${goal.icon || "🔎"}</span>
             <span class="focus-title">${escapeHtmlFn(goal.title)}</span>
-            ${progress > 0 ? `<small class="focus-progress">${progress}%</small>` : ""}
+            ${progress > 0 ? `<span class="focus-progress">${progress}%</span>` : ""}
           </div>
+          <button class="living-garden-btn-ghost btn-tiny add-intention-btn" data-action="add-child" data-parent-id="${goal.id}" data-level="intention">+ Add Intention</button>
           <div class="intention-container">
              ${
                intentions.length > 0
                  ? intentions.map(renderLeaf).join("")
                  : `<div class="intention-leaf is-empty">No intentions yet</div>`
              }
-             <button class="living-garden-btn-ghost btn-tiny" data-action="add-child" data-parent-id="${goal.id}" data-level="intention">+ Add Intention</button>
           </div>
         </div>
       `;
@@ -558,7 +558,7 @@ export const PlantGardenRenderer = {
                   ? focuses.map(renderFocus).join("")
                   : `<div class="focus-card is-empty">No focuses yet</div>`
               }
-              <button class="living-garden-btn-ghost btn-small" style="margin-top:8px;" data-action="add-child" data-parent-id="${goal.id}" data-level="focus">+ Add Focus</button>
+              <button class="living-garden-btn-ghost btn-small add-focus-btn" data-action="add-child" data-parent-id="${goal.id}" data-level="focus">+ Add Focus</button>
             </div>
           </div>
         </div>

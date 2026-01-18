@@ -36,7 +36,6 @@ export class RenderCoordinator {
   private elements: UIElements;
   private callbacks: RenderCoordinatorCallbacks;
   private renderRaf: number | null = null;
-  private pendingViewTransition = false;
   private lastNavKey: string | null = null;
   private scrollResetRaf: number | null = null;
 
@@ -45,13 +44,11 @@ export class RenderCoordinator {
     this.callbacks = options.callbacks;
   }
 
-  scheduleRender(opts?: { transition?: boolean }) {
-    if (opts?.transition) this.pendingViewTransition = true;
+  scheduleRender() {
     if (this.renderRaf !== null) return;
 
     this.renderRaf = window.requestAnimationFrame(() => {
       this.renderRaf = null;
-      this.pendingViewTransition = false;
 
       // Document-level view transitions were causing full-page flashes on tab changes.
       // Render directly to keep the layout stable for motion-sensitive users.
@@ -63,7 +60,6 @@ export class RenderCoordinator {
     if (this.renderRaf !== null) {
       cancelAnimationFrame(this.renderRaf);
       this.renderRaf = null;
-      this.pendingViewTransition = false;
     }
 
     const navKey = (() => {
