@@ -342,27 +342,44 @@ export const LivingGardenRenderer = {
           </header>
         `;
 
-        // Build hero section content
-        let heroContent = "";
-        let primaryCTA = "";
+        // Build hero section content - only show when there's nothing set
+        const hasActivity = activeMilestones > 0 || hasIntentions;
+        let heroSection = "";
+        
+        if (!hasActivity) {
+          let heroContent = "";
+          let primaryCTA = "";
 
-        const heroGoal = primaryFocus.goal;
-        if (heroGoal) {
-          const heroGoalTitle = escapeHtmlFn(heroGoal.title);
-          heroContent = `<p class="living-garden-focus-text">${heroGoalTitle}</p>`;
-          const heroGoalId = escapeHtmlFn(heroGoal.id);
-          primaryCTA = `<button class="living-garden-btn-primary glassButton" data-action="open-goal" data-goal-id="${heroGoalId}">
-            <span class="btn-icon">🌱</span>
-            Plant today's seed
-          </button>`;
-        } else {
-          heroContent = `<p class="living-garden-focus-text">No focus set for this week</p>`;
-          primaryCTA = onAddGoal
-            ? `<button class="living-garden-btn-primary glassButton" data-action="add-focus">
-            <span class="btn-icon">🌱</span>
-            Plant today's seed
-          </button>`
-            : "";
+          const heroGoal = primaryFocus.goal;
+          if (heroGoal) {
+            const heroGoalTitle = escapeHtmlFn(heroGoal.title);
+            heroContent = `<p class="living-garden-focus-text">${heroGoalTitle}</p>`;
+            const heroGoalId = escapeHtmlFn(heroGoal.id);
+            primaryCTA = `<button class="living-garden-btn-primary glassButton" data-action="open-goal" data-goal-id="${heroGoalId}">
+              <span class="btn-icon">🌱</span>
+              Plant today's seed
+            </button>`;
+          } else {
+            heroContent = `<p class="living-garden-focus-text">No focus set for this week</p>`;
+            primaryCTA = onAddGoal
+              ? `<button class="living-garden-btn-primary glassButton" data-action="add-focus">
+              <span class="btn-icon">🌱</span>
+              Plant today's seed
+            </button>`
+              : "";
+          }
+          
+          heroSection = `
+            <section class="living-garden-hero">
+              <div class="living-garden-hero-card glassPanel">
+                <h2 class="living-garden-hero-title">Today's focus</h2>
+                <div class="living-garden-hero-content">
+                  ${heroContent}
+                </div>
+                ${primaryCTA}
+              </div>
+            </section>
+          `;
         }
       
       // Build context panel (collapsible)
@@ -407,16 +424,7 @@ export const LivingGardenRenderer = {
       container.innerHTML = `
         ${headerMarkup}
         <div class="living-garden-container">
-          <!-- Hero Card: Today's Focus (40-60% height) -->
-          <section class="living-garden-hero">
-            <div class="living-garden-hero-card glassPanel">
-              <h2 class="living-garden-hero-title">Today's focus</h2>
-              <div class="living-garden-hero-content">
-                ${heroContent}
-              </div>
-              ${primaryCTA}
-            </div>
-          </section>
+          ${heroSection}
           
           <!-- Progressive disclosure link -->
           ${firstVision || firstMilestone ? `<button class="living-garden-context-trigger glassPill" data-action="toggle-context">See the bigger picture →</button>` : ""}
