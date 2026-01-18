@@ -180,6 +180,30 @@
   --radius-xl: 32px;
   --radius-full: 9999px;
 
+  /* Organic Border Radius (blob-like shapes for whimsical garden) */
+  --radius-organic-1: 60% 40% 55% 45% / 55% 45% 40% 60%;
+  --radius-organic-2: 45% 55% 35% 65% / 40% 60% 55% 45%;
+  --radius-organic-3: 50% 50% 45% 55% / 60% 40% 50% 50%;
+  --radius-organic-seed: 50% 50% 80% 20% / 40% 60% 40% 60%;
+  --radius-organic-leaf: 70% 30% 70% 30% / 30% 70% 30% 70%;
+
+  /* Garden Level Hierarchy Colors */
+  --garden-milestone-accent: #f59e0b;
+  --garden-milestone-rgb: 245, 158, 11;
+  --garden-milestone-glow: rgba(245, 158, 11, 0.2);
+
+  --garden-focus-accent: #10b981;
+  --garden-focus-rgb: 16, 185, 129;
+  --garden-focus-glow: rgba(16, 185, 129, 0.15);
+
+  --garden-intention-accent: #8b5cf6;
+  --garden-intention-rgb: 139, 92, 246;
+  --garden-intention-glow: rgba(139, 92, 246, 0.12);
+
+  /* Garden-specific spacing */
+  --garden-breathing-room: clamp(16px, 4vw, 32px);
+  --garden-card-gap: clamp(12px, 3vw, 24px);
+
   /* Transitions */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);

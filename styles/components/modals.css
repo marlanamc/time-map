@@ -75,6 +75,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  margin-bottom: 0; /* Ensure no bottom margin on mobile */
 }
 
 .modal.edit-sheet-panel .modal-header {
@@ -97,7 +98,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 50%, rgba(241, 245, 249, 0.85) 100%);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
@@ -296,16 +297,23 @@
 @media (max-width: 768px) {
   .modal-overlay.edit-sheet {
     align-items: flex-end;
-    padding: 0 0 calc(env(safe-area-inset-bottom, 0px) + var(--space-1)) 0;
+    padding: 0 0 calc(env(safe-area-inset-bottom, 0px) + var(--mobile-tab-bar-height) + var(--space-4)) 0;
+    z-index: 10000 !important; /* Above mobile tab bar (z-index: 9999) */
   }
 
   .modal.edit-sheet-panel {
     border-radius: 28px 28px 0 0;
     width: 100%;
+    margin-bottom: var(--space-2); /* Add small bottom margin to lift it up */
+    max-height: calc(100vh - var(--mobile-tab-bar-height) - env(safe-area-inset-top, 0px) - var(--space-6));
   }
 
   .edit-sheet-topbar {
-    background: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.93) 50%, rgba(241, 245, 249, 0.89) 100%);
+  }
+
+  .dark-mode .edit-sheet-topbar {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.97) 0%, rgba(30, 41, 59, 0.93) 50%, rgba(51, 65, 85, 0.89) 100%);
   }
 }
 
@@ -336,6 +344,24 @@
   background: rgba(10, 22, 18, 0.95);
   border-color: var(--accent-muted);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode styles for edit sheet topbar */
+.dark-mode .edit-sheet-topbar {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.85) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode .edit-sheet-topbar-title .modal-title {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.dark-mode .edit-sheet-topbar-title .modal-level-descriptor {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.dark-mode .edit-sheet-topbar-btn {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .modal-overlay.active .modal {

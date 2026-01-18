@@ -373,6 +373,16 @@ export interface SidebarSections {
  * Neurodivergent (ND) support preferences
  * @remarks ADHD-friendly features and accessibility options
  */
+/**
+ * Custom emoji preferences for garden level indicators
+ * @remarks User can customize the emoji shown for each goal level in the garden view
+ */
+export interface GardenLevelEmojis {
+  milestone?: string;
+  focus?: string;
+  intention?: string;
+}
+
 export interface NDPreferences {
   accentTheme: AccentTheme;
   breakReminder: BreakReminder;
@@ -412,6 +422,7 @@ export interface Preferences {
   sidebar: SidebarPreferences;
   sidebarSections: SidebarSections;
   nd: NDPreferences;
+  gardenLevelEmojis?: GardenLevelEmojis;
 }
 
 /**

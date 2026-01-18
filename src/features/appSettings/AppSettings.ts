@@ -144,6 +144,26 @@ export const AppSettings = {
                 <label for="settingsCheckInTime">Check-in Time</label>
                 <input type="time" id="settingsCheckInTime" value="${prefs.nd?.checkInTime || "09:00"}">
               </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <label>Level Emojis</label>
+                  <div class="setting-description">Customize the emoji for each goal level</div>
+                </div>
+              </div>
+              <div class="setting-row" style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
+                <div style="display: flex; flex-direction: column; gap: var(--space-1); align-items: center;">
+                  <label for="settingsEmojiMilestone" style="font-size: var(--text-xs); color: var(--text-tertiary);">Milestone</label>
+                  <input type="text" id="settingsEmojiMilestone" value="${prefs.gardenLevelEmojis?.milestone || "🎯"}" maxlength="2" style="width: 48px; height: 48px; text-align: center; font-size: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--glass-border); background: var(--surface-1);">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: var(--space-1); align-items: center;">
+                  <label for="settingsEmojiFocus" style="font-size: var(--text-xs); color: var(--text-tertiary);">Focus</label>
+                  <input type="text" id="settingsEmojiFocus" value="${prefs.gardenLevelEmojis?.focus || "🌿"}" maxlength="2" style="width: 48px; height: 48px; text-align: center; font-size: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--glass-border); background: var(--surface-1);">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: var(--space-1); align-items: center;">
+                  <label for="settingsEmojiIntention" style="font-size: var(--text-xs); color: var(--text-tertiary);">Intention</label>
+                  <input type="text" id="settingsEmojiIntention" value="${prefs.gardenLevelEmojis?.intention || "🌱"}" maxlength="2" style="width: 48px; height: 48px; text-align: center; font-size: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--glass-border); background: var(--surface-1);">
+                </div>
+              </div>
             </div>
 
             <div class="settings-section">
@@ -414,6 +434,18 @@ export const AppSettings = {
       const checkInTime =
         (modal.querySelector("#settingsCheckInTime") as HTMLInputElement | null)
           ?.value || "09:00";
+
+      // Garden level emojis
+      const emojiMilestone =
+        (modal.querySelector("#settingsEmojiMilestone") as HTMLInputElement | null)
+          ?.value?.trim() || "🎯";
+      const emojiFocus =
+        (modal.querySelector("#settingsEmojiFocus") as HTMLInputElement | null)
+          ?.value?.trim() || "🌿";
+      const emojiIntention =
+        (modal.querySelector("#settingsEmojiIntention") as HTMLInputElement | null)
+          ?.value?.trim() || "🌱";
+
       const themeMode =
         (modal.querySelector("#settingsThemeMode") as HTMLSelectElement | null)
           ?.value || "auto";
@@ -458,6 +490,13 @@ export const AppSettings = {
           ...State.data.preferences.nd,
           checkInDay,
           checkInTime,
+        };
+
+        // Save garden level emojis
+        State.data.preferences.gardenLevelEmojis = {
+          milestone: emojiMilestone,
+          focus: emojiFocus,
+          intention: emojiIntention,
         };
 
         // Handle theme mode setting
