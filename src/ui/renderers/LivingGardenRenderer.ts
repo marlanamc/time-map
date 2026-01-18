@@ -326,20 +326,19 @@ export const LivingGardenRenderer = {
         // Desktop: ADHD-Friendly Living Garden
         container.className = "garden-view-container living-garden";
 
+        // Only show summary message when there's nothing set
         const activeMilestones = milestonesToday.length;
-        const milestoneLabel =
-          activeMilestones > 0
-            ? `${activeMilestones} active milestone${activeMilestones === 1 ? "" : "s"}`
-            : "No active milestones";
-        const intentionsLabel =
-          intentionsInWeek.length > 0
-            ? `${intentionsInWeek.length} intention${intentionsInWeek.length === 1 ? "" : "s"} this week`
-            : "No intentions this week";
-        const headerSummary = `${milestoneLabel} • ${intentionsLabel}`;
+        const hasIntentions = intentionsInWeek.length > 0;
+        let headerSummary = "";
+        
+        if (activeMilestones === 0 && !hasIntentions) {
+          headerSummary = "No active milestones • No intentions this week";
+        }
+        
         const headerMarkup = `
           <header class="living-garden-header glassPanel">
             <h1 class="living-garden-title">Your Living Garden</h1>
-            <div class="living-garden-summary glassPill">${headerSummary}</div>
+            ${headerSummary ? `<div class="living-garden-summary glassPill">${headerSummary}</div>` : ""}
           </header>
         `;
 

@@ -639,11 +639,6 @@ export class PlannerDayViewRenderer {
           primary.id
         }" aria-label="${this.escapeHtml(primary.title)}">
           <span class="vision-icon-large">${icon}</span>
-          ${
-            remaining > 0
-              ? `<span class="vision-icon-badge">+${remaining}</span>`
-              : ""
-          }
         </button>
       `;
     };
