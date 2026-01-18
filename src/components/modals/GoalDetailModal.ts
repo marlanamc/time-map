@@ -697,9 +697,19 @@ class GoalDetailModalManager {
             updates.icon = iconValue || undefined;
           }
         } else {
-          // For non-vision levels, just apply the meta from detailState
+          // For non-vision levels, apply the meta from detailState
           updates.meta =
             Object.keys(nextMeta).length > 0 ? nextMeta : undefined;
+
+          // Handle icon for milestones and focuses
+          if (goal.level === "milestone" || goal.level === "focus") {
+            const iconInputId = goal.level === "milestone" ? "#milestoneIcon" : "#focusIcon";
+            const iconInput = modal.querySelector(iconInputId) as HTMLInputElement | null;
+            if (iconInput) {
+              const iconValue = iconInput.value.trim();
+              updates.icon = iconValue || undefined;
+            }
+          }
         }
 
         Goals.update(goalId, updates);

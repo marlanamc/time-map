@@ -1075,6 +1075,12 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
   const visionIconEl = document.getElementById(
     "visionIcon",
   ) as HTMLInputElement | null;
+  const milestoneIconEl = document.getElementById(
+    "milestoneIcon",
+  ) as HTMLInputElement | null;
+  const focusIconEl = document.getElementById(
+    "focusIcon",
+  ) as HTMLInputElement | null;
 
   const title = titleEl?.value.trim() ?? "";
   if (!title) {
@@ -1249,6 +1255,12 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     if (Number.isFinite(year)) goalData.year = year;
     if (Number.isFinite(durationMonths))
       goalData.durationMonths = durationMonths;
+
+    // Handle icon - use modalIconDraft or fall back to input value
+    const iconValue = modalIconDraft ?? milestoneIconEl?.value?.trim() ?? "";
+    if (iconValue) {
+      goalData.icon = iconValue;
+    }
   }
 
   if (ctx.goalModalLevel === "focus") {
@@ -1268,6 +1280,12 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     if (focusEasyModeEl?.checked) {
       meta.easyMode = true;
       hasMeta = true;
+    }
+
+    // Handle icon - use modalIconDraft or fall back to input value
+    const iconValue = modalIconDraft ?? focusIconEl?.value?.trim() ?? "";
+    if (iconValue) {
+      goalData.icon = iconValue;
     }
   }
 
