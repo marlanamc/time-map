@@ -11,6 +11,14 @@ import type { TimeSlotCalculator } from "./TimeSlotCalculator";
 import { DragDropManager } from "./DragDropManager";
 import { DayViewState } from "./DayViewState";
 
+const DEBUG_DRAG_DROP =
+  typeof window !== "undefined" && Boolean((window as any).__DRAG_DROP_DEBUG__);
+
+function debugDropLog(message: string, context?: Record<string, unknown>): void {
+  if (!DEBUG_DRAG_DROP) return;
+  console.debug("[DayTimelineDrag]", message, context ?? {});
+}
+
 export interface TimelineDeps {
   container: HTMLElement;
   calculator: TimeSlotCalculator;
@@ -690,6 +698,11 @@ export function handleDrop(
   clientY: number,
   deps: TimelineDeps,
 ): void {
+  debugDropLog("handleDrop invoked", {
+    goalId: data.goalId,
+    clientY,
+    currentDate: deps.state.currentDate?.toISOString(),
+  });
   if (!deps.state.currentDate) return;
 
   const dayBed = deps.container.querySelector(
@@ -701,7 +714,10 @@ export function handleDrop(
   const y = clientY - rect.top;
 
   const goal = deps.state.currentGoals.find((g) => g.id === data.goalId);
-  if (!goal) return;
+  if (!goal) {
+    debugDropLog("handleDrop goal missing", { goalId: data.goalId });
+    return;
+  }
 
   const newStartMin = deps.calculator.yToMinutes(y, rect.height);
   const newStartTime = deps.calculator.toTimeString(newStartMin);
@@ -716,6 +732,16 @@ export function handleDrop(
   const newEndTime = deps.calculator.toTimeString(
     Math.min(newStartMin + durationMin, deps.options.timeWindowEnd ?? 1320),
   );
+
+  debugDropLog("handleDrop scheduling", {
+    goalId: data.goalId,
+    prevStartTime: goal.startTime,
+    prevEndTime: goal.endTime,
+    newStartTime,
+    newEndTime,
+    durationMin,
+    dropY: y,
+  });
 
   const command: UpdateGoalTimeCommand = {
     goalId: data.goalId,

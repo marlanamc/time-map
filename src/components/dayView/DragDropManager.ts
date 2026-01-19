@@ -179,11 +179,54 @@ export class DragDropManager {
       const target = e.target as HTMLElement;
       if (this.isInteractiveElement(target)) return;
 
-      this.startLongPress(e, element, data);
+      if (this.isTouchPointerEvent(e)) {
+        this.startLongPress(e, element, data);
+      } else {
+        this.startMouseDrag(e, element, data);
+      }
     };
 
     element.addEventListener("pointerdown", onPointerDown as EventListener);
     this.boundHandlers.set(`${data.goalId}-pointerdown`, onPointerDown as EventListener);
+  }
+
+  private isTouchPointerEvent(e: PointerEvent): boolean {
+    return e.pointerType === "touch" || e.pointerType === "pen";
+  }
+
+  private startMouseDrag(
+    e: PointerEvent,
+    element: HTMLElement,
+    data: DragData,
+  ): void {
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const pointerId = e.pointerId;
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== pointerId) return;
+
+      const dx = Math.abs(moveEvent.clientX - startX);
+      const dy = Math.abs(moveEvent.clientY - startY);
+      if (dx > this.dragThresholdPx || dy > this.dragThresholdPx) {
+        cleanup();
+        this.startDrag(moveEvent, element, data);
+      }
+    };
+
+    const onPointerUp = () => {
+      cleanup();
+    };
+
+    const cleanup = () => {
+      document.removeEventListener("pointermove", onPointerMove as EventListener);
+      document.removeEventListener("pointerup", onPointerUp as EventListener);
+      document.removeEventListener("pointercancel", onPointerUp as EventListener);
+    };
+
+    document.addEventListener("pointermove", onPointerMove as EventListener);
+    document.addEventListener("pointerup", onPointerUp as EventListener);
+    document.addEventListener("pointercancel", onPointerUp as EventListener);
   }
 
   private startLongPress(e: PointerEvent, element: HTMLElement, data: DragData): void {
