@@ -177,6 +177,7 @@ export class IntentionsManager {
     category: Category,
     duration: number,
     emoji?: string,
+    visionId?: string,
   ): CustomIntention | null {
     // Validation
     if (!title || title.trim().length === 0) {
@@ -201,6 +202,7 @@ export class IntentionsManager {
       category,
       duration: Math.floor(duration),
       emoji: emoji?.trim() || undefined,
+      visionId: visionId || undefined,
       order: maxOrder + 1,
       createdAt: new Date().toISOString(),
     };

@@ -9,6 +9,8 @@ import { IntentionsManager } from "../../core/IntentionsManager";
 import { CONFIG } from "../../config/constants";
 import { UI } from "../../ui/UIManager";
 import { refreshIntentionsGrid } from "./IntentionsGrid";
+import { Goals } from "../../core/Goals";
+import { State } from "../../core/State";
 import {
   renderAccordionSection,
   setupAccordionSectionToggles,
@@ -80,6 +82,14 @@ function renderAddFormBody(): string {
           required
         />
       </div>
+    </div>
+
+    <div class="form-group">
+      <label for="intention-vision">Link to Vision (optional)</label>
+      <select id="intention-vision">
+        <option value="">No specific vision</option>
+        ${renderVisionOptions()}
+      </select>
     </div>
 
     <div class="intention-form-actions">
@@ -191,6 +201,24 @@ function renderCategoryOptions(): string {
     .map((cat) => {
       const config = CONFIG.CATEGORIES[cat];
       return `<option value="${cat}">${config.emoji} ${config.label}</option>`;
+    })
+    .join("");
+}
+
+/**
+ * Render vision options for dropdown
+ * @returns HTML string for <option> elements
+ */
+function renderVisionOptions(): string {
+  const year = State.viewingYear ?? new Date().getFullYear();
+  const visions = Goals.getAll()
+    .filter(g => g.level === "vision" && g.year === year)
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  return visions
+    .map((vision) => {
+      const emoji = vision.icon || "🌟";
+      return `<option value="${vision.id}">${emoji} ${escapeHtml(vision.title)}</option>`;
     })
     .join("");
 }
@@ -419,11 +447,15 @@ function clearAddForm(
   const durationInput = container.querySelector(
     "#intention-duration"
   ) as HTMLInputElement;
+  const visionSelect = container.querySelector(
+    "#intention-vision"
+  ) as HTMLSelectElement;
 
   if (titleInput) titleInput.value = "";
   if (emojiInput) emojiInput.value = "";
   if (categorySelect) categorySelect.selectedIndex = 0;
   if (durationInput) durationInput.value = "";
+  if (visionSelect) visionSelect.selectedIndex = 0;
 
   editingIdRef.current = null;
 
@@ -580,6 +612,9 @@ export function setupCustomizationPanel(
     const durationInput = container.querySelector(
       "#intention-duration"
     ) as HTMLInputElement;
+    const visionSelect = container.querySelector(
+      "#intention-vision"
+    ) as HTMLSelectElement;
 
     if (!titleInput) return;
 
@@ -604,6 +639,7 @@ export function setupCustomizationPanel(
         category: categorySelect.value as Category,
         duration: parseInt(durationInput.value),
         emoji: emojiInput.value.trim() || undefined,
+        visionId: visionSelect.value || undefined,
       };
 
       if (IntentionsManager.update(editingIdRef.current, updates)) {
@@ -628,7 +664,8 @@ export function setupCustomizationPanel(
         titleInput.value.trim(),
         categorySelect.value as Category,
         parseInt(durationInput.value),
-        emojiInput.value.trim() || undefined
+        emojiInput.value.trim() || undefined,
+        visionSelect.value || undefined
       );
 
       if (created) {
@@ -693,6 +730,9 @@ export function setupCustomizationPanel(
     const durationInput = container.querySelector(
       "#intention-duration"
     ) as HTMLInputElement;
+    const visionSelect = container.querySelector(
+      "#intention-vision"
+    ) as HTMLSelectElement;
 
     if (titleInput) titleInput.value = intention.title;
     if (emojiInput) emojiInput.value = intention.emoji || "";
@@ -704,6 +744,13 @@ export function setupCustomizationPanel(
       }
     }
     if (durationInput) durationInput.value = intention.duration.toString();
+    if (visionSelect) {
+      if (intention.visionId) {
+        visionSelect.value = intention.visionId;
+      } else {
+        visionSelect.selectedIndex = 0;
+      }
+    }
 
     // Track that we're editing this intention
     editingIdRef.current = intentionId;

@@ -1717,3 +1717,24 @@
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 34px)) !important;
   }
 }
+
+/* Legacy standalone class fallback (Safari PWA detection that doesn't support
+   the display-mode media query). */
+body.standalone .header,
+body.standalone .mobile-header {
+  margin-top: 0 !important;
+  padding-top: calc(var(--space-4) + env(safe-area-inset-top, 47px)) !important;
+}
+
+body.standalone .header-mobile-support-btn {
+  top: calc(var(--space-4) + env(safe-area-inset-top, 47px)) !important;
+}
+
+body.standalone .app {
+  padding-top: 0;
+}
+
+body.standalone .mobile-tab-bar {
+  bottom: 0 !important;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 34px)) !important;
+}

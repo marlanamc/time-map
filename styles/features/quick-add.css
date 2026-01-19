@@ -115,6 +115,24 @@
     color: var(--text-tertiary);
 }
 
+.quick-add-vision-section {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--divider);
+}
+
+.quick-add-vision-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.quick-add-vision-section .modal-select {
+    width: 100%;
+}
+
 
 body.focus-mode .month-card.current {
     transform: scale(1.02);

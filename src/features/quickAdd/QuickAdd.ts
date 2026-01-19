@@ -81,6 +81,12 @@ class QuickAddManager {
         </div>
         <input type="text" id="quickAddInput" autocomplete="off" autocapitalize="sentences" spellcheck="true" autofocus>
         <div id="quickAddAccordionContainer" class="quick-add-accordion"></div>
+        <div id="quickAddVisionContainer" class="quick-add-vision-section">
+          <label class="quick-add-vision-label">Connect to Vision (optional)</label>
+          <select id="quickAddVisionSelect" class="modal-select">
+            <option value="">No vision</option>
+          </select>
+        </div>
       </div>
     `;
 
@@ -105,6 +111,56 @@ class QuickAddManager {
       });
       setupAccordionSectionToggles(accordionContainer);
       // refreshMoreSection(); // Move this call after function declaration
+    }
+
+    // Setup vision selector
+    const visionSelect = overlay.querySelector("#quickAddVisionSelect") as HTMLSelectElement;
+    if (visionSelect) {
+      const visions = getVisions();
+      visions.forEach(vision => {
+        const option = document.createElement("option");
+        option.value = vision.id;
+        option.textContent = vision.title;
+        visionSelect.appendChild(option);
+      });
+
+      visionSelect.addEventListener("change", () => {
+        const selectedVisionId = visionSelect.value;
+        if (selectedVisionId) {
+          // Find active focus for this vision
+          const activeFocus = Goals.findActiveFocusForVision(selectedVisionId);
+          if (activeFocus) {
+            this.quickAddLinkSelection = {
+              parentId: activeFocus.id,
+              parentLevel: "focus"
+            };
+          } else {
+            // If no active focus, try to find active milestone
+            const activeMilestone = Goals.getAll().find(g =>
+              g.level === "milestone" &&
+              g.parentId === selectedVisionId &&
+              g.status !== "done" &&
+              g.status !== "archived"
+            );
+            if (activeMilestone) {
+              this.quickAddLinkSelection = {
+                parentId: activeMilestone.id,
+                parentLevel: "milestone"
+              };
+            } else {
+              // Fallback to vision itself
+              this.quickAddLinkSelection = {
+                parentId: selectedVisionId,
+                parentLevel: "vision"
+              };
+            }
+          }
+          refreshMoreSection();
+        } else {
+          this.quickAddLinkSelection = null;
+          refreshMoreSection();
+        }
+      });
     }
 
     this.quickAddMetaDraft = {};

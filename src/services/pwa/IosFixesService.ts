@@ -23,7 +23,18 @@ export class IOSPWAFixes {
   // Detect iOS environment
   private static detectEnvironment(): void {
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    this.isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    let displayModeStandalone = false;
+    try {
+      displayModeStandalone = window.matchMedia(
+        "(display-mode: standalone)",
+      ).matches;
+    } catch {
+      displayModeStandalone = false;
+    }
+    const legacyStandalone = Boolean(
+      (window.navigator as any).standalone === true,
+    );
+    this.isStandalone = displayModeStandalone || legacyStandalone;
     this.isSafari = /^((?!chrome|android).)*safari\/[\d.]+$/.test(
       navigator.userAgent,
     );

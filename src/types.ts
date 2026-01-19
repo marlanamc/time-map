@@ -52,6 +52,7 @@ export interface CustomIntention {
   category: Category;
   duration: number;
   emoji?: string;
+  visionId?: string;
   order: number;
   createdAt: string;
 }
