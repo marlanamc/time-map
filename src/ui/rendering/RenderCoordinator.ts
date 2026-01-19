@@ -14,6 +14,7 @@ type RenderCoordinatorCallbacks = {
   updateStreaks: () => void;
   updateMobileHomeView: () => void;
   syncAddButtonLabel: () => void;
+  updateZoomControls: () => void;
   syncViewButtons: () => void;
   renderDayView: () => void;
   renderCalendar: () => void;
@@ -146,6 +147,7 @@ export class RenderCoordinator {
 
     updates.push(() => viewportManager.updateMobileLayoutVars());
     updates.push(() => this.callbacks.syncAddButtonLabel());
+    updates.push(() => this.callbacks.updateZoomControls());
 
     // Execute all updates in a single frame
     requestAnimationFrame(() => {

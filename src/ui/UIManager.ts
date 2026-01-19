@@ -58,6 +58,56 @@ import * as keyboardShortcuts from "./keyboardShortcuts";
 import * as syncIssues from "../features/syncIssues";
 import type { UIElements, ViewType, Goal, GoalLevel } from "../types";
 
+const ZOOM_CONTROL_HIDE_SELECTORS = [
+  ".day-view-container",
+  ".planner-day-view",
+  ".modal-overlay.active",
+  '.delete-confirmation-dialog[data-dialog-visible="true"]',
+  ".delete-confirmation-dialog.visible",
+];
+
+let zoomControlObserver: MutationObserver | null = null;
+
+function shouldHideZoomControls(): boolean {
+  if (typeof document === "undefined") {
+    return false;
+  }
+  return ZOOM_CONTROL_HIDE_SELECTORS.some((selector) =>
+    Boolean(document.querySelector(selector)),
+  );
+}
+
+function updateZoomControlVisibility(): void {
+  if (typeof document === "undefined") return;
+  document.body.classList.toggle(
+    "zoom-controls-hidden",
+    shouldHideZoomControls(),
+  );
+}
+
+function watchZoomControlVisibility(): void {
+  if (
+    typeof document === "undefined" ||
+    typeof MutationObserver === "undefined"
+  ) {
+    return;
+  }
+  if (zoomControlObserver) return;
+
+  zoomControlObserver = new MutationObserver(() => {
+    updateZoomControlVisibility();
+  });
+
+  zoomControlObserver.observe(document.body, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ["class", "data-dialog-visible"],
+  });
+
+  updateZoomControlVisibility();
+}
+
 type QuickAddShowOptions = Parameters<QuickAddApi["show"]>[0];
 
 export const UI = {
@@ -168,6 +218,7 @@ export const UI = {
         updateMobileHomeView: () => this.updateMobileHomeView(),
         syncAddButtonLabel: () => this.syncAddButtonLabel(),
         syncViewButtons: () => this.syncViewButtons(),
+        updateZoomControls: () => updateZoomControlVisibility(),
         renderDayView: () => this.renderDayView(),
         renderCalendar: () => {
           YearRenderer.render(this.elements, {
@@ -336,6 +387,7 @@ export const UI = {
     this.els = this.elements; // Alias for convenience
     this.setupRendererEventListeners();
     this.bindEvents();
+    watchZoomControlVisibility();
     this.setupEventBusListeners(); // Set up EventBus communication
     this.setupSyncEventListeners(); // Set up sync status event listeners
     this.setupInstallPrompt(); // Set up PWA install prompt handling

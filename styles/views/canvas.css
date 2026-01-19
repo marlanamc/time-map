@@ -39,11 +39,7 @@
 }
 
 /* Hide zoom controls when modal is open or in day/planner view */
-body:has(.modal-overlay.active) .canvas-zoom-controls,
-body:has(.delete-confirmation-dialog[data-dialog-visible="true"]) .canvas-zoom-controls,
-body:has(.delete-confirmation-dialog.visible) .canvas-zoom-controls,
-body:has(.day-view-container) .canvas-zoom-controls,
-body:has(.planner-day-view) .canvas-zoom-controls {
+body.zoom-controls-hidden .canvas-zoom-controls {
     display: none !important;
 }
 
