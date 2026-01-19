@@ -189,6 +189,7 @@ export interface Goal {
   dueDate: string | null;
   startTime?: string | null;
   endTime?: string | null;
+  scheduledAt?: string | null;
   tags: string[];
   meta?: GoalMeta;
   activityId?: string;
@@ -217,6 +218,7 @@ export interface GoalData {
   dueDate?: string | null;
   startTime?: string | null;
   endTime?: string | null;
+  scheduledAt?: string | null;
   activityId?: string;
   /** Optional parent linkage for hierarchy/alignment (Vision → Milestone → Focus → Intention). */
   parentId?: string | null;

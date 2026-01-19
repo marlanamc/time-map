@@ -248,6 +248,44 @@
   order: 2; /* Appears after unscheduled on desktop */
 }
 
+.planner-timeline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--bg-hover) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--glass-border) 60%, transparent);
+  margin-bottom: 0.6rem;
+}
+
+.planner-timeline-status .planner-sync-icon {
+  font-size: 0.9rem;
+  transform-origin: center;
+  display: inline-flex;
+}
+
+.planner-timeline-status[data-sync-state="syncing"] {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.planner-timeline-status[data-sync-state="error"] {
+  background: color-mix(in srgb, #f87171 20%, transparent);
+  border-color: color-mix(in srgb, #f87171 70%, transparent);
+  color: #991b1b;
+}
+
+.planner-timeline-status[data-sync-state="offline"],
+.planner-timeline-status[data-sync-state="local"] {
+  background: color-mix(in srgb, #facc15 25%, transparent);
+  border-color: color-mix(in srgb, #facc15 60%, transparent);
+}
+
 .planner-timeline-container.is-drop-target {
   background: color-mix(in srgb, var(--bg-hover) 55%, transparent);
   border-radius: 24px;
@@ -302,6 +340,34 @@
 .dark-mode .planner-drop-indicator-label {
   background: rgba(21, 32, 43, 0.78);
   border-color: rgba(140, 183, 217, 0.2);
+}
+
+.planner-drop-preview {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 4px 10px;
+  opacity: 0.85;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.planner-drop-preview-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .planner-timeline-content {

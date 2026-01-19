@@ -2,6 +2,8 @@ import { haptics } from "../../utils/haptics";
 import { openCustomizationPanel } from "./CustomizationPanel";
 import type { DayViewCallbacks } from "./types";
 import { DayViewState } from "./DayViewState";
+import type { TimeSlotCalculator } from "./TimeSlotCalculator";
+import type { Goal } from "../../types";
 
 export type EventDeps = {
   container: HTMLElement;
@@ -9,7 +11,100 @@ export type EventDeps = {
   state: DayViewState;
   undo: () => boolean;
   redo: () => boolean;
+  calculator: TimeSlotCalculator;
 };
+
+const KEY_ADJUST_MIN = 15;
+
+function parseScheduledMinutes(goal: Goal, calculator: TimeSlotCalculator): number | null {
+  if (goal.scheduledAt) {
+    const parsed = new Date(goal.scheduledAt);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.getHours() * 60 + parsed.getMinutes();
+    }
+  }
+  return calculator.parseTimeToMinutes(goal.startTime);
+}
+
+function getGoalEndMin(goal: Goal, startMin: number, calculator: TimeSlotCalculator): number {
+  const parsedEnd = calculator.parseTimeToMinutes(goal.endTime);
+  if (parsedEnd !== null && parsedEnd > startMin) {
+    return parsedEnd;
+  }
+  return Math.min(startMin + 60, calculator.getPlotEndMin());
+}
+
+function applyTimelineAdjustment(
+  deps: EventDeps,
+  goal: Goal,
+  newStartMin: number,
+  newEndMin: number,
+  message: string,
+): void {
+  const calculator = deps.calculator;
+  const currentDate = deps.state.currentDate ?? new Date();
+  const startTime = calculator.toTimeString(newStartMin);
+  const endTime = calculator.toTimeString(newEndMin);
+
+  const scheduledAt = new Date(currentDate);
+  scheduledAt.setHours(Math.floor(newStartMin / 60), newStartMin % 60, 0, 0);
+
+  deps.callbacks.onGoalUpdate(goal.id, {
+    startTime,
+    endTime,
+    dueDate: currentDate.toISOString(),
+    month: currentDate.getMonth(),
+    year: currentDate.getFullYear(),
+    scheduledAt: scheduledAt.toISOString(),
+  });
+
+  deps.callbacks.onShowToast?.("🕓", message);
+}
+
+function handleTimelineKey(
+  e: KeyboardEvent,
+  deps: EventDeps,
+): boolean {
+  const target = e.target as HTMLElement;
+  const card = target.closest(".planner-timed-task") as HTMLElement | null;
+  if (!card) return false;
+
+  const goalId = card.dataset.goalId;
+  if (!goalId) return false;
+  const goal = deps.state.currentGoals.find((g) => g.id === goalId);
+  if (!goal || goal.status === "done") return false;
+
+  if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return false;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const calculator = deps.calculator;
+  const startMin = parseScheduledMinutes(goal, calculator) ?? calculator.getPlotStartMin();
+  const endMin = getGoalEndMin(goal, startMin, calculator);
+  const plotStart = calculator.getPlotStartMin();
+  const plotEnd = calculator.getPlotEndMin();
+  const delta = e.key === "ArrowDown" ? KEY_ADJUST_MIN : -KEY_ADJUST_MIN;
+
+  let newStart = startMin;
+  let newEnd = endMin;
+
+  if (e.shiftKey) {
+    newEnd = calculator.clamp(newEnd + delta, newStart + 15, plotEnd);
+  } else {
+    newStart = calculator.clamp(newStart + delta, plotStart, plotEnd - 15);
+    const duration = Math.max(15, newEnd - startMin);
+    newEnd = Math.min(newStart + duration, plotEnd);
+    if (newEnd - newStart < 15) newEnd = newStart + 15;
+  }
+
+  const message = e.shiftKey
+    ? `Duration ${newEnd - newStart} min`
+    : `Moved to ${calculator.format12h(newStart)}`;
+
+  applyTimelineAdjustment(deps, goal, newStart, newEnd, message);
+  return true;
+}
 
 function formatDateComponent(value: number): string {
   return String(value).padStart(2, "0");
@@ -161,6 +256,7 @@ export function handleClick(e: Event, deps: EventDeps): void {
         deps.callbacks.onGoalUpdate(goalId, {
           startTime: undefined,
           endTime: undefined,
+          scheduledAt: null,
         });
         deps.callbacks.onShowToast?.("💨", "Removed from timeline");
       }
@@ -196,7 +292,7 @@ export function handleClick(e: Event, deps: EventDeps): void {
     const goalId = scheduleBtn.dataset.goalId;
     if (goalId) {
       const goal = deps.state.currentGoals.find((g) => g.id === goalId);
-      if (goal && !goal.startTime) {
+      if (goal && !goalHasSchedule(goal)) {
         haptics.impact("light");
         deps.callbacks.onGoalClick(goalId);
       }
@@ -212,7 +308,11 @@ export function handleClick(e: Event, deps: EventDeps): void {
   }
 }
 
+const goalHasSchedule = (goal: Goal): boolean =>
+  Boolean(goal.scheduledAt ?? goal.startTime);
+
 export function handleKeyDown(e: KeyboardEvent, deps: EventDeps): void {
+  if (handleTimelineKey(e, deps)) return;
   const target = e.target as HTMLElement;
 
   if (

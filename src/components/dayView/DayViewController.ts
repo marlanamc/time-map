@@ -20,6 +20,7 @@ import {
   setupSwipeToComplete,
   clearTimelineDropUi,
   createTimelineRuntimeState,
+  updateTimelineDragPreview,
   type TimelineDeps,
 } from "./timeline";
 
@@ -49,6 +50,9 @@ export class DayViewController {
 
   private state = new DayViewState();
   private timelineState = createTimelineRuntimeState();
+  private plannerScrollContainer: HTMLElement | null = null;
+  private syncStatusElement: HTMLElement | null = null;
+  private lastSyncAt: Date | null = null;
 
   private readonly boundHandleClick: (e: Event) => void;
   private readonly boundHandleKeyDown: (e: KeyboardEvent) => void;
@@ -57,6 +61,7 @@ export class DayViewController {
   private readonly boundHandleNativeDragOver: (e: DragEvent) => void;
   private readonly boundHandleNativeDrop: (e: DragEvent) => void;
   private readonly boundHandlePointerDown: (e: PointerEvent) => void;
+  private readonly boundHandleSyncStatus: (event: Event) => void;
 
   constructor(
     container: HTMLElement,
@@ -102,6 +107,8 @@ export class DayViewController {
       onDragStart: (data) => this.handleDragStart(data),
       onDragEnd: (data, clientX, clientY) =>
         this.handleDragEnd(data, clientX, clientY),
+      onDragMove: (data, clientX, clientY) =>
+        this.handleDragMove(data, clientX, clientY),
       onDragCancel: () => clearTimelineDropUi(this.container),
     });
 
@@ -120,6 +127,7 @@ export class DayViewController {
     this.boundHandleNativeDrop = (e) => handleNativeDrop(e, this.timelineDeps);
     this.boundHandlePointerDown = (e) =>
       handlePointerDown(e, this.timelineDeps, this.timelineState);
+    this.boundHandleSyncStatus = (event) => this.handleSyncStatus(event);
   }
 
   private get eventDeps(): EventDeps {
@@ -129,6 +137,7 @@ export class DayViewController {
       state: this.state,
       undo: () => this.undo(),
       redo: () => this.redo(),
+      calculator: this.calculator,
     };
   }
 
@@ -165,6 +174,8 @@ export class DayViewController {
         "pointerdown",
         this.boundHandlePointerDown
       );
+      window.addEventListener("sync-status", this.boundHandleSyncStatus);
+      this.updateSyncIndicator("synced");
 
       // Add event listeners for refresh events
       this.container.addEventListener(
@@ -244,6 +255,7 @@ export class DayViewController {
       "pointerdown",
       this.boundHandlePointerDown
     );
+    window.removeEventListener("sync-status", this.boundHandleSyncStatus);
 
     // Remove refresh event listeners
     this.container.removeEventListener(
@@ -265,15 +277,18 @@ export class DayViewController {
 
     if (!this.isMounted) {
       this.renderer.renderCurrent();
+      this.refreshScrollContainer();
       setupDragAndDrop(this.timelineDeps);
     } else {
       this.renderer.updateCurrent();
+      this.refreshScrollContainer();
       setupDragAndDrop(this.timelineDeps);
     }
   }
 
   render(): void {
     this.renderer.renderCurrent();
+    this.refreshScrollContainer();
     setupDragAndDrop(this.timelineDeps);
   }
 
@@ -356,12 +371,60 @@ export class DayViewController {
     document.body.classList.remove(`is-dragging-${data.type}`);
   }
 
+  private handleDragMove(data: DragData, clientX: number, clientY: number): void {
+    this.autoScrollPlanner(clientY);
+    const duration = this.getGoalDuration(data.goalId);
+    updateTimelineDragPreview(this.timelineDeps, clientX, clientY, duration);
+  }
+
+  private autoScrollPlanner(clientY: number): void {
+    const container = this.plannerScrollContainer;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const threshold = 72;
+    const scrollSpeed = 14;
+
+    if (clientY < rect.top + threshold) {
+      const delta = Math.min(
+        scrollSpeed,
+        Math.max(1, rect.top + threshold - clientY),
+      );
+      container.scrollBy({ top: -delta, left: 0 });
+    } else if (clientY > rect.bottom - threshold) {
+      const delta = Math.min(
+        scrollSpeed,
+        Math.max(1, clientY - (rect.bottom - threshold)),
+      );
+      container.scrollBy({ top: delta, left: 0 });
+    }
+  }
+
+  private getGoalDuration(goalId: string): number {
+    const goal = this.state.currentGoals.find((g) => g.id === goalId);
+    if (!goal) return 60;
+    const prevStartMin = this.calculator.parseTimeToMinutes(goal.startTime);
+    const prevEndMin = this.calculator.parseTimeToMinutes(goal.endTime);
+    if (prevStartMin !== null && prevEndMin !== null && prevEndMin > prevStartMin) {
+      return prevEndMin - prevStartMin;
+    }
+    return 60;
+  }
+
+  private refreshScrollContainer(): void {
+    this.plannerScrollContainer = this.container.querySelector(
+      ".planner-main",
+    ) as HTMLElement | null;
+    this.syncStatusElement = null;
+  }
+
   private handleGoalCreated(_event: Event): void {
     // A new goal was created, refresh the view
     if (!this.state.currentDate) return;
 
     // Trigger a re-render to show the new goal
     this.renderer.updateCurrent();
+    this.refreshScrollContainer();
     setupDragAndDrop(this.timelineDeps);
   }
 
@@ -370,7 +433,48 @@ export class DayViewController {
     if (!this.state.currentDate) return;
 
     this.renderer.updateCurrent();
+    this.refreshScrollContainer();
     setupDragAndDrop(this.timelineDeps);
+  }
+
+  private handleSyncStatus(event: Event): void {
+    const detail = (event as CustomEvent<{ status?: string }>)?.detail ?? {};
+    const status = detail.status ?? "synced";
+    this.updateSyncIndicator(status);
+  }
+
+  private updateSyncIndicator(status: string): void {
+    if (!this.syncStatusElement) {
+      this.syncStatusElement = this.container.querySelector(
+        ".planner-timeline-status",
+      ) as HTMLElement | null;
+    }
+    if (!this.syncStatusElement) return;
+
+    this.syncStatusElement.dataset.syncState = status;
+    const textEl = this.syncStatusElement.querySelector(
+      ".planner-sync-text",
+    ) as HTMLElement | null;
+    if (!textEl) return;
+
+    if (status === "synced") {
+      this.lastSyncAt = new Date();
+      const formatted = this.lastSyncAt.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      textEl.textContent = `Synced at ${formatted}`;
+    } else if (status === "syncing") {
+      textEl.textContent = "Syncing…";
+    } else if (status === "error") {
+      textEl.textContent = "Sync error";
+    } else if (status === "offline") {
+      textEl.textContent = "Offline (saved locally)";
+    } else if (status === "local") {
+      textEl.textContent = "Local-only edits";
+    } else {
+      textEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    }
   }
 
   private isMobileViewport(): boolean {

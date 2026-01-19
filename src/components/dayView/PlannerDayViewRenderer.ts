@@ -99,12 +99,12 @@ export class PlannerDayViewRenderer {
       Number(a.status === "done") - Number(b.status === "done");
 
     const scheduled = dayGoals
-      .filter((g) => Boolean(g.startTime))
+      .filter((g) => this.isGoalScheduledForDate(g, date))
       .slice()
       .sort(sortDoneLast);
 
     const unscheduled = dayGoals
-      .filter((g) => !g.startTime)
+      .filter((g) => !this.isGoalScheduledForDate(g, date))
       .slice()
       .sort(sortDoneLast);
 
@@ -113,16 +113,12 @@ export class PlannerDayViewRenderer {
       const bDone = Number(b.status === "done");
       if (aDone !== bDone) return aDone - bDone;
 
-      const aHasTime = Number(Boolean(a.startTime));
-      const bHasTime = Number(Boolean(b.startTime));
+      const aHasTime = Number(this.isGoalScheduledForDate(a, date));
+      const bHasTime = Number(this.isGoalScheduledForDate(b, date));
       if (aHasTime !== bHasTime) return bHasTime - aHasTime;
 
-      const aStart = a.startTime
-        ? this.calculator.parseTimeToMinutes(a.startTime) ?? 9999
-        : 9999;
-      const bStart = b.startTime
-        ? this.calculator.parseTimeToMinutes(b.startTime) ?? 9999
-        : 9999;
+      const aStart = this.getScheduledStartMin(a, date) ?? 9999;
+      const bStart = this.getScheduledStartMin(b, date) ?? 9999;
       if (aStart !== bStart) return aStart - bStart;
 
       return a.title.localeCompare(b.title);
@@ -266,10 +262,14 @@ export class PlannerDayViewRenderer {
           `
               : ""
           }
+          <div class="planner-timeline-status" data-sync-state="synced" aria-live="polite" role="status">
+            <span class="planner-sync-icon" aria-hidden="true">⟳</span>
+            <span class="planner-sync-text">Synced just now</span>
+          </div>
           <div class="planner-timeline-container day-timeline">
             ${this.timelineGrid.render()}
             <div class="planner-timeline-content">
-              ${scheduled.map((g) => this.renderTimedTask(g)).join("")}
+              ${scheduled.map((g) => this.renderTimedTask(g, date)).join("")}
               ${this.todayEvents.map((ev) => this.renderTimelineEvent(ev)).join("")}
             </div>
           </div>
@@ -464,10 +464,15 @@ export class PlannerDayViewRenderer {
    * @returns HTML string for the timed task card
    * @private
    */
-  private renderTimedTask(goal: Goal): string {
-    const startMin = this.calculator.parseTimeToMinutes(goal.startTime) || 0;
-    const endMin =
-      this.calculator.parseTimeToMinutes(goal.endTime) || startMin + 60;
+  private renderTimedTask(goal: Goal, date: Date): string {
+    const fallbackStartMin = this.getScheduledStartMin(goal, date) ?? 0;
+    const parsedStartMin =
+      this.calculator.parseTimeToMinutes(goal.startTime) ?? fallbackStartMin;
+    const parsedEndMin =
+      this.calculator.parseTimeToMinutes(goal.endTime) ??
+      (parsedStartMin + 60);
+    const startMin = parsedStartMin;
+    const endMin = Math.max(parsedEndMin, startMin + 15);
     const duration = endMin - startMin;
 
     // Calculate tighter positioning - account for card borders and padding
@@ -480,7 +485,9 @@ export class PlannerDayViewRenderer {
 
     const emoji = getGoalEmoji(goal);
     const colorClass = goal.category ? `cat-${goal.category}` : "cat-default";
-    const countdownLabel = this.getCountdownLabelForTime(goal.startTime);
+    const startTimeForMeta =
+      goal.startTime ?? this.formatTimeFromScheduled(goal, date);
+    const countdownLabel = this.getCountdownLabelForTime(startTimeForMeta);
     const countdownHtml = countdownLabel
       ? `<span class="timeline-countdown" aria-hidden="true">${countdownLabel}</span>`
       : "";
@@ -493,7 +500,7 @@ export class PlannerDayViewRenderer {
         : "";
 
     return `
-        <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" style="top: ${adjustedTop}%; height: ${adjustedHeight}%;" data-goal-id="${
+        <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" tabindex="0" style="top: ${adjustedTop}%; height: ${adjustedHeight}%;" data-goal-id="${
       goal.id
     }">
         ${resizeHandles}
@@ -514,9 +521,47 @@ export class PlannerDayViewRenderer {
             "minus"
           )}</button>
         </div>
-        ${countdownHtml}
-      </div>
+      ${countdownHtml}
+    </div>
     `;
+  }
+
+  private isGoalScheduledForDate(goal: Goal, date: Date): boolean {
+    return Boolean(this.getScheduledDate(goal, date));
+  }
+
+  private getScheduledDate(goal: Goal, date: Date): Date | null {
+    if (goal.scheduledAt) {
+      const parsed = new Date(goal.scheduledAt);
+      if (!Number.isNaN(parsed.getTime())) return parsed;
+    }
+
+    if (!goal.startTime) return null;
+    const baseDate = goal.dueDate ? new Date(goal.dueDate) : new Date(date);
+    if (Number.isNaN(baseDate.getTime())) return null;
+
+    const [hours, minutes] = goal.startTime
+      .split(":")
+      .map((segment) => Number(segment));
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+
+    const scheduled = new Date(baseDate);
+    scheduled.setHours(hours, minutes, 0, 0);
+    return scheduled;
+  }
+
+  private getScheduledStartMin(goal: Goal, date: Date): number | null {
+    const scheduled = this.getScheduledDate(goal, date);
+    if (!scheduled) return null;
+    return scheduled.getHours() * 60 + scheduled.getMinutes();
+  }
+
+  private formatTimeFromScheduled(goal: Goal, date: Date): string | null {
+    const scheduled = this.getScheduledDate(goal, date);
+    if (!scheduled) return null;
+    const hours = scheduled.getHours();
+    const minutes = scheduled.getMinutes();
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
   }
 
   private renderTimelineEvent(event: EventInstance): string {
@@ -632,7 +677,6 @@ export class PlannerDayViewRenderer {
     const renderIconOnly = (goals: Goal[], fallbackIcon: string) => {
       if (goals.length === 0) return "";
       const primary = goals[0];
-      const remaining = Math.max(0, goals.length - 1);
       const icon = primary.icon || fallbackIcon;
       return `
         <button type="button" class="year-vision-icon-only" data-goal-id="${

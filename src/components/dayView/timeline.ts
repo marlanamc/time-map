@@ -45,6 +45,17 @@ export interface TimelineRuntimeState {
   swipeCleanup: (() => void) | null;
 }
 
+interface DropPreviewMetrics {
+  dayBed: HTMLElement;
+  rect: DOMRect;
+  startMin: number;
+  endMin: number;
+  startPct: number;
+  durPct: number;
+  formattedTime: string;
+  isInside: boolean;
+}
+
 export function createTimelineRuntimeState(): TimelineRuntimeState {
   return {
     activeCommonTemplate: null,
@@ -69,17 +80,132 @@ function ensurePlannerDropIndicator(dayBed: HTMLElement): HTMLElement {
   return indicator;
 }
 
+function ensurePlannerDropPreview(dayBed: HTMLElement): HTMLElement {
+  let preview = dayBed.querySelector(
+    ".planner-drop-preview",
+  ) as HTMLElement | null;
+  if (preview) return preview;
+  preview = document.createElement("div");
+  preview.className = "planner-drop-preview";
+  preview.setAttribute("aria-hidden", "true");
+  preview.innerHTML = `<span class="planner-drop-preview-label"></span>`;
+  dayBed.appendChild(preview);
+  return preview;
+}
+
+function clearPlannerDropPreview(dayBed: HTMLElement): void {
+  const preview = dayBed.querySelector(
+    ".planner-drop-preview",
+  ) as HTMLElement | null;
+  if (preview) preview.remove();
+}
+
+function updatePlannerDropPreview(
+  dayBed: HTMLElement,
+  metrics: DropPreviewMetrics,
+): void {
+  const preview = ensurePlannerDropPreview(dayBed);
+  preview.style.top = `${metrics.startPct}%`;
+  preview.style.height = `${Math.max(metrics.durPct, 1.5)}%`;
+  const label = preview.querySelector(
+    ".planner-drop-preview-label",
+  ) as HTMLElement | null;
+  if (label) label.textContent = metrics.formattedTime;
+}
+
+function getTimelineDropMetrics(
+  deps: TimelineDeps,
+  clientX: number,
+  clientY: number,
+  durationMin: number,
+  snapIntervalMinutes = 30,
+): DropPreviewMetrics | null {
+  const dayBed = deps.container.querySelector(
+    ".day-timeline",
+  ) as HTMLElement | null;
+  if (!dayBed) return null;
+
+  const rect = dayBed.getBoundingClientRect();
+  if (rect.height <= 0) return null;
+
+  const scrollTop = dayBed.scrollTop;
+  const rawY = clientY - rect.top + scrollTop;
+  const y = Math.max(0, Math.min(rawY, rect.height));
+  const rawMinutes = deps.calculator.yToMinutes(y, rect.height);
+  const startMin = deps.calculator.clamp(
+    snapMinutesToInterval(rawMinutes, snapIntervalMinutes),
+    deps.calculator.getPlotStartMin(),
+    deps.calculator.getPlotEndMin() - 15,
+  );
+
+  const durationRange = deps.calculator.getPlotRangeMin() || 1;
+  const endMin = Math.min(startMin + durationMin, deps.calculator.getPlotEndMin());
+  const startPct = deps.calculator.minutesToPercent(startMin);
+  const durPct = ((endMin - startMin) / durationRange) * 100;
+
+  const formattedTime = deps.calculator.format12h(startMin);
+  const insideX = clientX >= rect.left && clientX <= rect.right;
+  const insideY = clientY >= rect.top && clientY <= rect.bottom;
+  return {
+    dayBed,
+    rect,
+    startMin,
+    endMin,
+    startPct,
+    durPct,
+    formattedTime,
+    isInside: insideX && insideY,
+  };
+}
+
+export function updateTimelineDragPreview(
+  deps: TimelineDeps,
+  clientX: number,
+  clientY: number,
+  durationMin: number = 60,
+): boolean {
+  const metrics = getTimelineDropMetrics(
+    deps,
+    clientX,
+    clientY,
+    durationMin,
+    30,
+  );
+  const dayBed = metrics?.dayBed ?? (deps.container.querySelector(
+    ".day-timeline",
+  ) as HTMLElement | null);
+
+  if (!metrics || !metrics.isInside) {
+    if (dayBed) clearPlannerDropPreview(dayBed);
+    return false;
+  }
+
+  const indicator = ensurePlannerDropIndicator(metrics.dayBed);
+  indicator.style.top = `${metrics.startPct}%`;
+  const label = indicator.querySelector(
+    ".planner-drop-indicator-label",
+  ) as HTMLElement | null;
+  if (label) {
+    label.textContent = metrics.formattedTime;
+  }
+
+  updatePlannerDropPreview(metrics.dayBed, metrics);
+  return true;
+}
+
 export function clearTimelineDropUi(container: HTMLElement): void {
   const dayBed = container.querySelector(".day-timeline") as HTMLElement | null;
   if (!dayBed) return;
   dayBed.classList.remove("is-drop-target");
   const indicator = dayBed.querySelector(".planner-drop-indicator");
   if (indicator) indicator.remove();
+  clearPlannerDropPreview(dayBed);
 }
 
-export function setupDragAndDrop(deps: TimelineDeps): void {
+export function setupDragAndDrop(deps: TimelineDeps): HTMLElement | null {
   const container = deps.container;
   const dragDrop = deps.dragDropManager;
+  dragDrop.clearDropZones();
   const goals = deps.state.currentGoals;
 
   const seedCards = container.querySelectorAll(
@@ -146,7 +272,7 @@ export function setupDragAndDrop(deps: TimelineDeps): void {
     });
   });
 
-  const dayBed = container.querySelector(".day-timeline") as HTMLElement;
+  const dayBed = container.querySelector(".day-timeline") as HTMLElement | null;
   if (dayBed) {
     dragDrop.enableDropZone(dayBed, {
       element: dayBed,
@@ -160,6 +286,8 @@ export function setupDragAndDrop(deps: TimelineDeps): void {
       },
     });
   }
+
+  return dayBed;
 }
 
 export function handleNativeDragStart(
@@ -638,6 +766,7 @@ export function handlePointerDown(
       prevDueDate,
       prevMonth,
       prevYear,
+      prevScheduledAt: goal.scheduledAt ?? null,
       newStartTime,
       newEndTime,
       newDueDate: deps.state.currentDate
@@ -663,6 +792,7 @@ export function handlePointerDown(
           dueDate: prevDueDate,
           month: prevMonth,
           year: prevYear,
+          scheduledAt: command.prevScheduledAt ?? null,
         });
       },
     };
@@ -694,33 +824,23 @@ export function handlePointerDown(
 
 export function handleDrop(
   data: DragData,
-  _clientX: number,
+  clientX: number,
   clientY: number,
   deps: TimelineDeps,
 ): void {
   debugDropLog("handleDrop invoked", {
     goalId: data.goalId,
     clientY,
+    clientX,
     currentDate: deps.state.currentDate?.toISOString(),
   });
   if (!deps.state.currentDate) return;
-
-  const dayBed = deps.container.querySelector(
-    ".day-timeline",
-  ) as HTMLElement | null;
-  if (!dayBed) return;
-
-  const rect = dayBed.getBoundingClientRect();
-  const y = clientY - rect.top;
 
   const goal = deps.state.currentGoals.find((g) => g.id === data.goalId);
   if (!goal) {
     debugDropLog("handleDrop goal missing", { goalId: data.goalId });
     return;
   }
-
-  const newStartMin = deps.calculator.yToMinutes(y, rect.height);
-  const newStartTime = deps.calculator.toTimeString(newStartMin);
 
   const prevStartMin = deps.calculator.parseTimeToMinutes(goal.startTime);
   const prevEndMin = deps.calculator.parseTimeToMinutes(goal.endTime);
@@ -729,9 +849,33 @@ export function handleDrop(
       ? prevEndMin - prevStartMin
       : 60;
 
-  const newEndTime = deps.calculator.toTimeString(
-    Math.min(newStartMin + durationMin, deps.options.timeWindowEnd ?? 1320),
+  const metrics = getTimelineDropMetrics(
+    deps,
+    clientX,
+    clientY,
+    durationMin,
+    30,
   );
+  if (!metrics || !metrics.isInside) return;
+
+  const timeWindowEnd = deps.calculator.getPlotEndMin();
+  const minEnd = Math.min(metrics.startMin + 15, timeWindowEnd);
+  const newEndMin = Math.max(metrics.endMin, minEnd);
+  const newStartTime = deps.calculator.toTimeString(metrics.startMin);
+  const newEndTime = deps.calculator.toTimeString(
+    newEndMin > metrics.startMin ? newEndMin : minEnd,
+  );
+
+  const scheduledAt = new Date(deps.state.currentDate);
+  scheduledAt.setHours(
+    Math.floor(metrics.startMin / 60),
+    metrics.startMin % 60,
+    0,
+    0,
+  );
+  const scheduledAtIso = scheduledAt.toISOString();
+
+  const prevScheduledAt = goal.scheduledAt ?? null;
 
   debugDropLog("handleDrop scheduling", {
     goalId: data.goalId,
@@ -740,7 +884,7 @@ export function handleDrop(
     newStartTime,
     newEndTime,
     durationMin,
-    dropY: y,
+    dropY: metrics.startMin,
   });
 
   const command: UpdateGoalTimeCommand = {
@@ -750,12 +894,15 @@ export function handleDrop(
     prevDueDate: goal.dueDate,
     prevMonth: goal.month,
     prevYear: goal.year,
+    prevScheduledAt,
     newStartTime,
     newEndTime,
     newDueDate: deps.state.currentDate.toISOString(),
     newMonth: deps.state.currentDate.getMonth(),
     newYear: deps.state.currentDate.getFullYear(),
-    description: `Schedule goal at ${deps.calculator.format12h(newStartMin)}`,
+    description: `Schedule goal at ${deps.calculator.format12h(
+      metrics.startMin,
+    )}`,
     execute: () => {
       deps.callbacks.onGoalUpdate(data.goalId, {
         startTime: newStartTime,
@@ -763,6 +910,7 @@ export function handleDrop(
         dueDate: deps.state.currentDate!.toISOString(),
         month: deps.state.currentDate!.getMonth(),
         year: deps.state.currentDate!.getFullYear(),
+        scheduledAt: scheduledAtIso,
       });
     },
     undo: () => {
@@ -772,6 +920,7 @@ export function handleDrop(
         dueDate: command.prevDueDate,
         month: command.prevMonth,
         year: command.prevYear,
+        scheduledAt: command.prevScheduledAt ?? null,
       });
     },
   };

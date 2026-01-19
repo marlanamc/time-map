@@ -80,6 +80,18 @@ export class DragDropManager {
   }
 
   /**
+   * Clear all registered drop zones (useful when the DOM is replaced)
+   */
+  clearDropZones(): void {
+    this.dropZones.forEach((zone) => {
+      zone.element.classList.remove("is-drop-target", "is-drop-over");
+      zone.onDragLeave?.();
+      zone.element.removeAttribute("data-drop-zone");
+    });
+    this.dropZones.clear();
+  }
+
+  /**
    * Check if currently dragging
    */
   isDragging(): boolean {

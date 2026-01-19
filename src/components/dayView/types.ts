@@ -73,6 +73,7 @@ export interface UpdateGoalTimeCommand extends Command {
   prevDueDate: string | null;
   prevMonth: number;
   prevYear: number;
+  prevScheduledAt: string | null;
   newStartTime: string;
   newEndTime: string | null;
   newDueDate: string;

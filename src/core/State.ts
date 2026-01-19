@@ -319,6 +319,14 @@ export const State: AppState & {
       this.data.goals = [];
       changed = true;
     }
+    if (Array.isArray(this.data.goals)) {
+      this.data.goals.forEach((goal) => {
+        if (!Object.prototype.hasOwnProperty.call(goal, "scheduledAt")) {
+          goal.scheduledAt = null;
+          changed = true;
+        }
+      });
+    }
     if (!Array.isArray(this.data.events)) {
       this.data.events = [];
       changed = true;

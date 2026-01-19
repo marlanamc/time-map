@@ -261,6 +261,7 @@ export const Goals = {
       dueDate,
       startTime: goalData.startTime || null,
       endTime: goalData.endTime || null,
+      scheduledAt: goalData.scheduledAt ?? null,
       tags,
       parentId: goalData.parentId ?? null,
       parentLevel: goalData.parentLevel ?? null,
