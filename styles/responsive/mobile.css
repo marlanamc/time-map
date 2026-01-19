@@ -3,6 +3,19 @@
    =================================== */
 @import "./pwa-transitions.css";
 
+/* Centralize safe-area values so we don't double-apply offsets on mobile/PWA */
+:root {
+  --mobile-safe-top: env(safe-area-inset-top, 0px);
+  --mobile-safe-right: env(safe-area-inset-right, 0px);
+}
+
+@supports (padding: max(0px)) {
+  :root {
+    --mobile-safe-top: max(env(safe-area-inset-top, 0px), 0px);
+    --mobile-safe-right: max(env(safe-area-inset-right, 0px), 0px);
+  }
+}
+
 @media (max-width: 1280px) {
   .calendar-grid {
     grid-template-columns: repeat(3, minmax(240px, 1fr));
@@ -215,8 +228,8 @@
   /* Show support panel toggle button on mobile */
   .header-mobile-support-btn {
     position: fixed;
-    top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
-    right: calc(var(--space-4) + env(safe-area-inset-right, 0px));
+    top: calc(var(--space-4) + var(--mobile-safe-top));
+    right: calc(var(--space-4) + var(--mobile-safe-right));
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -238,14 +251,14 @@
 
   /* Align support button with header when date-nav is in header */
   body.mobile-date-nav-in-header .header-mobile-support-btn {
-    top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+    top: calc(var(--space-4) + var(--mobile-safe-top));
   }
 
   /* Align support button on garden view - match logo vertical center */
   /* Both logo container and support button are 44px, header centers via align-items: center */
   /* Position support button at same vertical position as the centered logo */
   body.mobile-garden-view .header-mobile-support-btn {
-    top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
+    top: calc(var(--space-3) + var(--mobile-safe-top));
     /* Header's align-items: center will naturally align both at same height */
   }
 
@@ -681,12 +694,13 @@
   }
 
   .header {
-    padding: calc(var(--space-4) + env(safe-area-inset-top, 0px))
+    --header-height: calc(64px + var(--mobile-safe-top));
+    padding: calc(var(--space-4) + var(--mobile-safe-top))
       calc(var(--space-4) + env(safe-area-inset-right, 0px)) var(--space-4)
       calc(var(--space-4) + env(safe-area-inset-left, 0px));
-    /* Extend header background into the iOS status bar area (PWA). */
-    margin-top: calc(-1 * env(safe-area-inset-top, 0px));
-    min-height: 64px;
+    /* Extend header background into the iOS status bar area (PWA) without overshooting. */
+    margin-top: 0;
+    min-height: var(--header-height);
     border-radius: 0;
     margin-right: 0;
     margin-bottom: 0;
@@ -1697,12 +1711,13 @@
        in standalone mode this causes content to shift under the status bar */
     margin-top: 0 !important;
     /* Ensure padding accounts for safe area */
-    padding-top: calc(var(--space-4) + env(safe-area-inset-top, 47px)) !important;
+    padding-top: calc(var(--space-4) + var(--mobile-safe-top)) !important;
+    min-height: calc(64px + var(--mobile-safe-top)) !important;
   }
 
   /* Fixed position elements also need safe area adjustment */
   .header-mobile-support-btn {
-    top: calc(var(--space-4) + env(safe-area-inset-top, 47px)) !important;
+    top: calc(var(--space-4) + var(--mobile-safe-top)) !important;
   }
 
   /* Ensure the app container doesn't double-apply safe area padding */
@@ -1723,11 +1738,12 @@
 body.standalone .header,
 body.standalone .mobile-header {
   margin-top: 0 !important;
-  padding-top: calc(var(--space-4) + env(safe-area-inset-top, 47px)) !important;
+  padding-top: calc(var(--space-4) + var(--mobile-safe-top)) !important;
+  min-height: calc(64px + var(--mobile-safe-top)) !important;
 }
 
 body.standalone .header-mobile-support-btn {
-  top: calc(var(--space-4) + env(safe-area-inset-top, 47px)) !important;
+  top: calc(var(--space-4) + var(--mobile-safe-top)) !important;
 }
 
 body.standalone .app {
