@@ -236,7 +236,9 @@
 .level-context-bar.expanded .level-context-content {
   opacity: 1;
   max-height: 450px;
-  transition: opacity 0.3s ease, max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    opacity 0.3s ease,
+    max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
@@ -420,7 +422,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 250;
+  z-index: 10001;
   transition: all var(--duration-normal) var(--ease-out);
 }
 
@@ -512,7 +514,9 @@
   background: rgba(140, 183, 217, 0.16);
   border: 1px solid rgba(140, 183, 217, 0.22);
   color: rgba(226, 232, 240, 1);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 0 16px rgba(140, 183, 217, 0.15);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.4),
+    0 0 16px rgba(140, 183, 217, 0.15);
 }
 
 .view-btn {
@@ -891,7 +895,9 @@
 .dark-mode .filter-menu {
   background: rgba(10, 22, 18, 0.95);
   border-color: rgba(140, 183, 217, 0.25);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 20px rgba(140, 183, 217, 0.08);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(140, 183, 217, 0.08);
 }
 
 .dark-mode .category-filter {

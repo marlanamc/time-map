@@ -47,7 +47,7 @@ export function createTimelineRuntimeState(): TimelineRuntimeState {
 
 function ensurePlannerDropIndicator(dayBed: HTMLElement): HTMLElement {
   let indicator = dayBed.querySelector(
-    ".planner-drop-indicator"
+    ".planner-drop-indicator",
   ) as HTMLElement | null;
   if (indicator) return indicator;
   indicator = document.createElement("div");
@@ -75,7 +75,7 @@ export function setupDragAndDrop(deps: TimelineDeps): void {
   const goals = deps.state.currentGoals;
 
   const seedCards = container.querySelectorAll(
-    ".day-goal-variant-seed[draggable='true']"
+    ".day-goal-variant-seed[draggable='true']",
   ) as NodeListOf<HTMLElement>;
   seedCards.forEach((card) => {
     const goalId = card.dataset.goalId;
@@ -91,7 +91,7 @@ export function setupDragAndDrop(deps: TimelineDeps): void {
   });
 
   const planterCards = container.querySelectorAll(
-    ".day-goal-variant-planter[draggable='true']"
+    ".day-goal-variant-planter[draggable='true']",
   ) as NodeListOf<HTMLElement>;
   planterCards.forEach((card) => {
     const goalId = card.dataset.goalId;
@@ -107,7 +107,7 @@ export function setupDragAndDrop(deps: TimelineDeps): void {
   });
 
   const unscheduledItems = container.querySelectorAll(
-    ".planner-unscheduled-item[data-goal-id]"
+    ".planner-unscheduled-item[data-goal-id]",
   ) as NodeListOf<HTMLElement>;
   unscheduledItems.forEach((item) => {
     const goalId = item.dataset.goalId;
@@ -123,7 +123,7 @@ export function setupDragAndDrop(deps: TimelineDeps): void {
   });
 
   const timedTasks = container.querySelectorAll(
-    ".planner-timed-task[data-goal-id]"
+    ".planner-timed-task[data-goal-id]",
   ) as NodeListOf<HTMLElement>;
   timedTasks.forEach((card) => {
     const goalId = card.dataset.goalId;
@@ -157,10 +157,10 @@ export function setupDragAndDrop(deps: TimelineDeps): void {
 export function handleNativeDragStart(
   e: DragEvent,
   _deps: TimelineDeps,
-  runtime: TimelineRuntimeState
+  runtime: TimelineRuntimeState,
 ): void {
   const item = (e.target as HTMLElement | null)?.closest(
-    ".intention-pill"
+    ".intention-pill",
   ) as HTMLElement | null;
   if (!item || !e.dataTransfer) return;
 
@@ -180,10 +180,10 @@ export function handleNativeDragStart(
 export function handleNativeDragEnd(
   e: DragEvent,
   deps: TimelineDeps,
-  runtime: TimelineRuntimeState
+  runtime: TimelineRuntimeState,
 ): void {
   const item = (e.target as HTMLElement | null)?.closest(
-    ".intention-pill"
+    ".intention-pill",
   ) as HTMLElement | null;
   if (item) item.classList.remove("is-dragging");
   runtime.activeCommonTemplate = null;
@@ -193,10 +193,10 @@ export function handleNativeDragEnd(
 export function handleNativeDragOver(
   e: DragEvent,
   deps: TimelineDeps,
-  runtime: TimelineRuntimeState
+  runtime: TimelineRuntimeState,
 ): void {
   const dayBed = (e.target as HTMLElement | null)?.closest(
-    ".day-timeline"
+    ".day-timeline",
   ) as HTMLElement | null;
   if (!dayBed) return;
 
@@ -207,21 +207,21 @@ export function handleNativeDragOver(
   const startMin = deps.calculator.clamp(
     snapMinutesToInterval(rawStartMin, 15),
     deps.calculator.getPlotStartMin(),
-    deps.calculator.getPlotEndMin() - 15
+    deps.calculator.getPlotEndMin() - 15,
   );
 
   const pct = deps.calculator.minutesToPercent(startMin);
   const indicator = ensurePlannerDropIndicator(dayBed);
   indicator.style.top = `${pct}%`;
   const label = indicator.querySelector(
-    ".planner-drop-indicator-label"
+    ".planner-drop-indicator-label",
   ) as HTMLElement | null;
   if (label) {
     const title = runtime.activeCommonTemplate?.title
       ? `• ${runtime.activeCommonTemplate.title}`
       : "";
     label.textContent = `${deps.calculator.format12h(
-      startMin
+      startMin,
     )} ${title}`.trim();
   }
 
@@ -230,7 +230,7 @@ export function handleNativeDragOver(
 
 export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
   const dayBed = (e.target as HTMLElement | null)?.closest(
-    ".day-timeline"
+    ".day-timeline",
   ) as HTMLElement | null;
   if (!dayBed) return;
 
@@ -260,7 +260,7 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
   const startMin = deps.calculator.clamp(
     snapMinutesToInterval(rawStartMin, 15),
     deps.calculator.getPlotStartMin(),
-    deps.calculator.getPlotEndMin() - 15
+    deps.calculator.getPlotEndMin() - 15,
   );
 
   const duration = Math.max(15, Math.floor(payload.duration || 60));
@@ -270,11 +270,11 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
   const endTime = deps.calculator.toTimeString(
     endMin > startMin
       ? endMin
-      : Math.min(startMin + 15, deps.calculator.getPlotEndMin())
+      : Math.min(startMin + 15, deps.calculator.getPlotEndMin()),
   );
 
   const ymd = `${currentDate.getFullYear()}-${String(
-    currentDate.getMonth() + 1
+    currentDate.getMonth() + 1,
   ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
   const coerceCategory = (value: string): Category | null => {
@@ -312,6 +312,7 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
     // Also trigger the general refresh mechanism
     const requestRefreshEvent = new CustomEvent("requestRefresh");
     deps.container.dispatchEvent(requestRefreshEvent);
+    haptics.impact("medium");
   } catch (error: any) {
     console.error("Failed to create goal:", error);
     deps.callbacks.onShowToast?.("❌", "Failed to add intention");
@@ -326,7 +327,7 @@ function snapMinutesToInterval(mins: number, interval: number): number {
 
 export function setupSwipeToComplete(
   deps: TimelineDeps,
-  runtime: TimelineRuntimeState
+  runtime: TimelineRuntimeState,
 ): void {
   runtime.swipeCleanup?.();
   runtime.swipeCleanup = null;
@@ -367,7 +368,7 @@ export function setupSwipeToComplete(
       activeCard.classList.remove(
         "is-swiping",
         "swipe-ready-complete",
-        "swipe-ready-undo"
+        "swipe-ready-undo",
       );
       activeCard.style.removeProperty("--swipe-x");
     }
@@ -394,7 +395,7 @@ export function setupSwipeToComplete(
     if (!canStart(e.target as Element | null)) return;
 
     const card = (e.target as Element | null)?.closest(
-      ".day-goal-card"
+      ".day-goal-card",
     ) as HTMLElement | null;
     const goalId = card?.dataset.goalId ?? null;
     if (!card || !goalId) return;
@@ -436,11 +437,11 @@ export function setupSwipeToComplete(
 
     activeCard.classList.toggle(
       "swipe-ready-complete",
-      ready && clamped > 0 && !isDone
+      ready && clamped > 0 && !isDone,
     );
     activeCard.classList.toggle(
       "swipe-ready-undo",
-      ready && clamped < 0 && !!isDone
+      ready && clamped < 0 && !!isDone,
     );
   };
 
@@ -488,16 +489,16 @@ export function setupSwipeToComplete(
 export function handlePointerDown(
   e: PointerEvent,
   deps: TimelineDeps,
-  runtime: TimelineRuntimeState
+  runtime: TimelineRuntimeState,
 ): void {
   const target = e.target as HTMLElement | null;
   const handle = target?.closest(
-    ".planter-resize-handle"
+    ".planter-resize-handle",
   ) as HTMLElement | null;
   if (!handle) return;
 
   const card = handle.closest(
-    ".planner-timed-task[data-goal-id]"
+    ".planner-timed-task[data-goal-id]",
   ) as HTMLElement | null;
   const goalId = card?.dataset.goalId;
   if (!card || !goalId) return;
@@ -506,7 +507,7 @@ export function handlePointerDown(
   if (!goal || goal.status === "done") return;
 
   const dayBed = deps.container.querySelector(
-    ".day-timeline"
+    ".day-timeline",
   ) as HTMLElement | null;
   if (!dayBed) return;
 
@@ -522,12 +523,12 @@ export function handlePointerDown(
   const startMin = deps.calculator.clamp(
     startMinRaw,
     deps.calculator.getPlotStartMin(),
-    deps.calculator.getPlotEndMin() - 15
+    deps.calculator.getPlotEndMin() - 15,
   );
   const endMin = deps.calculator.clamp(
     endMinRaw,
     startMin + 15,
-    deps.calculator.getPlotEndMin()
+    deps.calculator.getPlotEndMin(),
   );
 
   const resizeType = (handle.dataset.resize === "top" ? "top" : "bottom") as
@@ -582,14 +583,14 @@ export function handlePointerDown(
       const nextStart = deps.calculator.clamp(
         snapped,
         plotStart,
-        runtime.activeResize.endMin - minDur
+        runtime.activeResize.endMin - minDur,
       );
       runtime.activeResize.startMin = nextStart;
     } else {
       const nextEnd = deps.calculator.clamp(
         snapped,
         runtime.activeResize.startMin + minDur,
-        plotEnd
+        plotEnd,
       );
       runtime.activeResize.endMin = nextEnd;
     }
@@ -633,7 +634,7 @@ export function handlePointerDown(
       newEndTime,
       newDueDate: deps.state.currentDate
         ? deps.state.currentDate.toISOString()
-        : goal.dueDate ?? new Date().toISOString(),
+        : (goal.dueDate ?? new Date().toISOString()),
       newMonth: deps.state.currentDate
         ? deps.state.currentDate.getMonth()
         : goal.month,
@@ -687,12 +688,12 @@ export function handleDrop(
   data: DragData,
   _clientX: number,
   clientY: number,
-  deps: TimelineDeps
+  deps: TimelineDeps,
 ): void {
   if (!deps.state.currentDate) return;
 
   const dayBed = deps.container.querySelector(
-    ".day-timeline"
+    ".day-timeline",
   ) as HTMLElement | null;
   if (!dayBed) return;
 
@@ -713,7 +714,7 @@ export function handleDrop(
       : 60;
 
   const newEndTime = deps.calculator.toTimeString(
-    Math.min(newStartMin + durationMin, deps.options.timeWindowEnd ?? 1320)
+    Math.min(newStartMin + durationMin, deps.options.timeWindowEnd ?? 1320),
   );
 
   const command: UpdateGoalTimeCommand = {
@@ -752,6 +753,8 @@ export function handleDrop(
   deps.dragDropManager.executeCommand(command);
   deps.callbacks.onShowToast?.(
     "🌱",
-    `Planted at ${deps.calculator.format12h(newStartMin)}`
+    `Planted at ${deps.calculator.format12h(newStartMin)}`,
   );
+  haptics.impact("medium");
+  clearTimelineDropUi(deps.container);
 }

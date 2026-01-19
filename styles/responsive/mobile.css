@@ -402,8 +402,14 @@
 
   /* Make sure any emoji buttons in header-actions match logo icon size */
   body.mobile-date-nav-in-header .mobile-header .header-actions button,
-  body.mobile-date-nav-in-header .mobile-header .header-actions .support-panel-toggle-btn,
-  body.mobile-date-nav-in-header .mobile-header .header-actions .header-more-toggle {
+  body.mobile-date-nav-in-header
+    .mobile-header
+    .header-actions
+    .support-panel-toggle-btn,
+  body.mobile-date-nav-in-header
+    .mobile-header
+    .header-actions
+    .header-more-toggle {
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -687,7 +693,6 @@
     max-width: 0;
     overflow: visible;
   }
-
 
   .today-btn {
     padding: 0 var(--space-2);
@@ -1176,12 +1181,16 @@
   .fab-add {
     width: 56px;
     height: 56px;
-    right: calc(var(--space-4) + env(safe-area-inset-right, 0px));
-    bottom: calc(var(--mobile-tab-bar-height) + var(--space-6));
+    right: calc(var(--space-4) + env(safe-area-inset-right, 0px)) !important;
+    left: auto !important;
+    bottom: calc(
+      var(--mobile-tab-bar-height, 68px) + var(--space-6) + env(safe-area-inset-bottom, 0px)
+    ) !important;
     box-shadow:
       0 4px 16px rgba(0, 0, 0, 0.12),
       0 2px 8px rgba(0, 0, 0, 0.08);
     border: 2px solid var(--glass-border);
+    z-index: 10005;
   }
 
   .canvas-zoom-controls {
@@ -1357,7 +1366,9 @@
   /* Reduce header height on garden view */
   body.mobile-garden-view .header,
   body.mobile-garden-view .mobile-header {
-    padding-top: calc(var(--space-3) + env(safe-area-inset-top, 0px)) !important;
+    padding-top: calc(
+      var(--space-3) + env(safe-area-inset-top, 0px)
+    ) !important;
     padding-bottom: var(--space-3) !important;
     min-height: 56px !important;
   }
@@ -1457,6 +1468,26 @@
   body.mobile-garden-view .garden-view-container {
     width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
+    padding-inline-start: calc(var(--space-4) + env(safe-area-inset-left, 0px));
+    padding-inline-end: calc(var(--space-4) + env(safe-area-inset-right, 0px));
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.mobile-garden-view .garden-content {
+    width: min(600px, 100%);
+    margin: 0 auto;
+    padding-inline: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  body.mobile-garden-view .garden-group {
+    width: 100%;
+    padding-inline: var(--space-3);
     box-sizing: border-box;
   }
 

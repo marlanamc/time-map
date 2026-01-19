@@ -1210,3 +1210,24 @@
   font-size: 1.2rem;
   margin-right: 4px;
 }
+
+/* Added for alignment with Week/Month views */
+.year-view-header {
+  text-align: center;
+  margin-bottom: var(--space-2);
+}
+
+.year-view-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.year-vision-hero-container {
+  margin-top: var(--space-3);
+  display: flex;
+  justify-content: center;
+}

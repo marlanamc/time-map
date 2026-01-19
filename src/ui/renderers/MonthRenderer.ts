@@ -190,7 +190,9 @@ export const MonthRenderer = {
         <div class="month-week-row${
           primaryFocus ? " has-focus" : ""
         }" role="row">
-          ${weekDates.map(renderDayCell).join("")}
+          <div class="month-day-container">
+            ${weekDates.map(renderDayCell).join("")}
+          </div>
           ${
             primaryFocus
               ? `

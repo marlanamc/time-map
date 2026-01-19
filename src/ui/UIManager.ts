@@ -3,12 +3,17 @@
 // ===================================
 import { State } from "../core/State";
 import { Goals } from "../core/Goals";
+import DB, { DB_STORES } from "../db";
 import { Planning } from "../core/Planning";
 import { Streaks } from "../core/Streaks";
 import { CONFIG, VIEWS } from "../config";
 import { TimeBreakdown } from "../utils/TimeBreakdown";
 import { cacheElements } from "./elements/UIElements";
-import { buildShareMessage, copyShareText, tryNativeShare } from "../utils/share";
+import {
+  buildShareMessage,
+  copyShareText,
+  tryNativeShare,
+} from "../utils/share";
 import { Toast } from "../components/feedback/Toast";
 import { Celebration } from "../components/feedback/Celebration";
 import { TimeVisualizations } from "../garden/timeVisualizations";
@@ -1245,7 +1250,17 @@ export const UI = {
         container,
         {
           onGoalUpdate: (goalId: string, updates: Partial<Goal>) => {
-            Goals.update(goalId, updates);
+            const updatedGoal = Goals.update(goalId, updates);
+            if (!updatedGoal) return;
+            // Explicitly ensure persistence and re-render
+            void State.save();
+            void DB.update(DB_STORES.GOALS, updatedGoal).catch((err) => {
+              console.warn(
+                "[UIManager] Failed to sync goal to IndexedDB:",
+                err,
+              );
+            });
+
             // Re-render to update the view
             if (this.dayViewController) {
               const contextGoals = this.getContextGoalsForDate(

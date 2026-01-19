@@ -102,6 +102,7 @@ export class DayViewController {
       onDragStart: (data) => this.handleDragStart(data),
       onDragEnd: (data, clientX, clientY) =>
         this.handleDragEnd(data, clientX, clientY),
+      onDragCancel: () => clearTimelineDropUi(this.container),
     });
 
     // Initialize new class-based modules

@@ -8,6 +8,8 @@ body.is-dragging {
   cursor: grabbing !important;
   user-select: none;
   -webkit-user-select: none;
+  /* Prevent scroll during drag so pointerup fires over the timeline (touch) */
+  touch-action: none;
 }
 
 body.is-dragging * {

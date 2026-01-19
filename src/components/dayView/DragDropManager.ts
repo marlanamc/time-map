@@ -325,7 +325,10 @@ export class DragDropManager {
   private onDragEnd(e: PointerEvent): void {
     if (!this.dragState) return;
 
-    const dropZone = this.dragState.activeDropZone;
+    // Resolve drop zone from release position (critical for touch: last pointermove
+    // may be throttled or not reflect where the user released)
+    const dropZone =
+      this.findDropZone(e.clientX, e.clientY) ?? this.dragState.activeDropZone;
 
     if (dropZone) {
       // Valid drop
