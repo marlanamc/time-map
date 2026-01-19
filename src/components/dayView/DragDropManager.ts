@@ -39,14 +39,16 @@ export class DragDropManager {
    * Enable dragging on an element
    */
   enableDraggable(element: HTMLElement, data: DragData): void {
-    element.setAttribute("draggable", "true");
     element.setAttribute("data-drag-id", data.goalId);
 
     // Use PointerEvent for unified touch/mouse handling
     if ("PointerEvent" in window) {
+      // Prevent native drag from interfering with our custom pointer implementation
+      element.removeAttribute("draggable");
       this.addPointerDrag(element, data);
     } else {
-      // Fallback to mouse/touch events
+      // Fallback to mouse/touch events which rely on native drag or specific touch handling
+      element.setAttribute("draggable", "true");
       this.addLegacyDrag(element, data);
     }
   }
@@ -143,7 +145,8 @@ export class DragDropManager {
    * Redo last undone command
    */
   redo(): boolean {
-    if (this.commandHistoryIndex >= this.commandHistory.length - 1) return false;
+    if (this.commandHistoryIndex >= this.commandHistory.length - 1)
+      return false;
 
     this.commandHistoryIndex++;
     const command = this.commandHistory[this.commandHistoryIndex];
@@ -199,7 +202,10 @@ export class DragDropManager {
     };
 
     element.addEventListener("pointerdown", onPointerDown as EventListener);
-    this.boundHandlers.set(`${data.goalId}-pointerdown`, onPointerDown as EventListener);
+    this.boundHandlers.set(
+      `${data.goalId}-pointerdown`,
+      onPointerDown as EventListener,
+    );
   }
 
   private isTouchPointerEvent(e: PointerEvent): boolean {
@@ -231,9 +237,15 @@ export class DragDropManager {
     };
 
     const cleanup = () => {
-      document.removeEventListener("pointermove", onPointerMove as EventListener);
+      document.removeEventListener(
+        "pointermove",
+        onPointerMove as EventListener,
+      );
       document.removeEventListener("pointerup", onPointerUp as EventListener);
-      document.removeEventListener("pointercancel", onPointerUp as EventListener);
+      document.removeEventListener(
+        "pointercancel",
+        onPointerUp as EventListener,
+      );
     };
 
     document.addEventListener("pointermove", onPointerMove as EventListener);
@@ -241,7 +253,11 @@ export class DragDropManager {
     document.addEventListener("pointercancel", onPointerUp as EventListener);
   }
 
-  private startLongPress(e: PointerEvent, element: HTMLElement, data: DragData): void {
+  private startLongPress(
+    e: PointerEvent,
+    element: HTMLElement,
+    data: DragData,
+  ): void {
     const startX = e.clientX;
     const startY = e.clientY;
     const pointerId = e.pointerId;
@@ -286,7 +302,11 @@ export class DragDropManager {
     }, this.options.longPressMs);
   }
 
-  private startDrag(e: PointerEvent, element: HTMLElement, data: DragData): void {
+  private startDrag(
+    e: PointerEvent,
+    element: HTMLElement,
+    data: DragData,
+  ): void {
     // Vibrate on mobile
     if ("vibrate" in navigator) {
       navigator.vibrate(10);
@@ -325,9 +345,15 @@ export class DragDropManager {
     };
 
     const cleanup = () => {
-      document.removeEventListener("pointermove", onPointerMove as EventListener);
+      document.removeEventListener(
+        "pointermove",
+        onPointerMove as EventListener,
+      );
       document.removeEventListener("pointerup", onPointerUp as EventListener);
-      document.removeEventListener("pointercancel", onPointerCancel as EventListener);
+      document.removeEventListener(
+        "pointercancel",
+        onPointerCancel as EventListener,
+      );
     };
 
     const onPointerCancel = () => {
@@ -337,7 +363,10 @@ export class DragDropManager {
 
     document.addEventListener("pointermove", onPointerMove as EventListener);
     document.addEventListener("pointerup", onPointerUp as EventListener);
-    document.addEventListener("pointercancel", onPointerCancel as EventListener);
+    document.addEventListener(
+      "pointercancel",
+      onPointerCancel as EventListener,
+    );
 
     // Callback
     this.options.onDragStart?.(data);
@@ -406,7 +435,10 @@ export class DragDropManager {
     }
 
     // Clean up classes
-    document.body.classList.remove("is-dragging", `is-dragging-${this.dragState.data.type}`);
+    document.body.classList.remove(
+      "is-dragging",
+      `is-dragging-${this.dragState.data.type}`,
+    );
     this.dragState.sourceElement.setAttribute("aria-grabbed", "false");
 
     // Clean up drop zones
@@ -474,7 +506,12 @@ export class DragDropManager {
   private findDropZone(x: number, y: number): DropZoneConfig | null {
     for (const [element, config] of this.dropZones) {
       const rect = element.getBoundingClientRect();
-      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      if (
+        x >= rect.left &&
+        x <= rect.right &&
+        y >= rect.top &&
+        y <= rect.bottom
+      ) {
         return config;
       }
     }

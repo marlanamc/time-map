@@ -116,7 +116,8 @@
   box-shadow: var(--shadow-xs);
   cursor: grab;
   user-select: none;
-  transition: transform var(--duration-fast) var(--ease-out),
+  transition:
+    transform var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out),
     background var(--duration-fast) var(--ease-out);
 }
@@ -302,7 +303,9 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
   opacity: 0.92;
 }
 
@@ -359,7 +362,9 @@
   justify-content: flex-end;
   padding: 4px 10px;
   opacity: 0.85;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .planner-drop-preview-label {
@@ -424,8 +429,17 @@
 
 .day-goal-card.planner-timed-task {
   position: absolute;
-  left: 70px;
-  right: 10px;
+  --lane: 0;
+  --lanes: 1;
+  --gutter: 70px;
+  --edge-gap: 10px;
+  --available-width: calc(100% - var(--gutter) - var(--edge-gap));
+
+  left: calc(
+    var(--gutter) + (var(--lane) * var(--available-width)) / var(--lanes)
+  );
+  width: calc((var(--available-width) / var(--lanes)) - 6px);
+
   background: var(--bg-surface);
   border-radius: 24px;
   padding: 0.5rem 1rem;
@@ -438,7 +452,10 @@
   border: none;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .day-goal-card.planner-timed-task.day-goal-variant-planter {
@@ -459,8 +476,17 @@
 
 .planner-event-card {
   position: absolute;
-  left: 70px;
-  right: 10px;
+  --lane: 0;
+  --lanes: 1;
+  --gutter: 70px;
+  --edge-gap: 10px;
+  --available-width: calc(100% - var(--gutter) - var(--edge-gap));
+
+  left: calc(
+    var(--gutter) + (var(--lane) * var(--available-width)) / var(--lanes)
+  );
+  width: calc((var(--available-width) / var(--lanes)) - 6px);
+
   background: color-mix(in srgb, var(--accent) 20%, var(--bg-surface) 80%);
   border-radius: 24px;
   padding: var(--space-3) var(--space-4);
@@ -469,7 +495,12 @@
   gap: var(--space-1);
   box-shadow: var(--shadow-sm);
   pointer-events: auto;
-  border: 1px solid color-mix(in srgb, var(--accent-border, #00aaff) 40%, var(--glass-border) 60%);
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--accent-border, #00aaff) 40%,
+      var(--glass-border) 60%
+    );
   color: var(--text-primary);
   z-index: 8;
   backdrop-filter: blur(12px);

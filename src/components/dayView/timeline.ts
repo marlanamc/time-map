@@ -14,7 +14,10 @@ import { DayViewState } from "./DayViewState";
 const DEBUG_DRAG_DROP =
   typeof window !== "undefined" && Boolean((window as any).__DRAG_DROP_DEBUG__);
 
-function debugDropLog(message: string, context?: Record<string, unknown>): void {
+function debugDropLog(
+  message: string,
+  context?: Record<string, unknown>,
+): void {
   if (!DEBUG_DRAG_DROP) return;
   console.debug("[DayTimelineDrag]", message, context ?? {});
 }
@@ -139,7 +142,10 @@ function getTimelineDropMetrics(
   );
 
   const durationRange = deps.calculator.getPlotRangeMin() || 1;
-  const endMin = Math.min(startMin + durationMin, deps.calculator.getPlotEndMin());
+  const endMin = Math.min(
+    startMin + durationMin,
+    deps.calculator.getPlotEndMin(),
+  );
   const startPct = deps.calculator.minutesToPercent(startMin);
   const durPct = ((endMin - startMin) / durationRange) * 100;
 
@@ -171,9 +177,9 @@ export function updateTimelineDragPreview(
     durationMin,
     30,
   );
-  const dayBed = metrics?.dayBed ?? (deps.container.querySelector(
-    ".day-timeline",
-  ) as HTMLElement | null);
+  const dayBed =
+    metrics?.dayBed ??
+    (deps.container.querySelector(".day-timeline") as HTMLElement | null);
 
   if (!metrics || !metrics.isInside) {
     if (dayBed) clearPlannerDropPreview(dayBed);
@@ -373,11 +379,26 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
   e.preventDefault();
   e.stopPropagation();
 
-  const currentDate = deps.state.currentDate;
-  if (!currentDate) return;
-
   const dt = e.dataTransfer;
   if (!dt) return;
+
+  // 1. Handle dragging existing goals (unscheduled or rescheduling)
+  const rawDragData = dt.getData("application/x-goal-drag");
+  if (rawDragData) {
+    try {
+      const data = JSON.parse(rawDragData);
+      // Delegate to the main handleDrop logic used by mobile/pointer events
+      handleDrop(data, e.clientX, e.clientY, deps);
+      clearTimelineDropUi(deps.container);
+      return;
+    } catch (err) {
+      console.error("Failed to parse dragged goal data", err);
+    }
+  }
+
+  // 2. Handle creating NEW goals from templates (e.g. intentions pill)
+  const currentDate = deps.state.currentDate;
+  if (!currentDate) return;
 
   const raw = dt.getData("application/json") || dt.getData("text/plain") || "";
   let payload: { title: string; category: string; duration: number } | null =
@@ -928,7 +949,7 @@ export function handleDrop(
   deps.dragDropManager.executeCommand(command);
   deps.callbacks.onShowToast?.(
     "🌱",
-    `Planted at ${deps.calculator.format12h(newStartMin)}`,
+    `Planted at ${deps.calculator.format12h(metrics.startMin)}`,
   );
   haptics.impact("medium");
   clearTimelineDropUi(deps.container);

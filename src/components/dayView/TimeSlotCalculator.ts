@@ -1,5 +1,11 @@
 import type { Goal } from "../../types";
-import type { TimedGoal, PositionedGoal, TimeSlot } from "./types";
+import type {
+  TimedGoal,
+  PositionedGoal,
+  TimeSlot,
+  TimelineItem,
+  PositionedTimelineItem,
+} from "./types";
 
 export class TimeSlotCalculator {
   private plotStartMin: number;
@@ -12,7 +18,7 @@ export class TimeSlotCalculator {
     timeWindowStart: number = 480, // 8 AM
     timeWindowEnd: number = 1320, // 10 PM
     maxLanes: number = 4,
-    snapInterval: number = 5
+    snapInterval: number = 5,
   ) {
     this.plotStartMin = timeWindowStart;
     this.plotEndMin = timeWindowEnd;
@@ -108,7 +114,7 @@ export class TimeSlotCalculator {
         const endMinRaw = this.parseTimeToMinutes(goal.endTime);
         const startMin = Math.min(
           Math.max(startMinRaw, this.plotStartMin),
-          this.plotEndMin - 15
+          this.plotEndMin - 15,
         );
 
         let endMin =
@@ -130,35 +136,102 @@ export class TimeSlotCalculator {
    * Prevents overlapping goals by placing them in different lanes
    */
   assignLanes(timedGoals: TimedGoal[]): PositionedGoal[] {
-    const laneEndTimes: number[] = [];
+    const items: TimelineItem[] = timedGoals.map((g) => ({
+      startMin: g.startMin,
+      endMin: g.endMin,
+      data: g.goal,
+      type: "goal",
+    }));
 
-    return timedGoals.map((item) => {
-      // Find first lane where this goal can fit
-      let lane = laneEndTimes.findIndex((end) => item.startMin >= end);
+    const positioned = this.calculateLayout(items);
 
-      if (lane === -1) {
-        // No available lane, create a new one
-        lane = laneEndTimes.length;
-        laneEndTimes.push(item.endMin);
+    return positioned.map((p) => ({
+      goal: p.data as Goal,
+      startMin: p.startMin,
+      endMin: p.endMin,
+      lane: p.lane,
+      totalLanes: p.totalLanes,
+      startPct: p.startPct,
+      durPct: p.durPct,
+    }));
+  }
+
+  /**
+   * Universal layout engine for goals and events
+   * Clusters items that overlap and determines how many columns each needs
+   */
+  calculateLayout(items: TimelineItem[]): PositionedTimelineItem[] {
+    if (items.length === 0) return [];
+
+    // 1. Sort by start time, then duration (longer first)
+    const sorted = [...items].sort((a, b) => {
+      if (a.startMin !== b.startMin) return a.startMin - b.startMin;
+      return b.endMin - b.startMin - (a.endMin - a.startMin);
+    });
+
+    // 2. Identify clusters of overlapping items
+    const clusters: TimelineItem[][] = [];
+    let currentCluster: TimelineItem[] = [];
+    let clusterEnd = 0;
+
+    for (const item of sorted) {
+      if (item.startMin >= clusterEnd && currentCluster.length > 0) {
+        clusters.push(currentCluster);
+        currentCluster = [item];
+        clusterEnd = item.endMin;
       } else {
-        // Update the lane's end time
-        laneEndTimes[lane] = item.endMin;
+        currentCluster.push(item);
+        clusterEnd = Math.max(clusterEnd, item.endMin);
+      }
+    }
+    if (currentCluster.length > 0) clusters.push(currentCluster);
+
+    // 3. Process each cluster to assign lanes
+    const result: PositionedTimelineItem[] = [];
+
+    for (const cluster of clusters) {
+      const lanes: number[][] = []; // indices of items in each lane
+
+      for (const item of cluster) {
+        let placed = false;
+        for (let i = 0; i < lanes.length; i++) {
+          const lastItemInLaneIndex = lanes[i][lanes[i].length - 1];
+          const lastItemInLane = cluster.find(
+            (c) => cluster.indexOf(c) === lastItemInLaneIndex,
+          );
+
+          if (lastItemInLane && item.startMin >= lastItemInLane.endMin) {
+            lanes[i].push(cluster.indexOf(item));
+            placed = true;
+            break;
+          }
+        }
+
+        if (!placed) {
+          lanes.push([cluster.indexOf(item)]);
+        }
       }
 
-      // Clamp to max lanes (goals will overlap if we exceed capacity)
-      const laneClamped = Math.min(lane, this.maxLanes - 1);
+      // Assign positioned data for cluster items
+      const clusterSize = Math.min(lanes.length, this.maxLanes);
 
-      // Calculate percentage positions
-      const startPct = this.minutesToPercent(item.startMin);
-      const durPct = ((item.endMin - item.startMin) / this.plotRangeMin) * 100;
+      lanes.forEach((laneIndices, laneIndex) => {
+        const clampedLaneIndex = Math.min(laneIndex, this.maxLanes - 1);
 
-      return {
-        ...item,
-        lane: laneClamped,
-        startPct,
-        durPct,
-      };
-    });
+        laneIndices.forEach((idx) => {
+          const item = cluster[idx];
+          result.push({
+            ...item,
+            lane: clampedLaneIndex,
+            totalLanes: clusterSize,
+            startPct: this.minutesToPercent(item.startMin),
+            durPct: ((item.endMin - item.startMin) / this.plotRangeMin) * 100,
+          });
+        });
+      });
+    }
+
+    return result;
   }
 
   /**
@@ -183,7 +256,7 @@ export class TimeSlotCalculator {
     for (let i = 0; i < hourCount; i++) {
       const hour = startHour + i;
       const totalMinutes = hour * 60;
-      
+
       // Calculate evenly spaced position (0% to 100%)
       // For n hours, we have n-1 intervals, so position = (i / (hourCount - 1)) * 100
       const position = hourCount > 1 ? (i / (hourCount - 1)) * 100 : 0;
@@ -213,7 +286,7 @@ export class TimeSlotCalculator {
    */
   findAvailableSlots(
     goals: TimedGoal[],
-    durationMin: number
+    durationMin: number,
   ): { startMin: number; endMin: number }[] {
     const slots: { startMin: number; endMin: number }[] = [];
     const sortedGoals = [...goals].sort((a, b) => a.startMin - b.startMin);

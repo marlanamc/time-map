@@ -9,6 +9,7 @@ import type { EventInstance } from "../../utils/recurrence";
 import { expandEventsForRange } from "../../utils/recurrence";
 import { formatCountdown, formatTo12Hour } from "../../utils/time";
 import { getGoalEmoji } from "../../utils/goalVisuals";
+import type { TimelineItem, PositionedTimelineItem } from "./types";
 
 /**
  * Renderer for the Planner-style day view
@@ -70,7 +71,7 @@ export class PlannerDayViewRenderer {
     container: HTMLElement,
     _cardComponent: CardComponent,
     calculator: TimeSlotCalculator,
-    timelineGrid: TimelineGrid
+    timelineGrid: TimelineGrid,
   ) {
     this.container = container;
     this.calculator = calculator;
@@ -87,7 +88,7 @@ export class PlannerDayViewRenderer {
   renderInitial(
     date: Date,
     allGoals: Goal[],
-    contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] }
+    contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] },
   ): void {
     this.activeDate = date;
     const dayGoals = allGoals
@@ -132,10 +133,10 @@ export class PlannerDayViewRenderer {
       day % 10 === 1 && day !== 11
         ? "st"
         : day % 10 === 2 && day !== 12
-        ? "nd"
-        : day % 10 === 3 && day !== 13
-        ? "rd"
-        : "th";
+          ? "nd"
+          : day % 10 === 3 && day !== 13
+            ? "rd"
+            : "th";
     const dayName = `${weekday}, ${month} ${day}${ordinal}`;
 
     const dayStart = new Date(date);
@@ -151,6 +152,49 @@ export class PlannerDayViewRenderer {
       const d = new Date(iso);
       return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     };
+
+    // 1. Prepare items for unified layout
+    const timelineItems: TimelineItem[] = [];
+
+    // Add scheduled goals
+    scheduled.forEach((goal) => {
+      const startMin = this.getScheduledStartMin(goal, date);
+      if (startMin === null) return;
+
+      const duration = this.calculator.parseTimeToMinutes(goal.endTime)
+        ? this.calculator.parseTimeToMinutes(goal.endTime)! - startMin
+        : 60;
+      const endMin = Math.max(startMin + 15, startMin + duration);
+
+      timelineItems.push({
+        startMin,
+        endMin,
+        data: goal,
+        type: "goal",
+      });
+    });
+
+    // Add external events
+    this.todayEvents.forEach((ev) => {
+      if (ev.allDay) return;
+      const start = new Date(ev.startAt);
+      const end = ev.endAt ? new Date(ev.endAt) : new Date(start);
+      const startMin = start.getHours() * 60 + start.getMinutes();
+      const endMin = Math.max(
+        startMin + 15,
+        end.getHours() * 60 + end.getMinutes(),
+      );
+
+      timelineItems.push({
+        startMin,
+        endMin,
+        data: ev,
+        type: "event",
+      });
+    });
+
+    // 2. Calculate unified layout
+    const positionedItems = this.calculator.calculateLayout(timelineItems);
 
     const html = `
           <div class="day-view planner-day-view">
@@ -189,14 +233,14 @@ export class PlannerDayViewRenderer {
                         <div class="planner-event-title">${ev.title}</div>
                         <div class="planner-event-meta">${formatEventTime(
                           ev.startAt,
-                          ev.allDay
+                          ev.allDay,
                         )}${
-                      ev.endAt && !ev.allDay
-                        ? `–${formatEventTime(ev.endAt, false)}`
-                        : ""
-                    }</div>
+                          ev.endAt && !ev.allDay
+                            ? `–${formatEventTime(ev.endAt, false)}`
+                            : ""
+                        }</div>
                       </button>
-                    `
+                    `,
                   )
                   .join("")}
                 ${
@@ -269,8 +313,13 @@ export class PlannerDayViewRenderer {
           <div class="planner-timeline-container day-timeline">
             ${this.timelineGrid.render()}
             <div class="planner-timeline-content">
-              ${scheduled.map((g) => this.renderTimedTask(g, date)).join("")}
-              ${this.todayEvents.map((ev) => this.renderTimelineEvent(ev)).join("")}
+              ${positionedItems
+                .map((item) =>
+                  item.type === "goal"
+                    ? this.renderTimedTask(item as any, date)
+                    : this.renderTimelineEvent(item as any),
+                )
+                .join("")}
             </div>
           </div>
         </main>
@@ -292,7 +341,7 @@ export class PlannerDayViewRenderer {
   update(
     date: Date,
     allGoals: Goal[],
-    contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] }
+    contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] },
   ): void {
     // Store expand/collapse state before re-rendering
     const expandState = this.captureExpandState();
@@ -313,7 +362,7 @@ export class PlannerDayViewRenderer {
   updateGoal(_date: Date, goalId: string, goal: Goal): void {
     // Find and update the goal in the current view
     const elements = this.container.querySelectorAll(
-      `[data-goal-id="${goalId}"]`
+      `[data-goal-id="${goalId}"]`,
     );
 
     elements.forEach((element) => {
@@ -371,7 +420,7 @@ export class PlannerDayViewRenderer {
 
     // Capture collapsed sections
     const collapsedSections = this.container.querySelectorAll(
-      ".planner-sidebar-section.collapsed"
+      ".planner-sidebar-section.collapsed",
     );
     collapsedSections.forEach((section) => {
       const sectionId = section.getAttribute("data-section-id") || "default";
@@ -435,8 +484,8 @@ export class PlannerDayViewRenderer {
 
     return `
       <div class="planner-unscheduled-item ${colorClass}" data-goal-id="${
-      goal.id
-    }">
+        goal.id
+      }">
         <div class="day-goal-checkbox ${
           goal.status === "done" ? "checked" : ""
         }"></div>
@@ -448,8 +497,8 @@ export class PlannerDayViewRenderer {
           <button class="btn-icon btn-schedule-task" type="button" data-goal-id="${
             goal.id
           }" aria-label="Schedule" title="Schedule">${this.icon(
-      "plus"
-    )}</button>
+            "plus",
+          )}</button>
           <button class="btn-zen-focus btn-icon" type="button" data-goal-id="${
             goal.id
           }" aria-label="Focus" title="Focus">${this.icon("eye")}</button>
@@ -460,24 +509,16 @@ export class PlannerDayViewRenderer {
 
   /**
    * Render a timed task on the timeline
-   * @param goal - The goal to render
+   * @param item - The positioned item to render
    * @returns HTML string for the timed task card
    * @private
    */
-  private renderTimedTask(goal: Goal, date: Date): string {
-    const fallbackStartMin = this.getScheduledStartMin(goal, date) ?? 0;
-    const parsedStartMin =
-      this.calculator.parseTimeToMinutes(goal.startTime) ?? fallbackStartMin;
-    const parsedEndMin =
-      this.calculator.parseTimeToMinutes(goal.endTime) ??
-      (parsedStartMin + 60);
-    const startMin = parsedStartMin;
-    const endMin = Math.max(parsedEndMin, startMin + 15);
-    const duration = endMin - startMin;
+  private renderTimedTask(item: PositionedTimelineItem, date: Date): string {
+    const goal = item.data as Goal;
 
     // Calculate tighter positioning - account for card borders and padding
-    const top = this.calculator.minutesToPercent(startMin);
-    const durPct = (duration / this.calculator.getPlotRangeMin()) * 100;
+    const top = item.startPct;
+    const durPct = item.durPct;
 
     // Apply a small adjustment to fit within hour boundaries better
     const adjustedTop = Math.max(0, top - 0.1); // Slight upward adjustment
@@ -500,9 +541,10 @@ export class PlannerDayViewRenderer {
         : "";
 
     return `
-        <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" tabindex="0" style="top: ${adjustedTop}%; height: ${adjustedHeight}%;" data-goal-id="${
-      goal.id
-    }">
+        <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" 
+             tabindex="0" 
+             style="top: ${adjustedTop}%; height: ${adjustedHeight}%; --lane: ${item.lane}; --lanes: ${item.totalLanes};" 
+             data-goal-id="${goal.id}">
         ${resizeHandles}
         <div class="day-goal-checkbox ${
           goal.status === "done" ? "checked" : ""
@@ -518,7 +560,7 @@ export class PlannerDayViewRenderer {
           <button class="btn-icon btn-planner-remove" type="button" data-goal-id="${
             goal.id
           }" aria-label="Remove from timeline" title="Remove from timeline">${this.icon(
-            "minus"
+            "minus",
           )}</button>
         </div>
       ${countdownHtml}
@@ -564,33 +606,14 @@ export class PlannerDayViewRenderer {
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
   }
 
-  private renderTimelineEvent(event: EventInstance): string {
-    if (event.allDay) return "";
+  private renderTimelineEvent(item: PositionedTimelineItem): string {
+    const event = item.data as EventInstance;
 
-    const start = new Date(event.startAt);
-    const end = event.endAt ? new Date(event.endAt) : new Date(start);
-    const startMinRaw = start.getHours() * 60 + start.getMinutes();
-    const endMinRaw = end.getHours() * 60 + end.getMinutes();
+    const startMin = item.startMin;
+    const endMin = item.endMin;
 
-    const startMin = this.calculator.clamp(
-      startMinRaw,
-      this.calculator.getPlotStartMin(),
-      this.calculator.getPlotEndMin() - 15
-    );
-    let endMin = Math.min(
-      Math.max(endMinRaw, startMin + 15),
-      this.calculator.getPlotEndMin()
-    );
-    if (endMin <= startMin) {
-      endMin = Math.min(
-        this.calculator.getPlotEndMin(),
-        startMin + 60
-      );
-    }
-
-    const top = this.calculator.minutesToPercent(startMin);
-    const duration = Math.max(1, endMin - startMin);
-    const durPct = (duration / this.calculator.getPlotRangeMin()) * 100;
+    const top = item.startPct;
+    const durPct = item.durPct;
     const adjustedHeight = Math.max(1, durPct - 0.2);
 
     const startLabel = this.calculator.format12h(startMin);
@@ -604,7 +627,7 @@ export class PlannerDayViewRenderer {
     return `
       <div
         class="planner-event-card"
-        style="top: ${top}%; height: ${adjustedHeight}%"
+        style="top: ${top}%; height: ${adjustedHeight}%; --lane: ${item.lane}; --lanes: ${item.totalLanes};"
         data-action="edit-event"
         data-event-id="${event.originalId}"
       >
@@ -715,5 +738,4 @@ export class PlannerDayViewRenderer {
     div.textContent = text;
     return div.innerHTML;
   }
-
 }

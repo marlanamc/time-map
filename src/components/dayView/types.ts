@@ -1,4 +1,5 @@
 import type { Goal, CustomIntention } from "../../types";
+import type { EventInstance } from "../../utils/recurrence";
 
 export interface DayViewOptions {
   timeWindowStart?: number; // Minutes from midnight (default: 480 = 8 AM)
@@ -33,8 +34,33 @@ export interface TimedGoal {
 
 export interface PositionedGoal extends TimedGoal {
   lane: number;
+  totalLanes: number;
   startPct: number; // Percentage position (0-100)
   durPct: number; // Percentage duration (0-100)
+}
+
+export interface PositionedEvent {
+  event: EventInstance;
+  startMin: number;
+  endMin: number;
+  lane: number;
+  totalLanes: number;
+  startPct: number;
+  durPct: number;
+}
+
+export interface TimelineItem {
+  startMin: number;
+  endMin: number;
+  data: Goal | EventInstance;
+  type: "goal" | "event";
+}
+
+export interface PositionedTimelineItem extends TimelineItem {
+  lane: number;
+  totalLanes: number;
+  startPct: number;
+  durPct: number;
 }
 
 export interface DragData {
