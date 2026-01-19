@@ -1181,10 +1181,11 @@
   .fab-add {
     width: 56px;
     height: 56px;
-    right: calc(var(--space-4) + env(safe-area-inset-right, 0px)) !important;
+    right: 20px !important;
     left: auto !important;
     bottom: calc(
-      var(--mobile-tab-bar-height, 68px) + var(--space-6) + env(safe-area-inset-bottom, 0px)
+      var(--mobile-tab-bar-height, 68px) + var(--space-8) +
+        env(safe-area-inset-bottom, 0px) + 20px
     ) !important;
     box-shadow:
       0 4px 16px rgba(0, 0, 0, 0.12),
@@ -1194,7 +1195,7 @@
   }
 
   .canvas-zoom-controls {
-    bottom: calc(var(--mobile-tab-bar-height) + var(--space-6));
+    display: none !important;
   }
 
   .fab-add:active {
