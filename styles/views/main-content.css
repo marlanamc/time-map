@@ -331,6 +331,7 @@
 /* Support Panel Toggle Button (in Control Bar) */
 .control-right .support-panel-toggle-btn {
   flex-shrink: 0;
+  position: relative;
 }
 
 .support-panel-toggle-btn .support-panel-celestial {
@@ -385,7 +386,6 @@
 
 .support-panel-toggle-btn {
   color: var(--text-primary);
-  position: relative;
 }
 
 .support-panel-toggle-btn:hover {
