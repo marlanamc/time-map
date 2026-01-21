@@ -2126,16 +2126,11 @@
     min-height: 100%;
   }
 
-  /* Additional fallback: ensure canvas-container is scrollable when it contains day/week views */
+  /* Prevent pull-to-refresh on canvas and ensure it's scrollable */
   .canvas-container {
-    /* Default: allow scrolling */
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-  }
-
-  /* Prevent pull-to-refresh on canvas */
-  .canvas-container {
     overscroll-behavior-y: contain;
   }
 
