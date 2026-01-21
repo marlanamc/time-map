@@ -1184,8 +1184,7 @@
     left: auto !important;
     right: var(--space-5) !important;
     bottom: calc(
-      var(--mobile-tab-bar-height, 68px) + var(--space-8) +
-        env(safe-area-inset-bottom, 0px) + var(--space-6)
+      var(--mobile-tab-bar-height, 68px) + var(--space-6)
     ) !important;
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--glass-border);

@@ -334,12 +334,7 @@
 @media (max-width: 768px) {
   .modal-overlay.edit-sheet {
     align-items: flex-end;
-    padding: 0 0
-      calc(
-        env(safe-area-inset-bottom, 0px) + var(--mobile-tab-bar-height) +
-          var(--space-4)
-      )
-      0;
+    padding: 0 0 calc(var(--mobile-tab-bar-height) + var(--space-4)) 0;
     z-index: 10000 !important; /* Above mobile tab bar (z-index: 9999) */
   }
 

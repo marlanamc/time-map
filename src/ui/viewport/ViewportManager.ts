@@ -171,11 +171,17 @@ class ViewportManager {
 
       const tabBar = document.getElementById("mobileTabBar");
       // Use fallback height if tab bar is not visible or has no height
+      const tabBarRect = tabBar?.getBoundingClientRect();
       const tabBarHeight =
-        tabBar && tabBar.getBoundingClientRect().height > 0
-          ? Math.round(tabBar.getBoundingClientRect().height)
+        tabBarRect && tabBarRect.height > 0 ? tabBarRect.height : 0;
+      const tabBarOccupiedBottomSpace =
+        tabBarRect && tabBarHeight > 0
+          ? Math.round(window.innerHeight - tabBarRect.top)
           : 68; // Fallback height matching CSS
-      root.style.setProperty("--mobile-tab-bar-height", `${tabBarHeight}px`);
+      root.style.setProperty(
+        "--mobile-tab-bar-height",
+        `${tabBarOccupiedBottomSpace}px`,
+      );
 
       const isMobileHomeView =
         document.body.classList.contains("mobile-home-view");
