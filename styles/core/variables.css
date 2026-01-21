@@ -10,9 +10,9 @@
        - No pure white for large surfaces
        - 3-level hierarchy: app wash → card → raised
        =========================================== */
-  --surface-0: #eaf4f2; /* app background wash */
-  --surface-1: #f2f7f6; /* default card/panel */
-  --surface-2: #fafcfb; /* raised/active/selected */
+  --surface-0: #f8fafc; /* app background wash - neutrally clean */
+  --surface-1: #ffffff; /* pure white for cards */
+  --surface-2: #f1f5f9; /* raised/active/selected */
 
   /* Base colors - mapped to surface system */
   --bg-base: var(--surface-0);
@@ -21,8 +21,8 @@
   --bg-hover: rgba(31, 45, 42, 0.04);
   --bg-active: rgba(31, 45, 42, 0.07);
 
-  /* Glass effects - Soft & Gentle */
-  --divider: rgba(0, 0, 0, 0.06);
+  /* Glass effects - Flattened & Clean */
+  --divider: #e2e8f0;
   --glass-bg: rgba(242, 247, 246, 0.86);
   --glass-border: rgba(
     31,
@@ -33,27 +33,51 @@
   --glass-shine: rgba(250, 252, 251, 0.55);
   --glass-panel-border-radius: var(--radius-lg);
   --glass-panel-blur: 14px;
-  --glass-panel-bg: color-mix(in srgb, var(--glass-bg) 75%, rgba(255, 255, 255, 0.15));
-  --glass-panel-border: color-mix(in srgb, var(--glass-border) 60%, rgba(255, 255, 255, 0.35));
-  --glass-panel-shadow: 0 14px 30px rgba(3, 7, 20, 0.32);
+  --glass-panel-bg: color-mix(
+    in srgb,
+    var(--glass-bg) 75%,
+    rgba(255, 255, 255, 0.15)
+  );
+  --glass-panel-border: color-mix(
+    in srgb,
+    var(--glass-border) 60%,
+    rgba(255, 255, 255, 0.35)
+  );
+  --glass-panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
   --glass-button-bg: linear-gradient(
     135deg,
     color-mix(in srgb, var(--accent-button) 80%, rgba(255, 255, 255, 0.25)) 0%,
     color-mix(in srgb, var(--accent-progress) 80%, rgba(0, 0, 0, 0.65)) 100%
   );
-  --glass-button-border: color-mix(in srgb, var(--accent-border) 70%, rgba(255, 255, 255, 0.35));
-  --glass-button-shadow: 0 12px 28px rgba(3, 7, 20, 0.45);
-  --glass-button-glow: color-mix(in srgb, var(--accent-progress) 70%, rgba(255, 255, 255, 0.35));
-  --glass-pill-bg: color-mix(in srgb, var(--glass-bg) 65%, rgba(255, 255, 255, 0.08));
-  --glass-pill-border: color-mix(in srgb, var(--glass-border) 65%, rgba(255, 255, 255, 0.3));
-  --glass-pill-shadow: 0 8px 20px rgba(3, 7, 20, 0.25);
+  --glass-button-border: color-mix(
+    in srgb,
+    var(--accent-border) 70%,
+    rgba(255, 255, 255, 0.35)
+  );
+  --glass-button-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --glass-button-glow: color-mix(
+    in srgb,
+    var(--accent-progress) 70%,
+    rgba(255, 255, 255, 0.35)
+  );
+  --glass-pill-bg: color-mix(
+    in srgb,
+    var(--glass-bg) 65%,
+    rgba(255, 255, 255, 0.08)
+  );
+  --glass-pill-border: color-mix(
+    in srgb,
+    var(--glass-border) 65%,
+    rgba(255, 255, 255, 0.3)
+  );
+  --glass-pill-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 
   /* Text hierarchy - Optimized for day mode (dark text on light backgrounds) */
-  --text-primary: #1f2d2a;
-  --text-secondary: #4b6761;
-  --text-tertiary: rgba(31, 45, 42, 0.64);
-  --text-ghost: rgba(31, 45, 42, 0.48);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-tertiary: #64728b;
+  --text-ghost: #94a3b8;
   /* Text on accent-filled UI (chips, badges, zoom controls) */
   --text-on-accent: rgba(
     255,
@@ -190,10 +214,10 @@
   /* Border radius - Softened */
   --radius-xs: 4px;
   --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
-  --radius-2xl: 48px;
+  --radius-md: 8px; /* Standardize buttons */
+  --radius-lg: 12px; /* Standardize cards */
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
   --radius-full: 9999px;
 
   /* Organic Border Radius (blob-like shapes for whimsical garden) */
@@ -229,11 +253,11 @@
 
   /* Shadows */
   /* Shadows - Softened */
-  --shadow-xs: 0 3px 10px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 16px 36px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 26px 56px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 40px 90px rgba(0, 0, 0, 0.12);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.12);
   --shadow-glow: 0 0 24px rgba(111, 155, 134, 0.14);
   --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.1);
 
@@ -245,14 +269,14 @@
   --font-display: "Lexend", var(--font-sans);
 
   /* Font sizes */
-  --text-xs: 0.6875rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-lg: 1.0625rem;
+  --text-xs: 0.75rem; /* 12px Metadata */
+  --text-sm: 0.875rem; /* 14px Body */
+  --text-base: 1rem;
+  --text-lg: 1.125rem; /* 18px Title */
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
-  --text-3xl: 2rem;
-  --text-display: 2.5rem;
+  --text-3xl: 1.875rem;
+  --text-display: 2.25rem;
 
   /* Line heights */
   --lh-tight: 1.2;
@@ -755,7 +779,11 @@
   --panel-bg: rgba(12, 22, 36, 0.85);
   --panel-backdrop: rgba(0, 0, 0, 0.8);
 
-  --glass-panel-bg: color-mix(in srgb, var(--glass-bg) 88%, rgba(5, 7, 20, 0.45));
+  --glass-panel-bg: color-mix(
+    in srgb,
+    var(--glass-bg) 88%,
+    rgba(5, 7, 20, 0.45)
+  );
   --glass-panel-border: rgba(255, 255, 255, 0.22);
   --glass-panel-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
   --glass-button-bg: linear-gradient(
@@ -765,7 +793,11 @@
   );
   --glass-button-border: rgba(255, 255, 255, 0.35);
   --glass-button-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
-  --glass-button-glow: color-mix(in srgb, var(--accent-progress) 70%, rgba(255, 255, 255, 0.25));
+  --glass-button-glow: color-mix(
+    in srgb,
+    var(--accent-progress) 70%,
+    rgba(255, 255, 255, 0.25)
+  );
   --glass-pill-bg: rgba(255, 255, 255, 0.06);
   --glass-pill-border: rgba(255, 255, 255, 0.2);
   --glass-pill-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);

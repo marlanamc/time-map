@@ -2,75 +2,75 @@
    Buttons
    =================================== */
 .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    touch-action: manipulation;
-    font-family: inherit;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    line-height: 1.4;
-    text-decoration: none;
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-out);
-    white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  touch-action: manipulation;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  white-space: nowrap;
 }
 
 .btn-primary {
-    position: relative;
-    overflow: hidden;
-    background: var(--accent-fill-gradient);
-    color: var(--text-on-accent);
+  position: relative;
+  overflow: hidden;
+  background: var(--accent-fill-gradient);
+  color: var(--text-on-accent);
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm), var(--shadow-glow-sm);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:disabled {
-    cursor: not-allowed;
-    opacity: 0.8;
-    box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.8;
+  box-shadow: none;
 }
 
 .btn-primary[data-loading="true"] {
-    cursor: progress;
-    pointer-events: none;
+  cursor: progress;
+  pointer-events: none;
 }
 
 .btn-primary[data-loading="true"]::after {
-    content: "";
-    position: absolute;
-    right: var(--space-4);
-    top: 50%;
-    width: var(--space-4);
-    height: var(--space-4);
-    border: 2px solid rgba(255, 255, 255, 0.45);
-    border-top-color: rgba(255, 255, 255, 0.95);
-    border-radius: 50%;
-    transform: translateY(-50%);
-    animation: button-spinner 0.8s linear infinite;
+  content: "";
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  width: var(--space-4);
+  height: var(--space-4);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  animation: button-spinner 0.8s linear infinite;
 }
 
 .btn-primary:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 .btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
 }
 
 .btn-ghost:hover {
-    color: var(--text-primary);
-    background: var(--bg-hover);
-    border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn:focus-visible,
@@ -80,9 +80,9 @@
 .toggle-switch:focus-visible,
 .pick-btn:focus-visible,
 .category-filter:focus-visible {
-    outline: 3px solid var(--accent-highlight);
-    /* WCAG AA: 3px for better visibility (was 2px) */
-    outline-offset: 2px;
+  outline: 3px solid var(--accent-highlight);
+  /* WCAG AA: 3px for better visibility (was 2px) */
+  outline-offset: 2px;
 }
 
 /* WCAG AA: Ensure all interactive elements have visible focus */
@@ -94,42 +94,42 @@ select:focus-visible,
 [role="button"]:focus-visible,
 [role="tab"]:focus-visible,
 [tabindex]:not([tabindex="-1"]):focus-visible {
-    outline: 3px solid var(--accent-highlight);
-    outline-offset: 2px;
+  outline: 3px solid var(--accent-highlight);
+  outline-offset: 2px;
 }
 
 .btn-success {
-    background: var(--success-muted);
-    color: var(--success);
+  background: var(--success-muted);
+  color: var(--success);
 }
 
 .btn-success:hover {
-    background: rgba(74, 222, 128, 0.2);
+  background: rgba(74, 222, 128, 0.2);
 }
 
 .btn-danger {
-    background: var(--danger-muted);
-    color: var(--danger);
+  background: var(--danger-muted);
+  color: var(--danger);
 }
 
 .btn-danger:hover {
-    background: rgba(248, 113, 113, 0.2);
+  background: rgba(248, 113, 113, 0.2);
 }
 
 .btn-sm {
-    padding: var(--space-1) var(--space-3);
-    font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
 }
 
 .btn-icon {
-    width: var(--space-10);
-    height: var(--space-10);
-    padding: 0;
-    border-radius: var(--radius-md);
+  width: var(--space-8);
+  height: var(--space-8);
+  padding: 0;
+  border-radius: var(--radius-md);
 }
 
 @keyframes button-spinner {
-    to {
-        transform: translateY(-50%) rotate(360deg);
-    }
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
 }

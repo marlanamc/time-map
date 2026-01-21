@@ -12,18 +12,22 @@
 
 .dark-mode .day-view-container {
   background:
-    radial-gradient(1200px 600px at 20% 10%,
+    radial-gradient(
+      1200px 600px at 20% 10%,
       rgba(30, 41, 79, 0.45) 0%,
-      transparent 65%),
-    radial-gradient(1000px 700px at 90% 30%,
+      transparent 65%
+    ),
+    radial-gradient(
+      1000px 700px at 90% 30%,
       rgba(15, 23, 42, 0.45) 0%,
-      transparent 68%),
+      transparent 68%
+    ),
     rgba(8, 12, 26, 0.55);
 }
 
 .day-view {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: clamp(1.5rem, 4vw, 3rem);
 }
@@ -49,7 +53,12 @@
 }
 
 .day-view-subtitle {
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family:
+    "SF Pro Text",
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
   font-size: clamp(0.875rem, 2vw, 1.125rem);
   color: var(--text-secondary, rgba(0, 0, 0, 0.6));
   margin: 0.5rem 0 0 0;
@@ -71,9 +80,11 @@
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   margin-bottom: 2rem;
-  background: linear-gradient(135deg,
-      rgba(255, 193, 7, 0.12) 0%,
-      rgba(255, 152, 0, 0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 193, 7, 0.12) 0%,
+    rgba(255, 152, 0, 0.08) 100%
+  );
   border: 1px solid rgba(255, 193, 7, 0.3);
   border-left: 4px solid rgba(255, 193, 7, 0.7);
   border-radius: var(--radius-md);
@@ -88,7 +99,7 @@
   border-radius: inherit;
   border: 2px solid rgba(255, 193, 7, 0.35);
   pointer-events: none;
-  opacity: 0.0;
+  opacity: 0;
   transform: scale(0.98);
   will-change: transform, opacity;
   animation: warningPulse 2s ease-in-out infinite;
@@ -102,7 +113,7 @@
   }
 
   50% {
-    opacity: 0.0;
+    opacity: 0;
     transform: scale(1.08);
   }
 }
@@ -114,7 +125,6 @@
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0px);
@@ -157,10 +167,11 @@
    ============================================ */
 
 .day-land {
-  background:
-    linear-gradient(180deg,
-      var(--surface-2) 0%,
-      var(--surface-1) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--surface-2) 0%,
+    var(--surface-1) 100%
+  );
   border: 1px solid var(--divider);
   border-radius: var(--radius-xl);
   padding: clamp(1.5rem, 3vw, 2.5rem);
@@ -169,7 +180,7 @@
   box-shadow:
     0 4px 24px rgba(111, 155, 134, 0.08),
     0 12px 48px rgba(180, 106, 74, 0.04),
-    inset 0 1px 0 rgba(250, 252, 251, 0.70);
+    inset 0 1px 0 rgba(250, 252, 251, 0.7);
 }
 
 /* Organic texture overlay */
@@ -178,17 +189,26 @@
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle at 20% 20%, rgba(111, 155, 134, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(180, 106, 74, 0.03) 0%, transparent 50%);
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(111, 155, 134, 0.04) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(180, 106, 74, 0.03) 0%,
+      transparent 50%
+    );
   pointer-events: none;
   opacity: 0.6;
 }
 
 .dark-mode .day-land {
-  background:
-    linear-gradient(180deg,
-      rgba(15, 23, 42, 0.75) 0%,
-      rgba(8, 12, 26, 0.85) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.75) 0%,
+    rgba(8, 12, 26, 0.85) 100%
+  );
   border: 1px solid rgba(140, 183, 217, 0.12);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.4),
@@ -214,9 +234,11 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
-  background: linear-gradient(135deg,
-      rgba(180, 106, 74, 0.08) 0%,
-      rgba(111, 155, 134, 0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(180, 106, 74, 0.08) 0%,
+    rgba(111, 155, 134, 0.08) 100%
+  );
   border: 1px solid rgba(180, 106, 74, 0.2);
   border-radius: var(--radius-md);
   backdrop-filter: blur(8px);
@@ -227,7 +249,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--earth, #B46A4A);
+  color: var(--earth, #b46a4a);
 }
 
 .fence-value {
@@ -244,9 +266,11 @@
 }
 
 .dark-mode .day-land-fence {
-  background: linear-gradient(135deg,
-      rgba(180, 106, 74, 0.15) 0%,
-      rgba(111, 155, 134, 0.12) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(180, 106, 74, 0.15) 0%,
+    rgba(111, 155, 134, 0.12) 100%
+  );
   border-color: rgba(180, 106, 74, 0.25);
 }
 
@@ -260,9 +284,11 @@
 
 .day-plant-btn {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg,
-      var(--sage, #6F9B86) 0%,
-      var(--earth, #B46A4A) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--sage, #6f9b86) 0%,
+    var(--earth, #b46a4a) 100%
+  );
   color: white;
   border: none;
   border-radius: var(--radius-md);
@@ -279,9 +305,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.2) 0%,
-      transparent 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 100%
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -314,9 +342,11 @@
    ============================================ */
 
 .day-seed-tray {
-  background: linear-gradient(135deg,
-      rgba(111, 155, 134, 0.08) 0%,
-      rgba(111, 155, 134, 0.04) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(111, 155, 134, 0.08) 0%,
+    rgba(111, 155, 134, 0.04) 100%
+  );
   border: 1px solid rgba(111, 155, 134, 0.2);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
@@ -331,9 +361,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg,
-      var(--sage, #6F9B86) 0%,
-      transparent 100%);
+  background: linear-gradient(90deg, var(--sage, #6f9b86) 0%, transparent 100%);
   opacity: 0.6;
 }
 
@@ -374,9 +402,11 @@
 }
 
 .dark-mode .day-seed-tray {
-  background: linear-gradient(135deg,
-      rgba(111, 155, 134, 0.12) 0%,
-      rgba(111, 155, 134, 0.06) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(111, 155, 134, 0.12) 0%,
+    rgba(111, 155, 134, 0.06) 100%
+  );
   border-color: rgba(111, 155, 134, 0.2);
 }
 
@@ -436,13 +466,17 @@
   border: 1px solid rgba(111, 155, 134, 0.2);
   --time-gutter: 72px;
   background:
-    radial-gradient(1200px 700px at 40% -10%,
+    radial-gradient(
+      1200px 700px at 40% -10%,
       rgba(140, 183, 217, 0.14) 0%,
-      transparent 60%),
-    linear-gradient(180deg,
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
       rgba(111, 155, 134, 0.12) 0%,
       rgba(255, 255, 255, 0.25) 50%,
-      rgba(180, 106, 74, 0.08) 100%);
+      rgba(180, 106, 74, 0.08) 100%
+    );
   overflow: hidden;
   padding: 0 var(--space-3, 1rem);
   box-shadow:
@@ -455,10 +489,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image:
-    radial-gradient(circle at 15% 15%,
-      rgba(255, 255, 255, 0.5) 0%,
-      transparent 35%);
+  background-image: radial-gradient(
+    circle at 15% 15%,
+    rgba(255, 255, 255, 0.5) 0%,
+    transparent 35%
+  );
   opacity: 0.6;
   pointer-events: none;
   mix-blend-mode: overlay;
@@ -467,23 +502,28 @@
 .dark-mode .day-bed-canvas {
   border: 1px solid rgba(140, 183, 217, 0.12);
   background:
-    radial-gradient(1200px 700px at 40% -10%,
+    radial-gradient(
+      1200px 700px at 40% -10%,
       rgba(30, 41, 79, 0.3) 0%,
-      transparent 70%),
-    linear-gradient(180deg,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
       rgba(15, 23, 42, 0.6) 0%,
       rgba(8, 12, 26, 0.8) 50%,
-      rgba(30, 41, 79, 0.12) 100%);
+      rgba(30, 41, 79, 0.12) 100%
+    );
   box-shadow:
     inset 0 2px 12px rgba(0, 0, 0, 0.3),
     inset 0 -2px 12px rgba(30, 41, 79, 0.2);
 }
 
 .dark-mode .day-bed-canvas::before {
-  background-image:
-    radial-gradient(circle at 15% 15%,
-      rgba(140, 183, 217, 0.12) 0%,
-      transparent 40%);
+  background-image: radial-gradient(
+    circle at 15% 15%,
+    rgba(140, 183, 217, 0.12) 0%,
+    transparent 40%
+  );
   opacity: 0.8;
 }
 
@@ -566,11 +606,13 @@
 
 .current-time-line {
   height: 2px;
-  background: linear-gradient(90deg,
-      color-mix(in srgb, var(--accent) 0%, transparent) 0%,
-      color-mix(in srgb, var(--accent) 90%, transparent) 10%,
-      color-mix(in srgb, var(--accent) 90%, transparent) 90%,
-      color-mix(in srgb, var(--accent) 0%, transparent) 100%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 0%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 90%, transparent) 10%,
+    color-mix(in srgb, var(--accent) 90%, transparent) 90%,
+    color-mix(in srgb, var(--accent) 0%, transparent) 100%
+  );
   position: relative;
   box-shadow:
     0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
@@ -579,7 +621,6 @@
 }
 
 @keyframes timePulse {
-
   0%,
   100% {
     opacity: 1;
@@ -597,10 +638,12 @@
   transform: translate(-50%, -50%);
   width: 12px;
   height: 12px;
-  background: radial-gradient(circle,
-      var(--accent) 0%,
-      color-mix(in srgb, var(--accent) 80%, transparent) 50%,
-      color-mix(in srgb, var(--accent) 0%, transparent) 100%);
+  background: radial-gradient(
+    circle,
+    var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 80%, transparent) 50%,
+    color-mix(in srgb, var(--accent) 0%, transparent) 100%
+  );
   border-radius: 50%;
   box-shadow:
     0 0 12px color-mix(in srgb, var(--accent) 80%, transparent),
@@ -609,7 +652,6 @@
 }
 
 @keyframes dotPulse {
-
   0%,
   100% {
     transform: translate(-50%, -50%) scale(1);
@@ -654,9 +696,11 @@
    ============================================ */
 
 .day-compost {
-  background: linear-gradient(135deg,
-      rgba(16, 185, 129, 0.08) 0%,
-      rgba(16, 185, 129, 0.04) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.08) 0%,
+    rgba(16, 185, 129, 0.04) 100%
+  );
   border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
@@ -671,9 +715,11 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg,
-      var(--success, #10b981) 0%,
-      transparent 100%);
+  background: linear-gradient(
+    90deg,
+    var(--success, #10b981) 0%,
+    transparent 100%
+  );
   opacity: 0.6;
 }
 
@@ -705,9 +751,11 @@
 }
 
 .dark-mode .day-compost {
-  background: linear-gradient(135deg,
-      rgba(16, 185, 129, 0.12) 0%,
-      rgba(16, 185, 129, 0.06) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.12) 0%,
+    rgba(16, 185, 129, 0.06) 100%
+  );
   border-color: rgba(16, 185, 129, 0.2);
 }
 

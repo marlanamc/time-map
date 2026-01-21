@@ -1,0 +1,20 @@
+# Revamp Tracker
+
+## Objective
+Capture the synth from the design audit and track progress toward resetting the UI to a disciplined, premium feel (spacing, typography, color, components, interactions, layout, and copy).
+
+## Tasks
+1. **Normalize spacing rhythm** – replace the hard-coded 18px/14px/6px/10px values across the flow state cards, garden headers, toast buttons, and initial skeleton with the shared `--space-*` scale so every margin/padding/gap snaps to 4/8/12/16/20/24/32/40/48px. _Status: Completed._ Adjusted flow-state padding/margins, garden-mobile-range padding, toast action spacing, and the loading skeleton/card to use the shared tokens.
+2. **Re-anchor typography** – refactor the edit-sheet top bar title and descriptor to use the `--text-*` ramp (e.g., `--text-2xl`) with consistent line-height and lowered letter-spacing instead of the current 1.3rem/uppercase treatment. _Status: Completed._ `.edit-sheet-topbar-title .modal-title` now relies on `var(--text-2xl)` with 0.08em tracking, and the descriptor uses `var(--text-xs)` with 0.2em tracking (`styles/components/modals.css:118‑134`).
+3. **Simplify accent colors** – remove the multi-tone rainbow confetti gradient and align celebratory cues (achievement/mood toasts) with the established accent palette (e.g., `var(--accent-progress)`). _Status: Completed._ Confetti fragments, reward/level-up chrome, and dopamine progress fills all now draw from the accent tokens instead of neon gradients (`styles/views/adhd/dopamine-features.css:146‑530`).
+4. **Unify component tokens** – introduce shared chip/connector tokens (border-radius, offsets, shadow) and apply them in `living-garden.css` so all cards, lanes, and connectors respect a single radius/shadow system instead of bespoke values. _Status: Completed._ Added `--living-garden-*` tokens and routed every chip/hover/mobile/kanban rule through them so the living garden cards share the same component language (`styles/views/living-garden.css`).
+5. **Strengthen interaction states** – drop purely decorative button sheen, and add a disabled/loading state with `aria-busy` for the weekly review save action while `Planning.createWeeklyReview` runs. _Status: Completed._ `.btn-primary` now relies on thoughtful box-shadow instead of a shimmer, and the weekly review save button disables, shows a spinner, and waits for the async response before dismissing the modal (`styles/components/buttons.css`, `src/features/weeklyReview/WeeklyReview.ts`).
+6. **Refine copy** – rewrite weekly review headings/mood labels and toast text to remove emojis and adopt grounded product language. _Status: Completed._ The prompt, modal, mood selector, and toasts now read like a professional tool instead of “build your dreams” copy (`src/features/weeklyReview/WeeklyReview.ts`, `styles/features/review-prompt.css`, `styles/accessibility/reduced-emoji.css`).
+
+## Progress Notes
+- Completed task (1): spacing rhythm now follows the defined `var(--space-*)` scale for the audited cards, toasts, and skeletons.
+- Completed task (2): edit-sheet top bar typography now sits on the `--text-*` ramp with consistent line-height and softened tracking (`styles/components/modals.css:118‑134`).
+- Completed task (3): celebratory gradients now pull from `var(--accent-progress)` and use purposeful glow/shadow tokens instead of rainbow flourishes (`styles/views/adhd/dopamine-features.css:146‑530`).
+- Completed task (4): living garden chips and connectors all consume the same `--living-garden-*` radius, padding, border, and offset tokens for cohesion (`styles/views/living-garden.css`).
+- Completed task (5): `.btn-primary` left the decorative sheen behind, and the weekly review save button now disables, shows a spinner, and awaits the async response before closing (`styles/components/buttons.css`, `src/features/weeklyReview/WeeklyReview.ts`).
+- Completed task (6): the review prompt copy, modal headings, mood labels, and toasts now use grounded language rather than emojis, keeping the tone professional (`src/features/weeklyReview/WeeklyReview.ts`, `styles/features/review-prompt.css`, `styles/accessibility/reduced-emoji.css`).

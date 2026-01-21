@@ -1181,16 +1181,14 @@
   .fab-add {
     width: var(--space-16);
     height: var(--space-16);
-    right: var(--space-5) !important;
     left: auto !important;
+    right: var(--space-5) !important;
     bottom: calc(
       var(--mobile-tab-bar-height, 68px) + var(--space-8) +
-        env(safe-area-inset-bottom, 0px) + var(--space-5)
+        env(safe-area-inset-bottom, 0px) + var(--space-6)
     ) !important;
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.12),
-      0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 2px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--glass-border);
     z-index: 10005;
   }
 
@@ -1791,6 +1789,6 @@ body.standalone .app {
 }
 
 body.standalone .mobile-tab-bar {
-  bottom: 0 !important;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 34px)) !important;
+  bottom: var(--space-4) !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
 }

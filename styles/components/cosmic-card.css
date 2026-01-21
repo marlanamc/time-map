@@ -7,8 +7,16 @@
   /* Color system - customizable per level */
   --cosmic-color: var(--accent);
   --cosmic-ink: var(--text-primary);
-  --cosmic-surface-top: color-mix(in srgb, var(--glass-bg) 82%, var(--cosmic-color) 18%);
-  --cosmic-surface-bottom: color-mix(in srgb, var(--glass-bg) 92%, var(--cosmic-color) 8%);
+  --cosmic-surface-top: color-mix(
+    in srgb,
+    var(--glass-bg) 82%,
+    var(--cosmic-color) 18%
+  );
+  --cosmic-surface-bottom: color-mix(
+    in srgb,
+    var(--glass-bg) 92%,
+    var(--cosmic-color) 8%
+  );
   --cosmic-inner-stroke: color-mix(in srgb, var(--cosmic-ink) 12%, transparent);
   --cosmic-glow-a: color-mix(in srgb, var(--cosmic-color) 42%, transparent);
   --cosmic-glow-b: color-mix(in srgb, var(--cosmic-color) 34%, transparent);
@@ -20,61 +28,29 @@
   position: relative;
   display: block;
   overflow: hidden;
-  border-radius: var(--radius-xl, 20px);
-  padding: var(--space-4, 16px);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
 
   /* Gradient border effect */
-  border: 2px solid transparent;
-  background:
-    linear-gradient(180deg, var(--cosmic-surface-top), var(--cosmic-surface-bottom)) padding-box,
-    var(--cosmic-border-gradient) border-box;
+  border: 1px solid var(--divider);
+  background: var(--surface-1);
 
   /* Glow layers */
-  box-shadow:
-    0 0 0 1px var(--cosmic-inner-stroke) inset,
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 0 18px var(--cosmic-glow-b),
-    0 0 26px var(--cosmic-glow-a);
+  box-shadow: var(--shadow-sm);
 
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* Glow overlays (::before) - 3 radial gradients for ambient glow */
 .cosmic-card::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  background:
-    radial-gradient(260px 120px at 18% 24%,
-      color-mix(in srgb, var(--cosmic-color) 24%, transparent), transparent 70%),
-    radial-gradient(220px 120px at 86% 26%,
-      color-mix(in srgb, var(--cosmic-color) 18%, transparent), transparent 70%),
-    radial-gradient(300px 180px at 60% 110%,
-      color-mix(in srgb, var(--cosmic-color) 16%, transparent), transparent 70%);
-  filter: blur(2px);
-  opacity: 0.9;
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 /* Sparkle pattern (::after) - 8 radial gradients for star effect */
 .cosmic-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(1px 1px at 12% 22%, color-mix(in srgb, var(--cosmic-ink) 40%, transparent) 0, transparent 2px),
-    radial-gradient(1px 1px at 22% 64%, color-mix(in srgb, var(--cosmic-ink) 32%, transparent) 0, transparent 2px),
-    radial-gradient(1px 1px at 36% 30%, color-mix(in srgb, var(--cosmic-ink) 28%, transparent) 0, transparent 2px),
-    radial-gradient(1px 1px at 44% 58%, color-mix(in srgb, var(--cosmic-ink) 22%, transparent) 0, transparent 2px),
-    radial-gradient(1px 1px at 58% 26%, color-mix(in srgb, var(--cosmic-ink) 30%, transparent) 0, transparent 2px),
-    radial-gradient(1px 1px at 66% 52%, color-mix(in srgb, var(--cosmic-ink) 24%, transparent) 0, transparent 2px),
-    radial-gradient(1px 1px at 78% 36%, color-mix(in srgb, var(--cosmic-ink) 34%, transparent) 0, transparent 2px),
-    radial-gradient(1px 1px at 86% 70%, color-mix(in srgb, var(--cosmic-ink) 20%, transparent) 0, transparent 2px);
-  opacity: var(--cosmic-stars-opacity);
-  pointer-events: none;
-  mix-blend-mode: var(--cosmic-stars-blend);
-  z-index: 0;
+  display: none;
 }
 
 /* Ensure content appears above pseudo-elements */
@@ -86,12 +62,8 @@
 /* Hover state - enhanced glow */
 .cosmic-card:hover {
   transform: translateY(-2px);
-  box-shadow:
-    0 0 0 1px var(--cosmic-inner-stroke) inset,
-    0 12px 48px rgba(0, 0, 0, 0.12),
-    0 0 22px var(--cosmic-glow-b),
-    0 0 30px var(--cosmic-glow-a),
-    0 0 18px var(--cosmic-glow-c);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cosmic-color);
 }
 
 /* ===================================
@@ -125,8 +97,10 @@
     --link-accent-gradient,
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--link-accent, var(--cosmic-color)) 92%, white 8%) 0%,
-      color-mix(in srgb, var(--link-accent, var(--cosmic-color)) 62%, white 38%) 120%
+      color-mix(in srgb, var(--link-accent, var(--cosmic-color)) 92%, white 8%)
+        0%,
+      color-mix(in srgb, var(--link-accent, var(--cosmic-color)) 62%, white 38%)
+        120%
     )
   );
 }
@@ -150,7 +124,13 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2, 8px);
-  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  font-family: var(
+    --font-display,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif
+  );
   font-size: var(--text-xl, 1.25rem);
   font-weight: 850;
   letter-spacing: 0.08em;
@@ -256,23 +236,24 @@
 .cosmic-add-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2, 8px);
-  padding: var(--space-3, 12px) var(--space-5, 20px);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   background: var(--cosmic-color);
   color: white;
   border: none;
-  border-radius: var(--radius-full, 9999px);
-  font-size: var(--text-base, 1rem);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--cosmic-color) 40%, transparent);
+  box-shadow: var(--shadow-sm);
 }
 
 .cosmic-add-btn:hover {
   background: color-mix(in srgb, var(--cosmic-color) 90%, white);
   transform: scale(1.05);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--cosmic-color) 50%, transparent);
+  box-shadow: 0 4px 12px
+    color-mix(in srgb, var(--cosmic-color) 50%, transparent);
 }
 
 .cosmic-add-btn:active {
