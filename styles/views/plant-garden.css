@@ -10,7 +10,7 @@
   row-gap: var(--space-12);
   align-items: start;
   justify-items: center;
-  max-width: 1100px; /* Tighter container */
+  max-width: var(--container-wide);
   margin: 0 auto;
 
   /* Use seasonal gradient background if available, or fallbacks */
@@ -23,7 +23,7 @@
   align-items: center;
   position: relative;
   width: 100%;
-  max-width: 600px;
+  max-width: var(--container-narrow);
   /* Entrance animation */
   animation: sproutUp 0.8s ease-out;
 }

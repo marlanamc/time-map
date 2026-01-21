@@ -2,6 +2,7 @@
    Canvas & Calendar
    =================================== */
 .canvas-container {
+    position: relative;
     flex: 1;
     overflow: auto;
     min-height: 0;
@@ -25,13 +26,54 @@
     cursor: grabbing;
 }
 
+/* View loading skeleton (data-loaded="false" on .canvas-container) */
+.view-skeleton {
+    display: none;
+    position: absolute;
+    inset: 0;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    pointer-events: none;
+}
+
+.canvas-container[data-loaded="false"] .view-skeleton {
+    display: flex;
+}
+
+.canvas-container[data-loaded="false"] .canvas {
+    visibility: hidden;
+}
+
+.view-skeleton-line {
+    height: 12px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(
+        90deg,
+        rgba(140, 183, 217, 0.16),
+        rgba(140, 183, 217, 0.32),
+        rgba(140, 183, 217, 0.16)
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.15s ease-in-out infinite;
+}
+
+.view-skeleton-line.w-90 { width: 90%; }
+.view-skeleton-line.w-70 { width: 70%; }
+.view-skeleton-line.w-55 { width: 55%; }
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 .canvas-zoom-controls {
     position: fixed !important;
-    left: calc(280px + (var(--space-4) * 2));
+    left: calc(var(--sidebar-width) + (var(--space-4) * 2));
     bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)) !important;
     z-index: 1400;
     width: fit-content;
-    padding: 2px 6px;
+    padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-full);
     border: 1px solid var(--accent-stroke);
     background: var(--accent-fill);
@@ -78,7 +120,7 @@ body.hide-sidebar .canvas-zoom-controls {
 }
 
 .canvas-zoom-controls .zoom-level {
-    min-width: 28px;
+    min-width: var(--space-8);
     font-size: 0.7rem;
     color: var(--text-on-accent);
 }

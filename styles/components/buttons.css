@@ -27,31 +27,34 @@
     color: var(--text-on-accent);
 }
 
-.btn-primary::after {
-    content: "";
-    position: absolute;
-    inset: -40% -60%;
-    transform: rotate(18deg) translateX(-60%);
-    background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.22) 40%,
-            rgba(255, 255, 255, 0.38) 50%,
-            rgba(255, 255, 255, 0.22) 60%,
-            transparent 100%);
-    opacity: 0;
-    transition: transform var(--duration-slow) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
-    pointer-events: none;
-}
-
 .btn-primary:hover {
-    filter: brightness(1.1);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm), var(--shadow-glow-sm);
 }
 
-.btn-primary:hover::after {
-    opacity: 1;
-    transform: rotate(18deg) translateX(60%);
+.btn-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+    box-shadow: none;
+}
+
+.btn-primary[data-loading="true"] {
+    cursor: progress;
+    pointer-events: none;
+}
+
+.btn-primary[data-loading="true"]::after {
+    content: "";
+    position: absolute;
+    right: var(--space-4);
+    top: 50%;
+    width: var(--space-4);
+    height: var(--space-4);
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    border-top-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    animation: button-spinner 0.8s linear infinite;
 }
 
 .btn-primary:active {
@@ -119,8 +122,14 @@ select:focus-visible,
 }
 
 .btn-icon {
-    width: 36px;
-    height: 36px;
+    width: var(--space-10);
+    height: var(--space-10);
     padding: 0;
     border-radius: var(--radius-md);
+}
+
+@keyframes button-spinner {
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
 }

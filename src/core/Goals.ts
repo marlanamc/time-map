@@ -517,7 +517,7 @@ export const Goals = {
       })();
       callbacks.onCelebrate(
         "✨",
-        `${levelLabel} updated`,
+        `${levelLabel} complete.`,
         `"${goal.title}" marked done.`,
       );
     }

@@ -41,7 +41,7 @@
 }
 
 .has-shimmer:hover .shimmer-overlay {
-  animation: shimmer var(--liquid-shimmer-duration) ease-in-out infinite;
+  animation: none;
 }
 
 /* Reduce motion variant */
@@ -357,6 +357,7 @@
 }
 
 .floating-particle {
+  display: none; /* Decorative; hidden by default */
   position: absolute;
   width: 4px;
   height: 4px;

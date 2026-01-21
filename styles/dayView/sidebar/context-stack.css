@@ -246,7 +246,7 @@
 }
 
 .context-stack-card:hover .context-card-shimmer {
-  animation: shimmer var(--liquid-shimmer-duration) ease-in-out infinite;
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

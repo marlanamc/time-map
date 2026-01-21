@@ -1015,7 +1015,7 @@
   font-style: italic;
   text-align: center;
   color: var(--text-primary);
-  max-width: 800px;
+  max-width: var(--container-xl);
   text-wrap: balance;
 }
 

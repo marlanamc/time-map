@@ -172,12 +172,28 @@
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Layout */
+  --sidebar-width: 288px;
+  --container-modal: 480px;
+  --container-sheet: 560px;
+  --container-narrow: 600px;
+  --container-mid: 720px;
+  --container-mid2: 760px;
+  --container-wide: 980px;
+  --container-lg: 640px;
+  --container-xl: 800px;
+  --container-xwide: 1200px;
 
   /* Border radius - Softened */
+  --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
   --radius-xl: 32px;
+  --radius-2xl: 48px;
   --radius-full: 9999px;
 
   /* Organic Border Radius (blob-like shapes for whimsical garden) */
@@ -236,6 +252,13 @@
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
   --text-3xl: 2rem;
+  --text-display: 2.5rem;
+
+  /* Line heights */
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.6;
 
   /* ===========================================
        Common Pattern Utilities
@@ -666,14 +689,12 @@
   --font-body-liquid: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --font-mono-liquid: "Space Mono", "JetBrains Mono", monospace;
 
-  /* Shimmer gradient (iridescent rainbow effect) */
+  /* Shimmer gradient (subtle accent-only, supports hierarchy) */
   --shimmer-gradient: linear-gradient(
     135deg,
-    rgba(56, 189, 248, 0) 0%,
-    rgba(56, 189, 248, 0.3) 25%,
-    rgba(192, 132, 252, 0.5) 50%,
-    rgba(251, 146, 60, 0.3) 75%,
-    rgba(251, 146, 60, 0) 100%
+    transparent 0%,
+    color-mix(in srgb, var(--accent) 10%, transparent) 50%,
+    transparent 100%
   );
 
   /* Time-based gradients (set by LiquidEffects) */

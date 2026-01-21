@@ -151,6 +151,9 @@ export class RenderCoordinator {
 
     // Execute all updates in a single frame
     requestAnimationFrame(() => {
+      const canvasContainer = this.elements.canvasContainer;
+      if (canvasContainer) canvasContainer.setAttribute("data-loaded", "false");
+
       // Execute all DOM updates
       updates.forEach((update) => {
         try {
@@ -159,6 +162,8 @@ export class RenderCoordinator {
           console.error("Error during render update:", error);
         }
       });
+
+      if (canvasContainer) canvasContainer.setAttribute("data-loaded", "true");
 
       // Remove loading state with smooth transition
       if (calendarGrid && shouldResetScroll) {

@@ -840,3 +840,32 @@ body.support-panel-open {
     accent-color: var(--accent);
     cursor: pointer;
 }
+
+/* Support Panel Footer (Privacy, Terms, Help) */
+.support-panel-footer {
+    margin-top: var(--space-6);
+    padding: var(--space-4) 0 var(--space-2);
+    border-top: 1px solid var(--glass-border);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+}
+
+.support-panel-footer-link {
+    color: var(--text-tertiary);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
+}
+
+.support-panel-footer-link:hover {
+    color: var(--accent);
+}
+
+.support-panel-footer-sep {
+    user-select: none;
+    opacity: 0.6;
+}

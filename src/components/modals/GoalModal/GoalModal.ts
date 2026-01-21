@@ -794,7 +794,7 @@ export function openGoalModal(
   }
 }
 
-export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
+export async function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
   e.preventDefault();
 
   const titleEl = document.getElementById(
@@ -1005,11 +1005,28 @@ export function handleGoalSubmit(ctx: GoalModalContext, e: Event) {
     goalData.meta = modalMetaDraft;
   }
 
-  Goals.create(goalData);
-
-  ctx.closeGoalModal();
-  ctx.render();
-  ctx.showToast("✨", `${ctx.getLevelLabel(ctx.goalModalLevel)} saved.`);
+  const btn = document.getElementById("goalSubmitButton") as HTMLButtonElement | null;
+  const origText = btn?.textContent ?? "Set intention";
+  if (btn) {
+    btn.disabled = true;
+    btn.setAttribute("data-loading", "true");
+    btn.setAttribute("aria-busy", "true");
+    btn.textContent = "Saving…";
+  }
+  try {
+    Goals.create(goalData);
+    await State.save();
+    ctx.closeGoalModal();
+    ctx.render();
+    ctx.showToast("✨", `${ctx.getLevelLabel(ctx.goalModalLevel)} saved.`);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.removeAttribute("data-loading");
+      btn.removeAttribute("aria-busy");
+      btn.textContent = origText;
+    }
+  }
 }
 
 export class GoalModal {

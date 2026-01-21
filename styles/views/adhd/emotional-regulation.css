@@ -51,7 +51,7 @@
   border-radius: 16px;
   padding: 20px;
   margin: 12px 0;
-  font-size: 16px;
+  font-size: var(--text-base);
   line-height: 1.6;
 }
 
@@ -72,7 +72,7 @@
   border-radius: 14px;
   padding: 18px;
   margin: 10px 0;
-  font-size: 16px;
+  font-size: var(--text-base);
 }
 
 .calm-mode-calm-focus .task-item:hover {
@@ -89,10 +89,10 @@
 .calm-mode-emergency-calm .task-item {
   border: 1px solid rgba(22, 101, 52, 0.1);
   background: rgba(240, 253, 244, 0.8);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   padding: 24px;
   margin: 16px 0;
-  font-size: 18px;
+  font-size: var(--text-lg);
   line-height: 1.7;
 }
 
@@ -126,9 +126,9 @@
 
 .anxiety-technique-container {
   background: white;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   padding: 32px;
-  max-width: 500px;
+  max-width: var(--container-modal);
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -152,7 +152,7 @@
 }
 
 .anxiety-technique-description {
-  font-size: 16px;
+  font-size: var(--text-base);
   color: #64748b;
   margin: 0 0 24px 0;
   line-height: 1.5;
@@ -175,7 +175,7 @@
 
 .anxiety-technique-instructions li {
   padding: 12px 0;
-  font-size: 16px;
+  font-size: var(--text-base);
   color: #475569;
   line-height: 1.6;
   position: relative;
@@ -195,7 +195,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 700;
 }
 
@@ -217,7 +217,7 @@
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 18px;
+  font-size: var(--text-lg);
   font-weight: 700;
   animation: breathing 4s ease-in-out infinite;
 }
@@ -271,7 +271,7 @@
 
 /* Countdown Timer */
 .countdown-timer {
-  font-size: 48px;
+  font-size: var(--text-display);
   font-weight: 700;
   color: #10b981;
   font-variant-numeric: tabular-nums;
@@ -316,7 +316,7 @@
 }
 
 .grounding-item-text {
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: #64748b;
   line-height: 1.3;
 }
@@ -412,7 +412,7 @@
   padding: 24px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   z-index: 1500;
-  max-width: 400px;
+  max-width: var(--container-modal);
   width: 90%;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.9);
@@ -429,13 +429,13 @@
 }
 
 .compassion-icon {
-  font-size: 48px;
+  font-size: var(--text-display);
   text-align: center;
   margin-bottom: 16px;
 }
 
 .compassion-gentle {
-  font-size: 18px;
+  font-size: var(--text-lg);
   font-weight: 600;
   color: #64748b;
   text-align: center;
@@ -444,7 +444,7 @@
 }
 
 .compassion-encouraging {
-  font-size: 16px;
+  font-size: var(--text-base);
   color: #475569;
   text-align: center;
   margin-bottom: 20px;
@@ -462,7 +462,7 @@
   border: none;
   border-radius: 8px;
   padding: 12px 20px;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -509,13 +509,13 @@
   align-items: center;
   gap: 12px;
   color: #dc2626;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
 .overwhelm-indicator::before {
   content: "⚠️";
-  font-size: 18px;
+  font-size: var(--text-lg);
 }
 
 .collapsed-items {
@@ -528,7 +528,7 @@
   border-radius: 8px;
   padding: 8px 16px;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -547,7 +547,7 @@
 .simplified-items .task-item {
   padding: 12px;
   margin: 4px 0;
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
 /* ===================================
@@ -607,7 +607,7 @@
 }
 
 .emergency-calm-icon {
-  font-size: 64px;
+  font-size: var(--text-display);
   margin-bottom: 16px;
 }
 
@@ -619,7 +619,7 @@
 }
 
 .emergency-calm-message {
-  font-size: 18px;
+  font-size: var(--text-lg);
   color: #15803d;
   margin: 0 0 24px 0;
   line-height: 1.5;
@@ -637,7 +637,7 @@
   border: none;
   border-radius: 12px;
   padding: 16px 24px;
-  font-size: 16px;
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -674,7 +674,7 @@
   }
   
   .anxiety-technique-description {
-    font-size: 14px;
+    font-size: var(--text-sm);
   }
   
   .compassion-popup {
@@ -683,15 +683,15 @@
   }
   
   .compassion-icon {
-    font-size: 36px;
+    font-size: var(--text-3xl);
   }
   
   .compassion-gentle {
-    font-size: 16px;
+    font-size: var(--text-base);
   }
   
   .compassion-encouraging {
-    font-size: 14px;
+    font-size: var(--text-sm);
   }
   
   .breathing-circle,
@@ -702,11 +702,11 @@
   }
   
   .breathing-circle {
-    font-size: 16px;
+    font-size: var(--text-base);
   }
   
   .countdown-timer {
-    font-size: 36px;
+    font-size: var(--text-3xl);
   }
   
   .grounding-exercise {
@@ -723,7 +723,7 @@
   }
   
   .grounding-item-text {
-    font-size: 12px;
+    font-size: var(--text-xs);
   }
 }
 

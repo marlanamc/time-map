@@ -30,15 +30,15 @@
 }
 
 .celebration-emoji {
-    font-size: 4rem;
+    font-size: var(--text-display);
     margin-bottom: var(--space-4);
     animation: bounce 0.6s ease-out;
 }
 
 .celebration-icon {
     display: none;
-    width: 64px;
-    height: 64px;
+    width: var(--space-16);
+    height: var(--space-16);
     margin: 0 auto var(--space-4);
     background: var(--accent);
     border-radius: 50%;
@@ -51,7 +51,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 32px;
+    font-size: var(--text-3xl);
     font-weight: 700;
     color: var(--bg-base);
 }
@@ -71,8 +71,7 @@ body.reduce-emojis .celebration-icon {
     margin-bottom: var(--space-2);
     background: linear-gradient(135deg,
             var(--accent) 0%,
-            var(--success) 50%,
-            var(--warning) 100%);
+            var(--accent-progress) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -90,9 +89,8 @@ body.reduce-emojis .celebration-icon {
 
 .dark-mode .celebration-title {
     background: linear-gradient(135deg,
-            rgba(140, 183, 217, 1) 0%,
-            rgba(90, 155, 141, 1) 50%,
-            rgba(240, 180, 41, 1) 100%);
+            var(--accent) 0%,
+            var(--accent-progress) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

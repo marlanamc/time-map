@@ -10,7 +10,7 @@
 
 .day-view {
     padding: var(--space-6);
-    max-width: 1040px;
+    max-width: var(--container-xwide);
     margin: 0 auto;
 }
 

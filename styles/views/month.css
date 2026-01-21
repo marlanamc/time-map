@@ -3,7 +3,7 @@
    =================================== */
 .month-view {
   padding: var(--space-6);
-  max-width: 900px;
+  max-width: var(--container-wide);
   margin: 0 auto;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .month-milestone-pill {
-  max-width: min(720px, 100%);
+  max-width: min(var(--container-mid), 100%);
 }
 
 .month-milestone-pill .year-vision-pill-dot {

@@ -13,7 +13,7 @@
 }
 
 .intentions-modal {
-  max-width: 480px;
+  max-width: var(--container-modal);
   margin-top: 0;
 }
 

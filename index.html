@@ -79,10 +79,10 @@
 
       .app-loading-card {
         width: min(520px, 92vw);
-        border-radius: 16px;
+        border-radius: var(--radius-md, 16px);
         border: 1px solid rgba(140, 183, 217, 0.22);
         background: rgba(255, 255, 255, 0.75);
-        padding: 18px 18px 14px;
+        padding: var(--space-4, 16px);
         box-shadow: 0 10px 36px rgba(0, 0, 0, 0.08);
       }
 
@@ -100,7 +100,7 @@
           Roboto,
           Inter,
           sans-serif;
-        margin-bottom: 12px;
+        margin-bottom: var(--space-3, 12px);
         color: rgba(13, 21, 23, 0.88);
       }
 
@@ -119,7 +119,7 @@
         );
         background-size: 200% 100%;
         animation: skeleton-shimmer 1.15s ease-in-out infinite;
-        margin: 10px 0;
+        margin: var(--space-2, 8px) 0;
       }
 
       .skeleton-line.w-90 {
@@ -644,7 +644,7 @@
                 aria-selected="false"
                 aria-label="Garden view - See all your goals organized by level"
               >
-                📍 Garden
+                Garden
               </button>
               <button
                 class="view-btn"
@@ -790,7 +790,12 @@
         ></div>
 
         <!-- Zoomable Canvas -->
-        <div class="canvas-container" id="canvasContainer">
+        <div class="canvas-container" id="canvasContainer" data-loaded="true">
+          <div class="view-skeleton" aria-hidden="true">
+            <div class="view-skeleton-line w-90"></div>
+            <div class="view-skeleton-line w-70"></div>
+            <div class="view-skeleton-line w-55"></div>
+          </div>
           <div class="canvas" id="canvas">
             <div
               class="calendar-grid"
@@ -1019,6 +1024,7 @@
         <div class="celebration-emoji" id="celebrationIcon" aria-hidden="true">
           🎉
         </div>
+        <div class="celebration-icon" aria-hidden="true"></div>
         <div class="celebration-title" id="celebration-title-label">
           Amazing!
         </div>
@@ -1522,6 +1528,14 @@
               </div>
             </div>
           </div>
+
+          <footer class="support-panel-footer" role="contentinfo">
+            <a href="#" class="support-panel-footer-link">Privacy</a>
+            <span class="support-panel-footer-sep" aria-hidden="true">·</span>
+            <a href="#" class="support-panel-footer-link">Terms</a>
+            <span class="support-panel-footer-sep" aria-hidden="true">·</span>
+            <a href="#" class="support-panel-footer-link">Help</a>
+          </footer>
         </div>
       </aside>
     </div>

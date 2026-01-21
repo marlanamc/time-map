@@ -10,7 +10,7 @@
     gap: 0; /* Gap handled by padding/margins for lines to align */
     padding: var(--space-4) var(--space-4) var(--space-12);
     width: 100%;
-    max-width: 900px;
+    max-width: var(--container-wide);
     margin: 0 auto;
     position: relative;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;

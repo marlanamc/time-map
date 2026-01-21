@@ -53,7 +53,7 @@ function renderAddFormBody(): string {
         <input
           type="text"
           id="intention-emoji"
-          placeholder="🎯"
+          placeholder="Icon"
           maxlength="2"
         />
         <button type="button" class="emoji-picker-btn" aria-label="Choose emoji">

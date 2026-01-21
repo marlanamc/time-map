@@ -526,6 +526,7 @@ export const UI = {
     });
 
     // Listen for toast notifications
+    // Follow-up: replace emoji arg with type: 'success'|'warning'|'info' and centralized icon mapping.
     eventBus.on("ui:toast", (data) => {
       Toast.show(this.elements, data.icon, data.message);
     });

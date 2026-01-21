@@ -104,7 +104,7 @@
 .zen-desc {
     font-size: 1.25rem;
     color: var(--text-secondary);
-    max-width: 600px;
+    max-width: var(--container-narrow);
     margin: 0 auto var(--space-12);
     line-height: 1.6;
 }

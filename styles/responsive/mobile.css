@@ -1149,7 +1149,7 @@
     width: 40px;
     height: 4px;
     background: currentColor;
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
     opacity: 0.3;
   }
 
@@ -1179,13 +1179,13 @@
   }
 
   .fab-add {
-    width: 56px;
-    height: 56px;
-    right: 20px !important;
+    width: var(--space-16);
+    height: var(--space-16);
+    right: var(--space-5) !important;
     left: auto !important;
     bottom: calc(
       var(--mobile-tab-bar-height, 68px) + var(--space-8) +
-        env(safe-area-inset-bottom, 0px) + 20px
+        env(safe-area-inset-bottom, 0px) + var(--space-5)
     ) !important;
     box-shadow:
       0 4px 16px rgba(0, 0, 0, 0.12),

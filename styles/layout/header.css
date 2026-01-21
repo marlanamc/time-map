@@ -2,7 +2,7 @@
    Header
    =================================== */
 .header {
-  --header-height: 72px;
+  --header-height: var(--space-16);
   grid-area: header;
   display: flex;
   align-items: center;

@@ -3,9 +3,16 @@
    =================================== */
 body.reduce-emojis .streak-fire,
 body.reduce-emojis .celebration-emoji,
-body.reduce-emojis .review-emoji,
 body.reduce-emojis .empty-state-emoji {
     display: none !important;
+}
+
+body.reduce-emojis .support-panel-toggle-btn .support-panel-celestial {
+    display: none !important;
+}
+
+body.reduce-emojis .support-panel-toggle-btn .support-panel-toggle-fallback-icon {
+    display: inline-flex !important;
 }
 
 body.reduce-emojis .streak-icon,
@@ -84,4 +91,3 @@ body.reduce-emojis .swatch-emoji {
 body.reduce-emojis .theme-swatch {
     height: 40px;
 }
-

@@ -54,7 +54,7 @@ kbd {
   background: var(--text-primary);
   color: white;
   padding: 12px 24px;
-  border-radius: 50px;
+  border-radius: var(--radius-full);
   font-size: 14px;
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

@@ -394,7 +394,7 @@ class QuickAddManager {
 
     this.callbacks.onRender();
     this.callbacks.onToast("🌱", "Saved.");
-    this.callbacks.onCelebrate("✨", "Captured", "One small step is enough.");
+    this.callbacks.onCelebrate("✨", "Intention set.", "One small step is enough.");
   }
 }
 

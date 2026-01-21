@@ -397,10 +397,10 @@
 .support-panel-toggle-btn.install-available::after {
   content: "";
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 8px;
-  height: 8px;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: var(--space-2);
+  height: var(--space-2);
   border-radius: 50%;
   background: var(--accent-badge);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
@@ -437,7 +437,7 @@
 
 .fab-add:focus-visible {
   outline: 2px solid var(--accent-highlight);
-  outline-offset: 3px;
+  outline-offset: var(--space-1);
 }
 
 .fab-add .fab-icon {
@@ -454,7 +454,7 @@
   top: 50%;
   background: currentColor;
   transform: translate(-50%, -50%);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .fab-add .fab-icon::before {
@@ -474,8 +474,8 @@
   background: var(--glass-bg);
   border: 1px solid var(--divider);
   border-radius: var(--radius-full);
-  padding: 3px;
-  gap: 2px;
+  padding: var(--space-1);
+  gap: var(--space-1);
 }
 
 .dark-mode .view-switcher {
