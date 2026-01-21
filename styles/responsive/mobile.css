@@ -2103,6 +2103,37 @@
     touch-action: pan-x pan-y;
   }
 
+  /* Enable scrolling for day and week views on mobile */
+  /* When day or week view containers are present, allow scrolling */
+  .main-content:has(.day-view-container),
+  .main-content:has(.week-view-container) {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Ensure canvas-container can scroll for day/week views */
+  .canvas-container:has(.day-view-container),
+  .canvas-container:has(.week-view-container) {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    height: 100% !important;
+  }
+
+  /* Fallback for browsers that don't support :has() - ensure containers can grow */
+  .day-view-container,
+  .week-view-container {
+    min-height: 100%;
+  }
+
+  /* Additional fallback: ensure canvas-container is scrollable when it contains day/week views */
+  .canvas-container {
+    /* Default: allow scrolling */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Prevent pull-to-refresh on canvas */
   .canvas-container {
     overscroll-behavior-y: contain;
