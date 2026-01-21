@@ -384,12 +384,18 @@ export const PlantGardenRenderer = {
     const currentActiveGoal = activeGoalId ? Goals.getById(activeGoalId) : null;
     if (activeGoalId && currentActiveGoal) {
       // Reuse Living Garden styling for the detail view for consistency
+      const year = State.viewingYear;
       container.className = "garden-view-container living-garden";
       container.innerHTML = `
+        <div class="garden-view">
+          <div class="week-view-header">
+            <h2 class="week-view-title">${year} Garden</h2>
+          </div>
           <div class="living-garden-container living-garden-container--bare">
             ${renderGoalDetail(currentActiveGoal)}
           </div>
-        `;
+        </div>
+      `;
 
       // Detail View Interactions
       container
@@ -604,7 +610,14 @@ export const PlantGardenRenderer = {
           </div>`;
 
     container.className = "garden-view-container plant-garden-view";
-    container.innerHTML = plantsHtml;
+    container.innerHTML = `
+      <div class="garden-view">
+        <div class="week-view-header">
+          <h2 class="week-view-title">${year} Garden</h2>
+        </div>
+        ${plantsHtml}
+      </div>
+    `;
 
     // 4. Interaction Handlers
 

@@ -690,12 +690,18 @@ export const LivingGardenRenderer = {
     };
 
     const mainContent = activeGoal ? renderGoalDetail(activeGoal) : lanesMarkup;
+    const viewingYear = State.viewingYear;
 
     container.className = `garden-view-container living-garden${isMobile ? " living-garden--mobile" : ""}`;
     container.innerHTML = `
-      <div class="living-garden-container living-garden-container--bare">
-        ${mainContent}
-        ${!isMobile ? reflectionSection : ""}
+      <div class="garden-view">
+        <div class="week-view-header">
+          <h2 class="week-view-title">${viewingYear} Garden</h2>
+        </div>
+        <div class="living-garden-container living-garden-container--bare">
+          ${mainContent}
+          ${!isMobile ? reflectionSection : ""}
+        </div>
       </div>
     `;
 

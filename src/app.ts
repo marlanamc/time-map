@@ -117,6 +117,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Mark app initialization end
   // performanceMonitor.markAppInitEnd();
 
+  // Check if user was found after init and hide auth modal if it was shown prematurely
+  // This handles the case where session is restored asynchronously after modal is shown
+  const checkUserAndHideModal = async () => {
+    const user = isSupabaseConfigured ? await SupabaseService.getUser() : null;
+    if (user) {
+      const authModal = document.getElementById("auth-modal");
+      if (authModal && !authModal.hasAttribute("hidden")) {
+        authModal.setAttribute("hidden", "");
+        authModal.style.setProperty("display", "none", "important");
+      }
+    }
+  };
+  // Check after a short delay to allow async session restoration
+  setTimeout(checkUserAndHideModal, 500);
+
   // Set up auth state change listeners for session expiration and multi-tab logout
   const supabase = await getSupabaseClient();
   supabase.auth.onAuthStateChange(async (event: string, _session: unknown) => {
@@ -126,14 +141,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Clean up resources on logout
       await State.cleanup();
       UI.updateSyncStatus?.("local");
+      // Update support panel user info
+      UI.getSupportPanel()?.updateUserInfo();
       location.reload();
     } else if (event === "SIGNED_IN" && !State.data) {
       // Handle sign in (e.g., from another tab or after session refresh)
+      // Hide auth modal if it's visible
+      const authModal = document.getElementById("auth-modal");
+      if (authModal) {
+        authModal.setAttribute("hidden", "");
+        authModal.style.setProperty("display", "none", "important");
+      }
       await State.init();
       UI.init();
       UI.updateSyncStatus?.(isSupabaseConfigured ? "synced" : "local");
+      // Update support panel user info
+      UI.getSupportPanel()?.updateUserInfo();
     } else if (event === "TOKEN_REFRESHED") {
       console.log("Session token refreshed");
+      // Hide auth modal if it's visible (session was restored)
+      const authModal = document.getElementById("auth-modal");
+      if (authModal) {
+        authModal.setAttribute("hidden", "");
+        authModal.style.setProperty("display", "none", "important");
+      }
+      // Update support panel user info in case email changed
+      UI.getSupportPanel()?.updateUserInfo();
     }
   });
 
@@ -244,8 +277,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const user = await SupabaseService.getUser();
     UI.updateSyncStatus?.(user && isSupabaseConfigured ? "synced" : "local");
+    // Update support panel user info on initial load
+    UI.getSupportPanel()?.updateUserInfo();
   } catch {
     UI.updateSyncStatus?.("local");
+    // Update support panel user info even on error (will show "not logged in")
+    UI.getSupportPanel()?.updateUserInfo();
   }
 
   // ============================================
