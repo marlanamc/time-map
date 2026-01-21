@@ -2237,9 +2237,10 @@
     left: auto !important;
   }
 
-  /* Ensure the app container doesn't double-apply safe area padding */
+  /* Ensure the app container has proper top padding for fixed date navigation
+     even when header is transparent - account for date nav height + safe area */
   .app {
-    padding-top: 0;
+    padding-top: calc(44px + var(--space-6) + var(--mobile-safe-top)) !important;
   }
 
   /* Bottom tab bar - ensure it sits at actual bottom in PWA mode */
@@ -2281,7 +2282,8 @@ body.standalone .header-mobile-support-btn {
 }
 
 body.standalone .app {
-  padding-top: 0;
+  /* Maintain top padding for fixed date navigation even when header is transparent */
+  padding-top: calc(44px + var(--space-6) + var(--mobile-safe-top)) !important;
 }
 
 body.standalone .mobile-tab-bar {
