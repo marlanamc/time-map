@@ -63,15 +63,38 @@ class ViewportManager {
       document.body.classList.toggle("is-desktop", !isMobile);
       this.syncMobileDateNavPlacement(isMobile);
 
-      // Show/hide mobile support panel button
+      // Show/hide mobile support panel button - keep it in body (fixed positioned)
       const mobileSupportBtn = document.getElementById(
         "supportPanelToggleBtnMobile",
       );
+      
       if (mobileSupportBtn) {
         if (isMobile) {
           mobileSupportBtn.removeAttribute("hidden");
+          // Keep button in body for fixed positioning (not in header)
+          if (mobileSupportBtn.parentElement !== document.body) {
+            document.body.appendChild(mobileSupportBtn);
+          }
         } else {
           mobileSupportBtn.setAttribute("hidden", "");
+        }
+      }
+
+      // Move logo button out of header to body for fixed positioning on mobile
+      const logoBtn = document.getElementById("appLogo");
+      if (logoBtn) {
+        if (isMobile) {
+          // Move logo to body if it's still in the hidden header
+          if (logoBtn.parentElement?.classList.contains("mobile-header") || 
+              logoBtn.parentElement?.classList.contains("header")) {
+            document.body.appendChild(logoBtn);
+          }
+        } else {
+          // Move logo back to header on desktop if needed
+          const mobileHeader = document.getElementById("mobileHeader");
+          if (mobileHeader && logoBtn.parentElement === document.body) {
+            mobileHeader.insertBefore(logoBtn, mobileHeader.firstChild);
+          }
         }
       }
 
@@ -143,8 +166,18 @@ class ViewportManager {
     headerSlot.setAttribute("aria-hidden", String(!isMobile));
 
     if (isMobile) {
+      // Move headerSlot out of hidden header to body for fixed positioning
+      if (headerSlot.parentElement?.classList.contains("mobile-header") || 
+          headerSlot.parentElement?.classList.contains("header")) {
+        document.body.appendChild(headerSlot);
+      }
       headerSlot.appendChild(dateNav);
     } else {
+      // Move headerSlot back to header on desktop
+      const mobileHeader = document.getElementById("mobileHeader");
+      if (mobileHeader && headerSlot.parentElement === document.body) {
+        mobileHeader.appendChild(headerSlot);
+      }
       controlCenter.appendChild(dateNav);
     }
   }

@@ -8,6 +8,14 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    // Only generate source maps in development
+    sourcemap: process.env.NODE_ENV !== "production",
+    // Minify for production
+    minify: "esbuild",
+    // Target modern browsers
+    target: "es2020",
+    // Chunk size warning limit (500kb)
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
@@ -35,12 +43,6 @@ export default defineConfig({
         },
       },
     },
-    // Generate source maps for easier debugging
-    sourcemap: true,
-    // Minify for production
-    minify: "esbuild",
-    // Target modern browsers
-    target: "es2020",
   },
 
   server: {

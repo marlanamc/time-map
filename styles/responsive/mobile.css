@@ -225,12 +225,99 @@
     touch-action: manipulation;
   }
 
-  /* Show support panel toggle button on mobile */
-  .header-mobile-support-btn {
+  /* Modern simplified support panel toggle button - TickTick style */
+  /* Position fixed on right side when mobile header is hidden */
+  .header-mobile-support-btn,
+  #supportPanelToggleBtnMobile {
     position: fixed !important;
     top: calc(var(--space-3) + var(--mobile-safe-top)) !important;
-    right: calc(var(--space-4) + var(--mobile-safe-right)) !important;
+    right: calc(var(--space-4) + env(safe-area-inset-right, 0px)) !important;
     left: auto !important;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex !important;
+    visibility: visible !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    /* Circular background to match logo button */
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+    z-index: 10000 !important;
+    touch-action: manipulation;
+    transition: all var(--duration-fast) var(--ease-out);
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .header-mobile-support-btn:hover {
+    background: var(--surface-1);
+    border-color: var(--glass-border);
+    transform: scale(1.05);
+  }
+
+  .header-mobile-support-btn:active,
+  .header-mobile-support-btn:focus-visible {
+    background: var(--surface-1);
+    border-color: var(--glass-border);
+    outline: none;
+    transform: scale(0.95);
+  }
+
+  .header-mobile-support-btn .support-panel-celestial {
+    font-size: 18px;
+    filter: none;
+  }
+
+  /* Logo button - position fixed on left side */
+  /* Move logo out of header if it's still inside */
+  #appLogo {
+    position: fixed !important;
+    top: calc(var(--space-3) + var(--mobile-safe-top)) !important;
+    left: calc(var(--space-4) + env(safe-area-inset-left, 0px)) !important;
+    right: auto !important;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex !important;
+    visibility: visible !important;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000 !important;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    background: transparent;
+    transition: transform var(--duration-fast) var(--ease-out);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Ensure logo is moved to body if it's still in the hidden header */
+  .mobile-header #appLogo,
+  .header.mobile-header #appLogo,
+  #mobileHeader #appLogo {
+    position: fixed !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #appLogo:active {
+    transform: scale(0.95);
+  }
+
+  /* Logo icon - circular background */
+  #appLogo .logo-icon {
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -243,27 +330,25 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
-    color: var(--text-secondary);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    z-index: 500;
-    touch-action: manipulation;
+    padding: 0;
+    margin: 0;
     transition: all var(--duration-fast) var(--ease-out);
   }
 
-  /* Align support button with header when date-nav is in header */
-  body.mobile-date-nav-in-header .header-mobile-support-btn {
-    top: calc(var(--space-3) + var(--mobile-safe-top)) !important;
-    right: calc(var(--space-4) + var(--mobile-safe-right)) !important;
-    left: auto !important;
+  #appLogo:hover .logo-icon {
+    background: var(--surface-1);
+    transform: scale(1.05);
   }
 
-  /* Align support button on garden view - match logo vertical center */
-  /* Both logo container and support button are 44px, header centers via align-items: center */
-  /* Position support button at same vertical position as the centered logo */
-  body.mobile-garden-view .header-mobile-support-btn {
-    top: calc(var(--space-3) + var(--mobile-safe-top)) !important;
-    right: calc(var(--space-4) + var(--mobile-safe-right)) !important;
-    left: auto !important;
+  /* Hide logo text on mobile */
+  #appLogo .logo-text {
+    display: none !important;
+  }
+
+  /* Ensure header actions container doesn't interfere */
+  .mobile-header .header-actions {
+    display: none !important;
   }
 
   /* Universal mobile touch target enforcement - applies to all for accessibility */
@@ -305,35 +390,59 @@
   }
 
   body.mobile-date-nav-in-header .mobile-header {
-    display: flex;
-    align-items: center;
+    display: none !important;
   }
 
-  body.mobile-date-nav-in-header .header-mobile-nav {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
+  /* Date nav - position fixed at top center when header is hidden */
+  body.mobile-date-nav-in-header .header-mobile-nav,
+  body.mobile-date-nav-in-header #headerMobileNav {
+    position: fixed !important;
+    top: calc(var(--space-3) + var(--mobile-safe-top)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    display: flex !important;
+    visibility: visible !important;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
-    z-index: 1;
-    width: auto;
+    pointer-events: none !important;
+    z-index: 10000 !important;
+    width: auto !important;
+    min-width: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    opacity: 1 !important;
+    background: transparent !important;
+    background-color: transparent !important;
   }
 
-  body.mobile-date-nav-in-header .header-mobile-nav .date-nav {
+  body.mobile-date-nav-in-header .header-mobile-nav .date-nav,
+  body.mobile-date-nav-in-header #headerMobileNav .date-nav {
     position: relative;
-    display: flex;
+    display: flex !important;
+    visibility: visible !important;
     align-items: center;
     justify-content: center;
-    gap: var(--space-1);
+    gap: var(--space-2);
     margin: 0;
-    pointer-events: auto;
-    z-index: 2;
-    width: fit-content;
+    padding: var(--space-1);
+    pointer-events: auto !important;
+    z-index: 10001 !important;
+    width: fit-content !important;
+    min-width: fit-content !important;
+    height: auto !important;
+    min-height: 44px !important;
+    opacity: 1 !important;
+    flex-shrink: 0 !important;
+    /* Glass background for the date nav container */
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-full) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
   }
 
-  /* Logo on the left */
+  /* Simplified logo on the left - cleaner design */
   body.mobile-date-nav-in-header .mobile-header .logo {
     flex: 0 0 auto;
     display: flex;
@@ -341,23 +450,41 @@
     justify-content: center;
     position: relative;
     z-index: 2;
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-    max-width: 44px;
-    max-height: 44px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
     padding: 0;
     margin: 0;
     gap: 0;
-    overflow: hidden;
+    overflow: visible;
+    border-radius: 0;
+    background: transparent;
+    transition: none;
+  }
+
+  body.mobile-date-nav-in-header .mobile-header .logo:hover,
+  body.mobile-date-nav-in-header .mobile-header .logo:active {
+    background: transparent;
+  }
+
+  /* Ensure logo-icon has circular background in date-nav header view */
+  body.mobile-date-nav-in-header .mobile-header .logo-icon {
+    border-radius: var(--radius-full);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   body.mobile-date-nav-in-header .mobile-header .header-actions {
     flex: 0 0 auto;
-    width: 44px;
-    min-width: 44px;
-    max-width: 44px;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -426,11 +553,14 @@
   }
 
   body.mobile-date-nav-in-header .header-mobile-nav .date-nav .date-display {
-    display: none;
+    display: none !important;
   }
 
   body.mobile-date-nav-in-header .control-bar {
-    display: none;
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    opacity: 0 !important;
   }
 
   #appLogo {
@@ -453,12 +583,38 @@
     justify-content: center;
     font-size: 1.5rem;
     line-height: 1;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
+    /* Circular background for all mobile views */
+    border-radius: var(--radius-full);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
+  .mobile-header .logo-icon svg {
+    width: 20px;
+    height: 20px;
+    color: currentColor;
+    stroke: currentColor;
+  }
+
+  body.mobile-date-nav-in-header .mobile-header .logo-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Always hide logo text on mobile - only show leaf icon */
   .mobile-header .logo-text {
-    display: none;
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
   }
 
   /* Hide logo text when date-nav is in header - completely remove from layout */
@@ -490,11 +646,11 @@
     display: none !important;
   }
 
-  /* Show header in mobile home view for symmetry */
-  body.mobile-home-view .mobile-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
+  /* Hide header in mobile home view - buttons are fixed */
+  body.mobile-home-view .mobile-header,
+  body.mobile-home-view .header.mobile-header,
+  body.mobile-home-view .header {
+    display: none !important;
   }
 
   /* When date nav sits in the header, keep the emoji but hide the wordmark */
@@ -503,10 +659,9 @@
   }
 
   body.mobile-home-view .app {
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "header"
-      "main";
+    grid-template-rows: 1fr;
+    grid-template-areas: "main";
+    padding-top: calc(44px + var(--space-6) + var(--mobile-safe-top));
   }
 
   /* Show logo in mobile header for mobile home view */
@@ -517,8 +672,24 @@
   }
 
   body.mobile-home-view .header .logo-icon {
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     font-size: 1.5rem !important;
+    width: 40px !important;
+    height: 40px !important;
+    /* Circular background for home view */
+    border-radius: var(--radius-full) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  body.mobile-home-view .header .logo-icon svg {
+    width: 20px !important;
+    height: 20px !important;
   }
 
   /* Show logo text in header for mobile home view */
@@ -608,28 +779,89 @@
     gap: var(--space-2);
   }
 
-  body.mobile-date-nav-in-header .header-mobile-nav .nav-btn {
-    min-width: 44px;
-    min-height: 44px;
-    width: 44px;
-    height: 44px;
+  body.mobile-date-nav-in-header .header-mobile-nav .nav-btn,
+  body.mobile-date-nav-in-header #headerMobileNav .date-nav .nav-btn,
+  body.mobile-date-nav-in-header .date-nav .nav-btn {
+    min-width: 40px;
+    min-height: 40px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--radius-full);
     padding: 0;
-    display: flex;
+    display: flex !important;
+    visibility: visible !important;
     align-items: center;
     justify-content: center;
     font-size: var(--text-base);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    transition: all var(--duration-fast) var(--ease-out);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
-  body.mobile-date-nav-in-header .header-mobile-nav .today-btn {
-    min-height: 44px;
-    height: 44px;
+  body.mobile-date-nav-in-header .header-mobile-nav .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+  }
+
+  body.mobile-date-nav-in-header .header-mobile-nav .nav-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dark-mode body.mobile-date-nav-in-header .header-mobile-nav .nav-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(140, 183, 217, 0.18);
+    color: rgba(226, 232, 240, 0.85);
+  }
+
+  .dark-mode body.mobile-date-nav-in-header .header-mobile-nav .nav-btn:hover {
+    background: rgba(140, 183, 217, 0.12);
+    color: rgba(226, 232, 240, 0.95);
+    border-color: rgba(140, 183, 217, 0.3);
+  }
+
+  body.mobile-date-nav-in-header .header-mobile-nav .today-btn,
+  body.mobile-date-nav-in-header #headerMobileNav .date-nav .today-btn,
+  body.mobile-date-nav-in-header .date-nav .today-btn {
+    min-height: 40px;
+    height: 40px;
     border-radius: var(--radius-full);
     padding: 0 var(--space-3);
     font-weight: 600;
     font-size: var(--text-sm);
     min-width: auto;
     width: auto;
+    background: var(--accent);
+    border-color: transparent;
+    color: white;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  body.mobile-date-nav-in-header .header-mobile-nav .today-btn:hover {
+    background: var(--accent-hover, var(--accent));
+    transform: scale(1.05);
+  }
+
+  body.mobile-date-nav-in-header .header-mobile-nav .today-btn:active {
+    transform: scale(0.95);
+  }
+
+  .dark-mode body.mobile-date-nav-in-header .header-mobile-nav .today-btn {
+    background: var(--accent);
+    color: var(--text-on-accent, rgba(8, 23, 39, 0.92));
+  }
+
+  .dark-mode body.mobile-date-nav-in-header .header-mobile-nav .today-btn:hover {
+    background: var(--accent-badge-fill);
+    filter: brightness(1.1);
   }
 
   #hideHeaderBtn,
@@ -660,38 +892,42 @@
 
   .app {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "header"
-      "main";
+    grid-template-rows: 1fr;
+    grid-template-areas: "main";
     gap: 0;
     padding: 0;
+    padding-top: calc(44px + var(--space-6) + var(--mobile-safe-top));
     height: 100dvh;
     overflow: hidden;
+    /* Transparent - no background box */
+    background: transparent !important;
   }
 
-  /* Standard full-width mobile header */
-  .mobile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    position: relative;
-  }
+  /* Modern simplified mobile header - TickTick style */
+  /* REMOVED - header is now completely hidden, buttons are fixed positioned */
 
-  /* When date-nav is in header, ensure proper centering */
-  body.mobile-date-nav-in-header .mobile-header {
-    justify-content: space-between;
-    position: relative;
-  }
-
-  /* Hide header-mobile-nav from flex layout when date-nav is in header - it's absolutely positioned */
+  /* Date nav is now fixed positioned, not in header */
+  /* Keep header-mobile-nav visible but it's now fixed positioned */
   body.mobile-date-nav-in-header .mobile-header > .header-mobile-nav {
-    flex: 0 0 0;
-    width: 0;
-    min-width: 0;
-    max-width: 0;
-    overflow: visible;
+    display: none !important;
+  }
+
+  /* Ensure header-mobile-nav is visible when date nav is in it */
+  body.mobile-date-nav-in-header #headerMobileNav {
+    display: flex !important;
+    visibility: visible !important;
+    position: fixed !important;
+    background: none !important;
+    background-color: transparent !important;
+  }
+
+  /* Remove any background from header container that might be showing */
+  header.mobile-header,
+  .header.mobile-header,
+  #mobileHeader {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
   }
 
   .today-btn {
@@ -702,25 +938,189 @@
     grid-template-columns: 1fr;
   }
 
+  /* Hide mobile header completely - we'll use fixed buttons instead */
+  /* Use high specificity to override all other rules */
+  .mobile-header,
+  .header.mobile-header,
+  #mobileHeader,
+  header.mobile-header,
+  header.header.mobile-header {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: none !important;
+    background-image: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    overflow: hidden !important;
+  }
+
   .header {
-    --header-height: calc(56px + var(--mobile-safe-top));
-    padding: calc(var(--space-3) + var(--mobile-safe-top))
-      calc(var(--space-4) + env(safe-area-inset-right, 0px)) var(--space-3)
-      calc(var(--space-4) + env(safe-area-inset-left, 0px));
-    /* Extend header background into the iOS status bar area (PWA) without overshooting. */
-    margin-top: 0;
-    min-height: var(--header-height);
-    border-radius: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
-    background: var(--glass-bg) !important;
-    border-left: 0;
-    border-right: 0;
-    border-top: 0;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    --header-height: 0;
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: none !important;
+    background-image: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Override desktop header styles - make transparent with glass effect */
+  /* Remove all desktop gradients and backgrounds */
+  /* Use .header.mobile-header for higher specificity to override desktop rules */
+  .header.mobile-header,
+  .header {
+    background: transparent !important;
+    background-image: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Override all theme-specific desktop header styles for mobile */
+  :root:not(.dark-mode) .header.mobile-header,
+  :root:not(.dark-mode) .header {
+    background: transparent !important;
+    background-image: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .dark-mode .header.mobile-header,
+  .dark-mode .header {
+    background: transparent !important;
+    background-image: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Override time-based theme header styles for mobile */
+  :root.time-dawn:not(.dark-mode) .header.mobile-header,
+  :root.time-dawn:not(.dark-mode) .header,
+  :root.time-morning:not(.dark-mode) .header.mobile-header,
+  :root.time-morning:not(.dark-mode) .header,
+  :root.time-afternoon:not(.dark-mode) .header.mobile-header,
+  :root.time-afternoon:not(.dark-mode) .header,
+  :root.time-evening:not(.dark-mode) .header.mobile-header,
+  :root.time-evening:not(.dark-mode) .header,
+  :root.time-night .header.mobile-header,
+  :root.time-night .header {
+    background: transparent !important;
+    background-image: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove ::before pseudo-element that adds extra background layers */
+  .header.mobile-header::before,
+  .header::before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+  }
+
+  :root:not(.dark-mode) .header.mobile-header::before,
+  :root:not(.dark-mode) .header::before,
+  .dark-mode .header.mobile-header::before,
+  .dark-mode .header::before,
+  :root.time-dawn:not(.dark-mode) .header.mobile-header::before,
+  :root.time-dawn:not(.dark-mode) .header::before,
+  :root.time-morning:not(.dark-mode) .header.mobile-header::before,
+  :root.time-morning:not(.dark-mode) .header::before,
+  :root.time-afternoon:not(.dark-mode) .header.mobile-header::before,
+  :root.time-afternoon:not(.dark-mode) .header::before,
+  :root.time-evening:not(.dark-mode) .header.mobile-header::before,
+  :root.time-evening:not(.dark-mode) .header::before,
+  :root.time-night .header.mobile-header::before,
+  :root.time-night .header::before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+  }
+
+  /* Override any desktop header styles that might add background */
+  .mobile-header {
+    background: transparent !important;
+    background-image: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  :root:not(.dark-mode) .mobile-header,
+  .dark-mode .mobile-header,
+  :root.time-dawn:not(.dark-mode) .mobile-header,
+  :root.time-morning:not(.dark-mode) .mobile-header,
+  :root.time-afternoon:not(.dark-mode) .mobile-header,
+  :root.time-evening:not(.dark-mode) .mobile-header,
+  :root.time-night .mobile-header {
+    background: transparent !important;
+    background-image: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-header::before,
+  :root:not(.dark-mode) .mobile-header::before,
+  .dark-mode .mobile-header::before,
+  :root.time-dawn:not(.dark-mode) .mobile-header::before,
+  :root.time-morning:not(.dark-mode) .mobile-header::before,
+  :root.time-afternoon:not(.dark-mode) .mobile-header::before,
+  :root.time-evening:not(.dark-mode) .mobile-header::before,
+  :root.time-night .mobile-header::before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+  }
+
+  /* Strip all remaining chrome from top bar containers */
+  .control-bar,
+  .header-mobile-nav,
+  .header-mobile-nav .date-nav {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Remove any ::before pseudo-elements on mobile header */
+  .mobile-header::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  .dark-mode .mobile-header::before {
+    display: none !important;
+    content: none !important;
   }
 
   .logo-text {
@@ -910,7 +1310,11 @@
   .review-prompt {
     left: var(--space-3);
     right: var(--space-3);
-    bottom: var(--space-3);
+    /* Position above the tab bar and FAB to avoid overlap */
+    bottom: calc(var(--mobile-tab-bar-height, 68px) + var(--space-16) + var(--space-6));
+    max-width: calc(100% - var(--space-6));
+    /* Lower z-index than FAB so FAB stays on top */
+    z-index: 10004;
   }
 
   /* Mobile view adjustments */
@@ -1189,14 +1593,43 @@
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--glass-border);
     z-index: 10005;
+    /* Ensure it stays on the right even when review prompt is visible */
+    position: fixed !important;
   }
 
+  /* Completely disable zoom controls on mobile */
   .canvas-zoom-controls {
     display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* Disable zoom functionality on mobile canvas */
+  .canvas {
+    transform: scale(1) !important;
+    touch-action: pan-x pan-y !important;
+  }
+
+  /* Prevent pinch zoom on mobile */
+  .canvas-container {
+    touch-action: pan-x pan-y !important;
   }
 
   .fab-add:active {
     transform: scale(0.94);
+  }
+
+  /* Extra small screens (iPhone Mini, etc.) - ensure FAB stays on right */
+  @media (max-width: 375px) {
+    .fab-add {
+      right: var(--space-4) !important;
+      left: auto !important;
+    }
+
+    .review-prompt {
+      /* On very small screens, position review prompt higher to avoid FAB */
+      bottom: calc(var(--mobile-tab-bar-height, 68px) + var(--space-16) + var(--space-8));
+    }
   }
 
   /* Hide desktop view-switcher on mobile - replaced by bottom tabs */
@@ -1224,6 +1657,8 @@
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box;
+    /* Transparent - no blue background */
+    background: transparent !important;
   }
 
   /* Mobile Home tab: keep it focused */
@@ -1331,6 +1766,10 @@
     box-sizing: border-box;
     position: relative;
     z-index: 1;
+    /* Glass-like effect instead of solid background */
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
   }
 
   body.mobile-home-view .section-toggle,
@@ -1354,28 +1793,17 @@
     display: none !important;
   }
 
-  /* Show header in mobile garden view for symmetry */
-  body.mobile-garden-view .mobile-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-  }
-
-  /* Reduce header height on garden view */
-  body.mobile-garden-view .header,
-  body.mobile-garden-view .mobile-header {
-    padding-top: calc(
-      var(--space-3) + env(safe-area-inset-top, 0px)
-    ) !important;
-    padding-bottom: var(--space-3) !important;
-    min-height: 56px !important;
+  /* Hide header in mobile garden view - buttons are fixed */
+  body.mobile-garden-view .mobile-header,
+  body.mobile-garden-view .header.mobile-header,
+  body.mobile-garden-view .header {
+    display: none !important;
   }
 
   body.mobile-garden-view .app {
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "header"
-      "main";
+    grid-template-rows: 1fr;
+    grid-template-areas: "main";
+    padding-top: calc(44px + var(--space-6) + var(--mobile-safe-top));
   }
 
   /* Show logo in mobile header for mobile garden view */
@@ -1421,13 +1849,16 @@
     filter: none !important;
   }
 
+  /* Always hide logo text on mobile - even in garden view */
   body.mobile-garden-view .mobile-header .logo-text,
   body.mobile-garden-view .header .logo-text {
-    display: block !important;
-    visibility: visible !important;
-    position: static !important;
-    width: auto !important;
-    height: auto !important;
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
     overflow: visible !important;
     opacity: 1 !important;
     font-size: var(--text-lg) !important;
@@ -1731,6 +2162,42 @@
   }
 }
 
+/* Touch devices at larger widths (tablets/landscape) - keep header clear */
+@media (pointer: coarse) and (min-width: 768px) {
+  .header,
+  .mobile-header,
+  .header.mobile-header {
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+  }
+
+  :root:not(.dark-mode) .header,
+  :root:not(.dark-mode) .mobile-header,
+  :root:not(.dark-mode) .header.mobile-header,
+  .dark-mode .header,
+  .dark-mode .mobile-header,
+  .dark-mode .header.mobile-header {
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+  }
+
+  .header::before,
+  .mobile-header::before,
+  .header.mobile-header::before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+  }
+}
+
 /* ===================================
    PWA Standalone Mode Fixes
    =================================== */
@@ -1739,13 +2206,28 @@
    Remove the negative margin that was pulling content up into the status bar area. */
 @media (display-mode: standalone) {
   .header,
-  .mobile-header {
+  .mobile-header,
+  .header.mobile-header {
     /* Remove the negative margin that extends background into safe area -
        in standalone mode this causes content to shift under the status bar */
     margin-top: 0 !important;
     /* Ensure padding accounts for safe area */
     padding-top: calc(var(--space-3) + var(--mobile-safe-top)) !important;
     min-height: calc(56px + var(--mobile-safe-top)) !important;
+    background: transparent !important;
+    background-image: none !important;
+    backdrop-filter: blur(20px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .header::before,
+  .mobile-header::before,
+  .header.mobile-header::before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
   }
 
   /* Fixed position elements also need safe area adjustment */
@@ -1771,10 +2253,25 @@
 /* Legacy standalone class fallback (Safari PWA detection that doesn't support
    the display-mode media query). */
 body.standalone .header,
-body.standalone .mobile-header {
+body.standalone .mobile-header,
+body.standalone .header.mobile-header {
   margin-top: 0 !important;
   padding-top: calc(var(--space-3) + var(--mobile-safe-top)) !important;
   min-height: calc(56px + var(--mobile-safe-top)) !important;
+  background: transparent !important;
+  background-image: none !important;
+  backdrop-filter: blur(20px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body.standalone .header::before,
+body.standalone .mobile-header::before,
+body.standalone .header.mobile-header::before {
+  display: none !important;
+  content: none !important;
+  background: none !important;
 }
 
 body.standalone .header-mobile-support-btn {

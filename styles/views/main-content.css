@@ -7,6 +7,8 @@
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  /* Transparent - allow background to show through */
+  background: transparent;
 }
 
 /* Control Bar */

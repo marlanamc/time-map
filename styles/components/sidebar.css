@@ -11,11 +11,15 @@
     padding-right: var(--space-2);
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    /* Transparent - allow background to show through */
+    background: transparent;
 }
 
 /* Collapsible Sidebar Sections */
 .sidebar-section {
-    background: var(--bg-surface);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
     border-radius: var(--radius-xl);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-sm);

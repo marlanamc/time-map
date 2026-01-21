@@ -18,21 +18,28 @@
     align-items: center !important;
     height: 64px !important;
     padding: 0 var(--space-2) !important;
-    background: rgba(10, 22, 18, 0.85) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    /* Glass-like effect with accent border - better contrast in light mode */
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(24px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+    border: 1.5px solid var(--accent-stroke) !important;
     border-radius: var(--radius-full) !important;
     z-index: 9999 !important;
     isolation: isolate !important;
     box-sizing: border-box !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24) !important;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(0, 0, 0, 0.05) inset !important;
   }
 
   .dark-mode .mobile-tab-bar {
-    background: var(--bg-surface);
-    border-top-color: var(--glass-border);
-    backdrop-filter: blur(20px);
+    background: var(--glass-bg) !important;
+    border-color: var(--accent-stroke) !important;
+    backdrop-filter: blur(24px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
   }
 
   .mobile-tab {
@@ -45,7 +52,8 @@
     border: none !important;
     margin: 4px !important;
     padding: 0 !important;
-    color: rgba(255, 255, 255, 0.5) !important;
+    /* Better contrast for light mode */
+    color: var(--text-secondary) !important;
     cursor: pointer !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     position: relative !important;
@@ -56,12 +64,27 @@
   }
 
   .mobile-tab.active {
+    color: var(--text-primary) !important;
+    background: var(--surface-1) !important;
+  }
+
+  .mobile-tab:hover:not(.active) {
+    color: var(--text-primary) !important;
+    background: var(--bg-hover) !important;
+  }
+
+  /* Dark mode specific adjustments */
+  .dark-mode .mobile-tab {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .dark-mode .mobile-tab.active {
     color: #fff !important;
     background: rgba(255, 255, 255, 0.1) !important;
   }
 
-  .mobile-tab:hover:not(.active) {
-    color: rgba(255, 255, 255, 0.8) !important;
+  .dark-mode .mobile-tab:hover:not(.active) {
+    color: rgba(255, 255, 255, 0.9) !important;
   }
 
   .mobile-tab-icon {
@@ -76,6 +99,7 @@
     width: 20px;
     height: 20px;
     stroke-width: 2.2;
+    stroke: currentColor;
   }
 
   .mobile-tab-label {

@@ -10,6 +10,7 @@ import {
   getInheritedAccent,
 } from "../../utils/goalLinkage";
 import type { UIElements } from "../../types";
+import { viewportManager } from "../viewport/ViewportManager";
 
 export const WeekRenderer = {
   render(elements: UIElements, escapeHtmlFn: (text: string) => string) {
@@ -280,5 +281,43 @@ export const WeekRenderer = {
           }
         });
       });
+
+    // Auto-scroll to today's day on mobile when navigating to week view
+    if (viewportManager.isMobileViewport()) {
+      // Use double RAF to ensure DOM is fully rendered and layout is complete
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const todayColumn = container.querySelector(
+            ".week-day-column.today",
+          ) as HTMLElement | null;
+          if (todayColumn) {
+            // Find the scrollable container (likely main-content or canvas-container)
+            const scrollableParent = todayColumn.closest(
+              ".main-content, .canvas-container, .canvas",
+            ) as HTMLElement | null;
+            
+            if (scrollableParent) {
+              // Calculate scroll position accounting for header
+              const headerHeight = document.querySelector(".header")?.getBoundingClientRect().height || 0;
+              const columnRect = todayColumn.getBoundingClientRect();
+              const parentRect = scrollableParent.getBoundingClientRect();
+              const scrollTop = scrollableParent.scrollTop + columnRect.top - parentRect.top - headerHeight - 16;
+              
+              scrollableParent.scrollTo({
+                top: Math.max(0, scrollTop),
+                behavior: "smooth",
+              });
+            } else {
+              // Fallback to scrollIntoView
+              todayColumn.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+                inline: "nearest",
+              });
+            }
+          }
+        });
+      });
+    }
   },
 };

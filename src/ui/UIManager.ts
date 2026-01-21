@@ -4,7 +4,6 @@
 import { State } from "../core/State";
 import { Goals } from "../core/Goals";
 import DB, { DB_STORES } from "../db";
-import { Planning } from "../core/Planning";
 import { Streaks } from "../core/Streaks";
 import { CONFIG, VIEWS } from "../config";
 import { TimeBreakdown } from "../utils/TimeBreakdown";
@@ -425,9 +424,10 @@ export const UI = {
     setInterval(() => this.updateBodyDoubleDisplay(), 1000);
 
     // Check for weekly review prompt
-    if (Planning.shouldPromptReview()) {
-      setTimeout(() => this.showReviewPrompt(), 3000);
-    }
+    // TODO: Revisit weekly review prompt - disabled for now
+    // if (Planning.shouldPromptReview()) {
+    //   setTimeout(() => this.showReviewPrompt(), 3000);
+    // }
   },
 
   setupRendererEventListeners() {
@@ -847,13 +847,16 @@ export const UI = {
       this.openGoalModal(level, State.viewingMonth, State.viewingYear);
     });
 
-    // Zoom controls
-    document
-      .getElementById("zoomIn")
-      ?.addEventListener("click", () => this.zoom(10));
-    document
-      .getElementById("zoomOut")
-      ?.addEventListener("click", () => this.zoom(-10));
+    // Zoom controls - disabled on mobile
+    const zoomInBtn = document.getElementById("zoomIn");
+    const zoomOutBtn = document.getElementById("zoomOut");
+    if (zoomInBtn && zoomOutBtn) {
+      // Only enable zoom on desktop
+      if (!viewportManager.isMobileViewport()) {
+        zoomInBtn.addEventListener("click", () => this.zoom(10));
+        zoomOutBtn.addEventListener("click", () => this.zoom(-10));
+      }
+    }
 
     // Focus mode
     document
@@ -1103,16 +1106,19 @@ export const UI = {
     });
 
     // Mouse wheel zoom (non-passive because we conditionally preventDefault)
-    container.addEventListener(
-      "wheel",
-      (e: WheelEvent) => {
-        if (e.ctrlKey || e.metaKey) {
-          e.preventDefault();
-          this.zoom(e.deltaY < 0 ? 10 : -10);
-        }
-      },
-      { passive: false },
-    );
+    // Disabled on mobile - no zoom functionality
+    if (!viewportManager.isMobileViewport()) {
+      container.addEventListener(
+        "wheel",
+        (e: WheelEvent) => {
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            this.zoom(e.deltaY < 0 ? 10 : -10);
+          }
+        },
+        { passive: false },
+      );
+    }
   },
 
   scheduleRender(opts?: { transition?: boolean }) {

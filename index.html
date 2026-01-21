@@ -6,10 +6,49 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
     />
+    
+    <!-- Primary Meta Tags -->
+    <title>The Garden Fence | Boundaries & Blooms - ADHD-Friendly Planner</title>
+    <meta
+      name="title"
+      content="The Garden Fence | Boundaries & Blooms - ADHD-Friendly Planner"
+    />
     <meta
       name="description"
-      content="The Garden Fence is an ADHD-friendly focus tool that helps you set boundaries and watch your day bloom."
+      content="The Garden Fence is an ADHD-friendly focus tool that helps you set boundaries and watch your day bloom. A time orientation tool designed for neurodivergent minds."
     />
+    <meta
+      name="keywords"
+      content="ADHD planner, time management, productivity, neurodivergent, focus tool, time blindness, goal setting, vision board"
+    />
+    <meta name="author" content="The Garden Fence" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://your-domain.vercel.app/" />
+    <meta property="og:title" content="The Garden Fence | Boundaries & Blooms" />
+    <meta
+      property="og:description"
+      content="An ADHD-friendly focus tool that helps you set boundaries and watch your day bloom."
+    />
+    <meta property="og:image" content="https://your-domain.vercel.app/icons/icon.svg" />
+    <meta property="og:site_name" content="The Garden Fence" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://your-domain.vercel.app/" />
+    <meta name="twitter:title" content="The Garden Fence | Boundaries & Blooms" />
+    <meta
+      name="twitter:description"
+      content="An ADHD-friendly focus tool that helps you set boundaries and watch your day bloom."
+    />
+    <meta name="twitter:image" content="https://your-domain.vercel.app/icons/icon.svg" />
+    
+    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#E8F4F8" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -18,8 +57,26 @@
       content="black-translucent"
     />
     <meta name="apple-mobile-web-app-title" content="Garden Fence" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Security -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    
+    <!-- Resource Hints for Performance -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Icons and Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon.svg" />
+    
+    <!-- Apple Touch Startup Images -->
     <link
       rel="apple-touch-startup-image"
       href="splash/1290x2796.png"
@@ -35,16 +92,30 @@
       href="splash/1170x2532.png"
       media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
     />
-    <title>The Garden Fence | Boundaries & Blooms</title>
-    <!-- Dyslexia-friendly font option -->
+    
+    <!-- Fonts with optimized loading strategy -->
     <link
       href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <style>
       html {
         background: #e8f4f8;
@@ -369,7 +440,23 @@
           tabindex="0"
           aria-label="Open You Are Here"
         >
-          <div class="logo-icon" aria-hidden="true">🌱</div>
+          <div class="logo-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              width="20"
+              height="20"
+            >
+              <path d="M7 20h10"></path>
+              <path d="M10 20c5.5-2.5.8-6.4 3-10"></path>
+              <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-1.1-1.9-2.3-2.4-3.7C5.1 9.2 7.1 8.9 9.5 9.4z"></path>
+              <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.1-1.4 1-1 1.6-2.3 1.7-4.6-2.7.5-4.5 1.4-4.7 2z"></path>
+            </svg>
+          </div>
           <span class="logo-text">The Garden Fence</span>
         </div>
         <div
@@ -377,6 +464,7 @@
           id="headerMobileNav"
           aria-hidden="true"
         ></div>
+        <div class="header-actions"></div>
       </header>
       <!-- Sidebar -->
       <aside
@@ -398,7 +486,23 @@
         <div class="now-panel" role="region" aria-label="Current time context">
           <!-- App Title -->
           <div class="now-panel-logo">
-            <div class="logo-icon" aria-hidden="true">🌱</div>
+            <div class="logo-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                width="20"
+                height="20"
+              >
+                <path d="M7 20h10"></path>
+                <path d="M10 20c5.5-2.5.8-6.4 3-10"></path>
+                <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-1.1-1.9-2.3-2.4-3.7C5.1 9.2 7.1 8.9 9.5 9.4z"></path>
+                <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.1-1.4 1-1 1.6-2.3 1.7-4.6-2.7.5-4.5 1.4-4.7 2z"></path>
+              </svg>
+            </div>
             <span class="logo-text">The Garden Fence</span>
             <button
               class="help-btn"
