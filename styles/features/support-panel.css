@@ -51,47 +51,67 @@
 @media (max-width: 600px),
   ((max-width: 900px) and (max-height: 500px) and (pointer: coarse)) {
   .support-panel-overlay {
-    justify-content: center;
-    align-items: stretch;
+    /* On mobile, position as dropdown below button instead of full-screen overlay */
+    position: fixed;
+    top: calc(var(--space-3) + var(--mobile-safe-top) + 44px + var(--space-2));
+    right: calc(var(--space-4) + env(safe-area-inset-right, 0px));
+    left: auto;
+    bottom: auto;
+    width: min(320px, calc(100vw - var(--space-8)));
+    max-height: min(500px, calc(100vh - var(--space-3) - var(--mobile-safe-top) - 44px - var(--space-4)));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    justify-content: flex-end;
+    align-items: flex-start;
+    z-index: 9999; /* Just below button (10000) but above most content */
+    opacity: 0;
+    transform: translateY(-8px);
+    transition:
+      opacity var(--duration-normal) var(--ease-out),
+      transform var(--duration-normal) var(--ease-out),
+      visibility var(--duration-normal) var(--ease-out);
+    pointer-events: none;
+  }
+
+  .support-panel-overlay.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 
   .support-panel {
     width: 100%;
     max-width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    max-height: 100vh;
-    max-height: 100dvh;
+    height: auto;
+    max-height: 100%;
     border-left: none;
-    border-top: 1px solid rgba(107, 168, 169, 0.3);
-    box-shadow:
-      0 -4px 24px rgba(0, 0, 0, 0.08),
-      0 -2px 8px rgba(0, 0, 0, 0.04);
-    transform: translateY(100%);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    padding-top: calc(var(--space-2) + env(safe-area-inset-top, 0px));
-    padding-bottom: 0;
+    border-top: none;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    transform: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .support-panel-overlay.active .support-panel {
-    transform: translateY(0);
+    transform: none;
   }
 
   .support-panel-header {
-    padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
-    padding-bottom: var(--space-4);
+    padding: var(--space-4);
     flex-shrink: 0;
   }
 
   .support-panel-body {
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
-    padding-top: var(--space-5);
-    padding-bottom: calc(var(--space-6) + var(--mobile-tab-bar-height));
+    padding: var(--space-2) var(--space-4) var(--space-4);
     flex: 1 1 auto;
     min-height: 0;
+    max-height: calc(500px - 80px); /* Account for header */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;

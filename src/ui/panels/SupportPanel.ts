@@ -3,6 +3,7 @@ import { ND_CONFIG } from "../../config";
 import { ThemeManager } from "../../theme/ThemeManager";
 import { LiquidEffects } from "../../components/dayView/LiquidEffects";
 import type { AccentTheme } from "../../types";
+import { SupabaseService } from "../../services/supabase";
 
 type SupportPanelCallbacks = {
   onShowBrainDump: () => void | Promise<void>;
@@ -44,6 +45,11 @@ export class SupportPanel {
       "supportPanelToggleBtnMobile",
     );
 
+    // Initialize aria-expanded for mobile button
+    if (supportPanelToggleBtnMobile) {
+      supportPanelToggleBtnMobile.setAttribute("aria-expanded", "false");
+    }
+
     supportPanelToggleBtn?.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -53,17 +59,56 @@ export class SupportPanel {
     supportPanelToggleBtnMobile?.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.open();
+      // Toggle behavior: if panel is open, close it; if closed, open it
+      const overlay = document.getElementById("supportPanelOverlay");
+      if (overlay && !overlay.hasAttribute("hidden") && overlay.classList.contains("active")) {
+        this.close();
+      } else {
+        this.open();
+      }
     });
 
     document
       .getElementById("supportPanelClose")
       ?.addEventListener("click", () => this.close());
+    
+    // Click-outside handler: on mobile, close dropdown when clicking outside
+    // On desktop, close when clicking the overlay background
     document
       .getElementById("supportPanelOverlay")
       ?.addEventListener("click", (e) => {
+        // On mobile, the overlay is the dropdown itself, so we check if clicking outside
+        const isMobile = window.matchMedia("(max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse))").matches;
+        if (isMobile) {
+          // On mobile, clicking the overlay (which is now the dropdown container) shouldn't close it
+          // Only clicking outside should close it (handled by document click listener below)
+          return;
+        }
+        // On desktop, clicking the overlay background closes it
         if (e.target === e.currentTarget) this.close();
       });
+
+    // Mobile-specific: close dropdown when clicking outside button and panel
+    document.addEventListener("click", (e: MouseEvent) => {
+      const isMobile = window.matchMedia("(max-width: 600px), ((max-width: 900px) and (max-height: 500px) and (pointer: coarse))").matches;
+      if (!isMobile) return;
+      
+      const target = e.target as Node | null;
+      if (!target) return;
+      
+      const overlay = document.getElementById("supportPanelOverlay");
+      const mobileBtn = document.getElementById("supportPanelToggleBtnMobile");
+      const panel = document.getElementById("supportPanel");
+      
+      if (!overlay || !mobileBtn || !panel) return;
+      
+      // If panel is open and click is outside both button and panel, close it
+      if (!overlay.hasAttribute("hidden") && overlay.classList.contains("active")) {
+        if (!mobileBtn.contains(target) && !panel.contains(target)) {
+          this.close();
+        }
+      }
+    });
 
     document
       .getElementById("supportPanel")
@@ -207,9 +252,15 @@ export class SupportPanel {
       this.hideTimer = null;
     }
     this.syncAppearanceControls();
+    this.updateUserInfo();
     overlay.removeAttribute("hidden");
     overlay.classList.add("active");
     document.body.classList.add("support-panel-open");
+    // Update mobile button aria-expanded
+    const mobileBtn = document.getElementById("supportPanelToggleBtnMobile");
+    if (mobileBtn) {
+      mobileBtn.setAttribute("aria-expanded", "true");
+    }
     (
       document.getElementById("supportPanelClose") as HTMLElement | null
     )?.focus();
@@ -220,6 +271,11 @@ export class SupportPanel {
     if (!overlay) return;
     overlay.classList.remove("active");
     document.body.classList.remove("support-panel-open");
+    // Update mobile button aria-expanded
+    const mobileBtn = document.getElementById("supportPanelToggleBtnMobile");
+    if (mobileBtn) {
+      mobileBtn.setAttribute("aria-expanded", "false");
+    }
     if (this.hideTimer) clearTimeout(this.hideTimer);
     this.hideTimer = setTimeout(() => {
       overlay.setAttribute("hidden", "");
@@ -460,6 +516,55 @@ export class SupportPanel {
           const isActive = btn.dataset.time === devTimeOverride;
           btn.setAttribute("aria-checked", String(isActive));
         });
+    }
+  }
+
+  async updateUserInfo() {
+    const userNameEl = document.getElementById("supportPanelUserName");
+    const userAvatarEl = document.getElementById("supportPanelUserAvatar");
+    const logoutBtn = document.getElementById("logoutBtn");
+    
+    if (!userNameEl) return;
+
+    try {
+      const user = await SupabaseService.getUser();
+      
+      if (user && user.email) {
+        // User is logged in - show email
+        userNameEl.textContent = user.email;
+        if (userAvatarEl) {
+          // Show first letter of email
+          const initial = user.email.charAt(0).toUpperCase();
+          userAvatarEl.textContent = initial;
+        }
+        // Hide logout button description or update it
+        const logoutDesc = logoutBtn?.querySelector(".support-panel-desc");
+        if (logoutDesc) {
+          logoutDesc.textContent = "Sign out of your account";
+        }
+      } else {
+        // User is not logged in - show warning
+        userNameEl.textContent = "Not logged in";
+        if (userAvatarEl) {
+          userAvatarEl.textContent = "?";
+        }
+        // Update logout button to show warning
+        const logoutDesc = logoutBtn?.querySelector(".support-panel-desc");
+        if (logoutDesc) {
+          logoutDesc.textContent = "Nothing will be saved";
+        }
+      }
+    } catch (err) {
+      console.error("[SupportPanel] Error updating user info:", err);
+      // On error, assume not logged in
+      userNameEl.textContent = "Not logged in";
+      if (userAvatarEl) {
+        userAvatarEl.textContent = "?";
+      }
+      const logoutDesc = logoutBtn?.querySelector(".support-panel-desc");
+      if (logoutDesc) {
+        logoutDesc.textContent = "Nothing will be saved";
+      }
     }
   }
 
