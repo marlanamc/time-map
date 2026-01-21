@@ -1376,6 +1376,80 @@ export const UI = {
 
     // Set goals and render
     this.dayViewController.setGoals(date, allGoals, contextGoals);
+
+    // Auto-scroll to current time on mobile when viewing today
+    if (viewportManager.isMobileViewport()) {
+      const today = new Date();
+      const viewingDate = State.viewingDate;
+      const isToday =
+        viewingDate &&
+        viewingDate.toDateString() === today.toDateString();
+
+      if (isToday) {
+        // Use double RAF to ensure DOM is fully rendered and layout is complete
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // Try to find the current time indicator first
+            const currentTimeIndicator = container.querySelector(
+              ".current-time-indicator",
+            ) as HTMLElement | null;
+
+            let targetElement: HTMLElement | null = null;
+
+            if (currentTimeIndicator) {
+              targetElement = currentTimeIndicator;
+            } else {
+              // Fallback: find the hour slot for the current hour
+              const currentHour = today.getHours();
+              const hourSlot = container.querySelector(
+                `.bed-hour[data-hour="${currentHour}"]`,
+              ) as HTMLElement | null;
+              if (hourSlot) {
+                targetElement = hourSlot;
+              }
+            }
+
+            if (targetElement) {
+              // Find the scrollable container
+              const scrollableParent = targetElement.closest(
+                ".main-content, .canvas-container, .canvas, .day-view-container",
+              ) as HTMLElement | null;
+
+              if (scrollableParent) {
+                // Calculate scroll position accounting for header/navigation
+                const headerHeight =
+                  document.querySelector(".header")?.getBoundingClientRect()
+                    .height || 0;
+                const dateNavHeight =
+                  document.querySelector(".header-mobile-nav")
+                    ?.getBoundingClientRect().height || 0;
+                const offset = headerHeight + dateNavHeight + 16;
+
+                const targetRect = targetElement.getBoundingClientRect();
+                const parentRect = scrollableParent.getBoundingClientRect();
+                const scrollTop =
+                  scrollableParent.scrollTop +
+                  targetRect.top -
+                  parentRect.top -
+                  offset;
+
+                scrollableParent.scrollTo({
+                  top: Math.max(0, scrollTop),
+                  behavior: "smooth",
+                });
+              } else {
+                // Fallback to scrollIntoView
+                targetElement.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                  inline: "nearest",
+                });
+              }
+            }
+          });
+        });
+      }
+    }
   },
 
   async ensureDayViewControllerCtor(): Promise<void> {
