@@ -255,6 +255,8 @@
 
 .time-transition.transition-golden-hour {
     animation: golden-glow 3s ease-out;
+    border-color: rgba(146, 89, 97, 0.4);
+    box-shadow: var(--shadow-xl), 0 0 32px rgba(146, 89, 97, 0.15);
 }
 
 .time-transition.transition-moonrise {

@@ -603,48 +603,48 @@ body.dark-mode.theme-afternoon {
     --accent-badge-fill: var(--accent-badge);
 }
 
-/* Evening Theme - Purple to Pink (warmer than dawn) */
+/* Evening Theme - Dusk: dusty rose, horizon red-brown, cool plum */
 :root.theme-evening,
 body.theme-evening {
-    --accent: #C084FC;  /* Warm lavender */
-    --accent-hover: #A855F7;
-    --accent-muted: rgba(192, 132, 252, 0.16);
-    --accent-subtle: rgba(192, 132, 252, 0.08);
-    --shadow-glow: 0 0 24px rgba(192, 132, 252, 0.24);
-    --shadow-glow-sm: 0 0 12px rgba(192, 132, 252, 0.16);
-    --accent-button: #C084FC;
-    --accent-active: #EC4899;
-    --accent-border: #E879F9;
-    --accent-highlight: #F472B6;
-    --accent-link: #A855F7;
-    --accent-badge: #EC4899;
-    --accent-progress: #F472B6;
-    --accent-icon: #D946EF;
+    --accent: #925961;
+    --accent-hover: #7a4a52;
+    --accent-muted: rgba(146, 89, 97, 0.18);
+    --accent-subtle: rgba(146, 89, 97, 0.10);
+    --shadow-glow: 0 0 24px rgba(146, 89, 97, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(146, 89, 97, 0.16);
+    --accent-button: #925961;
+    --accent-active: #a86b78;
+    --accent-border: #a86b78;
+    --accent-highlight: #b87d8a;
+    --accent-link: #552b2c;
+    --accent-badge: #925961;
+    --accent-progress: #925961;
+    --accent-icon: #925961;
     --accent-stroke: var(--accent-button);
     --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
+    --accent-fill-gradient: linear-gradient(135deg, #552b2c 0%, #925961 50%, #4b3c44 100%);
     --accent-badge-fill: var(--accent-badge);
 }
 
 :root.dark-mode.theme-evening,
 body.dark-mode.theme-evening {
-    --accent: #C084FC;  /* Bright lavender */
-    --accent-hover: #D8B4FE;
-    --accent-muted: rgba(192, 132, 252, 0.20);
-    --accent-subtle: rgba(192, 132, 252, 0.10);
-    --shadow-glow: 0 0 24px rgba(192, 132, 252, 0.24);
-    --shadow-glow-sm: 0 0 12px rgba(192, 132, 252, 0.16);
-    --accent-button: #C084FC;
-    --accent-active: #EC4899;
-    --accent-border: rgba(216, 180, 254, 0.30);
-    --accent-highlight: #F472B6;
-    --accent-link: #D8B4FE;
-    --accent-badge: #EC4899;
-    --accent-progress: #F472B6;
-    --accent-icon: #D946EF;
+    --accent: #b87d8a;
+    --accent-hover: #d4a5b0;
+    --accent-muted: rgba(184, 125, 138, 0.20);
+    --accent-subtle: rgba(184, 125, 138, 0.10);
+    --shadow-glow: 0 0 24px rgba(184, 125, 138, 0.24);
+    --shadow-glow-sm: 0 0 12px rgba(184, 125, 138, 0.16);
+    --accent-button: #b87d8a;
+    --accent-active: #c4909a;
+    --accent-border: rgba(184, 125, 138, 0.30);
+    --accent-highlight: #d4a5b0;
+    --accent-link: #c4909a;
+    --accent-badge: #b87d8a;
+    --accent-progress: #b87d8a;
+    --accent-icon: #c4909a;
     --accent-stroke: var(--accent-button);
     --accent-fill: var(--accent-button);
-    --accent-fill-gradient: linear-gradient(135deg, #C084FC 0%, #EC4899 100%);
+    --accent-fill-gradient: linear-gradient(135deg, #925961 0%, #b87d8a 50%, #6b4d5a 100%);
     --accent-badge-fill: var(--accent-badge);
 }
 

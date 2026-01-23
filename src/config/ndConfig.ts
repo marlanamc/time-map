@@ -32,7 +32,7 @@ export const ND_CONFIG = {
     dawn: { label: "Dawn", emoji: "🌅", color: "#A78BFA" }, // Soft lavender purple
     morning: { label: "Morning", emoji: "🌄", color: "#38BDF8" }, // Sky blue
     afternoon: { label: "Afternoon", emoji: "☀️", color: "#FB7185" }, // Warm rose pink
-    evening: { label: "Evening", emoji: "🌆", color: "#C084FC" }, // Warm lavender
+    evening: { label: "Evening", emoji: "🌆", color: "#925961" }, // Dusk: dusty rose
     night: { label: "Night", emoji: "🌙", color: "#3B82F6" }, // Bright blue
   },
 
