@@ -51,8 +51,6 @@ export class DayViewController {
   private state = new DayViewState();
   private timelineState = createTimelineRuntimeState();
   private plannerScrollContainer: HTMLElement | null = null;
-  private syncStatusElement: HTMLElement | null = null;
-  private lastSyncAt: Date | null = null;
 
   private readonly boundHandleClick: (e: Event) => void;
   private readonly boundHandleKeyDown: (e: KeyboardEvent) => void;
@@ -61,7 +59,6 @@ export class DayViewController {
   private readonly boundHandleNativeDragOver: (e: DragEvent) => void;
   private readonly boundHandleNativeDrop: (e: DragEvent) => void;
   private readonly boundHandlePointerDown: (e: PointerEvent) => void;
-  private readonly boundHandleSyncStatus: (event: Event) => void;
 
   constructor(
     container: HTMLElement,
@@ -127,7 +124,6 @@ export class DayViewController {
     this.boundHandleNativeDrop = (e) => handleNativeDrop(e, this.timelineDeps);
     this.boundHandlePointerDown = (e) =>
       handlePointerDown(e, this.timelineDeps, this.timelineState);
-    this.boundHandleSyncStatus = (event) => this.handleSyncStatus(event);
   }
 
   private get eventDeps(): EventDeps {
@@ -174,8 +170,6 @@ export class DayViewController {
         "pointerdown",
         this.boundHandlePointerDown
       );
-      window.addEventListener("sync-status", this.boundHandleSyncStatus);
-      this.updateSyncIndicator("synced");
 
       // Add event listeners for refresh events
       this.container.addEventListener(
@@ -255,7 +249,6 @@ export class DayViewController {
       "pointerdown",
       this.boundHandlePointerDown
     );
-    window.removeEventListener("sync-status", this.boundHandleSyncStatus);
 
     // Remove refresh event listeners
     this.container.removeEventListener(
@@ -416,7 +409,6 @@ export class DayViewController {
     this.plannerScrollContainer = this.container.querySelector(
       ".planner-main",
     ) as HTMLElement | null;
-    this.syncStatusElement = null;
   }
 
   private handleGoalCreated(_event: Event): void {
@@ -436,46 +428,6 @@ export class DayViewController {
     this.renderer.updateCurrent();
     this.refreshScrollContainer();
     setupDragAndDrop(this.timelineDeps);
-  }
-
-  private handleSyncStatus(event: Event): void {
-    const detail = (event as CustomEvent<{ status?: string }>)?.detail ?? {};
-    const status = detail.status ?? "synced";
-    this.updateSyncIndicator(status);
-  }
-
-  private updateSyncIndicator(status: string): void {
-    if (!this.syncStatusElement) {
-      this.syncStatusElement = this.container.querySelector(
-        ".planner-timeline-status",
-      ) as HTMLElement | null;
-    }
-    if (!this.syncStatusElement) return;
-
-    this.syncStatusElement.dataset.syncState = status;
-    const textEl = this.syncStatusElement.querySelector(
-      ".planner-sync-text",
-    ) as HTMLElement | null;
-    if (!textEl) return;
-
-    if (status === "synced") {
-      this.lastSyncAt = new Date();
-      const formatted = this.lastSyncAt.toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-      });
-      textEl.textContent = `Synced at ${formatted}`;
-    } else if (status === "syncing") {
-      textEl.textContent = "Syncing…";
-    } else if (status === "error") {
-      textEl.textContent = "Sync error";
-    } else if (status === "offline") {
-      textEl.textContent = "Offline (saved locally)";
-    } else if (status === "local") {
-      textEl.textContent = "Local-only edits";
-    } else {
-      textEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-    }
   }
 
   private isMobileViewport(): boolean {

@@ -306,10 +306,6 @@ export class PlannerDayViewRenderer {
           `
               : ""
           }
-          <div class="planner-timeline-status" data-sync-state="synced" aria-live="polite" role="status">
-            <span class="planner-sync-icon" aria-hidden="true">⟳</span>
-            <span class="planner-sync-text">Synced just now</span>
-          </div>
           <div class="planner-timeline-container day-timeline">
             ${this.timelineGrid.render()}
             <div class="planner-timeline-content">
