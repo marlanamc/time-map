@@ -16,7 +16,9 @@ export const MonthRenderer = {
     const container = elements.calendarGrid;
     if (!container) return;
 
-    container.className = "month-view-container";
+    // Preserve base class and add month-specific classes
+    container.classList.add("month-view-container");
+    container.classList.remove("year-view-container", "week-view-container", "garden-horizon");
 
     const year = State.viewingYear;
     const month = State.viewingMonth;

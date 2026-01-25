@@ -17,7 +17,9 @@ export const WeekRenderer = {
     const container = elements.calendarGrid;
     if (!container) return;
 
-    container.className = "week-view-container";
+    // Preserve base class and add week-specific classes
+    container.classList.add("week-view-container");
+    container.classList.remove("year-view-container", "month-view-container", "garden-horizon");
 
     const weekNum = State.viewingWeek ?? 1;
     // Use ISO week year, not calendar year (important for late Dec/early Jan)

@@ -45,7 +45,9 @@ export const YearRenderer = {
     );
 
     // Render year header + grid
-    container.className = "year-view-container";
+    // Preserve base class and add year-specific classes
+    container.classList.add("year-view-container");
+    container.classList.remove("month-view-container", "week-view-container", "garden-horizon");
     container.innerHTML = "";
 
     const yearView = document.createElement("div");

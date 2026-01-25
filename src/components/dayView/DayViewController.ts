@@ -276,6 +276,7 @@ export class DayViewController {
     this.state.setGoals(date, goals, contextGoals);
 
     if (!this.isMounted) {
+      this.mount();
       this.renderer.renderCurrent();
       this.refreshScrollContainer();
       setupDragAndDrop(this.timelineDeps);

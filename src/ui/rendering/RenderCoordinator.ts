@@ -2,8 +2,12 @@ import { State } from "../../core/State";
 import { VIEWS } from "../../config";
 import { viewportManager } from "../viewport/ViewportManager";
 import type { UIElements } from "../../types";
-import { MonthRenderer, WeekRenderer, PlantGardenRenderer } from "../renderers";
-import { goalDetailModal } from "../../components/modals/GoalDetailModal";
+import {
+  MonthRenderer,
+  WeekRenderer,
+  GardenHorizonRenderer,
+  GoalDetailRenderer,
+} from "../renderers";
 
 type RenderCoordinatorCallbacks = {
   renderCategoryFilters: () => void;
@@ -39,6 +43,7 @@ export class RenderCoordinator {
   private renderRaf: number | null = null;
   private lastNavKey: string | null = null;
   private scrollResetRaf: number | null = null;
+  private currentActiveView: string | null = null;
 
   constructor(options: RenderCoordinatorOptions) {
     this.elements = options.elements;
@@ -242,9 +247,16 @@ export class RenderCoordinator {
     // Update view button states
     this.callbacks.syncViewButtons();
 
-    if (State.currentView !== VIEWS.DAY && this.callbacks.dayViewController) {
-      this.callbacks.dayViewController.unmount();
-      this.callbacks.dayViewController = null;
+    // Clean up previous view before rendering new view
+    if (this.currentActiveView !== State.currentView) {
+      if (this.currentActiveView === VIEWS.GARDEN) {
+        GardenHorizonRenderer.cleanup();
+      }
+      if (State.currentView !== VIEWS.DAY && this.callbacks.dayViewController) {
+        this.callbacks.dayViewController.unmount();
+        this.callbacks.dayViewController = null;
+      }
+      this.currentActiveView = State.currentView;
     }
 
     switch (State.currentView) {
@@ -264,40 +276,15 @@ export class RenderCoordinator {
         // Home view uses the sidebar layout; nothing to render on the main grid.
         break;
       case VIEWS.GARDEN:
-        // LivingGardenRenderer.render(
-        //   this.elements,
-        //   this.callbacks.escapeHtml.bind(this),
-        //   (goalId) => goalDetailModal.show(goalId),
-        //   (level) =>
-        //     this.callbacks.openGoalModal(
-        //       level,
-        //       State.viewingMonth,
-        //       State.viewingYear,
-        //     ),
-        //   (opts) =>
-        //     this.callbacks.openGoalModal(
-        //       opts.level,
-        //       opts.preselectedMonth ?? State.viewingMonth,
-        //       opts.preselectedYear ?? State.viewingYear,
-        //       { parentId: opts.parentId, parentLevel: opts.parentLevel },
-        //     ),
-        // );
-        PlantGardenRenderer.render(
+        GardenHorizonRenderer.render(
           this.elements,
           this.callbacks.escapeHtml.bind(this),
-          (goalId) => goalDetailModal.show(goalId),
+          (goalId) => GoalDetailRenderer.show(goalId),
           (level) =>
             this.callbacks.openGoalModal(
               level,
               State.viewingMonth,
               State.viewingYear,
-            ),
-          (opts) =>
-            this.callbacks.openGoalModal(
-              opts.level,
-              opts.preselectedMonth ?? State.viewingMonth,
-              opts.preselectedYear ?? State.viewingYear,
-              { parentId: opts.parentId, parentLevel: opts.parentLevel },
             ),
         );
         break;

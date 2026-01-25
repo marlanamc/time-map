@@ -376,6 +376,12 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
   ) as HTMLElement | null;
   if (!dayBed) return;
 
+  // Guard: Only handle drops in the day view container
+  if (!deps.container.classList.contains("planner-sidebar-and-timeline")) {
+    console.warn("Drop event received outside Day view context");
+    return;
+  }
+
   e.preventDefault();
   e.stopPropagation();
 
