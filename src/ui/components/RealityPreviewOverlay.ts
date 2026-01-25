@@ -11,7 +11,15 @@ const OVERLAY_ID = "reality-preview-overlay";
 
 let canvasElement: HTMLElement | null = null;
 let overlayElement: HTMLElement | null = null;
-let closeListener: ((event: PointerEvent) => void) | null = null;
+
+function handleOverlayPointer(event: PointerEvent): void {
+  if (!overlayElement) return;
+  const card = overlayElement.querySelector(".reality-preview-card");
+  if (card && card.contains(event.target as Node)) {
+    return;
+  }
+  hide();
+}
 
 function ensureOverlay(): HTMLElement {
   if (overlayElement) return overlayElement;
@@ -20,6 +28,7 @@ function ensureOverlay(): HTMLElement {
   overlay.id = OVERLAY_ID;
   overlay.className = "reality-preview-overlay";
   overlay.setAttribute("aria-live", "polite");
+  overlay.addEventListener("pointerdown", handleOverlayPointer);
   overlayElement = overlay;
   return overlay;
 }
@@ -337,33 +346,12 @@ function renderOverlay(goal: Goal): void {
   });
 }
 
-function handleDocumentPointer(event: PointerEvent): void {
-  if (!overlayElement) return;
-  const card = overlayElement.querySelector(".reality-preview-card");
-  if (card && card.contains(event.target as Node)) {
-    return;
-  }
-  RealityPreviewOverlay.hide();
-}
-
 function ensureCanvasAttached(): void {
   const overlay = ensureOverlay();
   const target = document.body;
   if (!target.contains(overlay)) {
     target.appendChild(overlay);
   }
-}
-
-function registerGlobalClose(): void {
-  if (closeListener) return;
-  closeListener = handleDocumentPointer;
-  document.addEventListener("pointerdown", closeListener);
-}
-
-function unregisterGlobalClose(): void {
-  if (!closeListener) return;
-  document.removeEventListener("pointerdown", closeListener);
-  closeListener = null;
 }
 
 export const RealityPreviewOverlay = {
@@ -380,13 +368,11 @@ export const RealityPreviewOverlay = {
     requestAnimationFrame(() => {
       overlay.classList.add("visible");
     });
-    registerGlobalClose();
   },
 
   hide(): void {
     const overlay = overlayElement;
     if (!overlay) return;
     overlay.classList.remove("visible");
-    unregisterGlobalClose();
   },
 };

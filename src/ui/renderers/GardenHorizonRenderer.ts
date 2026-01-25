@@ -36,9 +36,7 @@ function isGardenFenceVisible(): boolean {
 
 function clearVisionSelectionStyles(): void {
   document
-    .querySelectorAll(
-      ".spine-vision-item.is-selected, .time-band-marker.is-selected",
-    )
+    .querySelectorAll(".spine-vision-item.is-selected")
     .forEach((el) => el.classList.remove("is-selected"));
 }
 
@@ -49,11 +47,7 @@ function applyVisionSelectionStyles(goalId: string | null): void {
   const spineItem = document.querySelector<HTMLElement>(
     `.spine-vision-item[data-goal-id="${escapedId}"]`,
   );
-  const yearChip = document.querySelector<HTMLElement>(
-    `.time-band-year .time-band-marker[data-goal-id="${escapedId}"]`,
-  );
   spineItem?.classList.add("is-selected");
-  yearChip?.classList.add("is-selected");
 }
 
 function selectVision(
@@ -319,8 +313,6 @@ export const GardenHorizonRenderer = {
     // Time Canvas (main area)
     const canvas = this.renderTimeCanvas(
       viewDate,
-      viewYear,
-      visions,
       milestones,
       focuses,
       intentions,
@@ -489,8 +481,6 @@ export const GardenHorizonRenderer = {
    */
   renderTimeCanvas(
     viewDate: Date,
-    viewYear: number,
-    visions: Goal[],
     milestones: Goal[],
     focuses: Goal[],
     intentions: Goal[],
@@ -530,17 +520,6 @@ export const GardenHorizonRenderer = {
     );
     canvas.appendChild(monthBand);
 
-    // THIS YEAR band
-    const yearBand = this.renderTimeBand(
-      "year",
-      `${viewYear}`,
-      visions,
-      escapeHtmlFn,
-      onGoalClick,
-      { subtitle: `${viewYear} visions` },
-    );
-    canvas.appendChild(yearBand);
-
     return canvas;
   },
 
@@ -548,7 +527,7 @@ export const GardenHorizonRenderer = {
    * Render a time band section
    */
   renderTimeBand(
-    type: "year" | "month" | "week",
+    type: "month" | "week",
     label: string,
     goals: Goal[],
     escapeHtmlFn: (text: string) => string,
@@ -592,9 +571,8 @@ export const GardenHorizonRenderer = {
       markers.className = "time-band-markers";
 
       for (const goal of goals.slice(0, 5)) {
-        const showDot = type !== "year";
         const marker = document.createElement("div");
-        marker.className = `time-band-marker${type === "year" ? " time-band-marker-chip" : ""}`;
+        marker.className = "time-band-marker";
         marker.setAttribute("tabindex", "0");
         marker.setAttribute("role", "button");
         marker.setAttribute("aria-label", goal.title);
@@ -605,44 +583,22 @@ export const GardenHorizonRenderer = {
           marker.style.setProperty("--marker-color", accent.color);
         }
 
+        const markerDot = document.createElement("span");
+        markerDot.className = "marker-dot";
+        marker.append(markerDot);
+
         const markerTitle = document.createElement("span");
         markerTitle.className = "marker-title";
         markerTitle.textContent = escapeHtmlFn(goal.title);
-
-        if (showDot) {
-          const markerDot = document.createElement("span");
-          markerDot.className = "marker-dot";
-          marker.append(markerDot);
-        }
         marker.append(markerTitle);
 
-        const handleMarkerSelect = () => {
-          if (type === "year") {
-            selectVision(goal.id, onGoalClick);
-          } else {
-            onGoalClick(goal.id);
-          }
-        };
-
-        marker.addEventListener("click", handleMarkerSelect);
+        marker.addEventListener("click", () => onGoalClick(goal.id));
         marker.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            handleMarkerSelect();
+            onGoalClick(goal.id);
           }
         });
-
-        if (type === "year") {
-          const showPreview = () => RealityPreviewOverlay.show(goal);
-          const hidePreview = () => RealityPreviewOverlay.hide();
-          marker.addEventListener("mouseenter", showPreview);
-          marker.addEventListener("mouseleave", hidePreview);
-          marker.addEventListener("focus", showPreview);
-          marker.addEventListener("blur", hidePreview);
-          marker.addEventListener("click", () => {
-            showPreview();
-          });
-        }
 
         markers.appendChild(marker);
       }
