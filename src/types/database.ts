@@ -25,6 +25,7 @@ export interface GoalRow {
   due_date?: string;
   start_time?: string;
   end_time?: string;
+  scheduled_at?: string;
   completed_at?: string;
   last_worked_on?: string;
   created_at: string;

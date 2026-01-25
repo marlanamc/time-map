@@ -152,6 +152,7 @@ function getTimelineDropMetrics(
   const formattedTime = deps.calculator.format12h(startMin);
   const insideX = clientX >= rect.left && clientX <= rect.right;
   const insideY = clientY >= rect.top && clientY <= rect.bottom;
+  const isInside = insideX && insideY;
   return {
     dayBed,
     rect,
@@ -160,7 +161,7 @@ function getTimelineDropMetrics(
     startPct,
     durPct,
     formattedTime,
-    isInside: insideX && insideY,
+    isInside,
   };
 }
 
@@ -377,7 +378,8 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
   if (!dayBed) return;
 
   // Guard: Only handle drops in the day view container
-  if (!deps.container.classList.contains("planner-sidebar-and-timeline")) {
+  // Check for day-view-container instead of the non-existent planner-sidebar-and-timeline
+  if (!deps.container.classList.contains("day-view-container")) {
     console.warn("Drop event received outside Day view context");
     return;
   }
@@ -440,6 +442,16 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
     currentDate.getMonth() + 1,
   ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
+  // Calculate scheduledAt for persistence
+  const scheduledAt = new Date(currentDate);
+  scheduledAt.setHours(
+    Math.floor(startMin / 60),
+    startMin % 60,
+    0,
+    0,
+  );
+  const scheduledAtIso = scheduledAt.toISOString();
+
   const coerceCategory = (value: string): Category | null => {
     switch (value) {
       case "career":
@@ -461,6 +473,7 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
       startDate: ymd,
       startTime,
       endTime,
+      scheduledAt: scheduledAtIso,
     });
 
     // Trigger a refresh to show the new goal immediately
@@ -861,7 +874,9 @@ export function handleDrop(
     clientX,
     currentDate: deps.state.currentDate?.toISOString(),
   });
-  if (!deps.state.currentDate) return;
+  if (!deps.state.currentDate) {
+    return;
+  }
 
   const goal = deps.state.currentGoals.find((g) => g.id === data.goalId);
   if (!goal) {
@@ -883,7 +898,9 @@ export function handleDrop(
     durationMin,
     30,
   );
-  if (!metrics || !metrics.isInside) return;
+  if (!metrics || !metrics.isInside) {
+    return;
+  }
 
   const timeWindowEnd = deps.calculator.getPlotEndMin();
   const minEnd = Math.min(metrics.startMin + 15, timeWindowEnd);

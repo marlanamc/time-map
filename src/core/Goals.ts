@@ -21,7 +21,6 @@ import { getFocusStartDate } from "../utils/goalMeta";
 import DB, { DB_STORES } from "../db";
 import {
   validateGoalData,
-  validateGoal,
   formatValidationErrors,
   sanitizeString,
 } from "./Validation";
@@ -107,8 +106,12 @@ function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
       if (goal.dueDate) {
         const due = new Date(goal.dueDate);
         return { start: startOfDay(due), end: endOfDay(due) };
+      }
+      return { start: fallbackStart, end: fallbackEnd };
+    }
+    default:
+      return { start: fallbackStart, end: fallbackEnd };
   }
-  return { start: fallbackStart, end: fallbackEnd };
 }
 
 const PARENT_LEVEL_REQUIREMENTS: Record<GoalLevel, GoalLevel | null> = {
@@ -144,6 +147,7 @@ function ensureValidParentLink(
   childLevel: GoalLevel,
   parentId?: string | null,
 ): Goal | null {
+  // eslint-disable-next-line security/detect-object-injection
   const expectedParentLevel = PARENT_LEVEL_REQUIREMENTS[childLevel];
 
   if (expectedParentLevel === null) {
@@ -176,10 +180,6 @@ function ensureValidParentLink(
   }
 
   return parentGoal;
-}
-    default:
-      return { start: fallbackStart, end: fallbackEnd };
-  }
 }
 
 /**
@@ -424,7 +424,17 @@ export const Goals = {
     const targetLevel = updates.level ?? goal.level;
     const proposedParentId =
       updates.parentId !== undefined ? updates.parentId : goal.parentId ?? null;
-    const parentGoal = ensureValidParentLink(goalId, targetLevel, proposedParentId);
+    let parentGoal: Goal | null = null;
+    try {
+      parentGoal = ensureValidParentLink(goalId, targetLevel, proposedParentId);
+    } catch (error: any) {
+      // For intention goals without parents, we'll allow it (just warn)
+      if (targetLevel === 'intention' && !proposedParentId) {
+        parentGoal = null;
+      } else {
+        throw error;
+      }
+    }
 
     // If level is being changed, re-align to new level's time scope
     if (updates.level && updates.level !== goal.level) {
@@ -774,11 +784,12 @@ export const Goals = {
     State.save();
 
     const achievement = (
-      CONFIG.ACHIEVEMENTS as Record<
+      // eslint-disable-next-line security/detect-object-injection
+      (CONFIG.ACHIEVEMENTS as Record<
         string,
         { emoji: string; symbol: string; label: string; desc: string }
-      >
-    )[achievementId];
+      >)[achievementId]
+    );
     if (callbacks.onCelebrate) {
       callbacks.onCelebrate(
         achievement.emoji,

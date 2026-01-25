@@ -23,32 +23,29 @@ describe("Modular Architecture Integration", () => {
     test("should handle complete data lifecycle", () => {
       // Create test data
       const testData = dataStore.createDefaultData();
+      const now = new Date().toISOString();
       testData.goals = [
         {
           id: "test-goal-1",
           title: "Test Goal",
           level: "milestone" as const,
-          createdAt: new Date().toISOString(),
-          completedAt: null,
           description: "Test description",
-          month: null,
+          month: new Date().getMonth(),
           year: new Date().getFullYear(),
           category: "personal",
-          subtasks: [],
-          streak: 0,
-          lastCompletedAt: null,
-          isArchived: false,
-          tags: [],
           priority: "medium" as const,
+          status: "not-started" as const,
+          progress: 0,
+          subtasks: [],
+          notes: [],
+          timeLog: [],
+          createdAt: now,
+          updatedAt: now,
+          completedAt: null,
+          lastWorkedOn: null,
           dueDate: null,
-          recurring: null,
-          estimatedMinutes: 60,
-          actualMinutes: 0,
-          notes: "",
-          visionId: null,
-          milestoneId: null,
-          focusId: null,
-        } as unknown as any,
+          tags: [],
+        },
       ];
 
       // Set data

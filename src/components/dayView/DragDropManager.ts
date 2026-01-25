@@ -185,14 +185,20 @@ export class DragDropManager {
   private addPointerDrag(element: HTMLElement, data: DragData): void {
     const onPointerDown = (e: PointerEvent) => {
       // Only handle primary button (left mouse, primary touch)
-      if (e.button !== 0 && e.button !== -1) return;
+      if (e.button !== 0 && e.button !== -1) {
+        return;
+      }
 
       // Prevent if already dragging
-      if (this.dragState) return;
+      if (this.dragState) {
+        return;
+      }
 
       // Ignore if clicking on interactive elements
       const target = e.target as HTMLElement;
-      if (this.isInteractiveElement(target)) return;
+      if (this.isInteractiveElement(target)) {
+        return;
+      }
 
       if (this.isTouchPointerEvent(e)) {
         this.startLongPress(e, element, data);
@@ -411,8 +417,8 @@ export class DragDropManager {
 
     // Resolve drop zone from release position (critical for touch: last pointermove
     // may be throttled or not reflect where the user released)
-    const dropZone =
-      this.findDropZone(e.clientX, e.clientY) ?? this.dragState.activeDropZone;
+    const foundAtRelease = this.findDropZone(e.clientX, e.clientY);
+    const dropZone = foundAtRelease ?? this.dragState.activeDropZone;
 
     if (dropZone) {
       // Valid drop

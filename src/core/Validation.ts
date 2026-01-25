@@ -124,6 +124,17 @@ const IsoDateStringSchema = z.string().refine(
   { message: "Invalid date format. Expected YYYY-MM-DD or ISO 8601" }
 );
 
+/** Time string (HH:MM format) */
+const TimeStringSchema = z.string().refine(
+  (val) => {
+    if (!val) return true; // Allow empty strings to be caught by optional()
+    // Accept HH:MM format (24-hour time)
+    const timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timePattern.test(val);
+  },
+  { message: "Invalid time format. Expected HH:MM (24-hour format)" }
+);
+
 /** Non-empty trimmed string with max length */
 const SafeStringSchema = (maxLength: number = 1000) =>
   z
@@ -292,8 +303,8 @@ export const GoalDataSchema = z
     category: CategorySchema.optional(),
     priority: PrioritySchema.optional(),
     dueDate: IsoDateStringSchema.nullable().optional(),
-    startTime: IsoDateStringSchema.nullable().optional(),
-    endTime: IsoDateStringSchema.nullable().optional(),
+    startTime: TimeStringSchema.nullable().optional(),
+    endTime: TimeStringSchema.nullable().optional(),
     scheduledAt: IsoDateStringSchema.nullable().optional(),
     activityId: IdSchema.optional(),
     parentId: IdSchema.nullable().optional(),

@@ -194,9 +194,30 @@ describe('DataStore', () => {
     });
 
     test('should import data correctly', () => {
+      const now = new Date().toISOString();
       const importData = {
         ...dataStore.createDefaultData(),
-        goals: [{ id: 'test', title: 'Test Goal' }] as any
+        goals: [{
+          id: 'test',
+          title: 'Test Goal',
+          level: 'intention' as const,
+          description: '',
+          month: new Date().getMonth(),
+          year: new Date().getFullYear(),
+          category: null,
+          priority: 'medium' as const,
+          status: 'not-started' as const,
+          progress: 0,
+          subtasks: [],
+          notes: [],
+          timeLog: [],
+          createdAt: now,
+          updatedAt: now,
+          completedAt: null,
+          lastWorkedOn: null,
+          dueDate: null,
+          tags: [],
+        }]
       };
       
       dataStore.importData(importData);
