@@ -2,7 +2,7 @@
 // UI Manager - Main UI Orchestration
 // ===================================
 import { State } from "../core/State";
-import { Goals } from "../core/Goals";
+import { Goals, ensurePlanningFocusForGoal } from "../core/Goals";
 import DB, { DB_STORES } from "../db";
 import { Streaks } from "../core/Streaks";
 import { CONFIG, VIEWS } from "../config";
@@ -24,10 +24,14 @@ import { viewportManager } from "./viewport/ViewportManager";
 import { goalDetailModal } from "../components/modals/GoalDetailModal";
 import { monthDetailModal } from "../components/modals/MonthDetailModal";
 import { eventModal } from "../components/modals/EventModal";
+import { PlanningPage } from "./pages/PlanningPage";
+// Import MapPage for side effects (registers eventBus listener)
+import "./pages/MapPage";
 import { isSupabaseConfigured } from "../supabaseClient";
 import { batchSaveService } from "../services/BatchSaveService";
 import { SupabaseService } from "../services/supabase";
 import { syncQueue } from "../services/SyncQueue";
+import { conflictDetector } from "../services/sync/ConflictDetector";
 import { createFeatureLoaders } from "../features/featureLoaders";
 import { InstallPromptHandler } from "./interactions/InstallPromptHandler";
 import { KeyboardHandler } from "./interactions/KeyboardHandler";
@@ -536,6 +540,14 @@ export const UI = {
       Celebration.show(this.elements, data.icon, data.title, data.message);
     });
 
+    eventBus.on("garden:plan-requested", (data) => {
+      void this.openPlanningPage(data?.goalId ?? null);
+    });
+
+    eventBus.on("garden:review-requested", () => {
+      this.showWeeklyReview();
+    });
+
     // Listen for time range changes to update day view
     window.addEventListener("time-range-changed", () => {
       if (State.currentView === VIEWS.DAY) {
@@ -594,6 +606,23 @@ export const UI = {
         status === "offline"
       ) {
         this.updateSyncStatus(status);
+      }
+    }) as EventListener);
+
+    // Listen for sync conflicts (multi-device edits)
+    window.addEventListener("sync-conflict", ((e: CustomEvent) => {
+      const conflict = e.detail;
+      if (!conflict) return;
+
+      const message = conflictDetector.formatConflictMessage(conflict);
+
+      // Show a subtle notification for conflicts
+      if (conflict.resolution === "remote_wins") {
+        // User's local changes were overwritten - more prominent warning
+        Toast.show(this.elements, "⚠️", message);
+      } else {
+        // User's version won - subtle confirmation
+        console.log("[UIManager] Sync conflict resolved:", message);
       }
     }) as EventListener);
 
@@ -1895,6 +1924,27 @@ export const UI = {
     goalModal.handleGoalSubmit(this, e);
   },
 
+  async openPlanningPage(goalId?: string | null) {
+    if (!goalId) {
+      await PlanningPage.open();
+      return;
+    }
+
+    const goal = Goals.getById(goalId);
+    if (!goal) {
+      await PlanningPage.open();
+      return;
+    }
+
+    try {
+      const focus = await ensurePlanningFocusForGoal(goal);
+      await PlanningPage.open(focus.id);
+    } catch (err) {
+      console.warn("Planning request failed for goal", err);
+      await PlanningPage.open();
+    }
+  },
+
   // ============================================
   // Goal Detail View
   // ============================================
@@ -2194,6 +2244,132 @@ export const UI = {
         String(progress),
       );
       this.elements.timeProgress.setAttribute("aria-valuetext", `${progress}%`);
+    }
+
+    // Update Timeline
+    this.updateTimeline(start, end, now, effectiveView, progress);
+  },
+
+  updateTimeline(
+    start: Date,
+    end: Date,
+    now: Date,
+    view: ViewType,
+    progress: number,
+  ) {
+    if (
+      !this.elements.nowTimelineWidget ||
+      !this.elements.nowTimelineBar ||
+      !this.elements.nowTimelineFill ||
+      !this.elements.nowTimelineMarker ||
+      !this.elements.nowTimelineLabel ||
+      !this.elements.nowTimelineStart ||
+      !this.elements.nowTimelineRemaining ||
+      !this.elements.nowTimelineEnd
+    ) {
+      return;
+    }
+
+    const clampedProgress = Math.max(0, Math.min(100, progress));
+
+    // Format labels based on view
+    let startLabel = "";
+    let endLabel = "";
+    let remainingLabel = "";
+
+    if (view === VIEWS.DAY) {
+      // Day view: show 6 AM to 10 PM
+      const currentHour = now.getHours();
+      const dayStart = new Date(now);
+      dayStart.setHours(6, 0, 0, 0);
+      const dayEnd = new Date(now);
+      dayEnd.setHours(22, 0, 0, 0);
+
+      // Calculate progress within the day (6 AM to 10 PM)
+      const dayProgress =
+        now < dayStart
+          ? 0
+          : now > dayEnd
+            ? 100
+            : ((now.getTime() - dayStart.getTime()) /
+                (dayEnd.getTime() - dayStart.getTime())) *
+              100;
+
+      startLabel = "6 AM";
+      endLabel = "10 PM";
+      const hoursRemaining = Math.max(0, 22 - currentHour);
+      remainingLabel = `${hoursRemaining}h left`;
+
+      // Update progress for day view
+      const dayProgressClamped = Math.max(0, Math.min(100, dayProgress));
+      this.elements.nowTimelineFill.style.width = `${dayProgressClamped}%`;
+      this.elements.nowTimelineMarker.style.left = `${dayProgressClamped}%`;
+
+      // Time-of-day theming
+      const timeOfDay =
+        currentHour < 12
+          ? "morning"
+          : currentHour < 17
+            ? "afternoon"
+            : "evening";
+      this.elements.nowTimelineBar.setAttribute("data-time-of-day", timeOfDay);
+    } else {
+      // Week, Month, Year views
+      const totalMs = end.getTime() - start.getTime();
+      const remainingMs = Math.max(0, end.getTime() - now.getTime());
+
+      if (view === VIEWS.WEEK) {
+        const daysRemaining = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+        startLabel = start.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        endLabel = new Date(end.getTime() - 1).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        remainingLabel = `${daysRemaining}d left`;
+      } else if (view === VIEWS.MONTH) {
+        const daysRemaining = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+        startLabel = start.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        endLabel = new Date(end.getTime() - 1).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        remainingLabel = `${daysRemaining}d left`;
+      } else {
+        // YEAR view
+        const daysRemaining = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+        startLabel = start.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        // End is the first day of next year, so show last day of current year
+        const lastDayOfYear = new Date(end.getTime() - 1);
+        endLabel = lastDayOfYear.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        remainingLabel = `${daysRemaining}d left`;
+      }
+
+      this.elements.nowTimelineFill.style.width = `${clampedProgress}%`;
+      this.elements.nowTimelineMarker.style.left = `${clampedProgress}%`;
+      this.elements.nowTimelineBar.removeAttribute("data-time-of-day");
+    }
+
+    // Update labels
+    if (this.elements.nowTimelineStart) {
+      this.elements.nowTimelineStart.textContent = startLabel;
+    }
+    if (this.elements.nowTimelineEnd) {
+      this.elements.nowTimelineEnd.textContent = endLabel;
+    }
+    if (this.elements.nowTimelineRemaining) {
+      this.elements.nowTimelineRemaining.textContent = remainingLabel;
     }
   },
 

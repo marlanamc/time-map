@@ -3,6 +3,7 @@ import { getSupabaseClient } from "./client";
 import { cacheService } from "../CacheService";
 import { AuthenticationError, DatabaseError } from "../errors";
 import { authService } from "./AuthService";
+import { conflictDetector } from "../sync/ConflictDetector";
 import type { CalendarEvent } from "../../types";
 import type { EventRow } from "../../types/database";
 
@@ -71,6 +72,35 @@ export class EventsService {
 
     try {
       const supabase = await getSupabaseClient();
+
+      // Check for conflicts: fetch remote version and compare timestamps
+      try {
+        const { data: remoteEvent } = await supabase
+          .from("events")
+          .select("updated_at, title")
+          .eq("id", event.id)
+          .single();
+
+        if (remoteEvent?.updated_at) {
+          const conflict = conflictDetector.detectConflict(
+            "event",
+            event.id,
+            event.updatedAt,
+            remoteEvent.updated_at,
+            event.title,
+          );
+
+          if (conflict && conflict.resolution === "remote_wins") {
+            console.log(
+              `[EventsService] Conflict detected for "${event.title}" - local version will overwrite remote`,
+            );
+          }
+        }
+      } catch (conflictErr) {
+        // Event doesn't exist remotely yet, or error checking - continue with save
+        console.debug("[EventsService] Conflict check skipped:", conflictErr);
+      }
+
       const payload = {
         id: event.id,
         user_id: user.id,

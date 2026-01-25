@@ -9,6 +9,9 @@ export type ViewType = "year" | "month" | "week" | "day" | "home" | "garden";
 /** Goal hierarchy levels from highest to lowest */
 export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
 
+/** Computed goal state based on recent activity (not stored, calculated at runtime) */
+export type GoalState = "active" | "resting" | "dormant";
+
 /** Possible status states for a goal */
 export type GoalStatus =
   | "not-started"
@@ -40,6 +43,29 @@ export interface GoalMeta {
   startDate?: string;
   easyMode?: boolean;
   accentTheme?: AccentTheme;
+}
+
+/** Energy type for commitment planning */
+export type EnergyType = "focus" | "creative" | "rest" | "admin";
+
+/** Commitment horizon for planning */
+export type CommitmentHorizon = "week" | "month" | "season";
+
+/**
+ * Commitment plan for structured goal planning
+ * @remarks Captures frequency, duration, and energy requirements for a goal
+ */
+export interface CommitmentPlan {
+  /** Times per week (1-7) */
+  frequency: number;
+  /** Minutes per session (15-120) */
+  duration: number;
+  /** Type of energy required */
+  energyType: EnergyType;
+  /** Planning horizon */
+  horizon: CommitmentHorizon;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
@@ -201,6 +227,13 @@ export interface Goal {
   icon?: string;
   /** Soft delete timestamp - if set, goal is archived */
   archivedAt?: string | null;
+  /**
+   * Optional commitment plan for structured goal planning
+   * Planning commitments are stored on Focus goals only.
+   * Planning may be initiated from Vision, Milestone, or Focus, but the data
+   * always resolves back to a Focus goal.
+   */
+  commitment?: CommitmentPlan;
 }
 
 /**
@@ -223,6 +256,7 @@ export interface GoalData {
   /** Optional parent linkage for hierarchy/alignment (Vision → Milestone → Focus → Intention). */
   parentId?: string | null;
   parentLevel?: GoalLevel | null;
+  commitment?: CommitmentPlan;
   /**
    * For range-based levels (milestone/focus/intention), an explicit local-date start (YYYY-MM-DD).
    * This is used only at creation time; persisted shape remains month/year + dueDate.
@@ -533,6 +567,14 @@ export interface UIElements {
   flowerPetals: SVGElement | null;
   yearProgressLabel: HTMLElement | null;
   yearProgressValue: HTMLElement | null;
+  nowTimelineWidget: HTMLElement | null;
+  nowTimelineBar: HTMLElement | null;
+  nowTimelineFill: HTMLElement | null;
+  nowTimelineMarker: HTMLElement | null;
+  nowTimelineLabel: HTMLElement | null;
+  nowTimelineStart: HTMLElement | null;
+  nowTimelineRemaining: HTMLElement | null;
+  nowTimelineEnd: HTMLElement | null;
   zoomLevel: HTMLElement | null;
   affirmationText: HTMLElement | null;
   yearDisplay: HTMLElement | null;

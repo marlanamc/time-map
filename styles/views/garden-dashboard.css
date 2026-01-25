@@ -1,0 +1,570 @@
+/* ===================================
+   Garden Dashboard: Grounding & Focus
+   =================================== */
+
+/* CRITICAL: Override parent .calendar-grid styles when in Garden View */
+.calendar-grid.garden-view-wrapper {
+  display: flex !important;
+  grid-template-columns: unset !important;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 100%;
+  width: 100%;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+/* --- Layout Containers --- */
+.garden-view-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Subtle gradient overlay for depth */
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(var(--primary-rgb), 0.1),
+    transparent 70%
+  );
+}
+
+.garden-center-stage {
+  width: 100%;
+  max-width: 680px;
+  height: 100%;
+  max-height: 900px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  position: relative;
+  z-index: 10;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* When drawer is open, shift center stage */
+.garden-view-container.drawer-open .garden-center-stage {
+  transform: translateX(180px); /* Shift right to make room/hint at drawer */
+  opacity: 0.8;
+  pointer-events: none; /* Focus on drawer */
+}
+
+/* --- Header: Orientation --- */
+.garden-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-6) var(--space-4);
+  margin-bottom: var(--space-4);
+  position: relative;
+  gap: var(--space-6);
+}
+
+.garden-header .map-toggle-btn {
+  /* Removed absolute positioning for balanced layout */
+}
+
+.garden-header .date-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  /* Override global pill styling */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  height: auto;
+  min-width: auto;
+  padding: 0;
+}
+
+.date-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.date-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.map-toggle-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  color: var(--text-secondary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.map-toggle-btn:hover {
+  background: var(--surface-1);
+  color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.15);
+}
+
+.header-spacer {
+  width: 80px;
+  height: 1px;
+  visibility: hidden;
+}
+
+/* --- Main Card: The "Now" --- */
+.focus-card-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  perspective: 1000px;
+}
+
+.focus-card {
+  /* Glassmorphism: translucent with blur */
+  background: rgba(var(--surface-rgb, 30, 41, 46), 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10) var(--space-8);
+  text-align: center;
+  box-shadow:
+    0 16px 48px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Accent top border for "Grounding" feel */
+.focus-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  opacity: 0.8;
+}
+
+.focus-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(var(--primary-rgb), 0.1);
+}
+
+.focus-context-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-bottom: -0.5rem;
+}
+
+.focus-title {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.focus-status {
+  padding: var(--space-1) var(--space-3);
+  background: var(--surface-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* --- Action Area --- */
+.action-area {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-engaging {
+  background: var(--primary);
+  color: var(--text-on-accent);
+  border: none;
+  padding: var(--space-3) var(--space-8);
+  border-radius: var(--radius-full);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btn-engaging:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(var(--primary-rgb), 0.4);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--divider);
+  color: var(--text-primary);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-tertiary);
+  background: var(--surface-2);
+}
+
+/* --- Timer Display --- */
+.active-timer-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timer-digits {
+  font-size: 4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: var(--space-4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Grounding Inputs --- */
+.grounding-input-group {
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+}
+
+.grounding-input {
+  width: 100%;
+  padding: var(--space-4);
+  padding-right: 60px; /* Space for button */
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.grounding-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface-1);
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+}
+
+.grounding-submit-btn {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--primary);
+  color: var(--text-on-accent);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grounding-submit-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* --- Up Next Section --- */
+.next-steps-container {
+  margin-top: var(--space-8);
+}
+
+.section-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-3);
+  display: block;
+  text-align: center;
+}
+
+.next-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.next-step-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 255, 255, 0.05); /* Very subtle */
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.next-step-item:hover {
+  background: var(--surface-1);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.next-step-scaffold {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--text-tertiary);
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+.next-step-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* --- Side Drawer (The Map) --- */
+.garden-drawer {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  bottom: var(--space-4);
+  width: 320px;
+  background: var(--surface-1);
+  border-right: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  transform: translateX(-110%);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 20px 0 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+}
+
+.garden-view-container.drawer-open .garden-drawer {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: var(--space-5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--divider);
+}
+
+.drawer-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.drawer-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--space-2);
+}
+
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+/* Tree styles (simplified from previous) */
+.map-tree-item {
+  margin-bottom: var(--space-2);
+}
+.map-vision {
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.map-vision:hover {
+  background: var(--bg-hover);
+}
+.map-milestone {
+  padding-left: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+/* --- Floating Tools --- */
+.floating-tools {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6) 0;
+  margin-top: var(--space-4);
+  z-index: 100;
+}
+
+.tool-fab {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  /* Glassmorphism */
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.tool-fab:hover {
+  transform: translateY(-3px) scale(1.05);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .garden-center-stage {
+    padding: var(--space-2);
+  }
+  .focus-title {
+    font-size: 1.75rem;
+  }
+  .garden-drawer {
+    width: 85%;
+  }
+  .timer-digits {
+    font-size: 3rem;
+  }
+}
+
+/* --- Overlays (Celebration & Breathing) --- */
+.celebration-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(4px);
+}
+
+.celebration-content {
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.breathing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.5s ease;
+}
+
+.breathing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.breathing-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  box-shadow: 0 0 40px rgba(161, 140, 209, 0.5);
+  transform-origin: center;
+}
+
+@keyframes breathe-anim {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

@@ -1,0 +1,310 @@
+/* ===================================
+   Map Page
+   Read-only hierarchical goal view
+   =================================== */
+
+/* Overlay */
+.map-page-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.map-page-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Panel */
+.map-page-panel {
+  width: min(900px, 90vw);
+  max-height: 85vh;
+  background: var(--surface-1);
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    0 25px 60px rgba(15, 23, 42, 0.25),
+    0 10px 20px rgba(15, 23, 42, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.map-header {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--divider);
+  background: color-mix(in srgb, var(--surface-2) 50%, transparent);
+  position: relative;
+}
+
+.map-header h2 {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.map-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: var(--space-1) 0 0;
+}
+
+.map-close-btn {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--surface-3);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-size: var(--text-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.map-close-btn:hover {
+  background: var(--surface-4);
+  color: var(--text-primary);
+}
+
+/* Body */
+.map-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-6);
+}
+
+/* Empty state */
+.map-empty {
+  text-align: center;
+  padding: var(--space-10) var(--space-5);
+  color: var(--text-tertiary);
+}
+
+.map-empty p {
+  margin: var(--space-2) 0;
+}
+
+/* Legend */
+.map-legend {
+  display: flex;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.map-legend-indicator {
+  font-size: var(--text-md);
+}
+
+.map-legend-indicator.state-active {
+  color: var(--accent-active, #22c55e);
+}
+
+.map-legend-indicator.state-resting {
+  color: var(--accent-highlight, #f59e0b);
+}
+
+.map-legend-indicator.state-dormant {
+  color: var(--text-tertiary);
+}
+
+/* Trees container */
+.map-trees {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Vision tree */
+.map-vision-tree {
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.map-vision-header {
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+
+.map-vision-gap {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  background: color-mix(in srgb, var(--accent-highlight) 15%, transparent);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--accent-highlight, #f59e0b);
+}
+
+.map-vision-aligned {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  background: color-mix(in srgb, var(--accent-active) 12%, transparent);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--accent-active, #22c55e);
+}
+
+/* Goal node */
+.map-node {
+  padding-left: calc(var(--space-4) * var(--depth, 0));
+}
+
+.map-node[data-depth="0"] {
+  --depth: 0;
+}
+
+.map-node[data-depth="1"] {
+  --depth: 1;
+}
+
+.map-node[data-depth="2"] {
+  --depth: 2;
+}
+
+.map-node[data-depth="3"] {
+  --depth: 3;
+}
+
+.map-node-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+
+.map-node-indicator {
+  font-size: var(--text-md);
+  flex-shrink: 0;
+}
+
+.map-node.state-active .map-node-indicator {
+  color: var(--accent-active, #22c55e);
+}
+
+.map-node.state-resting .map-node-indicator {
+  color: var(--accent-highlight, #f59e0b);
+}
+
+.map-node.state-dormant .map-node-indicator {
+  color: var(--text-tertiary);
+  opacity: 0.6;
+}
+
+.map-node-icon {
+  font-size: var(--text-lg);
+  flex-shrink: 0;
+}
+
+.map-node-title {
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-node.state-dormant .map-node-title {
+  opacity: 0.6;
+}
+
+.map-node-level {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+/* Children container */
+.map-node-children {
+  border-left: 2px solid var(--divider);
+  margin-left: var(--space-3);
+  padding-left: var(--space-3);
+}
+
+/* Level-specific styling */
+.map-node-vision > .map-node-content {
+  font-weight: 600;
+}
+
+.map-node-milestone > .map-node-content {
+  padding-left: var(--space-4);
+}
+
+.map-node-focus > .map-node-content {
+  padding-left: var(--space-8);
+}
+
+.map-node-intention > .map-node-content {
+  padding-left: var(--space-12);
+  font-size: var(--text-sm);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .map-page-panel {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .map-header {
+    padding: var(--space-4);
+  }
+
+  .map-body {
+    padding: var(--space-4);
+  }
+
+  .map-legend {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .map-node-content {
+    flex-wrap: wrap;
+  }
+
+  .map-node-level {
+    width: 100%;
+    margin-top: var(--space-1);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .map-page-overlay {
+    transition: none;
+  }
+}

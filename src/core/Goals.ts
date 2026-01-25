@@ -19,6 +19,12 @@ import { dirtyTracker } from "../services/DirtyTracker";
 import { debouncedGoalSync } from "../services/sync/syncHelpers";
 import { getFocusStartDate } from "../utils/goalMeta";
 import DB, { DB_STORES } from "../db";
+import {
+  validateGoalData,
+  validateGoal,
+  formatValidationErrors,
+  sanitizeString,
+} from "./Validation";
 
 function startOfDay(date: Date): Date {
   const d = new Date(date);
@@ -101,9 +107,76 @@ function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
       if (goal.dueDate) {
         const due = new Date(goal.dueDate);
         return { start: startOfDay(due), end: endOfDay(due) };
-      }
-      return { start: fallbackStart, end: fallbackEnd };
+  }
+  return { start: fallbackStart, end: fallbackEnd };
+}
+
+const PARENT_LEVEL_REQUIREMENTS: Record<GoalLevel, GoalLevel | null> = {
+  vision: null,
+  milestone: "vision",
+  focus: "milestone",
+  intention: "focus",
+};
+
+function getParentGoalById(parentId?: string | null): Goal | null {
+  if (!parentId || !State.data) return null;
+  return State.data.goals.find((g) => g.id === parentId) || null;
+}
+
+function hasCircularParent(childId: string, parent: Goal | null): boolean {
+  if (!parent || !State.data) return false;
+  const visited = new Set<string>();
+  let current: Goal | null = parent;
+
+  while (current && !visited.has(current.id)) {
+    if (current.id === childId) {
+      return true;
     }
+    visited.add(current.id);
+    current = getParentGoalById(current.parentId ?? null);
+  }
+
+  return false;
+}
+
+function ensureValidParentLink(
+  childId: string,
+  childLevel: GoalLevel,
+  parentId?: string | null,
+): Goal | null {
+  const expectedParentLevel = PARENT_LEVEL_REQUIREMENTS[childLevel];
+
+  if (expectedParentLevel === null) {
+    if (parentId) {
+      throw new Error("Vision goals cannot be linked to a parent");
+    }
+    return null;
+  }
+
+  if (!parentId) {
+    console.warn(
+      `[Goals] ${childLevel} goal (${childId}) has no parent. Expected a ${expectedParentLevel}.`,
+    );
+    return null;
+  }
+
+  const parentGoal = getParentGoalById(parentId);
+  if (!parentGoal) {
+    throw new Error(`Parent goal (${parentId}) not found`);
+  }
+
+  if (parentGoal.level !== expectedParentLevel) {
+    throw new Error(
+      `${childLevel} goals must link to a ${expectedParentLevel}; received ${parentGoal.level}`,
+    );
+  }
+
+  if (hasCircularParent(childId, parentGoal)) {
+    throw new Error("Parent link would create a circular goal hierarchy");
+  }
+
+  return parentGoal;
+}
     default:
       return { start: fallbackStart, end: fallbackEnd };
   }
@@ -171,19 +244,36 @@ export const Goals = {
   },
 
   create(goalData: GoalData): Goal {
+    // Validate input data
+    const validation = validateGoalData(goalData);
+    if (!validation.success) {
+      const errorMsg = formatValidationErrors(validation.errors);
+      console.error("[Goals] Invalid goal data:", errorMsg);
+      throw new Error(`Invalid goal data: ${errorMsg}`);
+    }
+
+    // Sanitize user-provided strings to prevent XSS
+    const sanitizedData = {
+      ...validation.data,
+      title: sanitizeString(validation.data.title),
+      description: validation.data.description
+        ? sanitizeString(validation.data.description)
+        : undefined,
+    };
+
     const now = new Date();
-    const inputYear = goalData.year ?? now.getFullYear();
-    const inputMonth = Number.isFinite(goalData.month)
-      ? (goalData.month as number)
+    const inputYear = sanitizedData.year ?? now.getFullYear();
+    const inputMonth = Number.isFinite(sanitizedData.month)
+      ? (sanitizedData.month as number)
       : now.getMonth();
 
     let month = inputMonth;
     let year = inputYear;
-    let dueDate: string | null = goalData.dueDate ?? null;
-    const tags = goalData.tags ? [...goalData.tags] : [];
-    const meta: GoalMeta = goalData.meta ? { ...goalData.meta } : {};
+    let dueDate: string | null = sanitizedData.dueDate ?? null;
+    const tags = sanitizedData.tags ? sanitizedData.tags.map(sanitizeString) : [];
+    const meta: GoalMeta = sanitizedData.meta ? { ...sanitizedData.meta } : {};
 
-    switch (goalData.level) {
+    switch (sanitizedData.level) {
       case "vision": {
         // Year-only: always align to Jan and end at Dec 31 of the chosen year.
         year = inputYear;
@@ -199,7 +289,7 @@ export const Goals = {
         year = inputYear;
         const durationMonths = Math.max(
           1,
-          Math.floor(goalData.durationMonths ?? 1),
+          Math.floor(sanitizedData.durationMonths ?? 1),
         );
         const end = endOfDay(new Date(year, month + durationMonths, 0));
         dueDate = end.toISOString();
@@ -210,10 +300,10 @@ export const Goals = {
         // Week(s): start at week-start (Mon) of provided startDate (or today), end after N weeks.
         const durationWeeks = Math.max(
           1,
-          Math.floor(goalData.durationWeeks ?? 1),
+          Math.floor(sanitizedData.durationWeeks ?? 1),
         );
-        const startBase = goalData.startDate
-          ? parseYmdLocal(goalData.startDate)
+        const startBase = sanitizedData.startDate
+          ? parseYmdLocal(sanitizedData.startDate)
           : null;
         const start = getLocalWeekStart(startBase ?? now);
         const end = endOfDay(new Date(start));
@@ -228,8 +318,8 @@ export const Goals = {
 
       case "intention": {
         // Single day: align to a specific day (default: today).
-        const day = goalData.startDate
-          ? parseYmdLocal(goalData.startDate)
+        const day = sanitizedData.startDate
+          ? parseYmdLocal(sanitizedData.startDate)
           : null;
         const baseDate = day ?? now;
         month = baseDate.getMonth();
@@ -240,15 +330,22 @@ export const Goals = {
       }
     }
 
+    const goalId = this.generateId();
+    const parentGoal = ensureValidParentLink(
+      goalId,
+      sanitizedData.level,
+      sanitizedData.parentId ?? null,
+    );
+
     const goal: Goal = {
-      id: this.generateId(),
-      title: goalData.title,
-      level: goalData.level,
-      description: goalData.description || "",
+      id: goalId,
+      title: sanitizedData.title,
+      level: sanitizedData.level,
+      description: sanitizedData.description || "",
       month,
       year,
-      category: goalData.category || null,
-      priority: (goalData.priority || "medium") as Priority,
+      category: sanitizedData.category || null,
+      priority: (sanitizedData.priority || "medium") as Priority,
       status: "not-started" as GoalStatus,
       progress: 0,
       subtasks: [],
@@ -259,15 +356,16 @@ export const Goals = {
       completedAt: null,
       lastWorkedOn: null,
       dueDate,
-      startTime: goalData.startTime || null,
-      endTime: goalData.endTime || null,
-      scheduledAt: goalData.scheduledAt ?? null,
+      startTime: sanitizedData.startTime || null,
+      endTime: sanitizedData.endTime || null,
+      scheduledAt: sanitizedData.scheduledAt ?? null,
       tags,
-      parentId: goalData.parentId ?? null,
-      parentLevel: goalData.parentLevel ?? null,
-      icon: goalData.icon,
-      activityId: goalData.activityId ?? undefined,
+      parentId: sanitizedData.parentId ?? null,
+      parentLevel: parentGoal?.level ?? sanitizedData.parentLevel ?? null,
+      icon: sanitizedData.icon,
+      activityId: sanitizedData.activityId ?? undefined,
       meta: Object.keys(meta).length > 0 ? meta : undefined,
+      commitment: sanitizedData.commitment ?? undefined,
     };
 
     if (!State.data) {
@@ -322,6 +420,11 @@ export const Goals = {
   update(goalId: string, updates: Partial<Goal>): Goal | null {
     const goal = this.getById(goalId);
     if (!goal) return null;
+
+    const targetLevel = updates.level ?? goal.level;
+    const proposedParentId =
+      updates.parentId !== undefined ? updates.parentId : goal.parentId ?? null;
+    const parentGoal = ensureValidParentLink(goalId, targetLevel, proposedParentId);
 
     // If level is being changed, re-align to new level's time scope
     if (updates.level && updates.level !== goal.level) {
@@ -402,6 +505,15 @@ export const Goals = {
     }
 
     Object.assign(goal, updates, { updatedAt: new Date().toISOString() });
+
+    if (updates.parentId !== undefined) {
+      goal.parentId = updates.parentId ?? null;
+    }
+    if (parentGoal) {
+      goal.parentLevel = parentGoal.level;
+    } else if (updates.parentId === null) {
+      goal.parentLevel = null;
+    }
 
     // Auto-calculate progress from subtasks
     if (goal.subtasks.length > 0) {
@@ -708,3 +820,32 @@ export const Goals = {
     return activeFocus || null;
   },
 };
+
+export async function ensurePlanningFocusForGoal(goal: Goal): Promise<Goal> {
+  if (goal.level === "focus") {
+    return goal;
+  }
+
+  if (goal.level === "vision" || goal.level === "milestone") {
+    const focusTitle =
+      goal.level === "vision"
+        ? `Weekly plan for: ${goal.title}`
+        : `Work on: ${goal.title}`;
+    const referenceDate = goal.dueDate ? new Date(goal.dueDate) : new Date();
+    const focusData: GoalData = {
+      title: focusTitle,
+      level: "focus",
+      description: `Planner created for ${goal.title}`,
+      parentId: goal.id,
+      parentLevel: goal.level,
+      month: referenceDate.getMonth(),
+      year: referenceDate.getFullYear(),
+      startDate: formatYmdLocal(referenceDate),
+    };
+
+    const createdFocus = Goals.create(focusData);
+    return createdFocus;
+  }
+
+  throw new Error(`Cannot plan from goal level: ${goal.level}`);
+}

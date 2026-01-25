@@ -13,6 +13,7 @@
 import { dirtyTracker } from './DirtyTracker';
 import { SupabaseService } from './supabase';
 import DB, { DB_STORES } from '../db';
+import { batchSaveMutex } from './sync/Mutex';
 import type { Goal, BrainDumpEntry, CalendarEvent } from '../types';
 
 class BatchSaveService {
@@ -62,8 +63,9 @@ class BatchSaveService {
    * Save all dirty items (private method, runs on interval)
    */
   private async saveDirtyItems(): Promise<void> {
-    // Prevent concurrent runs
-    if (this.isRunning) {
+    // Use mutex to prevent concurrent runs (more robust than boolean flag)
+    const release = batchSaveMutex.tryAcquire();
+    if (!release) {
       console.log('⏭️ Skipping batch save (previous batch still running)');
       return;
     }
@@ -99,6 +101,7 @@ class BatchSaveService {
       console.error('Batch save error:', error);
     } finally {
       this.isRunning = false;
+      release();
     }
   }
 

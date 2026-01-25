@@ -2,6 +2,8 @@
 // Error Handling System
 // ===================================
 
+import { errorReportingService } from '../services/ErrorReportingService';
+
 export enum ErrorType {
   NETWORK = 'network',
   AUTHENTICATION = 'authentication',
@@ -112,8 +114,8 @@ export class ErrorHandler {
     // Notify listeners
     this.notifyListeners(appError);
 
-    // Send to external service if critical
-    if (appError.severity === ErrorSeverity.CRITICAL) {
+    // Send to external service for high/critical errors
+    if (appError.severity === ErrorSeverity.HIGH || appError.severity === ErrorSeverity.CRITICAL) {
       void this.reportError(appError);
     }
   }
@@ -330,19 +332,11 @@ export class ErrorHandler {
   }
 
   /**
-   * Report critical errors to external service
+   * Report critical errors to external service (Sentry)
    */
   private async reportError(error: AppError): Promise<void> {
-    // In a real implementation, this would send to a service like Sentry
-    // For now, just log it
-    console.log('Critical error reported:', error);
-    
-    // You could integrate with a service like:
-    // await fetch('/api/errors', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(error)
-    // });
+    // Report to Sentry if configured
+    errorReportingService.reportAppError(error);
   }
 
   /**

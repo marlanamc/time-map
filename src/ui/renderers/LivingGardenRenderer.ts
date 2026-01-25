@@ -5,7 +5,13 @@ import { State } from "../../core/State";
 import { Goals } from "../../core/Goals";
 import { WeekReflections } from "../../core/WeekReflections";
 import { eventBus } from "../../core/EventBus";
-import type { Goal, GoalLevel, UIElements, WeekReflection, GardenLevelEmojis } from "../../types";
+import type {
+  Goal,
+  GoalLevel,
+  UIElements,
+  WeekReflection,
+  GardenLevelEmojis,
+} from "../../types";
 import { getVisionAccent } from "../../utils/goalLinkage";
 
 type AddGoalLinkedOpts = {
@@ -56,7 +62,9 @@ function buildBreadcrumb(goal: Goal): Goal[] {
   while (current && !seen.has(current.id)) {
     trail.unshift(current);
     seen.add(current.id);
-    current = current.parentId ? (Goals.getById(current.parentId) ?? null) : null;
+    current = current.parentId
+      ? (Goals.getById(current.parentId) ?? null)
+      : null;
   }
   return trail;
 }
@@ -78,7 +86,9 @@ function groupByStatus(goals: Goal[]): {
   done: Goal[];
 } {
   return {
-    todo: goals.filter((g) => g.status === "not-started" || g.status === "blocked"),
+    todo: goals.filter(
+      (g) => g.status === "not-started" || g.status === "blocked",
+    ),
     inProgress: goals.filter((g) => g.status === "in-progress"),
     done: goals.filter((g) => g.status === "done"),
   };
@@ -87,11 +97,16 @@ function groupByStatus(goals: Goal[]): {
 /** Get level emoji for display */
 function getLevelEmoji(level: GoalLevel): string {
   switch (level) {
-    case "vision": return "✨";
-    case "milestone": return "🎯";
-    case "focus": return "🔎";
-    case "intention": return "🌱";
-    default: return "📌";
+    case "vision":
+      return "✨";
+    case "milestone":
+      return "🎯";
+    case "focus":
+      return "🔎";
+    case "intention":
+      return "🌱";
+    default:
+      return "📌";
   }
 }
 
@@ -191,7 +206,8 @@ export const LivingGardenRenderer = {
     const isMobile = typeof window !== "undefined" && window.innerWidth <= 600;
 
     // Get custom emoji preferences with defaults
-    const emojiPrefs: GardenLevelEmojis = State.data?.preferences?.gardenLevelEmojis ?? {};
+    const emojiPrefs: GardenLevelEmojis =
+      State.data?.preferences?.gardenLevelEmojis ?? {};
     const levelEmojis = {
       milestone: emojiPrefs.milestone ?? "🎯",
       focus: emojiPrefs.focus ?? "🌿",
@@ -200,8 +216,9 @@ export const LivingGardenRenderer = {
 
     const getGrowthMeta = (plot: (typeof ecosystem)[number]) => {
       const totalIntentions = plot.intentions.length;
-      const doneIntentions = plot.intentions.filter((i) => i.status === "done")
-        .length;
+      const doneIntentions = plot.intentions.filter(
+        (i) => i.status === "done",
+      ).length;
       const completionRate =
         totalIntentions > 0
           ? Math.round((doneIntentions / totalIntentions) * 100)
@@ -217,7 +234,7 @@ export const LivingGardenRenderer = {
           label: "Waiting to bloom",
           sublabel: "Add your first milestone",
           growthState: "dormant",
-          completionRate
+          completionRate,
         };
       }
 
@@ -227,7 +244,7 @@ export const LivingGardenRenderer = {
           label: "Flourishing",
           sublabel: `${doneIntentions} intention${doneIntentions !== 1 ? "s" : ""} complete`,
           growthState: "blooming",
-          completionRate
+          completionRate,
         };
       }
 
@@ -237,7 +254,7 @@ export const LivingGardenRenderer = {
           label: "Taking root",
           sublabel: `${focusCount} focus${focusCount !== 1 ? "es" : ""} active`,
           growthState: "growing",
-          completionRate
+          completionRate,
         };
       }
 
@@ -246,7 +263,7 @@ export const LivingGardenRenderer = {
         label: "Just planted",
         sublabel: `${totalIntentions - doneIntentions} to go`,
         growthState: "sprouting",
-        completionRate
+        completionRate,
       };
     };
 
@@ -364,40 +381,6 @@ export const LivingGardenRenderer = {
           </div>
           <div class="living-garden-reflection-body">
             <div class="living-garden-reflection-question">
-              <h4>How did your garden grow this week?</h4>
-              <div class="living-garden-reflection-options">
-                ${[
-                  "Flourishing 🌸",
-                  "Steady growth 🌿",
-                  "Some challenges 🍂",
-                  "Dormant period ❄️",
-                ]
-                  .map((opt) => {
-                    const selected = cachedReflection?.answers?.q1 === opt;
-                    return `<button class="living-garden-reflection-option ${selected ? "is-selected" : ""}" 
-                                 data-action="set-reflection" data-q="q1" data-value="${escapeHtmlFn(opt)}">${opt}</button>`;
-                  })
-                  .join("")}
-              </div>
-            </div>
-            <div class="living-garden-reflection-question">
-              <h4>How aligned do you feel with your visions?</h4>
-              <div class="living-garden-alignment-score">
-                ${[1, 2, 3, 4, 5]
-                  .map((score) => {
-                    const selected =
-                      (cachedReflection?.answers?.alignmentScore || 0) ===
-                      score;
-                    return `<button class="living-garden-score-btn ${selected ? "is-selected" : ""}" 
-                                  data-action="set-reflection" data-q="alignmentScore" data-value="${score}">
-                            ${score}
-                          </button>`;
-                  })
-                  .join("")}
-              </div>
-            </div>
-
-            <div class="living-garden-reflection-question">
               <h4>What were your biggest wins this week?</h4>
               <textarea class="living-garden-reflection-input" 
                         data-action="input-reflection" data-q="wins" 
@@ -427,7 +410,7 @@ export const LivingGardenRenderer = {
         : "";
 
     const activeGoal = activeGoalId
-      ? Goals.getById(activeGoalId) ?? null
+      ? (Goals.getById(activeGoalId) ?? null)
       : null;
     if (activeGoalId && !activeGoal) {
       activeGoalId = null;
@@ -439,7 +422,7 @@ export const LivingGardenRenderer = {
       while (cur && !guard.has(cur.id)) {
         if (cur.parentId === ancestorId) return true;
         guard.add(cur.id);
-        cur = cur.parentId ? Goals.getById(cur.parentId) ?? null : null;
+        cur = cur.parentId ? (Goals.getById(cur.parentId) ?? null) : null;
       }
       return false;
     };
@@ -458,7 +441,8 @@ export const LivingGardenRenderer = {
           : 0;
 
       // Use goal.progress for intentions, computed rate for others
-      const progress = goal.level === "intention" ? goal.progress : completionRate;
+      const progress =
+        goal.level === "intention" ? goal.progress : completionRate;
 
       const statusLabel =
         completionRate >= 75
@@ -466,13 +450,17 @@ export const LivingGardenRenderer = {
           : completionRate >= 35
             ? "Growing"
             : "Sprouting";
-      const statusIcon = completionRate >= 75 ? "🌸" : completionRate >= 35 ? "🌿" : "🌱";
+      const statusIcon =
+        completionRate >= 75 ? "🌸" : completionRate >= 35 ? "🌿" : "🌱";
 
       // Build breadcrumb trail
       const breadcrumb = buildBreadcrumb(goal);
 
       // Calculate time logged
-      const totalMinutes = (goal.timeLog || []).reduce((sum, e) => sum + e.minutes, 0);
+      const totalMinutes = (goal.timeLog || []).reduce(
+        (sum, e) => sum + e.minutes,
+        0,
+      );
       const timeDisplay = formatTimeLogged(totalMinutes);
 
       // Subtask stats
@@ -486,13 +474,22 @@ export const LivingGardenRenderer = {
 
       // Determine what child level this goal can have
       const childLevel: GoalLevel | null =
-        goal.level === "vision" ? "milestone" :
-        goal.level === "milestone" ? "focus" :
-        goal.level === "focus" ? "intention" : null;
+        goal.level === "vision"
+          ? "milestone"
+          : goal.level === "milestone"
+            ? "focus"
+            : goal.level === "focus"
+              ? "intention"
+              : null;
 
-      const _childLevelLabel = childLevel === "milestone" ? "milestones" :
-        childLevel === "focus" ? "focuses" :
-        childLevel === "intention" ? "intentions" : "";
+      const _childLevelLabel =
+        childLevel === "milestone"
+          ? "milestones"
+          : childLevel === "focus"
+            ? "focuses"
+            : childLevel === "intention"
+              ? "intentions"
+              : "";
 
       // Get vision accent for theming
       const visionId = getVisionIdForGoal(goal);
@@ -566,13 +563,17 @@ export const LivingGardenRenderer = {
           <div class="living-garden-empty-state-icon">${childLevel === "milestone" ? "🎯" : childLevel === "focus" ? "🔎" : "🌱"}</div>
           <h3 class="living-garden-empty-state-title">Ready to break this down?</h3>
           <p class="living-garden-empty-state-text">
-            ${goal.level === "vision"
-              ? "Add milestones to turn this vision into achievable monthly goals."
-              : goal.level === "milestone"
-                ? "Add focuses to create weekly action items for this milestone."
-                : "Add intentions to plan your daily actions."}
+            ${
+              goal.level === "vision"
+                ? "Add milestones to turn this vision into achievable monthly goals."
+                : goal.level === "milestone"
+                  ? "Add focuses to create weekly action items for this milestone."
+                  : "Add intentions to plan your daily actions."
+            }
           </p>
-          ${childLevel && onAddGoalLinked ? `
+          ${
+            childLevel && onAddGoalLinked
+              ? `
             <button class="living-garden-btn-primary living-garden-empty-state-cta"
                     data-action="add-child"
                     data-parent-id="${escapeHtmlFn(goal.id)}"
@@ -580,7 +581,9 @@ export const LivingGardenRenderer = {
                     data-child-level="${childLevel}">
               Add ${childLevel === "milestone" ? "a milestone" : childLevel === "focus" ? "a focus" : "an intention"}
             </button>
-          ` : ""}
+          `
+              : ""
+          }
         </div>
       `;
 

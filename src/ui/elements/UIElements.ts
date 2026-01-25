@@ -54,6 +54,30 @@ export function cacheElements(): UIElements {
     yearProgressValue: document.getElementById(
       "yearProgressValue"
     ) as HTMLElement | null,
+    nowTimelineWidget: document.getElementById(
+      "nowTimelineWidget"
+    ) as HTMLElement | null,
+    nowTimelineBar: document.getElementById(
+      "nowTimelineBar"
+    ) as HTMLElement | null,
+    nowTimelineFill: document.getElementById(
+      "nowTimelineFill"
+    ) as HTMLElement | null,
+    nowTimelineMarker: document.getElementById(
+      "nowTimelineMarker"
+    ) as HTMLElement | null,
+    nowTimelineLabel: document.getElementById(
+      "nowTimelineLabel"
+    ) as HTMLElement | null,
+    nowTimelineStart: document.getElementById(
+      "nowTimelineStart"
+    ) as HTMLElement | null,
+    nowTimelineRemaining: document.getElementById(
+      "nowTimelineRemaining"
+    ) as HTMLElement | null,
+    nowTimelineEnd: document.getElementById(
+      "nowTimelineEnd"
+    ) as HTMLElement | null,
     zoomLevel: document.getElementById("zoomLevel") as HTMLElement | null,
     affirmationText: document.getElementById(
       "affirmationText"

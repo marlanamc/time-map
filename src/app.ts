@@ -16,6 +16,7 @@ import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import { ReminderService } from "./services/ReminderService";
 import { eventBus } from "./core/EventBus";
 import type { SharePayload } from "./utils/share";
+import { initErrorReporting, errorReportingService } from "./services/ErrorReportingService";
 
 // Removed duplicate interfaces - now imported from types.ts
 
@@ -82,6 +83,14 @@ import { showWeeklyReview } from "./features/weeklyReview";
 // Initialize App
 // ============================================
 document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize error reporting first (before any errors can occur)
+  // Vite injects these at build time
+  initErrorReporting(
+    import.meta.env.VITE_SENTRY_DSN,
+    import.meta.env.MODE,
+    import.meta.env.VITE_APP_VERSION
+  );
+
   const isIosDevice =
     /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
   if (isIosDevice) {
@@ -143,6 +152,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       UI.updateSyncStatus?.("local");
       // Update support panel user info
       UI.getSupportPanel()?.updateUserInfo();
+      // Clear user context from error reporting
+      errorReportingService.setUser(null);
       location.reload();
     } else if (event === "SIGNED_IN" && !State.data) {
       // Handle sign in (e.g., from another tab or after session refresh)
@@ -157,6 +168,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       UI.updateSyncStatus?.(isSupabaseConfigured ? "synced" : "local");
       // Update support panel user info
       UI.getSupportPanel()?.updateUserInfo();
+      // Set user context for error reporting (use ID only, no PII)
+      const user = await SupabaseService.getUser();
+      if (user) {
+        errorReportingService.setUser({ id: user.id });
+      }
     } else if (event === "TOKEN_REFRESHED") {
       console.log("Session token refreshed");
       // Hide auth modal if it's visible (session was restored)

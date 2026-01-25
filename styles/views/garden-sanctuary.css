@@ -1,0 +1,843 @@
+/* ===================================
+   Garden Sanctuary Styles
+   A calm, visual sanctuary where the garden IS the data
+   =================================== */
+
+/* ===================================
+   Container & Layout
+   =================================== */
+
+.sanctuary-container {
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.sanctuary {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.sanctuary--overview {
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.sanctuary--detail {
+  justify-content: flex-start;
+  gap: var(--space-6);
+  overflow-y: auto;
+}
+
+/* ===================================
+   Garden Canvas
+   =================================== */
+
+.sanctuary-garden {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  max-height: 60vh;
+  width: 100%;
+}
+
+.sanctuary-garden__plots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  justify-content: center;
+  align-items: flex-end;
+  padding: var(--space-6);
+}
+
+/* ===================================
+   Plant Elements
+   =================================== */
+
+.sanctuary-plant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 120px;
+  max-width: 180px;
+}
+
+.sanctuary-plant:hover {
+  background: var(--surface-2);
+  transform: translateY(-4px);
+}
+
+.sanctuary-plant:focus-visible {
+  outline: 3px solid var(--plant-accent, var(--primary));
+  outline-offset: 4px;
+}
+
+.sanctuary-plant.is-selected {
+  background: var(--surface-1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Plant Visual Container */
+.sanctuary-plant__visual {
+  position: relative;
+  width: 100px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sanctuary-plant__icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  z-index: 2;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.4s ease;
+}
+
+.sanctuary-plant:hover .sanctuary-plant__icon {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.sanctuary-plant__growth {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Growth animations */
+.sanctuary-stem {
+  animation: sanctuary-sway 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.sanctuary-leaf {
+  animation: sanctuary-leaf-sway 3s ease-in-out infinite;
+}
+
+.sanctuary-leaf:nth-child(odd) {
+  animation-delay: -1.5s;
+}
+
+.sanctuary-bloom {
+  animation: sanctuary-bloom-pulse 3s ease-in-out infinite;
+}
+
+.sanctuary-bloom-center {
+  animation: sanctuary-bloom-glow 2s ease-in-out infinite;
+}
+
+/* Plant Labels */
+.sanctuary-plant__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  text-align: center;
+}
+
+.sanctuary-plant__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sanctuary-plant__state {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* Growth State Variations */
+.sanctuary-plant--seed .sanctuary-plant__visual {
+  opacity: 0.6;
+}
+
+.sanctuary-plant--sprouting .sanctuary-plant__visual {
+  opacity: 0.75;
+}
+
+.sanctuary-plant--growing .sanctuary-plant__visual {
+  opacity: 0.9;
+}
+
+.sanctuary-plant--blooming .sanctuary-plant__visual {
+  opacity: 1;
+}
+
+.sanctuary-plant--blooming::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--plant-accent) 15%, transparent 85%) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===================================
+   Detail View
+   =================================== */
+
+.sanctuary-detail {
+  background: var(--surface-1);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  animation: sanctuary-fade-in 0.4s ease-out;
+}
+
+.sanctuary-detail__close {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: var(--space-2) var(--space-3);
+  margin: calc(-1 * var(--space-2)) 0 var(--space-4) calc(-1 * var(--space-3));
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.sanctuary-detail__close:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.sanctuary-detail__header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.sanctuary-detail__icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.sanctuary-detail__title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.sanctuary-detail__desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Progress Ring */
+.sanctuary-detail__progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.sanctuary-detail__ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.sanctuary-detail__ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.sanctuary-detail__ring-progress {
+  transition: stroke-dasharray 1s ease-out;
+}
+
+.sanctuary-detail__ring-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--detail-accent, var(--primary));
+}
+
+.sanctuary-detail__growth-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Stats */
+.sanctuary-detail__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-bottom: var(--space-6);
+}
+
+.sanctuary-detail__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.sanctuary-detail__stat .stat-icon {
+  font-size: 1rem;
+}
+
+/* Milestone Tree */
+.sanctuary-detail__tree {
+  border-top: 1px solid var(--divider);
+  padding-top: var(--space-5);
+}
+
+.sanctuary-detail__tree-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-4);
+}
+
+.sanctuary-detail__branches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sanctuary-branch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  transition: background 0.2s ease;
+}
+
+.sanctuary-branch.is-complete {
+  background: color-mix(in srgb, var(--success) 10%, var(--surface-2) 90%);
+}
+
+.sanctuary-branch__connector {
+  width: 4px;
+  height: 24px;
+  background: var(--branch-color, var(--divider));
+  border-radius: var(--radius-full);
+  opacity: 0.3;
+}
+
+.sanctuary-branch.is-complete .sanctuary-branch__connector {
+  opacity: 0.6;
+}
+
+.sanctuary-branch__content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.sanctuary-branch__icon {
+  font-size: 1rem;
+}
+
+.sanctuary-branch__title {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.sanctuary-branch__count {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* ===================================
+   Reflection Corner
+   =================================== */
+
+.sanctuary-reflection {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  max-width: 280px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  animation: sanctuary-slide-up 0.5s ease-out;
+  z-index: 10;
+}
+
+.sanctuary-reflection__prompt {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+  line-height: 1.4;
+}
+
+.sanctuary-reflection__rating {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+.sanctuary-reflection__dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--divider);
+  background: var(--surface-1);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sanctuary-reflection__dot:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: scale(1.1);
+}
+
+.sanctuary-reflection__dot.is-selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-on-accent);
+  transform: scale(1.1);
+}
+
+.sanctuary-reflection__dot:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===================================
+   Quiet Pulse (Streak & Blooms)
+   =================================== */
+
+.sanctuary-pulse {
+  position: fixed;
+  top: var(--space-6);
+  right: var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  z-index: 10;
+}
+
+.sanctuary-pulse__item {
+  padding: var(--space-2) var(--space-3);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+}
+
+.sanctuary-pulse__blooms {
+  letter-spacing: -0.1em;
+}
+
+.sanctuary-pulse__streak {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2);
+}
+
+.sanctuary-pulse__vine {
+  display: block;
+  width: calc(var(--vine-length, 1) * 4px + 20px);
+  max-width: 140px;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--success) 0%,
+    color-mix(in srgb, var(--success) 60%, var(--primary) 40%) 100%
+  );
+  border-radius: var(--radius-full);
+  position: relative;
+}
+
+.sanctuary-pulse__vine::after {
+  content: "🌿";
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+}
+
+/* ===================================
+   Start Button
+   =================================== */
+
+.sanctuary-start {
+  position: fixed;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.sanctuary-start__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface-1);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.sanctuary-start__btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-on-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.3);
+}
+
+.sanctuary-start__btn:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.sanctuary-start__icon {
+  font-size: 1.1rem;
+}
+
+.sanctuary-start__label {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===================================
+   Empty State
+   =================================== */
+
+.sanctuary-empty {
+  text-align: center;
+  padding: var(--space-10);
+  animation: sanctuary-fade-in 0.6s ease-out;
+}
+
+.sanctuary-empty__icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-4);
+  opacity: 0.6;
+}
+
+.sanctuary-empty__title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.sanctuary-empty__text {
+  font-size: var(--text-base);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+/* ===================================
+   Animations - Calm & Organic
+   =================================== */
+
+@keyframes sanctuary-sway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1deg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
+}
+
+@keyframes sanctuary-leaf-sway {
+  0%, 100% {
+    transform: rotate(0deg) translateX(0);
+  }
+  50% {
+    transform: rotate(2deg) translateX(1px);
+  }
+}
+
+@keyframes sanctuary-bloom-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.6;
+  }
+}
+
+@keyframes sanctuary-bloom-glow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes sanctuary-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sanctuary-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   Respect Reduced Motion
+   =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .sanctuary-plant,
+  .sanctuary-detail,
+  .sanctuary-reflection,
+  .sanctuary-start__btn,
+  .sanctuary-reflection__dot {
+    transition: none;
+  }
+
+  .sanctuary-stem,
+  .sanctuary-leaf,
+  .sanctuary-bloom,
+  .sanctuary-bloom-center {
+    animation: none;
+  }
+
+  .sanctuary-detail,
+  .sanctuary-reflection,
+  .sanctuary-empty {
+    animation: none;
+  }
+}
+
+/* ===================================
+   Responsive - Mobile
+   =================================== */
+
+@media (max-width: 768px) {
+  .sanctuary {
+    padding: var(--space-4);
+  }
+
+  .sanctuary-garden__plots {
+    gap: var(--space-4);
+    padding: var(--space-3);
+  }
+
+  .sanctuary-plant {
+    min-width: 100px;
+    max-width: 140px;
+    padding: var(--space-3);
+  }
+
+  .sanctuary-plant__visual {
+    width: 80px;
+    height: 100px;
+  }
+
+  .sanctuary-plant__icon {
+    font-size: 1.5rem;
+  }
+
+  .sanctuary-plant__title {
+    font-size: var(--text-xs);
+    max-width: 100px;
+  }
+
+  /* Move reflection to bottom of screen */
+  .sanctuary-reflection {
+    position: fixed;
+    bottom: 80px; /* Above start button */
+    right: var(--space-4);
+    left: var(--space-4);
+    max-width: none;
+  }
+
+  /* Stack pulse items */
+  .sanctuary-pulse {
+    top: var(--space-4);
+    right: var(--space-4);
+  }
+
+  /* Full width start button on mobile */
+  .sanctuary-start {
+    left: var(--space-4);
+    right: var(--space-4);
+    transform: none;
+  }
+
+  .sanctuary-start__btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Detail view adjustments */
+  .sanctuary-detail {
+    padding: var(--space-4);
+  }
+
+  .sanctuary-detail__icon {
+    font-size: 2.5rem;
+  }
+
+  .sanctuary-detail__title {
+    font-size: var(--text-xl);
+  }
+
+  .sanctuary-detail__ring {
+    width: 100px;
+    height: 100px;
+  }
+
+  .sanctuary-detail__ring-value {
+    font-size: var(--text-xl);
+  }
+}
+
+/* ===================================
+   Small Mobile (under 400px)
+   =================================== */
+
+@media (max-width: 400px) {
+  .sanctuary-garden__plots {
+    gap: var(--space-3);
+  }
+
+  .sanctuary-plant {
+    min-width: 80px;
+    max-width: 110px;
+  }
+
+  .sanctuary-plant__visual {
+    width: 60px;
+    height: 80px;
+  }
+
+  .sanctuary-plant__icon {
+    font-size: 1.2rem;
+  }
+
+  .sanctuary-reflection {
+    bottom: 70px;
+    padding: var(--space-3);
+  }
+
+  .sanctuary-reflection__prompt {
+    font-size: var(--text-xs);
+  }
+
+  .sanctuary-reflection__dot {
+    width: 32px;
+    height: 32px;
+    font-size: var(--text-xs);
+  }
+}
+
+/* ===================================
+   Dark Mode Adjustments
+   =================================== */
+
+:root.dark-mode .sanctuary-plant--blooming::after {
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--plant-accent) 10%, transparent 90%) 0%,
+    transparent 70%
+  );
+}
+
+:root.dark-mode .sanctuary-reflection {
+  background: color-mix(in srgb, var(--surface-1) 90%, transparent 10%);
+}
+
+:root.dark-mode .sanctuary-pulse__item {
+  background: color-mix(in srgb, var(--surface-1) 90%, transparent 10%);
+}
+
+:root.dark-mode .sanctuary-start__btn {
+  background: var(--surface-2);
+}

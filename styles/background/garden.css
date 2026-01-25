@@ -17,76 +17,89 @@
 .garden-sky {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom,
+    background: var(--garden-sky-gradient);
+    transition: background 1s ease-out;
+}
+
+:root {
+    --garden-sky-gradient: linear-gradient(to bottom,
             var(--seasonal-bg) 0%,
             var(--bg-base) 100%);
-    transition: background 1s ease-out;
 }
 
 /* Time-based sky gradients */
 :root.time-dawn:not(.dark-mode) .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #A9C6D8 0%,
             #D7C1CD 50%,
             var(--surface-0) 100%);
+    background: var(--garden-sky-gradient);
 }
 
 :root.dark-mode.time-dawn .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #B8D4E8 0%,
             #E8C8D8 50%,
             #F0E8D8 100%);
+    background: var(--garden-sky-gradient);
 }
 
 :root.time-morning:not(.dark-mode) .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #79B6D2 0%,
             #A2CBD3 50%,
             var(--surface-0) 100%);
+    background: var(--garden-sky-gradient);
 }
 
 :root.dark-mode.time-morning .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #87CEEB 0%,
             #B0E0E6 50%,
             #E8F4F8 100%);
+    background: var(--garden-sky-gradient);
 }
 
 :root.time-afternoon:not(.dark-mode) .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #3E7FC6 0%,
             #79B6D2 50%,
             var(--surface-0) 100%);
+    background: var(--garden-sky-gradient);
 }
 
 :root.dark-mode.time-afternoon .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #4A90E2 0%,
             #87CEEB 50%,
             #E8F4F8 100%);
+    background: var(--garden-sky-gradient);
 }
 
 :root.time-evening:not(.dark-mode) .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #E48A5B 0%,
             #EFB57A 30%,
             #E7B09C 70%,
             var(--surface-0) 100%);
+    background: var(--garden-sky-gradient);
 }
 
 :root.dark-mode.time-evening .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #FF8C42 0%,
             #FFB347 30%,
             #F4A989 70%,
             #D9C8B8 100%);
+    background: var(--garden-sky-gradient);
 }
 
 :root.time-night .garden-sky {
-    background: linear-gradient(to bottom,
+    --garden-sky-gradient: linear-gradient(to bottom,
             #0A1A2E 0%,
             #16213E 40%,
             #1A2332 100%);
+    background: var(--garden-sky-gradient);
 }
 
 .garden-backdrop {

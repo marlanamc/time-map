@@ -12,6 +12,7 @@
 
 import type { Goal, BrainDumpEntry, CalendarEvent } from '../types';
 import { SupabaseService } from './supabase';
+import { syncMutex } from './sync/Mutex';
 
 interface QueuedOperation {
   id: string;
@@ -244,8 +245,15 @@ class SyncQueue {
    * Process all queued operations
    */
   async processQueue(): Promise<void> {
-    if (this.processing) return;
+    // Use mutex to prevent concurrent processing (more robust than boolean flag)
+    const release = syncMutex.tryAcquire();
+    if (!release) {
+      // Already processing
+      return;
+    }
+
     if (this.queue.length === 0) {
+      release();
       this.emitStatus(navigator.onLine ? 'synced' : 'offline');
       return;
     }
@@ -260,40 +268,43 @@ class SyncQueue {
 
     console.log(`🔄 Processing ${operations.length} queued operations...`);
 
-    for (const op of operations) {
-      try {
-        await this.executeOperation(op);
+    try {
+      for (const op of operations) {
+        try {
+          await this.executeOperation(op);
 
-        // Remove from queue on success
-        this.queue = this.queue.filter(q => q.id !== op.id);
-        succeededCount++;
-        console.log(`  ✓ Synced ${op.entity} ${op.type}`);
-      } catch (error) {
-        console.error(`  ✗ Failed to sync ${op.entity}:`, error);
-        hadFailure = true;
+          // Remove from queue on success
+          this.queue = this.queue.filter(q => q.id !== op.id);
+          succeededCount++;
+          console.log(`  ✓ Synced ${op.entity} ${op.type}`);
+        } catch (error) {
+          console.error(`  ✗ Failed to sync ${op.entity}:`, error);
+          hadFailure = true;
 
-        op.retries++;
-        if (op.retries < this.MAX_RETRIES) {
-          retryable.push(op);
-          console.log(`  ⏳ Will retry (attempt ${op.retries}/${this.MAX_RETRIES})`);
-        } else {
-          console.error(`  ❌ Operation failed after ${this.MAX_RETRIES} retries:`, op);
-          this.failures.push(op);
-          this.saveFailures();
-          this.emitSyncError(op);
+          op.retries++;
+          if (op.retries < this.MAX_RETRIES) {
+            retryable.push(op);
+            console.log(`  ⏳ Will retry (attempt ${op.retries}/${this.MAX_RETRIES})`);
+          } else {
+            console.error(`  ❌ Operation failed after ${this.MAX_RETRIES} retries:`, op);
+            this.failures.push(op);
+            this.saveFailures();
+            this.emitSyncError(op);
+          }
         }
       }
+
+      // Keep failed operations in queue
+      this.queue = retryable;
+      this.saveQueue();
+
+      if (succeededCount > 0) {
+        console.log(`✓ Successfully synced ${succeededCount}/${operations.length} operations`);
+      }
+    } finally {
+      this.processing = false;
+      release();
     }
-
-    // Keep failed operations in queue
-    this.queue = retryable;
-    this.saveQueue();
-
-    if (succeededCount > 0) {
-      console.log(`✓ Successfully synced ${succeededCount}/${operations.length} operations`);
-    }
-
-    this.processing = false;
 
     if (hadFailure) {
       this.emitStatus('error');

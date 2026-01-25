@@ -37,12 +37,17 @@ export interface EventRegistry {
   "goal:created": { goalId: string };
   "goal:updated": { goalId: string };
   "goal:deleted": { goalId: string };
+  "garden:goal-archived": { goalId: string };
+  "garden:goal-revived": { goalId: string };
 
   // UI events
   "ui:render": { transition?: boolean };
   "ui:toast": { icon: string; message: string; onClick?: () => void };
   "ui:celebrate": { icon: string; title: string; message: string };
   "ui:checkin-due": { weekNum: number; weekYear: number; message: string };
+  "garden:plan-requested": { goalId?: string | null };
+  "garden:review-requested": void;
+  "garden:map-requested": void;
 
   // Auth events
   "auth:login": { userId: string };

@@ -3,6 +3,7 @@ import { getSupabaseClient } from "./client";
 import { cacheService } from "../CacheService";
 import { AuthenticationError, DatabaseError } from "../errors";
 import { authService } from "./AuthService";
+import { conflictDetector } from "../sync/ConflictDetector";
 import type { Goal } from "../../types";
 import type { GoalRow } from "../../types/database";
 
@@ -125,6 +126,36 @@ export class GoalsService {
 
     try {
       const supabase = await getSupabaseClient();
+
+      // Check for conflicts: fetch remote version and compare timestamps
+      try {
+        const { data: remoteGoal } = await supabase
+          .from("goals")
+          .select("updated_at, title")
+          .eq("id", goal.id)
+          .single();
+
+        if (remoteGoal?.updated_at) {
+          const conflict = conflictDetector.detectConflict(
+            "goal",
+            goal.id,
+            goal.updatedAt,
+            remoteGoal.updated_at,
+            goal.title,
+          );
+
+          if (conflict && conflict.resolution === "remote_wins") {
+            // Remote is newer - our save will overwrite it anyway (last-write-wins)
+            // but user has been notified via the conflict detector
+            console.log(
+              `[GoalsService] Conflict detected for "${goal.title}" - local version will overwrite remote`,
+            );
+          }
+        }
+      } catch (conflictErr) {
+        // Goal doesn't exist remotely yet, or error checking - continue with save
+        console.debug("[GoalsService] Conflict check skipped:", conflictErr);
+      }
 
       // Verify schema before attempting save (only log warning, don't block)
       // This helps diagnose issues but doesn't prevent saves if schema is partially correct

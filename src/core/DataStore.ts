@@ -3,6 +3,11 @@
 // ===================================
 import type { AppData } from '../types';
 import { VIEWS } from '../config';
+import {
+  validateAppData,
+  validateGoalsArray,
+  formatValidationErrors,
+} from './Validation';
 
 export class DataStore {
   private data: AppData | null = null;
@@ -202,19 +207,68 @@ export class DataStore {
   }
 
   /**
-   * Import data from backup
+   * Import data from backup with validation
    */
-  importData(importData: AppData): void {
-    // Validate imported data structure
-    const defaults = this.createDefaultData();
-    const validatedData = { ...defaults, ...importData };
-    validatedData.createdAt = importData.createdAt || new Date().toISOString();
-    
+  importData(importData: AppData): { success: boolean; errors?: string } {
     // Remove export timestamp if present
-    if ('exportedAt' in validatedData) {
-      delete (validatedData as any).exportedAt;
+    const dataToImport = { ...importData };
+    if ('exportedAt' in dataToImport) {
+      delete (dataToImport as any).exportedAt;
     }
-    
+
+    // Validate the imported data structure
+    const validation = validateAppData(dataToImport);
+    if (!validation.success) {
+      const errorMsg = formatValidationErrors(validation.errors);
+      console.warn('[DataStore] Import validation failed:', errorMsg);
+
+      // Attempt to salvage valid data by merging with defaults
+      const defaults = this.createDefaultData();
+      const salvagedData = { ...defaults, ...dataToImport };
+      salvagedData.createdAt = dataToImport.createdAt || new Date().toISOString();
+
+      // Filter out invalid goals
+      if (Array.isArray(dataToImport.goals)) {
+        const { valid, invalid } = validateGoalsArray(dataToImport.goals);
+        if (invalid.length > 0) {
+          console.warn(`[DataStore] Filtered out ${invalid.length} invalid goals during import`);
+        }
+        salvagedData.goals = valid as AppData['goals'];
+      }
+
+      this.setData(salvagedData);
+      return {
+        success: true,
+        errors: `Some data was invalid and filtered: ${errorMsg}`
+      };
+    }
+
+    // Data is valid, import as-is with defaults for missing fields
+    const defaults = this.createDefaultData();
+    const validatedData = { ...defaults, ...validation.data } as AppData;
+    validatedData.createdAt = validation.data.createdAt || new Date().toISOString();
+
     this.setData(validatedData);
+    return { success: true };
+  }
+
+  /**
+   * Validate current data and log any issues
+   * @returns true if data is valid, false otherwise
+   */
+  validateCurrentData(): boolean {
+    if (!this.data) {
+      return true; // No data is technically valid (empty state)
+    }
+
+    const result = validateAppData(this.data);
+    if (!result.success) {
+      console.warn(
+        '[DataStore] Current data validation failed:',
+        formatValidationErrors(result.errors)
+      );
+      return false;
+    }
+    return true;
   }
 }
