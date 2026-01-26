@@ -373,32 +373,32 @@
    - Light mode + time-night → light text (dark sky)
    =================================== */
 
-/* Dark mode base → Midnight Moss with warm amber glow */
+/* Dark mode base → Nebula Oni: Glacial Blue + Sakura Pink */
 :root.dark-mode {
-  --surface-0: #1a1c18;  /* Deep charcoal with olive undertone */
-  --surface-1: #222420;  /* Moss-stone card */
-  --surface-2: #2a2d27;  /* Elevated moss */
-  --divider: rgba(200, 195, 170, 0.12);  /* Warm olive-tinted border */
+  --surface-0: #0d1117;  /* Glacial blue - deep, dark, cool */
+  --surface-1: #161b22;  /* Glacial blue card */
+  --surface-2: #1c2128;  /* Elevated glacial blue */
+  --divider: rgba(255, 110, 199, 0.15);  /* Sakura pink-tinted border */
 
-  --bg-base: #1a1c18;
-  --bg-elevated: #222420;
-  --bg-surface: rgba(34, 36, 32, 0.82);
-  --bg-hover: rgba(42, 45, 39, 0.86);
-  --bg-active: rgba(50, 54, 47, 0.90);
+  --bg-base: #0d1117;
+  --bg-elevated: #161b22;
+  --bg-surface: rgba(22, 27, 34, 0.82);
+  --bg-hover: rgba(33, 38, 45, 0.86);
+  --bg-active: rgba(48, 54, 61, 0.90);
 
-  --glass-bg: rgba(34, 36, 32, 0.75);  /* Moss-tinted glass */
-  --glass-border: rgba(235, 190, 120, 0.22);  /* Warm honey glow */
-  --glass-shine: rgba(245, 210, 145, 0.12);  /* Golden highlight */
+  --glass-bg: rgba(22, 27, 34, 0.75);  /* Glacial glass */
+  --glass-border: rgba(255, 110, 199, 0.24);  /* Sakura pink glow */
+  --glass-shine: rgba(255, 150, 220, 0.14);  /* Sakura highlight */
 
-  /* Warm accent palette for dark mode */
-  --accent-button: #d4a65a;  /* Warm gold instead of cool sky */
-  --accent-active: #89a876;  /* Warm sage instead of blue-green */
-  --accent-border: #e8ba7a;  /* Amber instead of sky blue */
-  --accent-highlight: #fb7185; /* Rose pink for highlights */
-  --accent-link: #818cf8; /* Indigo for links */
-  --accent-badge: #e77d3e; /* Sunset orange for badges */
-  --accent-progress: #6ee7b7; /* Mint for progress */
-  --accent-icon: #8b5cf6; /* Violet for icons */
+  /* Nebula Oni accent palette - vibrant Sakura pink primary */
+  --accent-button: #ff6ec7;  /* Sakura pink for primary */
+  --accent-active: #ff85d4;  /* Lighter sakura for active */
+  --accent-border: #ff6ec7;  /* Sakura pink for borders */
+  --accent-highlight: #ff6ec7; /* Sakura pink for highlights */
+  --accent-link: #58a6ff; /* Cyan/blue for links */
+  --accent-badge: #ff6ec7; /* Sakura pink for badges */
+  --accent-progress: #58a6ff; /* Cyan for progress */
+  --accent-icon: #ff6ec7; /* Sakura pink for icons */
 
   --accent-stroke: var(--accent-button);
   --accent-fill: var(--accent-button);
@@ -409,18 +409,18 @@
   );
   --accent-badge-fill: var(--accent-badge);
 
-  --text-primary: rgba(248, 246, 240, 0.95);  /* Warm off-white */
-  --text-secondary: rgba(230, 225, 210, 0.75);  /* Cream secondary */
-  --text-tertiary: rgba(210, 205, 190, 0.60);  /* Muted cream */
-  --text-ghost: rgba(190, 185, 170, 0.45);  /* Subtle sage-gray */
+  --text-primary: rgba(230, 237, 243, 0.97);  /* Cool light gray-blue */
+  --text-secondary: rgba(200, 209, 220, 0.82);  /* Cool muted gray-blue */
+  --text-tertiary: rgba(139, 148, 158, 0.70);  /* Muted cool tone */
+  --text-ghost: rgba(110, 118, 129, 0.50);  /* Subtle gray */
   /* Dark UI uses lighter accents; use dark ink for legible text on them */
-  --text-on-accent: rgba(8, 23, 39, 0.92);
+  --text-on-accent: rgba(255, 255, 255, 0.92);
 
-  --shadow-xs: 0 1px 3px rgba(10, 15, 10, 0.50);
-  --shadow-sm: 0 4px 14px rgba(10, 15, 10, 0.60);
-  --shadow-md: 0 10px 30px rgba(10, 15, 10, 0.68);
-  --shadow-lg: 0 20px 50px rgba(10, 15, 10, 0.75);
-  --shadow-xl: 0 36px 90px rgba(10, 15, 10, 0.82);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.50);
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.60);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.68);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.75);
+  --shadow-xl: 0 36px 90px rgba(0, 0, 0, 0.82);
 
   --month-card-bg: rgba(17, 30, 45, 0.3);
   --month-card-bg-hover: rgba(24, 40, 58, 0.42);
@@ -774,12 +774,12 @@
   --lift-shadow: var(--shadow-md);
 }
 
-/* Liquid glass effects for dark mode - Midnight Moss with Amber Glow */
+/* Liquid glass effects for dark mode - Nebula Oni: Glacial Blue + Sakura Pink */
 :root.dark-mode {
   --liquid-glass-blur: 16px;
-  --liquid-glass-bg: rgba(34, 36, 32, 0.75);  /* Moss-tinted glass */
-  --liquid-glass-border: rgba(220, 175, 100, 0.26);  /* Deeper amber */
-  --liquid-glass-shine: rgba(245, 210, 145, 0.10);  /* Honey shine */
+  --liquid-glass-bg: rgba(22, 27, 34, 0.75);  /* Glacial glass */
+  --liquid-glass-border: rgba(255, 110, 199, 0.28);  /* Sakura pink */
+  --liquid-glass-shine: rgba(255, 150, 220, 0.12);  /* Sakura shine */
 
   --intention-pill-bg: var(--liquid-glass-bg);
   --intention-pill-border: 1px solid var(--liquid-glass-border);
@@ -787,29 +787,29 @@
   --task-item-bg: var(--surface-1);
   --task-item-expanded-bg: var(--surface-2);
 
-  --panel-bg: rgba(34, 36, 32, 0.88);
-  --panel-backdrop: rgba(0, 0, 0, 0.8);
+  --panel-bg: rgba(22, 27, 34, 0.88);
+  --panel-backdrop: rgba(0, 0, 0, 0.85);
 
   --glass-panel-bg: color-mix(
     in srgb,
-    rgba(34, 36, 32, 0.88),
-    rgba(245, 210, 145, 0.05)
+    rgba(22, 27, 34, 0.88),
+    rgba(255, 110, 199, 0.05)
   );
-  --glass-panel-border: rgba(235, 190, 120, 0.24);
-  --glass-panel-shadow: 0 12px 30px rgba(10, 15, 10, 0.70);
+  --glass-panel-border: rgba(255, 110, 199, 0.26);
+  --glass-panel-shadow: 0 12px 30px rgba(0, 0, 0, 0.70);
   --glass-button-bg: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--accent-button) 70%, rgba(245, 210, 145, 0.15)) 0%,
-    color-mix(in srgb, var(--accent-progress) 75%, rgba(10, 15, 10, 0.85)) 100%
+    color-mix(in srgb, var(--accent-button) 70%, rgba(255, 150, 220, 0.15)) 0%,
+    color-mix(in srgb, var(--accent-progress) 75%, rgba(0, 0, 0, 0.85)) 100%
   );
-  --glass-button-border: rgba(235, 190, 120, 0.30);
-  --glass-button-shadow: 0 14px 32px rgba(10, 15, 10, 0.65);
+  --glass-button-border: rgba(255, 110, 199, 0.32);
+  --glass-button-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
   --glass-button-glow: color-mix(
     in srgb,
     var(--accent-progress) 70%,
-    rgba(245, 210, 145, 0.25)
+    rgba(255, 150, 220, 0.25)
   );
-  --glass-pill-bg: rgba(34, 36, 32, 0.70);
-  --glass-pill-border: rgba(235, 190, 120, 0.20);
-  --glass-pill-shadow: 0 10px 24px rgba(10, 15, 10, 0.55);
+  --glass-pill-bg: rgba(22, 27, 34, 0.70);
+  --glass-pill-border: rgba(255, 110, 199, 0.22);
+  --glass-pill-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
 }
