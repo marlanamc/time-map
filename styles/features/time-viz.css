@@ -4,107 +4,107 @@
 
 /* Time Garden Plot - Hour Blocks */
 .time-garden-plot {
-    margin-top: var(--space-4);
-    padding: var(--space-3);
-    background: var(--glass-bg);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--glass-border);
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  background: var(--glass-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
 }
 
 .plot-label {
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
 }
 
 .hour-blocks,
 .hour-blocks-container {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-    justify-content: center;
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .hour-block {
-    font-size: 24px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-sm);
-    transition: all var(--duration-normal) var(--ease-out);
-    cursor: default;
-    position: relative;
+  font-size: 24px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-normal) var(--ease-out);
+  cursor: default;
+  position: relative;
 }
 
 .hour-block.hour-past {
-    filter: saturate(1.2) brightness(1.1);
-    animation: bloom-complete 0.5s ease-out;
+  filter: saturate(1.2) brightness(1.1);
+  animation: bloom-complete 0.5s ease-out;
 }
 
 .hour-block.hour-current {
-    transform: scale(1.3);
-    filter: drop-shadow(0 0 8px var(--seasonal-flower));
-    animation: bloom-pulse 2s ease-in-out infinite;
+  transform: scale(1.3);
+  filter: drop-shadow(0 0 8px var(--seasonal-flower));
+  animation: bloom-pulse 2s ease-in-out infinite;
 }
 
 .hour-block.hour-future {
-    opacity: 0.5;
-    filter: saturate(0.6);
+  opacity: 0.5;
+  filter: saturate(0.6);
 }
 
 .hour-block:hover {
-    transform: scale(1.2);
+  transform: scale(1.2);
 }
 
 .hour-block:hover::after {
-    content: attr(title);
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 10px);
-    transform: translateX(-50%);
-    padding: 6px 10px;
-    border-radius: var(--radius-full);
-    background: var(--surface-2, var(--bg-surface));
-    border: 1px solid rgba(31, 45, 42, 0.18);
-    box-shadow: var(--shadow-sm);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-weight: 800;
-    letter-spacing: 0.03em;
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 10;
+  content: attr(title);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2, var(--bg-surface));
+  border: 1px solid rgba(31, 45, 42, 0.18);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .hour-block:hover::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 4px);
-    transform: translateX(-50%);
-    width: 10px;
-    height: 10px;
-    background: var(--surface-2, var(--bg-surface));
-    border-left: 1px solid rgba(31, 45, 42, 0.18);
-    border-bottom: 1px solid rgba(31, 45, 42, 0.18);
-    transform: translateX(-50%) rotate(45deg);
-    pointer-events: none;
-    z-index: 9;
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: var(--surface-2, var(--bg-surface));
+  border-left: 1px solid rgba(31, 45, 42, 0.18);
+  border-bottom: 1px solid rgba(31, 45, 42, 0.18);
+  transform: translateX(-50%) rotate(45deg);
+  pointer-events: none;
+  z-index: 9;
 }
 
 :root.dark-mode .hour-block:hover::after {
-    background: rgba(10, 22, 18, 0.86);
-    border-color: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.92);
+  background: rgba(10, 22, 18, 0.86);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 :root.dark-mode .hour-block:hover::before {
-    background: rgba(10, 22, 18, 0.86);
-    border-left-color: rgba(255, 255, 255, 0.12);
-    border-bottom-color: rgba(255, 255, 255, 0.12);
+  background: rgba(10, 22, 18, 0.86);
+  border-left-color: rgba(255, 255, 255, 0.12);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Light mode time themes - improve hour block visibility against bright backgrounds */
@@ -112,315 +112,321 @@
 :root.time-morning:not(.dark-mode) .time-garden-plot,
 :root.time-afternoon:not(.dark-mode) .time-garden-plot,
 :root.time-evening:not(.dark-mode) .time-garden-plot {
-    background: rgba(26, 43, 47, 0.12);
-    border: 1px solid rgba(26, 43, 47, 0.20);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+  background: rgba(26, 43, 47, 0.12);
+  border: 1px solid rgba(26, 43, 47, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 :root.time-dawn:not(.dark-mode) .hour-block,
 :root.time-morning:not(.dark-mode) .hour-block,
 :root.time-afternoon:not(.dark-mode) .hour-block,
 :root.time-evening:not(.dark-mode) .hour-block {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
 }
 
 :root.time-dawn:not(.dark-mode) .hour-block.hour-future,
 :root.time-morning:not(.dark-mode) .hour-block.hour-future,
 :root.time-afternoon:not(.dark-mode) .hour-block.hour-future,
 :root.time-evening:not(.dark-mode) .hour-block.hour-future {
-    opacity: 0.65;
-    filter: saturate(0.7) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+  opacity: 0.65;
+  filter: saturate(0.7) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
 }
 
 :root.time-dawn:not(.dark-mode) .plot-label,
 :root.time-morning:not(.dark-mode) .plot-label,
 :root.time-afternoon:not(.dark-mode) .plot-label,
 :root.time-evening:not(.dark-mode) .plot-label {
-    color: var(--text-primary);
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 /* Mobile: Larger touch targets, bigger spacing */
 @media (max-width: 600px) {
+  .hour-blocks,
+  .hour-blocks-container {
+    gap: var(--space-2); /* Tighter gap to fit more */
+    padding: 0 var(--space-1); /* Prevent edge clipping */
+    width: 100%;
+    box-sizing: border-box;
+  }
 
-    .hour-blocks,
-    .hour-blocks-container {
-        gap: var(--space-3);
-        /* Increase gap from 8px to 12px */
-    }
+  .hour-block {
+    width: 44px;
+    /* WCAG compliant */
+    height: 44px;
+    font-size: 28px;
+    /* Bigger emoji */
+  }
 
-    .hour-block {
-        width: 44px;
-        /* WCAG compliant */
-        height: 44px;
-        font-size: 28px;
-        /* Bigger emoji */
-    }
+  /* Reduce transform scale on mobile to prevent overflow */
+  .hour-block.hour-current {
+    transform: scale(1.15);
+    /* Was 1.3 - prevent overlapping */
+  }
 
-    /* Reduce transform scale on mobile to prevent overflow */
-    .hour-block.hour-current {
-        transform: scale(1.15);
-        /* Was 1.3 - prevent overlapping */
-    }
-
-    .hour-block:hover {
-        transform: scale(1.1);
-        /* Was 1.2 */
-    }
+  .hour-block:hover {
+    transform: scale(1.1);
+    /* Was 1.2 */
+  }
 }
 
 @keyframes bloom-complete {
-    0% {
-        transform: scale(0.8);
-        opacity: 0.5;
-    }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
 
-    50% {
-        transform: scale(1.3);
-    }
+  50% {
+    transform: scale(1.3);
+  }
 
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes bloom-pulse {
+  0%,
+  100% {
+    transform: scale(1.3);
+    opacity: 0.9;
+  }
 
-    0%,
-    100% {
-        transform: scale(1.3);
-        opacity: 0.9;
-    }
-
-    50% {
-        transform: scale(1.4);
-        opacity: 1;
-    }
+  50% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
 }
 
 /* Mobile-optimized animations - disable expensive effects */
-@media (max-width: 600px),
-(pointer: coarse) {
+@media (max-width: 600px), (pointer: coarse) {
+  body[data-garden-quality="low"] .hour-block.hour-current,
+  body[data-garden-quality="medium"] .hour-block.hour-current {
+    /* Remove expensive drop-shadow filter */
+    filter: none;
+    /* Use simpler transform only */
+    transform: scale(1.2);
+    /* Replace with border glow (cheaper) */
+    outline: 2px solid var(--seasonal-flower);
+    outline-offset: 2px;
+    animation: none;
+  }
 
-    body[data-garden-quality="low"] .hour-block.hour-current,
-    body[data-garden-quality="medium"] .hour-block.hour-current {
-        /* Remove expensive drop-shadow filter */
-        filter: none;
-        /* Use simpler transform only */
-        transform: scale(1.2);
-        /* Replace with border glow (cheaper) */
-        outline: 2px solid var(--seasonal-flower);
-        outline-offset: 2px;
-        animation: none;
-    }
-
-    /* Disable time transition animations on low-end mobile */
-    body[data-garden-quality="low"] .time-transition {
-        animation: none !important;
-        filter: none !important;
-    }
+  /* Disable time transition animations on low-end mobile */
+  body[data-garden-quality="low"] .time-transition {
+    animation: none !important;
+    filter: none !important;
+  }
 }
 
 /* Now Beam - Hidden per user preference */
 .now-beam {
-    display: none !important;
+  display: none !important;
 }
 
 /* Time Transitions */
 .time-transition {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: var(--space-6) var(--space-8);
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-xl);
-    border: 2px solid var(--glass-border);
-    box-shadow: var(--shadow-xl);
-    font-size: var(--text-xl);
-    font-weight: 500;
-    color: var(--text-primary);
-    z-index: 9999;
-    opacity: 0;
-    transition: opacity 0.5s var(--ease-out);
-    pointer-events: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: var(--space-6) var(--space-8);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--glass-border);
+  box-shadow: var(--shadow-xl);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  color: var(--text-primary);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out);
+  pointer-events: none;
 }
 
 .time-transition.transition-sun-intensifies {
-    animation: sun-intensify 3s ease-out;
+  animation: sun-intensify 3s ease-out;
 }
 
 .time-transition.transition-golden-hour {
-    animation: golden-glow 3s ease-out;
-    border-color: rgba(146, 89, 97, 0.4);
-    box-shadow: var(--shadow-xl), 0 0 32px rgba(146, 89, 97, 0.15);
+  animation: golden-glow 3s ease-out;
+  border-color: rgba(146, 89, 97, 0.4);
+  box-shadow:
+    var(--shadow-xl),
+    0 0 32px rgba(146, 89, 97, 0.15);
 }
 
 .time-transition.transition-moonrise {
-    animation: moon-rise 3s ease-out;
+  animation: moon-rise 3s ease-out;
 }
 
 .time-transition.transition-dawn {
-    animation: dawn-break 3s ease-out;
+  animation: dawn-break 3s ease-out;
 }
 
 .time-transition.transition-day-awakening {
-    animation: day-awaken 3s ease-out;
+  animation: day-awaken 3s ease-out;
 }
 
 @keyframes sun-intensify {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.98);
-    }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
 
-    25% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.02);
-    }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.02);
+  }
 
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(1);
-    }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 @keyframes golden-glow {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.98);
-    }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
 
-    35% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.03);
-    }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.03);
+  }
 
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(1);
-    }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 @keyframes moon-rise {
-    0% {
-        transform: translate(-50%, -50%) translateY(20px);
-        opacity: 0;
-    }
+  0% {
+    transform: translate(-50%, -50%) translateY(20px);
+    opacity: 0;
+  }
 
-    50% {
-        opacity: 1;
-    }
+  50% {
+    opacity: 1;
+  }
 
-    100% {
-        transform: translate(-50%, -50%) translateY(0);
-    }
+  100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
 }
 
 @keyframes dawn-break {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) translateY(8px) scale(0.98);
-    }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(8px) scale(0.98);
+  }
 
-    50% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translateY(0) scale(1.01);
-    }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0) scale(1.01);
+  }
 
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) translateY(-6px) scale(1);
-    }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(-6px) scale(1);
+  }
 }
 
 @keyframes day-awaken {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) translateY(10px) scale(0.98);
-    }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(10px) scale(0.98);
+  }
 
-    45% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translateY(0) scale(1.02);
-    }
+  45% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0) scale(1.02);
+  }
 
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) translateY(-4px) scale(1);
-    }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(-4px) scale(1);
+  }
 }
 
 /* Time Marker Points */
 .time-marker-now {
-    position: relative;
-    will-change: transform, opacity;
+  position: relative;
+  will-change: transform, opacity;
 }
 
 .time-marker-now::after {
-    content: "";
-    position: absolute;
-    inset: -10px;
-    border-radius: inherit;
-    pointer-events: none;
-    background: radial-gradient(circle, rgba(255, 223, 128, 0.35) 0%, transparent 70%);
-    opacity: 0.22;
-    transform: scale(0.98);
-    will-change: transform, opacity;
-    animation: time-marker-pulse 2s ease-in-out infinite;
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(255, 223, 128, 0.35) 0%,
+    transparent 70%
+  );
+  opacity: 0.22;
+  transform: scale(0.98);
+  will-change: transform, opacity;
+  animation: time-marker-pulse 2s ease-in-out infinite;
 }
 
 @keyframes time-marker-pulse {
-    0%,
-    100% {
-        opacity: 0.22;
-        transform: scale(0.98);
-    }
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: scale(0.98);
+  }
 
-    50% {
-        opacity: 0.44;
-        transform: scale(1.06);
-    }
+  50% {
+    opacity: 0.44;
+    transform: scale(1.06);
+  }
 }
 
 .time-marker-upcoming {
-    border-left: 3px solid var(--seasonal-accent);
+  border-left: 3px solid var(--seasonal-accent);
 }
 
 .time-marker-past {
-    opacity: 0.6;
-    filter: saturate(0.7);
+  opacity: 0.6;
+  filter: saturate(0.7);
 }
 
 /* Enhanced Garden Bloom Animations */
 .petal {
-    transition: transform 0.5s var(--ease-out), opacity 0.5s var(--ease-out);
-    transform-origin: center;
+  transition:
+    transform 0.5s var(--ease-out),
+    opacity 0.5s var(--ease-out);
+  transform-origin: center;
 }
 
 .flower-stem {
-    transition: d 1s var(--ease-out);
+  transition: d 1s var(--ease-out);
 }
 
 .flower-center {
-    transition: filter 0.5s var(--ease-out);
+  transition: filter 0.5s var(--ease-out);
 }
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
+  .now-beam,
+  .time-transition,
+  .time-marker-now,
+  .hour-block.hour-current,
+  .hour-block.hour-past {
+    animation: none !important;
+  }
 
-    .now-beam,
-    .time-transition,
-	    .time-marker-now,
-    .hour-block.hour-current,
-    .hour-block.hour-past {
-        animation: none !important;
-    }
-
-    .hour-block.hour-current {
-        transform: scale(1.1);
-    }
+  .hour-block.hour-current {
+    transform: scale(1.1);
+  }
 }
