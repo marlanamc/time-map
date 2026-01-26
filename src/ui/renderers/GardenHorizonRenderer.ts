@@ -360,13 +360,25 @@ export const GardenHorizonRenderer = {
     // You Are Here section (reuses existing sidebar content conceptually)
     const youAreHere = document.createElement("div");
     youAreHere.className = "spine-you-are-here";
+    
+    // Format stats with proper pluralization and bold numbers/units
+    const daysLeft = getDaysLeftInYear(viewDate);
+    const monthsLeft = getMonthsLeftInYear(viewDate);
+    const weeksLeft = getWeeksLeftInMonth(viewDate);
+    const hoursLeft = getHoursLeftToday(viewDate);
+    
+    const formatStat = (value: number, unit: string, suffix: string) => {
+      const unitText = value === 1 ? unit : `${unit}s`;
+      return `<span class="spine-stat-value">${value} ${unitText}</span> ${suffix}`;
+    };
+    
     youAreHere.innerHTML = `
       <div class="spine-date">${formatDate(viewDate)}</div>
       <div class="spine-stats">
-        <span class="spine-stat-line">${getDaysLeftInYear(viewDate)} days left in ${viewDate.getFullYear()}</span>
-        <span class="spine-stat-line">${getMonthsLeftInYear(viewDate)} months left in ${viewDate.getFullYear()}</span>
-        <span class="spine-stat-line">${getWeeksLeftInMonth(viewDate)} weeks left in ${getMonthName(viewDate)}</span>
-        <span class="spine-stat-line">${getHoursLeftToday(viewDate)} hours left today</span>
+        <span class="spine-stat-line">${formatStat(daysLeft, "day", `left in ${viewDate.getFullYear()}`)}</span>
+        <span class="spine-stat-line">${formatStat(monthsLeft, "month", `left in ${viewDate.getFullYear()}`)}</span>
+        <span class="spine-stat-line">${formatStat(weeksLeft, "week", `left in ${getMonthName(viewDate)}`)}</span>
+        <span class="spine-stat-line">${formatStat(hoursLeft, "hour", "left today")}</span>
       </div>
     `;
     spine.appendChild(youAreHere);
@@ -698,15 +710,6 @@ export const GardenHorizonRenderer = {
     header.appendChild(greetingBlock);
 
     band.appendChild(header);
-
-    // You are here marker
-    const marker = document.createElement("div");
-    marker.className = "now-marker";
-    marker.innerHTML = `
-      <span class="now-marker-dot"></span>
-      <span class="now-marker-text">You are here</span>
-    `;
-    band.appendChild(marker);
 
     const showFullDate = !isGardenFenceVisible();
     if (showFullDate) {
