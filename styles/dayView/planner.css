@@ -234,7 +234,7 @@
 .sidebar-item-time {
   margin-left: auto;
   font-size: 0.75rem;
-  color: #000000;
+  color: var(--text-primary);
   opacity: 0.8;
   font-weight: 800;
 }
@@ -253,6 +253,146 @@
   min-height: 900px;
   /* 14 hours * ~64px */
   order: 2; /* Appears after unscheduled on desktop */
+  overflow: visible; /* Allow absolutely positioned elements to be visible */
+}
+
+/* Past hours toggle button */
+.past-hours-toggle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.1));
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: fit-content;
+  max-width: 200px;
+}
+
+.past-hours-toggle:hover {
+  background: var(--glass-bg-hover, rgba(255, 255, 255, 0.15));
+  transform: translateY(-1px);
+}
+
+.past-hours-toggle:active {
+  transform: translateY(0);
+}
+
+.past-hours-toggle-icon {
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.past-hours-toggle[aria-expanded="true"] .past-hours-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.past-hours-toggle-text {
+  white-space: nowrap;
+}
+
+/* Current time indicator pinned at top of timeline - fixed visual anchor */
+/* This is NOT positioned by time - it's always at a fixed top position */
+/* IMPORTANT: This is a visual reference point, not positioned by actual time calculations */
+.planner-timeline-container .current-time-top-indicator {
+  position: absolute !important;
+  /* top is set inline via style attribute to align with actual current time */
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: 72px;
+  padding-right: 1rem;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  padding-top: 0;
+  padding-bottom: 0;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+.current-time-top-indicator .current-time-line {
+  flex: 1;
+  min-width: 0;
+  width: calc(100% + 1.25rem);
+  margin-left: -0.65rem;
+  margin-right: 0.5rem;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 0%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 90%, transparent) 10%,
+    color-mix(in srgb, var(--accent) 90%, transparent) 90%,
+    color-mix(in srgb, var(--accent) 0%, transparent) 100%
+  );
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
+  animation: timePulse 2s ease-in-out infinite;
+}
+
+.current-time-top-indicator .current-time-dot {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(
+    circle,
+    var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 80%, transparent) 50%,
+    color-mix(in srgb, var(--accent) 0%, transparent) 100%
+  );
+  border-radius: 50%;
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--accent) 80%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent) 40%, transparent);
+  animation: dotPulseInline 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.current-time-top-indicator .current-time-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+@keyframes timePulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes dotPulseInline {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
 }
 
 .planner-timeline-status {
@@ -383,11 +523,17 @@
 
 .planner-timeline-content {
   position: absolute;
-  top: 0;
+  top: 88px; /* Aligned with grid: starts just below the pinned indicator */
   left: 0;
   right: 0;
   bottom: 0;
   pointer-events: none;
+  z-index: 5; /* Above grid (z-index: 1) but below indicator (z-index: 10) */
+}
+
+/* Shift content up when past hours are collapsed to match grid positioning */
+.planner-timeline-container:not([data-past-hours-expanded="true"]) .planner-timeline-content {
+  transform: translateY(calc(var(--current-hour-pos, 0) * -1%));
 }
 
 /* Improve visibility of time labels in Planner View */
@@ -435,6 +581,7 @@
 
 .day-goal-card.planner-timed-task {
   position: absolute;
+  z-index: 6; /* Above timeline content container */
   --lane: 0;
   --lanes: 1;
   --gutter: 70px;
@@ -482,6 +629,7 @@
 
 .planner-event-card {
   position: absolute;
+  z-index: 6; /* Above timeline content container */
   --lane: 0;
   --lanes: 1;
   --gutter: 70px;

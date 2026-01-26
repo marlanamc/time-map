@@ -612,6 +612,14 @@ export class PlannerDayViewRenderer {
     );
   }
 
+  private getCurrentTimeMinutes(): number | null {
+    if (!this.activeDate || !this.isToday(this.activeDate)) {
+      return null;
+    }
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }
+
   /**
    * Update the current time indicator so it aligns with the measured hour grid position.
    */
@@ -888,12 +896,12 @@ export class PlannerDayViewRenderer {
         `
         : "";
 
-    // Determine if this item is in a past hour (for collapsing)
-    // Show one hour before current time, so items before (currentHour - 1) are past
     const itemHour = Math.floor(item.startMin / 60);
-    const isPast = this.activeDate && this.isToday(this.activeDate) 
-      ? itemHour < this.activeDate.getHours() - 1
-      : false;
+    const currentMinutes = this.getCurrentTimeMinutes();
+    const minutesSinceEnd =
+      currentMinutes !== null ? currentMinutes - item.endMin : null;
+    const isPast =
+      minutesSinceEnd !== null ? minutesSinceEnd > 60 : false;
     
     return `
         <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" 
@@ -981,12 +989,12 @@ export class PlannerDayViewRenderer {
       ? `<span class="timeline-countdown" aria-hidden="true">${countdownLabel}</span>`
       : "";
 
-    // Determine if this item is in a past hour (for collapsing)
-    // Show one hour before current time, so items before (currentHour - 1) are past
     const itemHour = Math.floor(item.startMin / 60);
-    const isPast = this.activeDate && this.isToday(this.activeDate) 
-      ? itemHour < this.activeDate.getHours() - 1
-      : false;
+    const currentMinutes = this.getCurrentTimeMinutes();
+    const minutesSinceEnd =
+      currentMinutes !== null ? currentMinutes - item.endMin : null;
+    const isPast =
+      minutesSinceEnd !== null ? minutesSinceEnd > 60 : false;
 
     return `
       <div
