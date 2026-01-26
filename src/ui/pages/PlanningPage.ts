@@ -1,57 +1,52 @@
 import { eventBus } from "../../core/EventBus";
-import { Goals, ensurePlanningFocusForGoal } from "../../core/Goals";
-import { RealityPreviewOverlay } from "../components/RealityPreviewOverlay";
-import {
-  calculateWeeklyTimeCommitment,
-  detectOvercommitment,
-} from "../../core/TimeCostCalculator";
-import type {
-  CommitmentHorizon,
-  EnergyType,
-  Goal,
-  GoalLevel,
-  GoalStatus,
-} from "../../types";
+import { Goals } from "../../core/Goals";
+import type { EnergyType, Goal, GoalLevel, GoalStatus } from "../../types";
 
 const OVERLAY_ID = "planning-page-overlay";
 const PANEL_ID = "planning-page-panel";
 
-type PlanningState = {
-  goalId: string | null;
+type IntentionState = {
+  title: string;
+  parentGoalId: string | null;
   frequency: number;
   duration: number;
   energyType: EnergyType;
-  horizon: CommitmentHorizon;
+  energyType: EnergyType;
+  specificDays: number[]; // 0=Sun..6=Sat
 };
 
 const ENERGY_OPTIONS: EnergyType[] = ["focus", "creative", "rest", "admin"];
-const HORIZON_OPTIONS: CommitmentHorizon[] = ["week", "month", "season"];
 
-const DEFAULT_STATE: PlanningState = {
-  goalId: null,
+const DEFAULT_STATE: IntentionState = {
+  title: "",
+  parentGoalId: null,
   frequency: 2,
-  duration: 60,
+  duration: 30,
   energyType: "focus",
-  horizon: "week",
+  specificDays: [],
 };
 
+const DAYS_OF_WEEK = [
+  { label: "S", value: 0 },
+  { label: "M", value: 1 },
+  { label: "T", value: 2 },
+  { label: "W", value: 3 },
+  { label: "T", value: 4 },
+  { label: "F", value: 5 },
+  { label: "S", value: 6 },
+];
+
 let overlayElement: HTMLElement | null = null;
-let state: PlanningState = { ...DEFAULT_STATE };
-let activeGoal: Goal | null = null;
-let selectedGoalOptionId: string | null = null;
+let state: IntentionState = { ...DEFAULT_STATE };
 
 interface FormElements {
+  titleInput: HTMLInputElement | null;
   goalSelect: HTMLSelectElement | null;
   frequencyInput: HTMLInputElement | null;
   durationInput: HTMLInputElement | null;
   energySelect: HTMLSelectElement | null;
-  horizonSelect: HTMLSelectElement | null;
-  weeklyMinutes: HTMLElement | null;
-  existingMinutes: HTMLElement | null;
-  consentCopy: HTMLElement | null;
-  warning: HTMLElement | null;
-  previewBtn: HTMLButtonElement | null;
-  includeBtn: HTMLButtonElement | null;
+  saveBtn: HTMLButtonElement | null;
+  dayButtons: NodeListOf<HTMLButtonElement> | null;
 }
 
 let formElements: FormElements | null = null;
@@ -72,14 +67,12 @@ function ensureOverlay(): HTMLElement {
   return overlay;
 }
 
-function resetState(goal?: Goal | null) {
-  activeGoal = goal ?? null;
+function resetState(parentGoalId?: string | null) {
   state = {
-    goalId: activeGoal?.id ?? null,
-    frequency: clampFrequency(activeGoal?.commitment?.frequency ?? DEFAULT_STATE.frequency),
-    duration: clampDuration(activeGoal?.commitment?.duration ?? DEFAULT_STATE.duration),
-    energyType: activeGoal?.commitment?.energyType ?? DEFAULT_STATE.energyType,
-    horizon: activeGoal?.commitment?.horizon ?? DEFAULT_STATE.horizon,
+    ...DEFAULT_STATE,
+    parentGoalId: parentGoalId ?? null,
+    // Reset specific days
+    specificDays: [],
   };
 }
 
@@ -90,12 +83,16 @@ function getPlannableGoals(): Goal[] {
     focus: 3,
     intention: 4,
   };
-  const CURRENT_STATUSES: GoalStatus[] = ["not-started", "in-progress", "blocked"];
+  const CURRENT_STATUSES: GoalStatus[] = [
+    "not-started",
+    "in-progress",
+    "blocked",
+  ];
 
   return Goals.getAll()
     .filter(
       (goal) =>
-        goal.level !== "intention" && CURRENT_STATUSES.includes(goal.status),
+        goal.level === "focus" && CURRENT_STATUSES.includes(goal.status),
     )
     .sort((a, b) => {
       const levelDiff = LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level];
@@ -108,64 +105,20 @@ function formatGoalOption(goal: Goal): string {
   return `${levelLabel}: ${goal.title}`;
 }
 
-async function selectGoalForPlanning(
-  goalId: string | null,
-  options?: { suppressRender?: boolean },
-) {
-  selectedGoalOptionId = goalId;
-
-  if (!goalId) {
-    resetState(null);
-    if (!options?.suppressRender) {
-      renderContent();
-    }
-    return;
-  }
-
-  const goal = Goals.getById(goalId);
-  if (!goal) {
-    resetState(null);
-    if (!options?.suppressRender) {
-      renderContent();
-    }
-    return;
-  }
-
-  try {
-    const focus = await ensurePlanningFocusForGoal(goal);
-    resetState(focus);
-  } catch (error) {
-    console.warn("Planning selection failed", error);
-    resetState(null);
-  }
-
-  if (!options?.suppressRender) {
-    renderContent();
-  }
-}
-
-async function prepareGoalSelection(goal: Goal | null) {
-  if (goal) {
-    selectedGoalOptionId = goal.id;
-    resetState(goal);
-    return;
-  }
-
-  const plannableGoals = getPlannableGoals();
-  if (plannableGoals.length === 0) {
-    selectedGoalOptionId = null;
-    resetState(null);
-    return;
-  }
-
-  selectedGoalOptionId = plannableGoals[0].id;
-  await selectGoalForPlanning(plannableGoals[0].id, { suppressRender: true });
-}
-
 function escapeHtml(text: string): string {
   const span = document.createElement("span");
   span.textContent = text;
   return span.innerHTML;
+}
+
+function clampFrequency(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_STATE.frequency;
+  return Math.min(7, Math.max(1, Math.round(value)));
+}
+
+function clampDuration(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_STATE.duration;
+  return Math.min(120, Math.max(15, Math.round(value)));
 }
 
 function formatMinutes(minutes: number): string {
@@ -181,11 +134,11 @@ function formatMinutes(minutes: number): string {
 function renderGoalSelectMarkup(): string {
   const goals = getPlannableGoals();
   if (goals.length === 0) {
-    return `<div class="planning-input disabled">Add a vision, milestone, or focus to start planning.</div>`;
+    return `<div class="planning-input disabled">Add a focus goal first.</div>`;
   }
 
-  if (!selectedGoalOptionId) {
-    selectedGoalOptionId = goals[0].id;
+  if (!state.parentGoalId) {
+    state.parentGoalId = goals[0].id;
   }
 
   return `
@@ -194,7 +147,7 @@ function renderGoalSelectMarkup(): string {
         .map(
           (goal) =>
             `<option value="${goal.id}" ${
-              goal.id === selectedGoalOptionId ? "selected" : ""
+              goal.id === state.parentGoalId ? "selected" : ""
             }>${escapeHtml(formatGoalOption(goal))}</option>`,
         )
         .join("")}
@@ -202,36 +155,60 @@ function renderGoalSelectMarkup(): string {
   `;
 }
 
-function clampFrequency(value: number): number {
-  if (!Number.isFinite(value)) return DEFAULT_STATE.frequency;
-  return Math.min(7, Math.max(1, Math.round(value)));
-}
-
-function clampDuration(value: number): number {
-  if (!Number.isFinite(value)) return DEFAULT_STATE.duration;
-  return Math.min(120, Math.max(15, Math.round(value)));
+function renderDayButtons(): string {
+  return `
+    <div class="planning-days-grid">
+      ${DAYS_OF_WEEK.map(
+        (day) => `
+        <button 
+          type="button" 
+          class="planning-day-btn ${state.specificDays.includes(day.value) ? "selected" : ""}" 
+          data-day="${day.value}"
+        >
+          ${day.label}
+        </button>
+      `,
+      ).join("")}
+    </div>
+  `;
 }
 
 function renderContent() {
   const overlay = ensureOverlay();
-  const goalLabel = getGoalLabelText();
+  const hasGoals = getPlannableGoals().length > 0;
+
   overlay.innerHTML = `
     <div class="planning-page-panel" id="${PANEL_ID}">
       <header class="planning-page-header">
         <div>
-          <p class="planning-page-label">Plan for</p>
-          <h2 class="planning-page-title">
-            ${goalLabel}
-          </h2>
+          <p class="planning-page-label">Create Intention</p>
+          <h2 class="planning-page-title">What do you want to do?</h2>
         </div>
-        <button type="button" class="planning-page-close" aria-label="Close planning workspace">
+        <button type="button" class="planning-page-close" aria-label="Close">
           ×
         </button>
       </header>
       <div class="planning-page-body">
+        <label class="planning-page-field">
+          <span>Title</span>
+          <input 
+            id="planningTitleInput" 
+            type="text" 
+            class="planning-input" 
+            placeholder="e.g., Morning workout, Clean desk, Read article..."
+            value="${escapeHtml(state.title)}"
+            autofocus
+          />
+        </label>
+
         <div class="planning-page-field">
-          <span>Goal</span>
+          <span>Link to Goal</span>
           ${renderGoalSelectMarkup()}
+        </div>
+
+        <div class="planning-page-field">
+          <span>Days</span>
+          ${renderDayButtons()}
         </div>
 
         <div class="planning-input-grid">
@@ -247,85 +224,122 @@ function renderContent() {
             <span>Energy type</span>
             <select id="planningEnergy" class="planning-input">
               ${ENERGY_OPTIONS.map(
-                (value) => `<option value="${value}" ${value === state.energyType ? "selected" : ""}>${value}</option>`,
-              ).join("")}
-            </select>
-          </label>
-          <label class="planning-page-field">
-            <span>Horizon</span>
-            <select id="planningHorizon" class="planning-input">
-              ${HORIZON_OPTIONS.map(
-                (value) => `<option value="${value}" ${value === state.horizon ? "selected" : ""}>${value}</option>`,
+                (value) =>
+                  `<option value="${value}" ${value === state.energyType ? "selected" : ""}>${value}</option>`,
               ).join("")}
             </select>
           </label>
         </div>
 
         <div class="planning-summary">
-          <p id="planningExistingMinutes" class="planning-summary-text"></p>
           <p id="planningWeeklyMinutes" class="planning-summary-text"></p>
-          <p id="planningWarning" class="planning-warning"></p>
         </div>
 
         <div class="planning-actions">
-          <button type="button" id="planningPreviewBtn" class="planning-preview-btn">Preview</button>
-          <div class="planning-consent">
-            <p class="planning-consent-copy" id="planningConsentCopy">
-              This adds ~${formatMinutes(state.frequency * state.duration)} per week on top of what’s already here.
-            </p>
-            <div class="planning-consent-buttons">
-              <button type="button" id="planningIncludeBtn" class="planning-include-btn">Include</button>
-              <button type="button" id="planningNotNowBtn" class="planning-neutral-btn">Not now</button>
-              <button type="button" id="planningLightenBtn" class="planning-neutral-btn">Make lighter</button>
-            </div>
+          <div class="planning-consent-buttons">
+            <button type="button" id="planningSaveBtn" class="planning-include-btn" ${!hasGoals ? "disabled" : ""}>
+              Add Intention
+            </button>
+            <button type="button" id="planningCancelBtn" class="planning-neutral-btn">
+              Cancel
+            </button>
           </div>
         </div>
       </div>
     </div>
   `;
 
+  // Add styles for day buttons if not present (simple inline injection for now, ideally in CSS)
+  // But wait, user said "Vanilla CSS". PlanningPage.ts usually relies on global CSS.
+  // I will check if I need to inject styles or if "planning-day-btn" needs to be added to CSS.
+  // For now, I'll assume I should rely on existing classes or basic styles.
+  // Let's add a style block just for this feature to ensure it works immediately.
+  const styleId = "planning-page-styles";
+  if (!document.getElementById(styleId)) {
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.textContent = `
+      .planning-days-grid {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .planning-day-btn {
+        flex: 1;
+        height: 40px;
+        border: 1px solid var(--border-color, #e5e7eb);
+        background: var(--bg-surface, #ffffff);
+        border-radius: 8px;
+        font-weight: 500;
+        color: var(--text-secondary, #6b7280);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .planning-day-btn:hover {
+        background: var(--bg-hover, #f3f4f6);
+      }
+      .planning-day-btn.selected {
+        background: var(--primary-color, #8b5cf6);
+        color: white;
+        border-color: var(--primary-color, #8b5cf6);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   setupElements();
+  updateSaveButton();
   updateSummary();
-}
-
-function getGoalLabelText(): string {
-  if (activeGoal) {
-    return `${escapeHtml(activeGoal.title)} (${activeGoal.level})`;
-  }
-
-  if (selectedGoalOptionId) {
-    const goal = Goals.getById(selectedGoalOptionId);
-    if (goal) {
-      return `${escapeHtml(goal.title)} (${goal.level})`;
-    }
-  }
-
-  return "Select a goal to plan";
 }
 
 function setupElements() {
   if (!overlayElement) return;
   formElements = {
+    titleInput: overlayElement.querySelector("#planningTitleInput"),
     goalSelect: overlayElement.querySelector("#planningGoalSelect"),
     frequencyInput: overlayElement.querySelector("#planningFrequency"),
     durationInput: overlayElement.querySelector("#planningDuration"),
     energySelect: overlayElement.querySelector("#planningEnergy"),
-    horizonSelect: overlayElement.querySelector("#planningHorizon"),
-    weeklyMinutes: overlayElement.querySelector("#planningWeeklyMinutes"),
-    existingMinutes: overlayElement.querySelector("#planningExistingMinutes"),
-    consentCopy: overlayElement.querySelector("#planningConsentCopy"),
-    warning: overlayElement.querySelector("#planningWarning"),
-    previewBtn: overlayElement.querySelector("#planningPreviewBtn"),
-    includeBtn: overlayElement.querySelector("#planningIncludeBtn"),
+    saveBtn: overlayElement.querySelector("#planningSaveBtn"),
+    dayButtons: overlayElement.querySelectorAll(".planning-day-btn"),
   };
 
   overlayElement
     .querySelector(".planning-page-close")
     ?.addEventListener("click", () => close());
 
+  formElements?.titleInput?.addEventListener("input", (event) => {
+    const input = event.currentTarget as HTMLInputElement;
+    state.title = input.value;
+    updateSaveButton();
+  });
+
   formElements?.goalSelect?.addEventListener("change", (event) => {
     const select = event.currentTarget as HTMLSelectElement;
-    void selectGoalForPlanning(select.value);
+    state.parentGoalId = select.value;
+  });
+
+  formElements?.dayButtons?.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const day = Number(btn.dataset.day);
+      if (state.specificDays.includes(day)) {
+        state.specificDays = state.specificDays.filter((d) => d !== day);
+      } else {
+        state.specificDays.push(day);
+      }
+
+      // Update UI
+      btn.classList.toggle("selected", state.specificDays.includes(day));
+
+      // Sync frequency
+      if (state.specificDays.length > 0) {
+        state.frequency = state.specificDays.length;
+        if (formElements?.frequencyInput) {
+          formElements.frequencyInput.value = String(state.frequency);
+        }
+      }
+      updateSummary();
+    });
   });
 
   formElements?.frequencyInput?.addEventListener("input", (event) => {
@@ -345,124 +359,68 @@ function setupElements() {
   formElements?.energySelect?.addEventListener("change", (event) => {
     const select = event.currentTarget as HTMLSelectElement;
     state.energyType = select.value as EnergyType;
-    updateSummary();
   });
 
-  formElements?.horizonSelect?.addEventListener("change", (event) => {
-    const select = event.currentTarget as HTMLSelectElement;
-    state.horizon = select.value as CommitmentHorizon;
-    updateSummary();
-  });
-
-  formElements?.previewBtn?.addEventListener("click", () => handlePreview());
-  formElements?.includeBtn?.addEventListener("click", () => handleInclude());
+  formElements?.saveBtn?.addEventListener("click", () => handleSave());
   overlayElement
-    .querySelector("#planningNotNowBtn")
+    .querySelector("#planningCancelBtn")
     ?.addEventListener("click", () => close());
-  overlayElement
-    .querySelector("#planningLightenBtn")
-    ?.addEventListener("click", () => lightenPlan());
+
+  // Focus the title input
+  formElements?.titleInput?.focus();
+}
+
+function updateSaveButton() {
+  const canSave = state.title.trim().length > 0 && state.parentGoalId !== null;
+  if (formElements?.saveBtn) {
+    formElements.saveBtn.disabled = !canSave;
+  }
 }
 
 function updateSummary() {
-  const allCommitments = calculateWeeklyTimeCommitment(Goals.getAll());
-  const currentGoalCommitment = state.goalId
-    ? allCommitments.byGoal.get(state.goalId) ?? 0
-    : 0;
   const weeklyMinutes = state.frequency * state.duration;
-  const entriesMinutes = allCommitments.totalMinutes - currentGoalCommitment;
-  const warning = detectOvercommitment(entriesMinutes, weeklyMinutes);
-
-  if (formElements?.weeklyMinutes) {
-    formElements.weeklyMinutes.textContent = `Planned addition: ${formatMinutes(
-      weeklyMinutes,
-    )} per week.`;
-  }
-  if (formElements?.existingMinutes) {
-    formElements.existingMinutes.textContent = `Existing commitments (excluding current goal): ${formatMinutes(
-      entriesMinutes,
-    )}`;
-  }
-  if (formElements?.consentCopy) {
-    formElements.consentCopy.textContent = `This adds ~${formatMinutes(
-      weeklyMinutes,
-    )} on top of what’s already planned.`;
-  }
-  if (formElements?.warning) {
-    formElements.warning.textContent = warning ? warning.message : "";
-  }
-  const disableButtons = !state.goalId && !selectedGoalOptionId;
-  if (formElements?.previewBtn) {
-    formElements.previewBtn.disabled = disableButtons;
-  }
-  if (formElements?.includeBtn) {
-    formElements.includeBtn.disabled = disableButtons;
+  const weeklyMinutesEl = overlayElement?.querySelector(
+    "#planningWeeklyMinutes",
+  );
+  if (weeklyMinutesEl) {
+    weeklyMinutesEl.textContent = `This adds ~${formatMinutes(weeklyMinutes)} per week to your schedule.`;
   }
 }
 
-function getPreviewGoal(commitment: PlanningState): Goal | null {
-  if (!state.goalId) return null;
-  const existing = Goals.getById(state.goalId);
-  if (!existing) return null;
+function handleSave() {
+  const title = state.title.trim();
+  if (!title || !state.parentGoalId) return;
 
-  const previewCommitment = {
-    frequency: commitment.frequency,
-    duration: commitment.duration,
-    energyType: commitment.energyType,
-    horizon: commitment.horizon,
-    createdAt: existing.commitment?.createdAt ?? new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  const parentGoal = Goals.getById(state.parentGoalId);
+  if (!parentGoal) return;
 
-  return {
-    ...existing,
-    commitment: previewCommitment,
-  };
-}
+  // Create the new intention linked to the parent goal with commitment
+  Goals.create({
+    title,
+    level: "intention",
+    category: parentGoal.category ?? undefined,
+    parentId: state.parentGoalId,
+    commitment: {
+      frequency: state.frequency,
+      duration: state.duration,
+      energyType: state.energyType,
+      specificDays:
+        state.specificDays.length > 0 ? state.specificDays : undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  });
 
-function handlePreview() {
-  const preview = getPreviewGoal(state);
-  if (!preview) return;
-  RealityPreviewOverlay.show(preview);
-}
-
-function handleInclude() {
-  if (!state.goalId) return;
-  const goal = Goals.getById(state.goalId);
-  if (!goal) return;
-
-  const newCommitment = {
-    frequency: state.frequency,
-    duration: state.duration,
-    energyType: state.energyType,
-    horizon: state.horizon,
-    createdAt: goal.commitment?.createdAt ?? new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  Goals.update(state.goalId, { commitment: newCommitment });
   eventBus.emit("ui:toast", {
     icon: "✅",
-    message: "Commitment added",
+    message: "Intention added",
   });
+
   close();
 }
 
-function lightenPlan() {
-  state.frequency = Math.max(1, Math.min(7, Math.floor(state.frequency * 0.75)));
-  state.duration = Math.max(15, Math.min(120, Math.floor(state.duration * 0.75)));
-
-  if (formElements?.frequencyInput) {
-    formElements.frequencyInput.value = String(state.frequency);
-  }
-  if (formElements?.durationInput) {
-    formElements.durationInput.value = String(state.duration);
-  }
-  updateSummary();
-}
-
-async function openOverlay(goal: Goal | null) {
-  await prepareGoalSelection(goal);
+async function openOverlay(parentGoalId: string | null) {
+  resetState(parentGoalId);
   renderContent();
   requestAnimationFrame(() => {
     overlayElement?.classList.add("visible");
@@ -471,16 +429,11 @@ async function openOverlay(goal: Goal | null) {
 
 function close() {
   overlayElement?.classList.remove("visible");
-  RealityPreviewOverlay.hide();
 }
 
 export const PlanningPage = {
   async open(goalId?: string | null) {
-    const goal = goalId ? Goals.getById(goalId) : null;
-    if (goal && goal.level !== "focus") {
-      console.warn("PlanningPage expected focus, got", goal.level);
-    }
-    await openOverlay(goal?.level === "focus" ? goal : null);
+    await openOverlay(goalId ?? null);
   },
   close() {
     close();

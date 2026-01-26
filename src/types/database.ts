@@ -41,6 +41,8 @@ export interface GoalRow {
   icon?: string;
   /** Soft delete timestamp - if set, goal is archived */
   archived_at?: string;
+  /** Recurring intention commitment details */
+  commitment?: any; // JSONB
 }
 
 /**

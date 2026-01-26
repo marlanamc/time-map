@@ -48,9 +48,6 @@ export interface GoalMeta {
 /** Energy type for commitment planning */
 export type EnergyType = "focus" | "creative" | "rest" | "admin";
 
-/** Commitment horizon for planning */
-export type CommitmentHorizon = "week" | "month" | "season";
-
 /**
  * Commitment plan for structured goal planning
  * @remarks Captures frequency, duration, and energy requirements for a goal
@@ -62,8 +59,8 @@ export interface CommitmentPlan {
   duration: number;
   /** Type of energy required */
   energyType: EnergyType;
-  /** Planning horizon */
-  horizon: CommitmentHorizon;
+  /** Specific days of week (0=Sun..6=Sat) */
+  specificDays?: number[];
   createdAt: string;
   updatedAt: string;
 }

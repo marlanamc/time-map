@@ -121,7 +121,7 @@ const IsoDateStringSchema = z.string().refine(
     const isoFull = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
     return dateOnly.test(val) || isoFull.test(val);
   },
-  { message: "Invalid date format. Expected YYYY-MM-DD or ISO 8601" }
+  { message: "Invalid date format. Expected YYYY-MM-DD or ISO 8601" },
 );
 
 /** Time string (HH:MM format) */
@@ -132,7 +132,7 @@ const TimeStringSchema = z.string().refine(
     const timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
     return timePattern.test(val);
   },
-  { message: "Invalid time format. Expected HH:MM (24-hour format)" }
+  { message: "Invalid time format. Expected HH:MM (24-hour format)" },
 );
 
 /** Non-empty trimmed string with max length */
@@ -204,14 +204,13 @@ export const GoalMetaSchema = z
 
 export const EnergyTypeSchema = z.enum(["focus", "creative", "rest", "admin"]);
 
-export const CommitmentHorizonSchema = z.enum(["week", "month", "season"]);
-
 export const CommitmentPlanSchema = z
   .object({
     frequency: z.number().int().min(1).max(7),
     duration: z.number().int().min(15).max(120),
     energyType: EnergyTypeSchema,
-    horizon: CommitmentHorizonSchema,
+    energyType: EnergyTypeSchema,
+    specificDays: z.array(z.number().int().min(0).max(6)).optional(),
     createdAt: IsoDateStringSchema,
     updatedAt: IsoDateStringSchema,
   })
@@ -553,7 +552,7 @@ export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailure;
  */
 export function validate<T>(
   schema: z.ZodSchema<T>,
-  data: unknown
+  data: unknown,
 ): ValidationResult<T> {
   const result = schema.safeParse(data);
   if (result.success) {
@@ -565,35 +564,45 @@ export function validate<T>(
 /**
  * Validates a Goal object
  */
-export function validateGoal(data: unknown): ValidationResult<z.infer<typeof GoalSchema>> {
+export function validateGoal(
+  data: unknown,
+): ValidationResult<z.infer<typeof GoalSchema>> {
   return validate(GoalSchema, data);
 }
 
 /**
  * Validates GoalData (for creation)
  */
-export function validateGoalData(data: unknown): ValidationResult<z.infer<typeof GoalDataSchema>> {
+export function validateGoalData(
+  data: unknown,
+): ValidationResult<z.infer<typeof GoalDataSchema>> {
   return validate(GoalDataSchema, data);
 }
 
 /**
  * Validates a CalendarEvent object
  */
-export function validateCalendarEvent(data: unknown): ValidationResult<z.infer<typeof CalendarEventSchema>> {
+export function validateCalendarEvent(
+  data: unknown,
+): ValidationResult<z.infer<typeof CalendarEventSchema>> {
   return validate(CalendarEventSchema, data);
 }
 
 /**
  * Validates a BrainDumpEntry object
  */
-export function validateBrainDumpEntry(data: unknown): ValidationResult<z.infer<typeof BrainDumpEntrySchema>> {
+export function validateBrainDumpEntry(
+  data: unknown,
+): ValidationResult<z.infer<typeof BrainDumpEntrySchema>> {
   return validate(BrainDumpEntrySchema, data);
 }
 
 /**
  * Validates the entire AppData structure
  */
-export function validateAppData(data: unknown): ValidationResult<z.infer<typeof AppDataSchema>> {
+export function validateAppData(
+  data: unknown,
+): ValidationResult<z.infer<typeof AppDataSchema>> {
   return validate(AppDataSchema, data);
 }
 
@@ -615,7 +624,7 @@ export function formatValidationErrors(errors: z.ZodError): string {
 export function validateOrThrow<T>(
   schema: z.ZodSchema<T>,
   data: unknown,
-  entityName: string = "data"
+  entityName: string = "data",
 ): T {
   const result = schema.safeParse(data);
   if (!result.success) {
@@ -628,7 +637,9 @@ export function validateOrThrow<T>(
 /**
  * Partial validation - validates only provided fields (for updates)
  */
-export function validatePartialGoal(data: unknown): ValidationResult<Partial<z.infer<typeof GoalSchema>>> {
+export function validatePartialGoal(
+  data: unknown,
+): ValidationResult<Partial<z.infer<typeof GoalSchema>>> {
   return validate(GoalSchema.partial(), data);
 }
 
@@ -648,9 +659,10 @@ export function sanitizeString(input: string): string {
 /**
  * Validates an array of goals and returns valid ones with error info
  */
-export function validateGoalsArray(
-  goals: unknown[]
-): { valid: z.infer<typeof GoalSchema>[]; invalid: { index: number; errors: string }[] } {
+export function validateGoalsArray(goals: unknown[]): {
+  valid: z.infer<typeof GoalSchema>[];
+  invalid: { index: number; errors: string }[];
+} {
   const valid: z.infer<typeof GoalSchema>[] = [];
   const invalid: { index: number; errors: string }[] = [];
 

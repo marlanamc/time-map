@@ -68,6 +68,7 @@ export class GoalsService {
         activityId: g.activity_id ?? undefined,
         icon: g.icon ?? undefined,
         archivedAt: g.archived_at ?? null,
+        commitment: g.commitment || undefined,
       }));
 
       cacheService.set(cacheKey, goals, cacheService.TTL.GOALS);
@@ -216,6 +217,7 @@ export class GoalsService {
         parent_level: goal.parentLevel ?? null,
         icon: goal.icon || null,
         archived_at: goal.archivedAt || null,
+        commitment: goal.commitment || null,
       };
 
       console.log("[GoalsService] Attempting to save goal:", {
@@ -571,6 +573,7 @@ export class GoalsService {
         activityId: g.activity_id ?? undefined,
         icon: g.icon ?? undefined,
         archivedAt: g.archived_at ?? null,
+        commitment: g.commitment || undefined,
       }));
 
       console.log(
