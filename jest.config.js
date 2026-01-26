@@ -13,6 +13,8 @@ module.exports = {
         compilerOptions: {
           module: 'es2020',
         },
+        diagnostics: false,
+        isolatedModules: true,
       },
     ],
   },

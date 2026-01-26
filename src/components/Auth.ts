@@ -31,7 +31,9 @@ export class AuthComponent {
 
   render() {
     // Use Vite's import.meta.env instead of window.__GARDEN_FENCE_ENV
+    // @ts-expect-error Vite injects import.meta.env at build time; suppressed for test builds
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    // @ts-expect-error Vite injects import.meta.env at build time; suppressed for test builds
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
     const isConfigured = Boolean(supabaseUrl && supabaseKey);
 

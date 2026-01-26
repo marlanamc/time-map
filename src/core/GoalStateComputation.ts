@@ -4,7 +4,7 @@
  * This is a runtime computation, not stored in the database.
  */
 
-import type { Goal, GoalState, GoalLevel } from "../types";
+import type { Goal, GoalState } from "../types";
 import { Goals } from "./Goals";
 
 /** Number of days to consider a goal "active" */
@@ -200,16 +200,22 @@ export function getVisionStates(visions: Goal[]): Map<string, GoalState> {
  * Sort goals by state priority (active first, then resting, then dormant).
  */
 export function sortByState(goals: Goal[]): Goal[] {
-  const statePriority: Record<GoalState, number> = {
-    active: 0,
-    resting: 1,
-    dormant: 2,
+  const getPriority = (state: GoalState): number => {
+    switch (state) {
+      case "active":
+        return 0;
+      case "resting":
+        return 1;
+      case "dormant":
+      default:
+        return 2;
+    }
   };
 
   return [...goals].sort((a, b) => {
     const stateA = computeGoalState(a);
     const stateB = computeGoalState(b);
-    return statePriority[stateA] - statePriority[stateB];
+    return getPriority(stateA) - getPriority(stateB);
   });
 }
 

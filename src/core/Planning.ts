@@ -6,7 +6,7 @@ import { State } from './State';
 import { Goals } from './Goals';
 
 export const Planning = {
-  createWeeklyReview(reviewData: Partial<WeeklyReview> & { weekStart: string; weekEnd: string }): WeeklyReview {
+  createWeeklyReview(reviewData: Partial<WeeklyReview> & { weekStart: string; weekEnd: string; alignmentReflection?: string }): WeeklyReview {
     if (!State.data) {
       State.init();
       if (!State.data) throw new Error("State not initialized");
@@ -17,8 +17,14 @@ export const Planning = {
       weekEnd: reviewData.weekEnd,
       goalsCompleted: reviewData.goalsCompleted || 0,
       timeSpent: reviewData.timeSpent || 0,
-      notes: reviewData.notes || "",
+      notes: reviewData.alignmentReflection || reviewData.notes || "",
       createdAt: new Date().toISOString(),
+      // Extended fields for full review data
+      wins: reviewData.wins,
+      challenges: reviewData.challenges,
+      learnings: reviewData.learnings,
+      nextWeekPriorities: reviewData.nextWeekPriorities,
+      mood: reviewData.mood,
     };
 
     State.data.weeklyReviews.push(review);

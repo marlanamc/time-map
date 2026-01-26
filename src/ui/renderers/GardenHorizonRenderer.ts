@@ -164,8 +164,8 @@ function getTimeGreeting(date: Date) {
 /**
  * Calculate days remaining in year
  */
-function getDaysLeftInYear(): number {
-  const now = new Date();
+function getDaysLeftInYear(date: Date = new Date()): number {
+  const now = new Date(date);
   const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
   const diff = endOfYear.getTime() - now.getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -245,8 +245,7 @@ export const GardenHorizonRenderer = {
     GoalDetailRenderer.hide();
     RealityPreviewOverlay.hide();
 
-    const now = new Date();
-    const viewDate = State.viewingDate ?? now;
+    const viewDate = State.viewingDate ?? new Date();
     const viewYear = viewDate.getFullYear();
 
     // Get data for all time horizons
@@ -261,9 +260,9 @@ export const GardenHorizonRenderer = {
     const weekStart = getWeekStart(viewDate);
     const weekEnd = getWeekEnd(viewDate);
     const todayStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
+      viewDate.getFullYear(),
+      viewDate.getMonth(),
+      viewDate.getDate(),
     );
     const todayEnd = new Date(todayStart);
     todayEnd.setHours(23, 59, 59, 999);
@@ -304,6 +303,7 @@ export const GardenHorizonRenderer = {
     // Goal Spine (sidebar)
     const spine = this.renderGoalSpine(
       sortedVisions,
+      viewDate,
       escapeHtmlFn,
       onGoalClick,
       onAddGoal,
@@ -331,7 +331,7 @@ export const GardenHorizonRenderer = {
     container.appendChild(rail);
 
     // Mobile drawer toggle
-    this.setupMobileDrawer(container);
+    this.setupMobileDrawer(container, viewDate);
 
     // Scroll to NOW section by default
     requestAnimationFrame(() => {
@@ -347,6 +347,7 @@ export const GardenHorizonRenderer = {
    */
   renderGoalSpine(
     visions: Goal[],
+    viewDate: Date,
     escapeHtmlFn: (text: string) => string,
     onGoalClick: (goalId: string) => void,
     onAddGoal?: (level: GoalLevel) => void,
@@ -357,16 +358,15 @@ export const GardenHorizonRenderer = {
     spine.setAttribute("aria-label", "Goal Spine");
 
     // You Are Here section (reuses existing sidebar content conceptually)
-    const now = new Date();
     const youAreHere = document.createElement("div");
     youAreHere.className = "spine-you-are-here";
     youAreHere.innerHTML = `
-      <div class="spine-date">${formatDate(now)}</div>
+      <div class="spine-date">${formatDate(viewDate)}</div>
       <div class="spine-stats">
-        <span class="spine-stat-line">${getDaysLeftInYear()} days left in ${now.getFullYear()}</span>
-        <span class="spine-stat-line">${getMonthsLeftInYear(now)} months left in ${now.getFullYear()}</span>
-        <span class="spine-stat-line">${getWeeksLeftInMonth(now)} weeks left in ${getMonthName(now)}</span>
-        <span class="spine-stat-line">${getHoursLeftToday(now)} hours left today</span>
+        <span class="spine-stat-line">${getDaysLeftInYear(viewDate)} days left in ${viewDate.getFullYear()}</span>
+        <span class="spine-stat-line">${getMonthsLeftInYear(viewDate)} months left in ${viewDate.getFullYear()}</span>
+        <span class="spine-stat-line">${getWeeksLeftInMonth(viewDate)} weeks left in ${getMonthName(viewDate)}</span>
+        <span class="spine-stat-line">${getHoursLeftToday(viewDate)} hours left today</span>
       </div>
     `;
     spine.appendChild(youAreHere);
@@ -494,7 +494,12 @@ export const GardenHorizonRenderer = {
     canvas.setAttribute("aria-label", "Time Canvas");
 
     // NOW band is the first thing we see
-    const nowBand = this.renderNowBand(intentions, escapeHtmlFn, onGoalClick);
+    const nowBand = this.renderNowBand(
+      viewDate,
+      intentions,
+      escapeHtmlFn,
+      onGoalClick,
+    );
     canvas.appendChild(nowBand);
 
     // THIS WEEK band
@@ -611,6 +616,14 @@ export const GardenHorizonRenderer = {
       }
 
       band.appendChild(markers);
+    } else {
+      const empty = document.createElement("div");
+      empty.className = "time-band-empty";
+      empty.textContent =
+        type === "week"
+          ? "No planted work for this week yet. You can add a Focus or drag something in when you are ready."
+          : "Nothing mapped for this month yet. New Milestones will show up here.";
+      band.appendChild(empty);
     }
 
     // Events for week band
@@ -646,6 +659,7 @@ export const GardenHorizonRenderer = {
    * Render the NOW band (special treatment)
    */
   renderNowBand(
+    currentDate: Date,
     intentions: Goal[],
     escapeHtmlFn: (text: string) => string,
     onGoalClick: (goalId: string) => void,
@@ -674,7 +688,7 @@ export const GardenHorizonRenderer = {
 
     header.appendChild(labelStack);
 
-    const greeting = getTimeGreeting(new Date());
+    const greeting = getTimeGreeting(currentDate);
     const greetingBlock = document.createElement("div");
     greetingBlock.className = "now-greeting-block";
     greetingBlock.innerHTML = `
@@ -698,7 +712,7 @@ export const GardenHorizonRenderer = {
     if (showFullDate) {
       const dateEl = document.createElement("div");
       dateEl.className = "now-date-display";
-      dateEl.textContent = formatDate(new Date());
+      dateEl.textContent = formatDate(currentDate);
       band.appendChild(dateEl);
     }
 
@@ -803,7 +817,7 @@ export const GardenHorizonRenderer = {
   /**
    * Setup mobile drawer toggle
    */
-  setupMobileDrawer(container: HTMLElement): void {
+  setupMobileDrawer(container: HTMLElement, viewDate: Date): void {
     // Add mobile header with menu button
     const isMobile = window.innerWidth < 768;
     if (!isMobile) return;
@@ -854,8 +868,8 @@ export const GardenHorizonRenderer = {
       const compactHeader = document.createElement("div");
       compactHeader.className = "mobile-you-are-here";
       compactHeader.innerHTML = `
-        <span class="mobile-date">${formatDateCompact(new Date())}</span>
-        <span class="mobile-days">${getDaysLeftInYear()} days left</span>
+        <span class="mobile-date">${formatDateCompact(viewDate)}</span>
+        <span class="mobile-days">${getDaysLeftInYear(viewDate)} days left</span>
         <span class="mobile-bloom">🌸</span>
       `;
       canvas.insertBefore(compactHeader, canvas.firstChild);
@@ -898,3 +912,13 @@ export const GardenHorizonRenderer = {
     clearVisionSelectionStyles();
   },
 };
+
+/*
+Garden Horizon map:
+- Entry: render() mounts on elements.calendarGrid, resets GoalDetailRenderer + RealityPreviewOverlay.
+- Spine: renderGoalSpine(viewDate) → You Are Here stats plus visions list and add-vision control.
+- Canvas: renderTimeCanvas(viewDate) → renderNowBand + week/month bands, wiring markers to onGoalClick and overlays.
+- Utility: renderUtilityRail + setupMobileDrawer(viewDate) emit plan/review/map via eventBus.
+Fixes: aligned spine/Now bands to State.viewingDate and let garden navigation shift viewingDate with arrows; week/month bands now render empty-state copy.
+TODO/Risks: plan rail still keys off selected vision only.
+*/

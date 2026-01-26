@@ -18,7 +18,7 @@ function handleOverlayPointer(event: PointerEvent): void {
   if (card && card.contains(event.target as Node)) {
     return;
   }
-  hide();
+  RealityPreviewOverlay.hide();
 }
 
 function ensureOverlay(): HTMLElement {

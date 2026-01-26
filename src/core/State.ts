@@ -177,11 +177,12 @@ export const State: AppState & {
         this.goToDate(d);
         break;
       case VIEWS.DAY:
+      case VIEWS.GARDEN:
         d.setDate(d.getDate() + direction);
         this.goToDate(d);
         break;
     }
-    eventBus.emit("view:changed", { transition: true });
+    eventBus.emit("view:changed", { view: this.currentView, transition: true });
   },
 
   getDefaultData(): AppData {
