@@ -153,16 +153,21 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--divider);
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   background: var(--surface-0);
   box-shadow: var(--shadow-xs);
 }
 
 .spine-vision-item:hover,
 .spine-vision-item:focus-visible {
-  background: var(--glass-pill-bg);
-  border-color: var(--glass-pill-border);
-  box-shadow: var(--glass-pill-shadow);
+  background: var(--surface-2);
+  border-color: var(--accent-muted, var(--divider));
+  transform: translateX(2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .spine-vision-item.is-selected {
@@ -299,7 +304,7 @@
 .reality-preview-overlay.visible {
   opacity: 1;
   transform: scale(1);
-  pointer-events: none;
+  pointer-events: all;
 }
 
 .reality-preview-card {
