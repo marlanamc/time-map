@@ -332,10 +332,40 @@ export class PlannerDayViewRenderer {
     // Set up past hours toggle
     this.setupPastHoursToggle();
     
-    // Update current time indicator position after render
+    // Update current time indicator position and past hours offset after render
     const timelineContainer = this.container.querySelector('.planner-timeline-container') as HTMLElement | null;
     if (timelineContainer) {
+      this.updatePastHoursOffset(timelineContainer);
       this.updateCurrentTimeIndicatorPosition(timelineContainer);
+    }
+  }
+  
+  /**
+   * Update the CSS variable --current-hour-pos that controls the grid transform
+   * when past hours are collapsed. This should be called on initial render
+   * and whenever the past hours toggle state changes.
+   */
+  private updatePastHoursOffset(timelineContainer: HTMLElement): void {
+    if (!this.activeDate || !this.isToday(this.activeDate)) {
+      timelineContainer.style.removeProperty("--current-hour-pos");
+      return;
+    }
+
+    if (!this.pastHoursExpanded) {
+      // Show one hour before current time
+      // Use minutesToPercent to match the indicator calculation
+      const now = new Date();
+      const currentHour = now.getHours();
+      const hourBeforeCurrent = currentHour - 1;
+      const hourBeforeMinutes = hourBeforeCurrent * 60;
+      const hourBeforePercent = this.calculator.minutesToPercent(hourBeforeMinutes);
+      
+      timelineContainer.style.setProperty(
+        "--current-hour-pos",
+        hourBeforePercent.toFixed(4)
+      );
+    } else {
+      timelineContainer.style.removeProperty("--current-hour-pos");
     }
   }
   
@@ -363,26 +393,7 @@ export class PlannerDayViewRenderer {
         toggleBtn.setAttribute('aria-expanded', String(this.pastHoursExpanded));
         
         // Update CSS variable for grid positioning when collapsing/expanding
-        // Show one hour before current time
-        // Use minutesToPercent to match the indicator calculation
-        if (!this.pastHoursExpanded && this.activeDate && this.isToday(this.activeDate)) {
-          const now = new Date();
-          const currentHour = now.getHours();
-          const hourBeforeCurrent = currentHour - 1;
-          const hourBeforeMinutes = hourBeforeCurrent * 60;
-          const hourBeforePercent = this.calculator.minutesToPercent(hourBeforeMinutes);
-          
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:setupPastHoursToggle',message:'Grid transform calculation - using minutesToPercent',data:{now:now.toISOString(),currentHour,hourBeforeCurrent,hourBeforeMinutes,hourBeforePercent,cssVarValue:hourBeforePercent.toFixed(4),pastHoursExpanded:this.pastHoursExpanded},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'F'})}).catch(()=>{});
-          // #endregion
-          
-          timelineContainer.style.setProperty(
-            '--current-hour-pos',
-            hourBeforePercent.toFixed(4)
-          );
-        } else {
-          timelineContainer.style.removeProperty('--current-hour-pos');
-        }
+        this.updatePastHoursOffset(timelineContainer);
         
         // Update current time indicator position
         this.updateCurrentTimeIndicatorPosition(timelineContainer);
@@ -593,8 +604,8 @@ export class PlannerDayViewRenderer {
 
     return `
       <div class="current-time-top-indicator" data-pinned="true">
-        <div class="current-time-line"></div>
         <div class="current-time-dot"></div>
+        <div class="current-time-line"></div>
         <span class="current-time-label">${timeLabel}</span>
       </div>
     `;

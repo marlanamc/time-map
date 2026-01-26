@@ -316,7 +316,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding-left: 72px;
+  padding-left: 70px; /* Start at the front of intention cards (matches --gutter) */
   padding-right: 1rem;
   background: transparent;
   backdrop-filter: none;
@@ -332,23 +332,20 @@
   flex: 1;
   min-width: 0;
   height: 2px;
-  margin-left: -0.65rem;
-  margin-right: 0.5rem;
+  /* Line starts at the left edge (no negative margin) */
+  margin-right: 0.75rem; /* Space before the time label */
 }
 
 .current-time-top-indicator .current-time-line::after {
   content: "";
   position: absolute;
   inset: 0;
-  left: -1rem;
-  right: -1rem;
+  /* Line extends full width of the flex container */
   height: 100%;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--accent) 0%, transparent) 0%,
-    color-mix(in srgb, var(--accent) 90%, transparent) 10%,
-    color-mix(in srgb, var(--accent) 90%, transparent) 90%,
-    color-mix(in srgb, var(--accent) 0%, transparent) 100%
+    color-mix(in srgb, var(--accent) 90%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 90%, transparent) 100%
   );
   box-shadow:
     0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
@@ -360,6 +357,7 @@
   position: relative;
   width: 12px;
   height: 12px;
+  margin-right: -6px; /* Overlap slightly with line start */
   background: radial-gradient(
     circle,
     var(--accent) 0%,
@@ -372,6 +370,7 @@
     0 0 24px color-mix(in srgb, var(--accent) 40%, transparent);
   animation: dotPulseInline 2s ease-in-out infinite;
   flex-shrink: 0;
+  z-index: 1;
 }
 
 .current-time-top-indicator .current-time-label {
