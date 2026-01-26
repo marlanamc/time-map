@@ -184,7 +184,7 @@
 }
 
 .add-node-btn:hover {
-  background: #fff;
+  background: var(--surface-1);
   color: var(--accent);
 }
 

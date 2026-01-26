@@ -125,13 +125,13 @@
 }
 
 .anxiety-technique-container {
-  background: white;
+  background: var(--surface-1);
   border-radius: var(--radius-lg);
   padding: 32px;
   max-width: var(--container-modal);
   width: 90%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
   transform: scale(0.9);
   transition: transform 0.3s ease;
 }
@@ -407,10 +407,10 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
+  background: var(--surface-1);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   z-index: 1500;
   max-width: var(--container-modal);
   width: 90%;

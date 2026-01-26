@@ -6,44 +6,57 @@
 /* CSS Variables */
 :root {
   /* ===========================================
-       Light Mode Surfaces (Paper System)
-       - No pure white for large surfaces
+       Light Mode Surfaces (Warm Sanctuary System)
+       - Warm, comforting tones for neurodivergent-safe space
+       - Parchment, honey, and creamy coffee inspired palette
+       - Clear visual hierarchy with visible boundaries
        - 3-level hierarchy: app wash → card → raised
        =========================================== */
-  --surface-0: #f8fafc; /* app background wash - neutrally clean */
-  --surface-1: #ffffff; /* pure white for cards */
-  --surface-2: #f1f5f9; /* raised/active/selected */
+  --surface-0: #f6eee3; /* parchment base with roasted honey warmth */
+  --surface-1: #f1e4d4; /* creamy card surface like cafe milk */
+  --surface-2: #e7d5c1; /* deeper parchment panel with cocoa depth */
 
   /* Base colors - mapped to surface system */
   --bg-base: var(--surface-0);
   --bg-surface: var(--surface-1);
   --bg-elevated: var(--surface-2);
-  --bg-hover: rgba(31, 45, 42, 0.04);
-  --bg-active: rgba(31, 45, 42, 0.07);
+  --bg-hover: rgba(140, 120, 95, 0.08); /* warm coffee hover - slightly more visible */
+  --bg-active: rgba(140, 120, 95, 0.12); /* warm coffee active - parchment-coffee blend */
 
-  /* Glass effects - Flattened & Clean */
-  --divider: #e2e8f0;
-  --glass-bg: rgba(242, 247, 246, 0.86);
+  /* Glass effects - Warm & Welcoming (Parchment/Honey/Coffee) */
+  --divider: rgba(123, 91, 71, 0.24); /* soft honey-brown divider for warmth */
+  --glass-bg: rgba(252, 244, 232, 0.95); /* a bit more honey, a bit less grey */
   --glass-border: rgba(
-    31,
-    45,
-    42,
-    0.12
-  ); /* Increased to 0.12 for WCAG AA 3:1 UI component contrast */
-  --glass-shine: rgba(250, 252, 251, 0.55);
+    150,
+    130,
+    110,
+    0.22
+  ); /* warm coffee-brown borders - gentle but visible */
+  --glass-shine: rgba(255, 252, 245, 0.45); /* soft honey shine */
   --glass-panel-border-radius: var(--radius-lg);
-  --glass-panel-blur: 14px;
+  --glass-panel-blur: 12px;
   --glass-panel-bg: color-mix(
     in srgb,
-    var(--glass-bg) 75%,
-    rgba(255, 255, 255, 0.15)
+    var(--glass-bg) 88%,
+    rgba(250, 245, 235, 0.15)
   );
   --glass-panel-border: color-mix(
     in srgb,
-    var(--glass-border) 60%,
-    rgba(255, 255, 255, 0.35)
+    var(--glass-border) 80%,
+    rgba(160, 140, 120, 0.28)
   );
-  --glass-panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --glass-panel-shadow: 0 2px 8px rgba(120, 100, 75, 0.08), 0 1px 2px rgba(120, 100, 75, 0.06);
+
+  /* NOW panel – warm ink wash over parchment */
+  --now-panel-bg: var(--glass-panel-bg);
+  --now-panel-ink-strong: rgba(32, 42, 58, 0.20);
+  --now-panel-ink-soft: rgba(32, 42, 58, 0.06);
+  --now-panel-overlay: linear-gradient(
+    180deg,
+    var(--now-panel-ink-strong) 0%,
+    var(--now-panel-ink-soft) 45%,
+    transparent 100%
+  );
 
   --glass-button-bg: linear-gradient(
     135deg,
@@ -73,11 +86,11 @@
   );
   --glass-pill-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 
-  /* Text hierarchy - Optimized for day mode (dark text on light backgrounds) */
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-tertiary: #64728b;
-  --text-ghost: #94a3b8;
+  /* Text hierarchy - Warm ink tones for comfortable reading */
+  --text-primary: #3a2618; /* coffee ink for clear warmth */
+  --text-secondary: #7b5b47; /* roasted caramel midtone */
+  --text-tertiary: #a6856f; /* toasted oat accent */
+  --text-ghost: #9a9590; /* warm light gray */
   /* Text on accent-filled UI (chips, badges, zoom controls) */
   --text-on-accent: rgba(
     255,
@@ -114,8 +127,8 @@
   /* rose red */
   --coral: #b8472f;
   /* warm coral */
-  --mint: #10b981;
-  /* fresh mint */
+  --mint: #6b8e7a;
+  /* muted sage - warm, non-fluorescent green (softened from #10b981) */
 
   /* Accent System
        - Keep legacy `--accent-*` tokens for compatibility across themes.
@@ -147,11 +160,11 @@
   --accent-progress: var(--sunset); /* Progress bars, meters */
   --accent-icon: var(--violet); /* Icons, decorative elements */
 
-  /* Month card transparency */
-  --month-card-bg: rgba(242, 247, 246, 0.62);
-  --month-card-bg-hover: rgba(250, 252, 251, 0.72);
-  --month-card-past-grey: rgba(160, 160, 160, 0.12);
-  --month-card-past-grey-hover: rgba(160, 160, 160, 0.18);
+  /* Month card transparency - warm cream cards */
+  --month-card-bg: rgba(250, 247, 240, 0.68); /* parchment-coffee cards */
+  --month-card-bg-hover: rgba(250, 247, 240, 0.78); /* warmer parchment on hover */
+  --month-card-past-grey: rgba(160, 145, 120, 0.12);
+  --month-card-past-grey-hover: rgba(160, 145, 120, 0.18);
 
   /* Semantic colors */
   --success: #5a9b8d;
@@ -232,9 +245,9 @@
   --garden-milestone-rgb: 245, 158, 11;
   --garden-milestone-glow: rgba(245, 158, 11, 0.2);
 
-  --garden-focus-accent: #10b981;
-  --garden-focus-rgb: 16, 185, 129;
-  --garden-focus-glow: rgba(16, 185, 129, 0.15);
+  --garden-focus-accent: #6b8e7a;
+  --garden-focus-rgb: 107, 142, 122;
+  --garden-focus-glow: rgba(107, 142, 122, 0.12);
 
   --garden-intention-accent: #8b5cf6;
   --garden-intention-rgb: 139, 92, 246;
@@ -251,15 +264,14 @@
   --duration-normal: 250ms;
   --duration-slow: 400ms;
 
-  /* Shadows */
-  /* Shadows - Softened */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 24px rgba(111, 155, 134, 0.14);
-  --shadow-glow-sm: 0 0 12px rgba(111, 155, 134, 0.1);
+  /* Shadows - Warm & Soft for gentle depth with warm undertones */
+  --shadow-xs: 0 1px 2px rgba(120, 100, 75, 0.06);
+  --shadow-sm: 0 2px 4px rgba(120, 100, 75, 0.07), 0 1px 2px rgba(120, 100, 75, 0.04);
+  --shadow-md: 0 4px 12px rgba(120, 100, 75, 0.09), 0 2px 4px rgba(120, 100, 75, 0.05);
+  --shadow-lg: 0 8px 24px rgba(120, 100, 75, 0.11), 0 4px 8px rgba(120, 100, 75, 0.06);
+  --shadow-xl: 0 12px 32px rgba(120, 100, 75, 0.13), 0 6px 12px rgba(120, 100, 75, 0.07);
+  --shadow-glow: 0 0 20px rgba(111, 155, 134, 0.12);
+  --shadow-glow-sm: 0 0 10px rgba(111, 155, 134, 0.08);
 
   /* Typography */
   --font-sans:
@@ -288,12 +300,16 @@
        Common Pattern Utilities
        =========================================== */
 
-  /* Card styles */
+  /* Card styles - Clear boundaries with warm feel */
   --card-bg: var(--surface-1);
   --card-border: 1px solid var(--divider);
   --card-radius: var(--radius-lg);
   --card-shadow: var(--shadow-sm);
   --card-padding: var(--space-4);
+
+  /* Section divider styles for clear visual separation */
+  --section-border: 1px solid rgba(94, 84, 68, 0.12);
+  --section-bg-tint: rgba(94, 84, 68, 0.025);
 
   /* Interactive element states */
   --focus-ring: 0 0 0 2px var(--accent-muted);
@@ -455,12 +471,12 @@
   --accent-border: #7dd3fc; /* Light sky borders */
   --accent-highlight: #06b6d4; /* Cyan highlight */
   --accent-link: #0ea5e9; /* Sky blue links */
-  --accent-badge: #10b981; /* Mint badge */
+  --accent-badge: #6b8e7a; /* Muted sage badge - non-fluorescent */
   --accent-progress: #14b8a6; /* Teal progress */
   --accent-icon: #22d3ee; /* Cyan icons */
   --accent-stroke: var(--accent-button);
   --accent-fill: var(--accent-button);
-  --accent-fill-gradient: linear-gradient(135deg, #38bdf8 0%, #10b981 100%);
+  --accent-fill-gradient: linear-gradient(135deg, #38bdf8 0%, #6b8e7a 100%);
   --accent-badge-fill: var(--accent-badge);
 }
 
@@ -566,12 +582,12 @@
   --accent-border: rgba(125, 211, 252, 0.3);
   --accent-highlight: #06b6d4; /* Bright cyan */
   --accent-link: #7dd3fc;
-  --accent-badge: #10b981; /* Mint green */
+  --accent-badge: #6b8e7a; /* Muted sage - non-fluorescent */
   --accent-progress: #14b8a6; /* Teal */
   --accent-icon: #22d3ee;
   --accent-stroke: var(--accent-button);
   --accent-fill: var(--accent-button);
-  --accent-fill-gradient: linear-gradient(135deg, #38bdf8 0%, #10b981 100%);
+  --accent-fill-gradient: linear-gradient(135deg, #38bdf8 0%, #6b8e7a 100%);
   --accent-badge-fill: var(--accent-badge);
 }
 
@@ -696,11 +712,11 @@
   --liquid-stack-offset-y: 4px;
   --liquid-stack-offset-x: 2px;
 
-  /* Liquid glass effects */
-  --liquid-glass-blur: 12px;
-  --liquid-glass-bg: rgba(242, 247, 246, 0.75);
-  --liquid-glass-border: rgba(31, 45, 42, 0.12);
-  --liquid-glass-shine: rgba(255, 255, 255, 0.3);
+  /* Liquid glass effects - Warm, inviting with clear boundaries (Parchment/Honey) */
+  --liquid-glass-blur: 10px;
+  --liquid-glass-bg: rgba(250, 247, 240, 0.92); /* parchment cream, more opaque */
+  --liquid-glass-border: rgba(150, 130, 110, 0.20); /* visible warm coffee borders */
+  --liquid-glass-shine: rgba(255, 252, 245, 0.38); /* soft honey shine */
 
   /* Liquid animations */
   --liquid-shimmer-duration: 2s;

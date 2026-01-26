@@ -210,10 +210,10 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  background: white;
+  background: var(--surface-1);
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   z-index: 1500;
   max-width: 350px;
   opacity: 0;
@@ -475,10 +475,10 @@
    =================================== */
 
 .dopamine-progress {
-  background: white;
+  background: var(--surface-1);
   border-radius: var(--radius-md);
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   margin: 16px 0;
 }
 

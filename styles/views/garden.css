@@ -7,15 +7,15 @@
 
 /* General container styling - applies to all screen sizes */
 .garden-view-container {
-  background: color-mix(in srgb, var(--liquid-glass-bg) 50%, transparent);
+  background: color-mix(in srgb, var(--liquid-glass-bg) 85%, var(--surface-1));
   backdrop-filter: blur(var(--liquid-glass-blur));
   -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
   border-radius: 48px;
-  border: 1px solid
-    color-mix(in srgb, var(--liquid-glass-border) 50%, transparent);
+  border: 1px solid var(--liquid-glass-border);
   box-shadow:
-    0 8px 32px rgba(15, 23, 42, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 4px 16px rgba(94, 84, 68, 0.06),
+    0 1px 3px rgba(94, 84, 68, 0.04),
+    inset 0 1px 0 rgba(255, 253, 248, 0.4);
   transition: all var(--liquid-transition-smooth);
   overflow: hidden;
 }
@@ -186,19 +186,17 @@
   }
 
   .garden-goal-item {
-    background: var(--glass-bg, rgba(255, 255, 255, 0.85));
+    background: var(--surface-1);
     padding: var(--space-3) var(--space-4);
-    border-radius: 16px;
-    border: 1.5px solid var(--glass-border, rgba(255, 255, 255, 0.5));
+    border-radius: 12px;
+    border: 1px solid var(--divider);
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: var(--text-base);
     color: var(--text-primary);
     font-weight: 500;
     position: relative;
-    box-shadow:
-      0 2px 8px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: var(--shadow-xs);
   }
 
   /* Dark mode improvements */
@@ -229,10 +227,10 @@
   }
 
   .garden-goal-item:hover {
-    background: rgba(255, 255, 255, 0.95);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    border-color: var(--accent, rgba(255, 255, 255, 0.6));
+    background: var(--surface-1);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--accent-muted, var(--divider));
   }
 
   html.dark-mode .garden-goal-item:hover {

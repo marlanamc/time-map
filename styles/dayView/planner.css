@@ -1,7 +1,7 @@
 :root {
-  --planner-bg: rgba(255, 255, 255, 0.15);
-  --planner-sidebar-bg: var(--glass-bg);
-  --planner-border: var(--glass-border);
+  --planner-bg: color-mix(in srgb, var(--surface-0) 85%, transparent);
+  --planner-sidebar-bg: var(--surface-1);
+  --planner-border: var(--divider);
   --planner-text: var(--text-primary);
   --planner-text-muted: var(--text-tertiary);
   --planner-accent: var(--accent);

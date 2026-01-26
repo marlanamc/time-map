@@ -14,9 +14,8 @@
   width: 100%;
   min-height: 100%;
   background:
-    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(59, 130, 246, 0.03), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139, 92, 246, 0.02), transparent 50%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(15, 23, 42, 0.08)),
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(94, 84, 68, 0.03), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139, 92, 246, 0.015), transparent 50%),
     var(--surface-0);
   color: var(--text-primary);
   --state-active-color: var(--accent-active, #22c55e);
@@ -34,12 +33,8 @@
 }
 
 .goal-spine {
-  background: linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--surface-1) 85%, rgba(255, 255, 255, 0.02)) 0%,
-      color-mix(in srgb, var(--surface-2) 55%, transparent) 100%
-    );
-  border: 1px solid color-mix(in srgb, var(--divider) 55%, rgba(255, 255, 255, 0.15));
+  background: var(--surface-1);
+  border: 1px solid var(--divider);
   border-radius: var(--radius-2xl);
   padding: var(--space-5);
   display: flex;
@@ -51,32 +46,29 @@
   min-height: calc(100vh - var(--space-8));
   max-height: calc(100vh - var(--space-6));
   overflow: hidden;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.05),
-    0 12px 32px rgba(15, 23, 42, 0.12),
-    0 28px 56px rgba(15, 23, 42, 0.14);
-  backdrop-filter: blur(22px) saturate(1.05);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
   transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
 }
 
 .goal-spine:hover {
   border-color: color-mix(in srgb, var(--divider) 80%, transparent);
   box-shadow:
-    0 4px 8px rgba(15, 23, 42, 0.08),
-    0 16px 42px rgba(15, 23, 42, 0.16),
-    0 36px 68px rgba(15, 23, 42, 0.16);
+    0 4px 8px rgba(120, 100, 75, 0.06),
+    0 16px 42px rgba(120, 100, 75, 0.12),
+    0 36px 68px rgba(120, 100, 75, 0.12);
 }
 
 .goal-spine.drawer-open {
-  background: color-mix(in srgb, var(--surface-1) 90%, rgba(255, 255, 255, 0.02));
+  background: color-mix(in srgb, var(--surface-1) 90%, rgba(250, 245, 235, 0.03));
 }
 
 .spine-you-are-here {
   border-radius: var(--radius-xl);
   padding: var(--space-4);
-  background: color-mix(in srgb, var(--surface-2) 60%, rgba(255, 255, 255, 0.02));
-  border: 1px solid color-mix(in srgb, var(--divider) 55%, rgba(255, 255, 255, 0.1));
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  box-shadow: var(--shadow-xs);
 }
 
 .spine-header {
@@ -159,27 +151,23 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
-  border: 1px solid color-mix(in srgb, var(--divider) 55%, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--divider);
   cursor: pointer;
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
     transform 0.2s ease,
     box-shadow 0.2s ease;
-  background: color-mix(in srgb, var(--surface-0) 35%, transparent);
-  box-shadow:
-    0 10px 28px rgba(15, 23, 42, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: var(--surface-0);
+  box-shadow: var(--shadow-xs);
 }
 
 .spine-vision-item:hover,
 .spine-vision-item:focus-visible {
-  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
-  border-color: color-mix(in srgb, var(--divider) 55%, rgba(255, 255, 255, 0.15));
-  transform: translateX(4px);
-  box-shadow:
-    0 14px 36px rgba(15, 23, 42, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: var(--surface-2);
+  border-color: var(--accent-muted, var(--divider));
+  transform: translateX(2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .spine-vision-item.is-selected {
@@ -282,17 +270,10 @@
 
 .time-canvas {
   border-radius: var(--radius-2xl);
-  background: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--surface-1) 92%, rgba(255, 255, 255, 0.06)) 0%,
-      color-mix(in srgb, var(--surface-0) 75%, rgba(255, 255, 255, 0.02)) 100%
-    );
+  background: color-mix(in srgb, var(--surface-0) 65%, var(--surface-1) 35%);
   padding: calc(var(--space-6) + var(--space-1)) calc(var(--space-5) + var(--space-1));
-  border: 1px solid color-mix(in srgb, var(--divider) 60%, rgba(255, 255, 255, 0.2));
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.04),
-    0 16px 38px rgba(15, 23, 42, 0.09),
-    0 32px 64px rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--divider);
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
   gap: calc(var(--space-8) + var(--space-2));
@@ -301,7 +282,7 @@
   scroll-snap-type: y proximity;
   position: relative;
   isolation: isolate;
-  backdrop-filter: blur(16px) saturate(1.02);
+  backdrop-filter: blur(10px);
 }
 
 .reality-preview-overlay {
@@ -800,25 +781,17 @@
 .time-band {
   border-radius: var(--radius-xl);
   padding: var(--space-5);
-  background: linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--surface-0) 70%, transparent) 0%,
-      color-mix(in srgb, var(--surface-1) 65%, rgba(255, 255, 255, 0.04)) 100%
-    );
-  border: 1px solid color-mix(in srgb, var(--divider) 40%, rgba(255, 255, 255, 0.25));
-  box-shadow:
-    0 4px 18px rgba(15, 23, 42, 0.12),
-    0 14px 36px rgba(15, 23, 42, 0.14);
+  background: var(--surface-1);
+  border: 1px solid var(--divider);
+  box-shadow: var(--shadow-sm);
   scroll-snap-align: start;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .time-band:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 10px 28px rgba(15, 23, 42, 0.14),
-    0 24px 52px rgba(15, 23, 42, 0.16);
-  border-color: color-mix(in srgb, var(--divider) 55%, rgba(255, 255, 255, 0.25));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-muted, var(--divider));
 }
 
 .time-band-header {
@@ -828,7 +801,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-4);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid color-mix(in srgb, var(--divider) 35%, transparent);
+  border-bottom: 1px solid var(--divider);
 }
 
 .time-band-label-stack {
@@ -872,39 +845,36 @@
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
-  background: linear-gradient(145deg, color-mix(in srgb, var(--surface-1) 70%, rgba(255, 255, 255, 0.08)), color-mix(in srgb, var(--surface-2) 60%, transparent));
-  border: 1px solid color-mix(in srgb, var(--divider) 40%, rgba(255, 255, 255, 0.18));
+  background: var(--surface-0);
+  border: 1px solid var(--divider);
   cursor: pointer;
   transition: transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  box-shadow:
-    0 8px 20px rgba(15, 23, 42, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-xs);
 }
 
 .time-band-marker:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 10px 26px rgba(15, 23, 42, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--accent-muted, var(--divider));
 }
 
 .time-band-marker.is-selected {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 18%, var(--surface-1) 82%);
   box-shadow:
-    0 12px 30px rgba(15, 23, 42, 0.2),
+    0 12px 30px rgba(120, 100, 75, 0.15),
     0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .time-band-marker.time-band-marker-chip {
-  background: color-mix(in srgb, var(--surface-1) 80%, rgba(255, 255, 255, 0.4));
-  border-color: color-mix(in srgb, var(--divider) 40%, rgba(255, 255, 255, 0.25));
+  background: color-mix(in srgb, var(--surface-1) 80%, rgba(250, 245, 235, 0.35));
+  border-color: color-mix(in srgb, var(--divider) 40%, rgba(200, 180, 160, 0.20));
   padding: var(--space-2) var(--space-5);
   color: var(--text-secondary);
   font-weight: 600;
   box-shadow:
-    0 6px 18px rgba(15, 23, 42, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 6px 18px rgba(120, 100, 75, 0.08),
+    inset 0 1px 0 rgba(250, 245, 235, 0.18);
 }
 
 .time-band-marker.time-band-marker-chip .marker-title {
@@ -1001,28 +971,32 @@
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.75) 35%, rgba(15, 23, 42, 0.55) 65%, rgba(15, 23, 42, 0.35) 85%, rgba(15, 23, 42, 0.15) 100%),
-    var(--garden-sky-gradient);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow:
-    0 25px 60px rgba(15, 23, 42, 0.45),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    var(--now-panel-overlay),
+    var(--now-panel-bg);
+  border-radius: var(--glass-panel-border-radius);
+  border: 1px solid var(--glass-panel-border);
+  box-shadow: var(--glass-panel-shadow);
   color: var(--text-primary);
   backdrop-filter: blur(24px);
 }
 
 .time-band-now .time-band-label,
+.time-band-now .now-date-display,
+.time-band-now .now-greeting-title {
+  color: var(--text-primary);
+  letter-spacing: 0.06em;
+}
+
 .time-band-now .time-band-subtitle,
-.time-band-now .now-greeting-title,
 .time-band-now .now-greeting-subtitle,
 .time-band-now .now-marker-text,
-.time-band-now .now-date-display,
 .time-band-now .now-intentions-label {
-  color: rgba(255, 255, 255, 0.92);
-  text-shadow: 0 2px 6px rgba(15, 23, 42, 0.45);
+  color: var(--text-secondary);
 }
 
 .time-band-now .now-greeting-block {
+  color: var(--text-secondary);
+  font-weight: 600;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1114,14 +1088,11 @@
   justify-content: space-between;
   gap: var(--space-2);
   padding: var(--space-3);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--surface-1) 80%, rgba(255, 255, 255, 0.2)), color-mix(in srgb, var(--surface-2) 55%, rgba(255, 255, 255, 0.08)));
-  backdrop-filter: blur(18px) saturate(1.15);
+  background: var(--surface-1);
+  backdrop-filter: blur(12px);
   border-radius: var(--radius-2xl);
-  border: 1px solid color-mix(in srgb, var(--divider) 60%, rgba(255, 255, 255, 0.2));
-  box-shadow:
-    0 20px 40px rgba(15, 23, 42, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    0 24px 60px rgba(15, 23, 42, 0.25);
+  border: 1px solid var(--divider);
+  box-shadow: var(--shadow-lg);
   z-index: 7;
   isolation: isolate;
 }
@@ -1142,7 +1113,7 @@
   flex: 1;
   position: relative;
   border: none;
-  background: color-mix(in srgb, var(--surface-0) 30%, rgba(255, 255, 255, 0.12));
+  background: color-mix(in srgb, var(--surface-0) 30%, rgba(250, 245, 235, 0.15));
   color: var(--text-primary);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -1155,17 +1126,17 @@
   cursor: pointer;
   transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, color 0.2s ease;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 8px 18px rgba(15, 23, 42, 0.14);
+    inset 0 1px 0 rgba(250, 245, 235, 0.20),
+    0 8px 18px rgba(120, 100, 75, 0.10);
   z-index: 1;
 }
 
 .utility-rail-btn:hover {
-  background: color-mix(in srgb, var(--surface-2) 70%, rgba(255, 255, 255, 0.08));
+  background: color-mix(in srgb, var(--surface-2) 70%, rgba(250, 245, 235, 0.12));
   transform: translateY(-1px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 12px 22px rgba(15, 23, 42, 0.16);
+    inset 0 1px 0 rgba(250, 245, 235, 0.24),
+    0 12px 22px rgba(120, 100, 75, 0.12);
 }
 
 .utility-rail-btn.is-active,
@@ -1174,9 +1145,9 @@
   background: color-mix(in srgb, var(--accent) 16%, var(--surface-1) 84%);
   color: var(--text-primary);
   box-shadow:
-    0 12px 26px rgba(15, 23, 42, 0.2),
+    0 12px 26px rgba(120, 100, 75, 0.15),
     0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    inset 0 1px 0 rgba(250, 245, 235, 0.22);
 }
 
 .utility-rail-icon {
@@ -1499,6 +1470,87 @@
   .goal-detail-panel.visible {
     transform: translateY(0);
   }
+}
+
+/* Warm-light overrides */
+[data-theme="light"] .calendar-grid.garden-horizon {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(214, 185, 149, 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(244, 200, 144, 0.10), transparent 55%),
+    var(--surface-0);
+}
+
+[data-theme="light"] .goal-spine {
+  background: color-mix(in srgb, var(--surface-1) 90%, #f9f1e7 10%);
+  border-color: color-mix(in srgb, var(--divider) 80%, rgba(255, 255, 255, 0.05));
+}
+
+[data-theme="light"] .spine-you-are-here {
+  background: color-mix(in srgb, var(--surface-2) 85%, #fdf4e2 15%);
+  border-color: color-mix(in srgb, var(--divider) 70%, rgba(255, 255, 255, 0.12));
+}
+
+[data-theme="light"] .time-canvas {
+  background: color-mix(in srgb, var(--surface-0) 60%, var(--surface-1) 40%);
+  border-color: color-mix(in srgb, var(--divider) 80%, rgba(255, 255, 255, 0.12));
+}
+
+[data-theme="light"] .time-band {
+  background: color-mix(in srgb, var(--surface-1) 88%, #fdf2e0 12%);
+  border-color: color-mix(in srgb, var(--divider) 70%, rgba(255, 255, 255, 0.16));
+}
+
+[data-theme="light"] .time-band-now {
+  background:
+    linear-gradient(180deg,
+      rgba(41, 52, 73, 0.96) 0%,
+      rgba(41, 52, 73, 0.82) 28%,
+      rgba(41, 52, 73, 0.64) 55%,
+      rgba(241, 228, 212, 0.95) 100%
+    );
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+[data-theme="light"] .time-band-now .now-intention {
+  background: color-mix(in srgb, var(--surface-1) 85%, #fff5e5 15%);
+  border-color: color-mix(in srgb, var(--divider) 65%, rgba(255, 255, 255, 0.16));
+}
+
+[data-theme="light"] .utility-rail {
+  background: color-mix(in srgb, var(--surface-1) 85%, rgba(255, 245, 230, 0.75));
+  border-color: color-mix(in srgb, var(--divider) 70%, rgba(255, 255, 255, 0.20));
+}
+
+[data-theme="light"] .utility-rail-btn {
+  background: color-mix(in srgb, var(--surface-0) 60%, rgba(255, 245, 230, 0.35));
+}
+
+[data-theme="light"] .utility-rail-btn.is-active,
+[data-theme="light"] .utility-rail-btn[aria-current="page"],
+[data-theme="light"] .utility-rail-btn[aria-current="true"] {
+  background: color-mix(in srgb, var(--accent) 18%, #fde9cf 82%);
+}
+
+[data-theme="light"] .planning-page-panel {
+  background: color-mix(in srgb, var(--surface-1) 92%, #fff4e3 8%);
+  border-color: color-mix(in srgb, var(--divider) 70%, rgba(255, 255, 255, 0.35));
+}
+
+[data-theme="light"] .reality-preview-card {
+  background: color-mix(in srgb, var(--surface-1) 90%, #fff3df 10%);
+}
+
+[data-theme="light"] .reality-preview-band-meter,
+[data-theme="light"] .reality-preview-budget-meter {
+  background: color-mix(in srgb, var(--surface-1) 88%, rgba(255, 255, 255, 0.12));
+}
+
+[data-theme="light"] .budget-chip {
+  background: color-mix(in srgb, var(--surface-0) 92%, rgba(255, 255, 255, 0.08));
+}
+
+[data-theme="light"] .goal-detail-commitment-grid div {
+  background: color-mix(in srgb, var(--surface-1) 88%, rgba(255, 255, 255, 0.05));
 }
 
 @media (prefers-reduced-motion: reduce) {

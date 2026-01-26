@@ -28,7 +28,7 @@
   -webkit-backdrop-filter: blur(20px);
   margin-bottom: 0;
   width: 100%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 20px rgba(120, 100, 75, 0.05);
   flex-shrink: 0;
 }
 

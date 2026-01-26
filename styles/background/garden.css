@@ -22,16 +22,20 @@
 }
 
 :root {
-    --garden-sky-gradient: linear-gradient(to bottom,
-            var(--seasonal-bg) 0%,
-            var(--bg-base) 100%);
+    --garden-sky-gradient: linear-gradient(
+            180deg,
+            #293449 0%,
+            #39445c 40%,
+            #46526a 70%,
+            #f1e4d4 100%
+    );
 }
 
-/* Time-based sky gradients */
+/* Time-based sky gradients - Softened for easier viewing */
 :root.time-dawn:not(.dark-mode) .garden-sky {
     --garden-sky-gradient: linear-gradient(to bottom,
-            #A9C6D8 0%,
-            #D7C1CD 50%,
+            #c8d5de 0%,
+            #ddd4d8 40%,
             var(--surface-0) 100%);
     background: var(--garden-sky-gradient);
 }
@@ -46,8 +50,8 @@
 
 :root.time-morning:not(.dark-mode) .garden-sky {
     --garden-sky-gradient: linear-gradient(to bottom,
-            #79B6D2 0%,
-            #A2CBD3 50%,
+            #a8c8d8 0%,
+            #c5d8dc 40%,
             var(--surface-0) 100%);
     background: var(--garden-sky-gradient);
 }
@@ -62,8 +66,8 @@
 
 :root.time-afternoon:not(.dark-mode) .garden-sky {
     --garden-sky-gradient: linear-gradient(to bottom,
-            #3E7FC6 0%,
-            #79B6D2 50%,
+            #8fafc8 0%,
+            #b5c8d5 40%,
             var(--surface-0) 100%);
     background: var(--garden-sky-gradient);
 }
@@ -78,9 +82,9 @@
 
 :root.time-evening:not(.dark-mode) .garden-sky {
     --garden-sky-gradient: linear-gradient(to bottom,
-            #E48A5B 0%,
-            #EFB57A 30%,
-            #E7B09C 70%,
+            #d8a088 0%,
+            #e0c4a8 35%,
+            #e5d8c8 65%,
             var(--surface-0) 100%);
     background: var(--garden-sky-gradient);
 }
