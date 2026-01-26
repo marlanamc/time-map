@@ -305,29 +305,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Routing & URL Management
   // ============================================
   {
-    const slugEntries: Array<[string, (typeof VIEWS)[keyof typeof VIEWS]]> = [
-      ["garden", VIEWS.GARDEN],
-      ["", VIEWS.GARDEN],
-      ["home", VIEWS.GARDEN], // Map 'home' to Garden as requested
-      ["day", VIEWS.DAY],
-      ["week", VIEWS.WEEK],
-      ["month", VIEWS.MONTH],
-      ["year", VIEWS.YEAR],
-    ];
-
-    const SLUG_MAP = new Map(slugEntries);
-
-    // Calculate reverse map for URL updating
-    const REVERSE_SLUG_MAP = new Map<
-      (typeof VIEWS)[keyof typeof VIEWS],
-      string
-    >();
-    for (const [slug, view] of slugEntries) {
-      if (slug === "home" || slug === "") continue;
-      if (!REVERSE_SLUG_MAP.has(view)) {
-        REVERSE_SLUG_MAP.set(view, slug); // Prefer the first non-empty slug as canonical
+    type ViewSlug = (typeof VIEWS)[keyof typeof VIEWS];
+    const getViewFromSlug = (slug: string): ViewSlug | undefined => {
+      switch (slug) {
+        case "":
+        case "garden":
+        case "home":
+          return VIEWS.GARDEN;
+        case "day":
+          return VIEWS.DAY;
+        case "week":
+          return VIEWS.WEEK;
+        case "month":
+          return VIEWS.MONTH;
+        case "year":
+          return VIEWS.YEAR;
+        default:
+          return undefined;
       }
-    }
+    };
+
+    const getCanonicalSlug = (view: ViewSlug): string | undefined => {
+      switch (view) {
+        case VIEWS.GARDEN:
+          return "garden";
+        case VIEWS.DAY:
+          return "day";
+        case VIEWS.WEEK:
+          return "week";
+        case VIEWS.MONTH:
+          return "month";
+        case VIEWS.YEAR:
+          return "year";
+        default:
+          return undefined;
+      }
+    };
 
     const params = new URLSearchParams(location.search);
     const viewParam = params.get("view");
@@ -338,11 +351,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 1. Determine Initial View from URL
     // Path takes precedence over query params
-    let targetView = SLUG_MAP.get(pathSlug);
+    let targetView = getViewFromSlug(pathSlug);
 
     // Fallback to query param (legacy/PWA)
     if (!targetView && viewParam) {
-      targetView = SLUG_MAP.get(viewParam);
+      targetView = getViewFromSlug(viewParam);
     }
 
     if (targetView) {
@@ -350,10 +363,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       didHandleAction = true;
 
       // If we loaded via query param or alias, canonicalize the URL to the verified slug
-      const canonicalSlug = REVERSE_SLUG_MAP.get(targetView);
-      const shouldCanonicalize =
-        canonicalSlug && pathSlug !== canonicalSlug && pathSlug !== "";
-      if (shouldCanonicalize) {
+      const canonicalSlug = getCanonicalSlug(targetView);
+      if (canonicalSlug && pathSlug !== canonicalSlug && pathSlug !== "") {
         history.replaceState(null, "", `/${canonicalSlug}`);
       }
     }
@@ -388,11 +399,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 3. Listen for View Changes -> Update URL
     eventBus.on("view:changed", ({ view }) => {
-      const slug = REVERSE_SLUG_MAP.get(view);
+      const slug = getCanonicalSlug(view);
       if (slug) {
         // Check if we need to update URL (avoid processing popstate events as new pushes)
         const currentPath = location.pathname.slice(1);
-        if (currentPath !== slug) {
+        const shouldSkipGardenRoot = slug === "garden" && currentPath === "";
+        if (currentPath !== slug && !shouldSkipGardenRoot) {
           history.pushState(null, "", `/${slug}`);
         }
       }
@@ -401,10 +413,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 4. Handle Browser Navigation (Back/Forward)
     window.addEventListener("popstate", () => {
       const rawSlug = location.pathname.slice(1);
-      const view = SLUG_MAP.get(rawSlug);
+      const view = getViewFromSlug(rawSlug);
       if (view) {
         // Use internal setView but we know the URL is already correct so the listener won't pushState
         State.setView(view);
+      } else if (rawSlug === "") {
+        // If user hits Back to root, we rely on whatever current state is?
+        // Or re-assert default.
+        // For now, this is safer than potentially broken emptyness.
       }
     });
   }
@@ -729,14 +745,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         e.preventDefault();
         const nextIndex =
           currentIndex < 0 ? 0 : (currentIndex + 1) % items.length;
-        const nextItem = items.at(nextIndex);
-        nextItem?.focus();
+        if (nextIndex >= 0 && nextIndex < items.length) {
+          // eslint-disable-next-line security/detect-object-injection
+          items[nextIndex].focus();
+        }
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         const prevIndex =
           currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
-        const prevItem = items.at(prevIndex);
-        prevItem?.focus();
+        if (prevIndex >= 0 && prevIndex < items.length) {
+          // eslint-disable-next-line security/detect-object-injection
+          items[prevIndex].focus();
+        }
       } else if (e.key === "Escape") {
         ndMenuToggle.focus();
         ndMenuToggle.setAttribute("aria-expanded", "false");
