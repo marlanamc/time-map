@@ -458,16 +458,33 @@ export const State: AppState & {
         });
 
         // Sync cloud goals to local IndexedDB for future offline resilience
-        if (this.data.goals.length > 0) {
-          try {
-            await DB.bulkUpdate(DB_STORES.GOALS, this.data.goals);
-            console.log("[State] ✓ Synced cloud goals to IndexedDB");
-          } catch (dbError) {
-            console.warn(
-              "[State] Failed to sync cloud goals to IndexedDB:",
-              dbError,
+        // Replace IndexedDB contents entirely to respect cloud deletions
+        try {
+          // Get existing local goals to find ones that were deleted in cloud
+          const localGoals = (await DB.getAll(DB_STORES.GOALS)) as Goal[];
+          const cloudGoalIds = new Set(this.data.goals.map((g) => g.id));
+          const deletedIds = localGoals
+            .filter((g) => g?.id && !cloudGoalIds.has(g.id))
+            .map((g) => g.id);
+
+          // Delete goals that no longer exist in cloud
+          if (deletedIds.length > 0) {
+            await DB.bulkDelete(DB_STORES.GOALS, deletedIds);
+            console.log(
+              `[State] ✓ Cleaned up ${deletedIds.length} deleted goal(s) from IndexedDB`,
             );
           }
+
+          // Update/add cloud goals
+          if (this.data.goals.length > 0) {
+            await DB.bulkUpdate(DB_STORES.GOALS, this.data.goals);
+            console.log("[State] ✓ Synced cloud goals to IndexedDB");
+          }
+        } catch (dbError) {
+          console.warn(
+            "[State] Failed to sync cloud goals to IndexedDB:",
+            dbError,
+          );
         }
 
         // Persist the cloud-loaded snapshot locally for offline fallback
@@ -498,7 +515,9 @@ export const State: AppState & {
         }
       }
 
-      if (this.data?.goals) {
+      // Only merge IndexedDB goals if we failed to load cloud data (offline mode)
+      // If cloud data loaded successfully, trust it as the source of truth for deletions
+      if (this.data?.goals && !cloudData) {
         try {
           const localGoals = (await DB.getAll(DB_STORES.GOALS)) as Goal[];
           if (Array.isArray(localGoals) && localGoals.length > 0) {
