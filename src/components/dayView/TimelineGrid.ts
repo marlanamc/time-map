@@ -9,11 +9,14 @@ export class TimelineGrid {
 
   /**
    * Render the time grid as HTML string
+   * @param currentDate - Optional current date to determine which hours have passed
    */
-  render(): string {
+  render(currentDate?: Date | null, pastHoursExpanded: boolean = false): string {
     const slots = this.calculator.generateTimeSlots();
-    const currentTimeVisible = this.calculator.isCurrentTimeVisible();
-    const currentTimePosition = this.calculator.getCurrentTimePosition();
+
+    // Determine current hour if date is provided
+    const currentHour = currentDate ? currentDate.getHours() : null;
+    const isToday = currentDate ? this.isToday(currentDate) : false;
 
     const hoursHtml = slots
       .map((slot, idx) => {
@@ -21,8 +24,13 @@ export class TimelineGrid {
         const isLast = idx === slots.length - 1;
         const posClass = isFirst ? " is-first" : isLast ? " is-last" : "";
 
+        // Check if this hour should be collapsed (only for today)
+        // Show one hour before current time, so collapse hours that are before (currentHour - 1)
+        const isPast = isToday && currentHour !== null && slot.hour < currentHour - 1;
+        const pastClass = isPast && !pastHoursExpanded ? " is-past" : "";
+
         return `
-          <div class="bed-hour${posClass}"
+          <div class="bed-hour${posClass}${pastClass}"
                style="--at:${slot.position.toFixed(4)}"
                data-hour="${slot.hour}">
             <span class="bed-hour-label">${slot.label12h}</span>
@@ -32,17 +40,9 @@ export class TimelineGrid {
       })
       .join("");
 
-    const currentTimeIndicator = currentTimeVisible
-      ? `<div class="current-time-indicator" style="--at:${currentTimePosition.toFixed(4)}">
-           <div class="current-time-line"></div>
-           <div class="current-time-dot"></div>
-         </div>`
-      : "";
-
     return `
       <div class="day-bed-grid" aria-hidden="true">
         ${hoursHtml}
-        ${currentTimeIndicator}
       </div>
     `;
   }
@@ -58,30 +58,31 @@ export class TimelineGrid {
 
   /**
    * Update an existing grid element
+   * @param element - The grid element to update
+   * @param currentDate - Optional current date to determine which hours have passed
+   * @param pastHoursExpanded - Whether past hours should be expanded
    */
-  updateElement(element: HTMLElement): void {
-    const currentTimeVisible = this.calculator.isCurrentTimeVisible();
-    const currentTimePosition = this.calculator.getCurrentTimePosition();
+  updateElement(element: HTMLElement, currentDate?: Date | null, pastHoursExpanded: boolean = false): void {
+    // Update past hours classes
+    const isToday = currentDate ? this.isToday(currentDate) : false;
+    const currentHour = currentDate ? currentDate.getHours() : null;
 
-    let indicator = element.querySelector(".current-time-indicator") as HTMLElement | null;
-
-    if (currentTimeVisible) {
-      if (!indicator) {
-        // Create indicator if it doesn't exist
-        indicator = document.createElement("div");
-        indicator.className = "current-time-indicator";
-        indicator.innerHTML = `
-          <div class="current-time-line"></div>
-          <div class="current-time-dot"></div>
-        `;
-        element.appendChild(indicator);
-      }
-      // Update position
-      indicator.style.setProperty("--at", currentTimePosition.toFixed(4));
-    } else if (indicator) {
-      // Remove indicator if time is not visible
-      indicator.remove();
+    if (isToday && currentHour !== null) {
+      const hourElements = element.querySelectorAll(".bed-hour");
+      hourElements.forEach((hourEl) => {
+        const hour = Number.parseInt(
+          (hourEl as HTMLElement).dataset.hour ?? "",
+          10
+        );
+        if (!Number.isNaN(hour)) {
+          // Collapse hours that are completely in the past (before current hour)
+          // Show one hour before current time, so collapse hours before (currentHour - 1)
+          const isPast = hour < currentHour - 1;
+          hourEl.classList.toggle("is-past", isPast && !pastHoursExpanded);
+        }
+      });
     }
+
   }
 
   /**
@@ -99,6 +100,18 @@ export class TimelineGrid {
   getYForTime(minutes: number, gridHeight: number): number {
     const pct = this.calculator.minutesToPercent(minutes) / 100;
     return pct * gridHeight;
+  }
+
+  /**
+   * Check if a date is today
+   */
+  private isToday(date: Date): boolean {
+    const today = new Date();
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
   }
 
   /**

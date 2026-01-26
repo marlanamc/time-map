@@ -201,7 +201,7 @@ export class DayViewController {
           const gridEl = this.container.querySelector(
             ".day-bed-grid"
           ) as HTMLElement | null;
-          if (gridEl) this.timelineGrid.updateElement(gridEl);
+          if (gridEl) this.timelineGrid.updateElement(gridEl, currentDate);
         }
       }, 60000);
     } catch (error) {

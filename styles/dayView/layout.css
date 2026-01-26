@@ -538,6 +538,19 @@
   z-index: 1;
 }
 
+/* Offset grid in planner view to start just below the pinned current time indicator */
+/* Indicator is at top: 48px, visual height ~20px (line + dot + label), plus 20px spacer */
+.planner-timeline-container .day-bed-grid {
+  top: 88px; /* 48px (indicator top) + ~20px (indicator visual height) + 20px (spacer) = first hour appears just below indicator */
+  bottom: 0;
+}
+
+/* Shift grid up when past hours are collapsed so first visible hour appears at top */
+/* Uses the current hour's position percentage (set via CSS variable) to calculate the transform */
+.planner-timeline-container:not([data-past-hours-expanded="true"]) .day-bed-grid {
+  transform: translateY(calc(var(--current-hour-pos, 0) * -1%));
+}
+
 .bed-hour {
   position: absolute;
   top: calc(var(--at) * 1%);
@@ -581,6 +594,57 @@
   opacity: 0.3;
 }
 
+/* Collapse past hours - compress them into minimal space */
+.planner-timeline-container:not([data-past-hours-expanded="true"]) .bed-hour.is-past {
+  height: 4px;
+  min-height: 4px;
+  max-height: 4px;
+  overflow: hidden;
+  opacity: 0.3;
+  transform: translateY(-50%) scaleY(0.1);
+  transition: height 0.3s ease-out, opacity 0.3s ease-out, transform 0.3s ease-out;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+}
+
+.planner-timeline-container:not([data-past-hours-expanded="true"]) .bed-hour.is-past .bed-hour-label {
+  display: none;
+}
+
+.planner-timeline-container:not([data-past-hours-expanded="true"]) .bed-hour.is-past .bed-hour-line {
+  opacity: 0.2;
+  height: 1px;
+  transition: opacity 0.2s ease-out;
+}
+
+/* When expanded, show past hours normally */
+.planner-timeline-container[data-past-hours-expanded="true"] .bed-hour.is-past {
+  opacity: 1;
+  transform: translateY(-50%) scaleY(1);
+  height: auto;
+  pointer-events: auto;
+}
+
+.planner-timeline-container[data-past-hours-expanded="true"] .bed-hour.is-past .bed-hour-label,
+.planner-timeline-container[data-past-hours-expanded="true"] .bed-hour.is-past .bed-hour-line {
+  opacity: 1;
+}
+
+/* Hide timeline content items in collapsed past hours */
+.planner-timeline-container:not([data-past-hours-expanded="true"]) .planner-timeline-content [data-is-past="true"] {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Show timeline content items when past hours are expanded */
+.planner-timeline-container[data-past-hours-expanded="true"] .planner-timeline-content [data-is-past="true"] {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .dark-mode .bed-hour-label {
   color: rgba(234, 246, 240, 0.6);
 }
@@ -588,78 +652,6 @@
 .dark-mode .bed-hour-line {
   background: rgba(234, 246, 240, 0.15);
   opacity: 0.5;
-}
-
-/* ============================================
-   CURRENT TIME INDICATOR
-   ============================================ */
-
-.current-time-indicator {
-  position: absolute;
-  top: calc(var(--at) * 1%);
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  z-index: 10;
-  pointer-events: none;
-}
-
-.current-time-line {
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--accent) 0%, transparent) 0%,
-    color-mix(in srgb, var(--accent) 90%, transparent) 10%,
-    color-mix(in srgb, var(--accent) 90%, transparent) 90%,
-    color-mix(in srgb, var(--accent) 0%, transparent) 100%
-  );
-  position: relative;
-  box-shadow:
-    0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
-    0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
-  animation: timePulse 2s ease-in-out infinite;
-}
-
-@keyframes timePulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.current-time-dot {
-  position: absolute;
-  left: var(--time-gutter);
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
-  background: radial-gradient(
-    circle,
-    var(--accent) 0%,
-    color-mix(in srgb, var(--accent) 80%, transparent) 50%,
-    color-mix(in srgb, var(--accent) 0%, transparent) 100%
-  );
-  border-radius: 50%;
-  box-shadow:
-    0 0 12px color-mix(in srgb, var(--accent) 80%, transparent),
-    0 0 24px color-mix(in srgb, var(--accent) 40%, transparent);
-  animation: dotPulse 2s ease-in-out infinite;
-}
-
-@keyframes dotPulse {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  50% {
-    transform: translate(-50%, -50%) scale(1.2);
-  }
 }
 
 /* ============================================

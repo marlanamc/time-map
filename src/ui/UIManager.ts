@@ -1377,6 +1377,7 @@ export const UI = {
             void this.ensureQuickAdd().then((qa) => qa?.show());
           },
           onGetPreference: (key: string) => {
+            // eslint-disable-next-line security/detect-object-injection
             return (State.data?.preferences.nd as any)?.[key];
           },
           onNavigate: (direction: number) => {
@@ -1415,68 +1416,8 @@ export const UI = {
         viewingDate.toDateString() === today.toDateString();
 
       if (isToday) {
-        // Use double RAF to ensure DOM is fully rendered and layout is complete
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            // Try to find the current time indicator first
-            const currentTimeIndicator = container.querySelector(
-              ".current-time-indicator",
-            ) as HTMLElement | null;
-
-            let targetElement: HTMLElement | null = null;
-
-            if (currentTimeIndicator) {
-              targetElement = currentTimeIndicator;
-            } else {
-              // Fallback: find the hour slot for the current hour
-              const currentHour = today.getHours();
-              const hourSlot = container.querySelector(
-                `.bed-hour[data-hour="${currentHour}"]`,
-              ) as HTMLElement | null;
-              if (hourSlot) {
-                targetElement = hourSlot;
-              }
-            }
-
-            if (targetElement) {
-              // Find the scrollable container
-              const scrollableParent = targetElement.closest(
-                ".main-content, .canvas-container, .canvas, .day-view-container",
-              ) as HTMLElement | null;
-
-              if (scrollableParent) {
-                // Calculate scroll position accounting for header/navigation
-                const headerHeight =
-                  document.querySelector(".header")?.getBoundingClientRect()
-                    .height || 0;
-                const dateNavHeight =
-                  document.querySelector(".header-mobile-nav")
-                    ?.getBoundingClientRect().height || 0;
-                const offset = headerHeight + dateNavHeight + 16;
-
-                const targetRect = targetElement.getBoundingClientRect();
-                const parentRect = scrollableParent.getBoundingClientRect();
-                const scrollTop =
-                  scrollableParent.scrollTop +
-                  targetRect.top -
-                  parentRect.top -
-                  offset;
-
-                scrollableParent.scrollTo({
-                  top: Math.max(0, scrollTop),
-                  behavior: "smooth",
-                });
-              } else {
-                // Fallback to scrollIntoView
-                targetElement.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                  inline: "nearest",
-                });
-              }
-            }
-          });
-        });
+        // Scroll-to-time feature disabled - current time indicator is now pinned at top
+        // No automatic scrolling should occur
       }
     }
   },
@@ -1834,6 +1775,7 @@ export const UI = {
     >;
 
     const shareAchievement = async (achievementId: string) => {
+      // eslint-disable-next-line security/detect-object-injection
       const achievement = achievementConfig[achievementId];
       if (!achievement) return;
 
@@ -2315,7 +2257,6 @@ export const UI = {
       this.elements.nowTimelineBar.setAttribute("data-time-of-day", timeOfDay);
     } else {
       // Week, Month, Year views
-      const totalMs = end.getTime() - start.getTime();
       const remainingMs = Math.max(0, end.getTime() - now.getTime());
 
       if (view === VIEWS.WEEK) {
