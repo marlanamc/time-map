@@ -373,27 +373,27 @@
    - Light mode + time-night → light text (dark sky)
    =================================== */
 
-/* Dark mode base → dark UI with light text */
+/* Dark mode base → Midnight Moss with warm amber glow */
 :root.dark-mode {
-  --surface-0: #0b1624;
-  --surface-1: #111e2d;
-  --surface-2: #16243a;
-  --divider: rgba(255, 255, 255, 0.1);
+  --surface-0: #1a1c18;  /* Deep charcoal with olive undertone */
+  --surface-1: #222420;  /* Moss-stone card */
+  --surface-2: #2a2d27;  /* Elevated moss */
+  --divider: rgba(200, 195, 170, 0.12);  /* Warm olive-tinted border */
 
-  --bg-base: #0b1624;
-  --bg-elevated: #111e2d;
-  --bg-surface: rgba(17, 30, 45, 0.82);
-  --bg-hover: rgba(24, 40, 58, 0.86);
-  --bg-active: rgba(32, 52, 74, 0.9);
+  --bg-base: #1a1c18;
+  --bg-elevated: #222420;
+  --bg-surface: rgba(34, 36, 32, 0.82);
+  --bg-hover: rgba(42, 45, 39, 0.86);
+  --bg-active: rgba(50, 54, 47, 0.90);
 
-  --glass-bg: rgba(12, 22, 36, 0.72);
-  --glass-border: rgba(140, 183, 217, 0.18);
-  --glass-shine: rgba(180, 210, 240, 0.1);
+  --glass-bg: rgba(34, 36, 32, 0.75);  /* Moss-tinted glass */
+  --glass-border: rgba(235, 190, 120, 0.22);  /* Warm honey glow */
+  --glass-shine: rgba(245, 210, 145, 0.12);  /* Golden highlight */
 
-  /* Accents for dark mode - softer, lighter versions */
-  --accent-button: #8cb7d9; /* Sky blue for buttons */
-  --accent-active: #6f9b86; /* Sage green for active states */
-  --accent-border: #7dd3fc; /* Light sky for borders */
+  /* Warm accent palette for dark mode */
+  --accent-button: #d4a65a;  /* Warm gold instead of cool sky */
+  --accent-active: #89a876;  /* Warm sage instead of blue-green */
+  --accent-border: #e8ba7a;  /* Amber instead of sky blue */
   --accent-highlight: #fb7185; /* Rose pink for highlights */
   --accent-link: #818cf8; /* Indigo for links */
   --accent-badge: #e77d3e; /* Sunset orange for badges */
@@ -409,18 +409,18 @@
   );
   --accent-badge-fill: var(--accent-badge);
 
-  --text-primary: rgba(255, 255, 255, 0.95);
-  --text-secondary: rgba(255, 255, 255, 0.75);
-  --text-tertiary: rgba(255, 255, 255, 0.6);
-  --text-ghost: rgba(255, 255, 255, 0.45);
+  --text-primary: rgba(248, 246, 240, 0.95);  /* Warm off-white */
+  --text-secondary: rgba(230, 225, 210, 0.75);  /* Cream secondary */
+  --text-tertiary: rgba(210, 205, 190, 0.60);  /* Muted cream */
+  --text-ghost: rgba(190, 185, 170, 0.45);  /* Subtle sage-gray */
   /* Dark UI uses lighter accents; use dark ink for legible text on them */
   --text-on-accent: rgba(8, 23, 39, 0.92);
 
-  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.45);
-  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.55);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.62);
-  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.68);
-  --shadow-xl: 0 36px 90px rgba(0, 0, 0, 0.74);
+  --shadow-xs: 0 1px 3px rgba(10, 15, 10, 0.50);
+  --shadow-sm: 0 4px 14px rgba(10, 15, 10, 0.60);
+  --shadow-md: 0 10px 30px rgba(10, 15, 10, 0.68);
+  --shadow-lg: 0 20px 50px rgba(10, 15, 10, 0.75);
+  --shadow-xl: 0 36px 90px rgba(10, 15, 10, 0.82);
 
   --month-card-bg: rgba(17, 30, 45, 0.3);
   --month-card-bg-hover: rgba(24, 40, 58, 0.42);
@@ -774,17 +774,12 @@
   --lift-shadow: var(--shadow-md);
 }
 
-/* Liquid glass effects for dark mode */
+/* Liquid glass effects for dark mode - Midnight Moss with Amber Glow */
 :root.dark-mode {
   --liquid-glass-blur: 16px;
-  --liquid-glass-bg: rgba(17, 30, 45, 0.65);
-  --liquid-glass-border: rgba(
-    140,
-    183,
-    217,
-    0.24
-  ); /* Increased to 0.24 for WCAG AA contrast */
-  --liquid-glass-shine: rgba(180, 210, 240, 0.08);
+  --liquid-glass-bg: rgba(34, 36, 32, 0.75);  /* Moss-tinted glass */
+  --liquid-glass-border: rgba(220, 175, 100, 0.26);  /* Deeper amber */
+  --liquid-glass-shine: rgba(245, 210, 145, 0.10);  /* Honey shine */
 
   --intention-pill-bg: var(--liquid-glass-bg);
   --intention-pill-border: 1px solid var(--liquid-glass-border);
@@ -792,29 +787,29 @@
   --task-item-bg: var(--surface-1);
   --task-item-expanded-bg: var(--surface-2);
 
-  --panel-bg: rgba(12, 22, 36, 0.85);
+  --panel-bg: rgba(34, 36, 32, 0.88);
   --panel-backdrop: rgba(0, 0, 0, 0.8);
 
   --glass-panel-bg: color-mix(
     in srgb,
-    var(--glass-bg) 88%,
-    rgba(5, 7, 20, 0.45)
+    rgba(34, 36, 32, 0.88),
+    rgba(245, 210, 145, 0.05)
   );
-  --glass-panel-border: rgba(255, 255, 255, 0.22);
-  --glass-panel-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+  --glass-panel-border: rgba(235, 190, 120, 0.24);
+  --glass-panel-shadow: 0 12px 30px rgba(10, 15, 10, 0.70);
   --glass-button-bg: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--accent-button) 70%, rgba(255, 255, 255, 0.15)) 0%,
-    color-mix(in srgb, var(--accent-progress) 75%, rgba(0, 0, 0, 0.85)) 100%
+    color-mix(in srgb, var(--accent-button) 70%, rgba(245, 210, 145, 0.15)) 0%,
+    color-mix(in srgb, var(--accent-progress) 75%, rgba(10, 15, 10, 0.85)) 100%
   );
-  --glass-button-border: rgba(255, 255, 255, 0.35);
-  --glass-button-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+  --glass-button-border: rgba(235, 190, 120, 0.30);
+  --glass-button-shadow: 0 14px 32px rgba(10, 15, 10, 0.65);
   --glass-button-glow: color-mix(
     in srgb,
     var(--accent-progress) 70%,
-    rgba(255, 255, 255, 0.25)
+    rgba(245, 210, 145, 0.25)
   );
-  --glass-pill-bg: rgba(255, 255, 255, 0.06);
-  --glass-pill-border: rgba(255, 255, 255, 0.2);
-  --glass-pill-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  --glass-pill-bg: rgba(34, 36, 32, 0.70);
+  --glass-pill-border: rgba(235, 190, 120, 0.20);
+  --glass-pill-shadow: 0 10px 24px rgba(10, 15, 10, 0.55);
 }
