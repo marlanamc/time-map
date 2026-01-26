@@ -77,6 +77,20 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
   background: var(--surface-2);
   border: 1px solid var(--divider);
   box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.spine-you-are-here:hover {
+  background: var(--surface-1);
+  border-color: var(--accent-muted, var(--divider));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.spine-you-are-here:focus-visible {
+  outline: 2px solid var(--accent-highlight);
+  outline-offset: 2px;
 }
 
 .spine-header {
@@ -677,6 +691,194 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
   background: var(--surface-0);
 }
 
+.planning-title-field {
+  position: relative;
+}
+
+.planning-title-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.planning-emoji-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  border: 1px dashed var(--divider);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+.planning-emoji-btn:hover {
+  border-color: var(--text-primary);
+}
+
+.planning-emoji-picker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  margin-top: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--divider);
+  background: var(--surface-1);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.25);
+  display: none;
+  gap: var(--space-2);
+  z-index: 10;
+}
+
+.planning-emoji-picker[data-visible="true"] {
+  display: grid;
+}
+
+.planning-emoji-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
+  gap: var(--space-2);
+}
+
+.planning-emoji-option {
+  border: none;
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: var(--space-1);
+  transition: transform 0.2s;
+}
+
+.planning-emoji-option:hover {
+  transform: translateY(-1px);
+}
+
+.planning-emoji-input {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--divider);
+  padding: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: var(--surface-0);
+}
+
+.planning-link-field .planning-link-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.planning-link-segmented {
+  display: flex;
+  gap: var(--space-1);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.planning-link-segment {
+  flex: 1;
+  border: none;
+  background: var(--surface-0);
+  padding: var(--space-2);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.planning-link-segment.active {
+  background: var(--surface-1);
+  color: var(--text-primary);
+}
+
+.planning-helper-text {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.planning-link-empty {
+  min-height: 1.25rem;
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.planning-section-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.planning-time-check {
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.planning-time-check-label {
+  margin: 0;
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.planning-time-check-line {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.planning-intention-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.planning-days-grid {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.planning-day-btn {
+  flex: 1;
+  height: 44px;
+  border: 1px solid var(--divider);
+  background: var(--surface-1);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.planning-day-btn.selected {
+  background: var(--accent);
+  color: var(--surface-1);
+  border-color: var(--accent);
+}
+
+.planning-day-btn:hover {
+  border-color: var(--accent);
+}
 .planning-input-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -1594,6 +1796,14 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.60),
     inset 0 1px 0 rgba(255, 150, 220, 0.08);
+}
+
+:root.dark-mode .spine-you-are-here:hover {
+  background: color-mix(in srgb, var(--surface-1) 90%, rgba(255, 110, 199, 0.12));
+  border-color: rgba(255, 110, 199, 0.32);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.65),
+    0 0 16px rgba(255, 110, 199, 0.12);
 }
 
 :root.dark-mode .spine-vision-item {

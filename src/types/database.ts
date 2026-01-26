@@ -43,6 +43,8 @@ export interface GoalRow {
   archived_at?: string;
   /** Recurring intention commitment details */
   commitment?: any; // JSONB
+  /** Optional pointer for tagging the intention's inspiration */
+  link_target?: { type: string; id: string } | null;
 }
 
 /**

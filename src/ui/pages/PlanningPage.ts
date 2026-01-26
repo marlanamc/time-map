@@ -1,29 +1,42 @@
 import { eventBus } from "../../core/EventBus";
-import { Goals } from "../../core/Goals";
-import type { EnergyType, Goal, GoalLevel, GoalStatus } from "../../types";
+import { Goals, ensurePlanningFocusForGoal } from "../../core/Goals";
+import type {
+  EnergyType,
+  Goal,
+  GoalData,
+  GoalLevel,
+  GoalStatus,
+  LinkTargetType,
+} from "../../types";
+import { dirtyTracker } from "../../services/DirtyTracker";
 
 const OVERLAY_ID = "planning-page-overlay";
 const PANEL_ID = "planning-page-panel";
 
 type IntentionState = {
   title: string;
-  parentGoalId: string | null;
+  emoji: string | null;
+  linkType: LinkTargetType;
+  linkTargetId: string | null;
   frequency: number;
   duration: number;
   energyType: EnergyType;
-  energyType: EnergyType;
   specificDays: number[]; // 0=Sun..6=Sat
+  timeOfDay: string;
 };
 
 const ENERGY_OPTIONS: EnergyType[] = ["focus", "creative", "rest", "admin"];
 
 const DEFAULT_STATE: IntentionState = {
   title: "",
-  parentGoalId: null,
+  emoji: null,
+  linkType: "focus",
+  linkTargetId: null,
   frequency: 2,
   duration: 30,
   energyType: "focus",
   specificDays: [],
+  timeOfDay: "",
 };
 
 const DAYS_OF_WEEK = [
@@ -36,20 +49,187 @@ const DAYS_OF_WEEK = [
   { label: "S", value: 6 },
 ];
 
+const LINK_TARGET_TYPES: LinkTargetType[] = ["vision", "milestone", "focus"];
+const LINK_TARGET_LABELS: Record<LinkTargetType, string> = {
+  vision: "Vision",
+  milestone: "Milestone",
+  focus: "Focus",
+};
+const LINKABLE_STATUSES: GoalStatus[] = ["not-started", "in-progress", "blocked"];
+const EMOJI_SUGGESTIONS = ["🌱", "✨", "🔥", "☀️", "⚡", "🧘", "📚"];
+
+const GOAL_LEVEL_ORDER: Record<GoalLevel, number> = {
+  vision: 1,
+  milestone: 2,
+  focus: 3,
+  intention: 4,
+};
+
+function getLinkOptionsForType(type: LinkTargetType): Goal[] {
+  const today = new Date();
+  switch (type) {
+    case "vision": {
+      const start = new Date(today.getFullYear(), 0, 1);
+      const end = new Date(today.getFullYear(), 11, 31);
+      return Goals.getForRange(start, end)
+        .filter(
+          (goal) =>
+            goal.level === "vision" && LINKABLE_STATUSES.includes(goal.status),
+        )
+        .sort((a, b) => a.title.localeCompare(b.title));
+    }
+    case "milestone": {
+      return Goals.getForRange(today, today)
+        .filter(
+          (goal) =>
+            goal.level === "milestone" &&
+            LINKABLE_STATUSES.includes(goal.status),
+        )
+        .sort((a, b) => a.title.localeCompare(b.title));
+    }
+    default:
+      return getActiveFocuses();
+  }
+}
+
+function formatLinkOptionLabel(goal: Goal, type: LinkTargetType): string {
+  switch (type) {
+    case "vision":
+      return goal.title;
+    case "milestone": {
+      const monthLabel = formatMonthLabel(goal.month);
+      return monthLabel ? `${goal.title} · ${monthLabel}` : goal.title;
+    }
+    case "focus": {
+      const startDate = goal.meta?.startDate
+        ? new Date(goal.meta.startDate)
+        : null;
+      const weekLabel = startDate ? `Week ${getWeekNumber(startDate)}` : null;
+      return weekLabel ? `${goal.title} · ${weekLabel}` : goal.title;
+    }
+    default:
+      return goal.title;
+  }
+}
+
+function formatMonthLabel(month?: number): string | null {
+  if (month === undefined || Number.isNaN(month)) return null;
+  return new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+    new Date(2000, month, 1),
+  );
+}
+
+function getWeekNumber(date: Date): number {
+  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+  const pastDays = Math.floor(
+    (date.getTime() - firstDayOfYear.getTime()) / 86_400_000,
+  );
+  return Math.ceil((pastDays + firstDayOfYear.getDay() + 1) / 7);
+}
+
+function computeDefaultLinkTargetId(
+  type: LinkTargetType,
+  preferredId?: string | null,
+): string | null {
+  const candidates = getLinkOptionsForType(type);
+  if (preferredId && candidates.some((goal) => goal.id === preferredId)) {
+    return preferredId;
+  }
+  return candidates[0]?.id ?? null;
+}
+
+function formatYmd(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getNextScheduledDate(weekdays: number[]): Date {
+  const today = new Date();
+  if (weekdays.length === 0) {
+    return today;
+  }
+  const normalized = Array.from(new Set(weekdays));
+  const todayIndex = today.getDay();
+  let minDiff = 7;
+  for (const target of normalized) {
+    const diff = (target - todayIndex + 7) % 7;
+    if (diff < minDiff) {
+      minDiff = diff;
+    }
+  }
+  const scheduled = new Date(today);
+  scheduled.setDate(scheduled.getDate() + minDiff);
+  scheduled.setHours(0, 0, 0, 0);
+  return scheduled;
+}
+
+async function waitForGoalSync(goalId: string, timeoutMs = 5000): Promise<void> {
+  const start = Date.now();
+  while (dirtyTracker.isDirty("goal", goalId)) {
+    if (Date.now() - start > timeoutMs) break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
+function findMilestoneForVision(vision: Goal): Goal | null {
+  return (
+    Goals.getAll().find(
+      (goal) => goal.level === "milestone" && goal.parentId === vision.id,
+    ) ?? null
+  );
+}
+
+function createMilestoneForVision(vision: Goal): Goal {
+  const now = new Date();
+  const month = Number.isFinite(vision.month) ? vision.month : now.getMonth();
+  const year = Number.isFinite(vision.year) ? vision.year : now.getFullYear();
+  const data: GoalData = {
+    title: `Milestone for ${vision.title}`,
+    level: "milestone",
+    parentId: vision.id,
+    parentLevel: "vision",
+    month,
+    year,
+    description: `Auto-created milestone for ${vision.title}`,
+  };
+  return Goals.create(data);
+}
+
+async function resolveFocusParentForLinkTarget(goal: Goal): Promise<Goal | null> {
+  switch (goal.level) {
+    case "focus":
+      return goal;
+    case "milestone":
+      return ensurePlanningFocusForGoal(goal);
+    case "vision": {
+      const milestone = findMilestoneForVision(goal) || createMilestoneForVision(goal);
+      return ensurePlanningFocusForGoal(milestone);
+    }
+    default:
+      return null;
+  }
+}
 let overlayElement: HTMLElement | null = null;
 let state: IntentionState = { ...DEFAULT_STATE };
 
 interface FormElements {
   titleInput: HTMLInputElement | null;
-  goalSelect: HTMLSelectElement | null;
+  linkSelect: HTMLSelectElement | null;
   frequencyInput: HTMLInputElement | null;
   durationInput: HTMLInputElement | null;
   energySelect: HTMLSelectElement | null;
   saveBtn: HTMLButtonElement | null;
   dayButtons: NodeListOf<HTMLButtonElement> | null;
+  timeInput: HTMLInputElement | null;
 }
 
 let formElements: FormElements | null = null;
+let emojiPickerElement: HTMLElement | null = null;
+let emojiButtonElement: HTMLButtonElement | null = null;
+let emojiDocClickListener: ((event: MouseEvent) => void) | null = null;
+let emojiDocKeydownListener: ((event: KeyboardEvent) => void) | null = null;
 
 function ensureOverlay(): HTMLElement {
   if (overlayElement) return overlayElement;
@@ -67,42 +247,24 @@ function ensureOverlay(): HTMLElement {
   return overlay;
 }
 
-function resetState(parentGoalId?: string | null) {
+function resetState(initialFocusId?: string | null) {
   state = {
     ...DEFAULT_STATE,
-    parentGoalId: parentGoalId ?? null,
+    emoji: null,
+    linkType: "focus",
+    linkTargetId: computeDefaultLinkTargetId("focus", initialFocusId),
     // Reset specific days
     specificDays: [],
   };
 }
 
-function getPlannableGoals(): Goal[] {
-  const LEVEL_ORDER: Record<GoalLevel, number> = {
-    vision: 1,
-    milestone: 2,
-    focus: 3,
-    intention: 4,
-  };
-  const CURRENT_STATUSES: GoalStatus[] = [
-    "not-started",
-    "in-progress",
-    "blocked",
-  ];
-
+function getActiveFocuses(): Goal[] {
   return Goals.getAll()
-    .filter(
-      (goal) =>
-        goal.level === "focus" && CURRENT_STATUSES.includes(goal.status),
-    )
+    .filter((goal) => goal.level === "focus" && LINKABLE_STATUSES.includes(goal.status))
     .sort((a, b) => {
-      const levelDiff = LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level];
+      const levelDiff = GOAL_LEVEL_ORDER[a.level] - GOAL_LEVEL_ORDER[b.level];
       return levelDiff !== 0 ? levelDiff : a.title.localeCompare(b.title);
     });
-}
-
-function formatGoalOption(goal: Goal): string {
-  const levelLabel = goal.level.charAt(0).toUpperCase() + goal.level.slice(1);
-  return `${levelLabel}: ${goal.title}`;
 }
 
 function escapeHtml(text: string): string {
@@ -119,40 +281,6 @@ function clampFrequency(value: number): number {
 function clampDuration(value: number): number {
   if (!Number.isFinite(value)) return DEFAULT_STATE.duration;
   return Math.min(120, Math.max(15, Math.round(value)));
-}
-
-function formatMinutes(minutes: number): string {
-  if (minutes <= 0) return "0 min";
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  if (hours > 0) {
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  }
-  return `${mins} min`;
-}
-
-function renderGoalSelectMarkup(): string {
-  const goals = getPlannableGoals();
-  if (goals.length === 0) {
-    return `<div class="planning-input disabled">Add a focus goal first.</div>`;
-  }
-
-  if (!state.parentGoalId) {
-    state.parentGoalId = goals[0].id;
-  }
-
-  return `
-    <select id="planningGoalSelect" class="planning-input">
-      ${goals
-        .map(
-          (goal) =>
-            `<option value="${goal.id}" ${
-              goal.id === state.parentGoalId ? "selected" : ""
-            }>${escapeHtml(formatGoalOption(goal))}</option>`,
-        )
-        .join("")}
-    </select>
-  `;
 }
 
 function renderDayButtons(): string {
@@ -173,10 +301,58 @@ function renderDayButtons(): string {
   `;
 }
 
+function formatTimeDescriptor(minutes: number, period: string): string {
+  if (minutes <= 0) {
+    return `0 minutes per ${period}`;
+  }
+  if (minutes < 60) {
+    const rounded = Math.round(minutes);
+    return `${rounded} minute${rounded === 1 ? "" : "s"} per ${period}`;
+  }
+
+  const hours = minutes / 60;
+  const roundedHours = Math.round(hours * 10) / 10;
+  const hourLabel = roundedHours === 1 ? "hour" : "hours";
+  return `${roundedHours} ${hourLabel} per ${period}`;
+}
+
 function renderContent() {
   const overlay = ensureOverlay();
-  const hasGoals = getPlannableGoals().length > 0;
+  hideEmojiPicker();
+  const hasAnyLinkTargets = LINK_TARGET_TYPES.some(
+    (type) => getLinkOptionsForType(type).length > 0,
+  );
 
+  const emojiButtons = EMOJI_SUGGESTIONS.map(
+    (emoji) => `
+      <button
+        type="button"
+        class="planning-emoji-option"
+        data-emoji-option="${emoji}"
+        aria-label="Use ${emoji}"
+      >
+        ${emoji}
+      </button>
+    `,
+  ).join("");
+
+  const segmentButtons = LINK_TARGET_TYPES.map(
+    (type) => {
+      const label = LINK_TARGET_LABELS[type as LinkTargetType] ?? type;
+      return `
+      <button
+        type="button"
+        class="planning-link-segment ${state.linkType === type ? "active" : ""}"
+        data-link-type="${type}"
+        aria-pressed="${state.linkType === type}"
+      >
+        ${label}
+      </button>
+    `;
+    },
+  ).join("");
+
+  // Plan / Create Intention modal
   overlay.innerHTML = `
     <div class="planning-page-panel" id="${PANEL_ID}">
       <header class="planning-page-header">
@@ -189,23 +365,74 @@ function renderContent() {
         </button>
       </header>
       <div class="planning-page-body">
-        <label class="planning-page-field">
+        <label class="planning-page-field planning-title-field">
           <span>Title</span>
-          <input 
-            id="planningTitleInput" 
-            type="text" 
-            class="planning-input" 
-            placeholder="e.g., Morning workout, Clean desk, Read article..."
-            value="${escapeHtml(state.title)}"
-            autofocus
-          />
+          <div class="planning-title-row">
+            <button
+              id="planningEmojiButton"
+              type="button"
+              class="planning-emoji-btn"
+              aria-label="Choose an icon for this intention"
+              aria-controls="planningEmojiPicker"
+              aria-expanded="false"
+            >
+              ${state.emoji ? escapeHtml(state.emoji) : "+"}
+            </button>
+            <input
+              id="planningTitleInput"
+              type="text"
+              class="planning-input"
+              placeholder="e.g., Morning workout, Clean desk, Read article..."
+              value="${escapeHtml(state.title)}"
+              autofocus
+            />
+          </div>
+          <div
+            id="planningEmojiPicker"
+            class="planning-emoji-picker"
+            data-visible="false"
+            aria-hidden="true"
+          >
+            <div class="planning-emoji-picker-grid">
+              ${emojiButtons}
+            </div>
+            <input
+              id="planningEmojiInput"
+              type="text"
+              maxlength="2"
+              class="planning-emoji-input"
+              placeholder="Custom emoji"
+            />
+          </div>
         </label>
 
-        <div class="planning-page-field">
-          <span>Link to Goal</span>
-          ${renderGoalSelectMarkup()}
+        <div class="planning-page-field planning-link-field">
+          <span>Link this to</span>
+          <div class="planning-link-controls">
+            <div
+              class="planning-link-segmented"
+              role="group"
+              aria-label="Link this intention to a vision, milestone, or focus"
+            >
+              ${segmentButtons}
+            </div>
+            <select
+              id="planningLinkSelect"
+              class="planning-input"
+              aria-label="Choose a vision, milestone, or focus"
+            ></select>
+          </div>
+          <p class="planning-helper-text">
+            Linking this intention to your map helps Future You remember why it mattered.
+          </p>
+          <p
+            id="planningLinkEmptyMessage"
+            class="planning-link-empty"
+            aria-live="polite"
+          ></p>
         </div>
 
+        <div class="planning-section-label">When and how often?</div>
         <div class="planning-page-field">
           <span>Days</span>
           ${renderDayButtons()}
@@ -213,32 +440,67 @@ function renderContent() {
 
         <div class="planning-input-grid">
           <label class="planning-page-field">
-            <span>Frequency / week</span>
-            <input id="planningFrequency" type="number" min="1" max="7" class="planning-input" value="${state.frequency}" />
+            <span>Times per week</span>
+            <input
+              id="planningFrequency"
+              type="number"
+              min="1"
+              max="7"
+              class="planning-input"
+              value="${state.frequency}"
+            />
           </label>
           <label class="planning-page-field">
-            <span>Duration (minutes)</span>
-            <input id="planningDuration" type="number" min="15" max="120" class="planning-input" value="${state.duration}" />
+            <span>Length (minutes)</span>
+            <input
+              id="planningDuration"
+              type="number"
+              min="15"
+              max="120"
+              class="planning-input"
+              value="${state.duration}"
+            />
           </label>
           <label class="planning-page-field">
             <span>Energy type</span>
             <select id="planningEnergy" class="planning-input">
               ${ENERGY_OPTIONS.map(
                 (value) =>
-                  `<option value="${value}" ${value === state.energyType ? "selected" : ""}>${value}</option>`,
+                  `<option value="${value}" ${
+                    value === state.energyType ? "selected" : ""
+                  }>${value}</option>`,
               ).join("")}
             </select>
           </label>
+          <label class="planning-page-field">
+            <span>Preferred time (optional)</span>
+            <input
+              id="planningPreferredTime"
+              type="time"
+              class="planning-input"
+              value="${escapeHtml(state.timeOfDay)}"
+            />
+          </label>
         </div>
 
-        <div class="planning-summary">
-          <p id="planningWeeklyMinutes" class="planning-summary-text"></p>
+        <div class="planning-time-check">
+          <p class="planning-time-check-label">Time check</p>
+          <p id="planningTimeCheckWeekly" class="planning-time-check-line"></p>
+          <p id="planningTimeCheckMonthly" class="planning-time-check-line"></p>
         </div>
 
         <div class="planning-actions">
+          <p class="planning-intention-note">
+            You can edit or pause this intention at any time.
+          </p>
           <div class="planning-consent-buttons">
-            <button type="button" id="planningSaveBtn" class="planning-include-btn" ${!hasGoals ? "disabled" : ""}>
-              Add Intention
+            <button
+              type="button"
+              id="planningSaveBtn"
+              class="planning-include-btn"
+              ${!hasAnyLinkTargets ? "disabled" : ""}
+            >
+              Add intention
             </button>
             <button type="button" id="planningCancelBtn" class="planning-neutral-btn">
               Cancel
@@ -249,77 +511,65 @@ function renderContent() {
     </div>
   `;
 
-  // Add styles for day buttons if not present (simple inline injection for now, ideally in CSS)
-  // But wait, user said "Vanilla CSS". PlanningPage.ts usually relies on global CSS.
-  // I will check if I need to inject styles or if "planning-day-btn" needs to be added to CSS.
-  // For now, I'll assume I should rely on existing classes or basic styles.
-  // Let's add a style block just for this feature to ensure it works immediately.
-  const styleId = "planning-page-styles";
-  if (!document.getElementById(styleId)) {
-    const style = document.createElement("style");
-    style.id = styleId;
-    style.textContent = `
-      .planning-days-grid {
-        display: flex;
-        gap: 8px;
-        margin-top: 4px;
-      }
-      .planning-day-btn {
-        flex: 1;
-        height: 40px;
-        border: 1px solid var(--border-color, #e5e7eb);
-        background: var(--bg-surface, #ffffff);
-        border-radius: 8px;
-        font-weight: 500;
-        color: var(--text-secondary, #6b7280);
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .planning-day-btn:hover {
-        background: var(--bg-hover, #f3f4f6);
-      }
-      .planning-day-btn.selected {
-        background: var(--primary-color, #8b5cf6);
-        color: white;
-        border-color: var(--primary-color, #8b5cf6);
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
+  populateLinkSelectOptions();
+  updateLinkTypeControls();
   setupElements();
   updateSaveButton();
   updateSummary();
+  updateEmojiButton();
 }
 
 function setupElements() {
   if (!overlayElement) return;
+
+  const titleInput = overlayElement.querySelector<HTMLInputElement>("#planningTitleInput");
+  const linkSelect = overlayElement.querySelector<HTMLSelectElement>("#planningLinkSelect");
+  const frequencyInput = overlayElement.querySelector<HTMLInputElement>("#planningFrequency");
+  const durationInput = overlayElement.querySelector<HTMLInputElement>("#planningDuration");
+  const energySelect = overlayElement.querySelector<HTMLSelectElement>("#planningEnergy");
+  const timeInput = overlayElement.querySelector<HTMLInputElement>("#planningPreferredTime");
+  const saveBtn = overlayElement.querySelector<HTMLButtonElement>("#planningSaveBtn");
+  const dayButtons = overlayElement.querySelectorAll<HTMLButtonElement>(".planning-day-btn");
+
   formElements = {
-    titleInput: overlayElement.querySelector("#planningTitleInput"),
-    goalSelect: overlayElement.querySelector("#planningGoalSelect"),
-    frequencyInput: overlayElement.querySelector("#planningFrequency"),
-    durationInput: overlayElement.querySelector("#planningDuration"),
-    energySelect: overlayElement.querySelector("#planningEnergy"),
-    saveBtn: overlayElement.querySelector("#planningSaveBtn"),
-    dayButtons: overlayElement.querySelectorAll(".planning-day-btn"),
+    titleInput,
+    linkSelect,
+    frequencyInput,
+    durationInput,
+    energySelect,
+    saveBtn,
+    dayButtons,
+    timeInput,
   };
 
   overlayElement
     .querySelector(".planning-page-close")
     ?.addEventListener("click", () => close());
 
-  formElements?.titleInput?.addEventListener("input", (event) => {
-    const input = event.currentTarget as HTMLInputElement;
-    state.title = input.value;
+  titleInput?.addEventListener("input", (event) => {
+    state.title = (event.currentTarget as HTMLInputElement).value;
     updateSaveButton();
   });
 
-  formElements?.goalSelect?.addEventListener("change", (event) => {
-    const select = event.currentTarget as HTMLSelectElement;
-    state.parentGoalId = select.value;
+  linkSelect?.addEventListener("change", (event) => {
+    state.linkTargetId = (event.currentTarget as HTMLSelectElement).value;
+    updateSaveButton();
   });
 
-  formElements?.dayButtons?.forEach((btn) => {
+  overlayElement
+    .querySelectorAll<HTMLButtonElement>("[data-link-type]")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const type = btn.dataset.linkType as LinkTargetType | undefined;
+        if (!type || state.linkType === type) return;
+        state.linkType = type;
+        updateLinkTypeControls();
+        populateLinkSelectOptions();
+        updateSaveButton();
+      });
+    });
+
+  dayButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const day = Number(btn.dataset.day);
       if (state.specificDays.includes(day)) {
@@ -328,50 +578,186 @@ function setupElements() {
         state.specificDays.push(day);
       }
 
-      // Update UI
       btn.classList.toggle("selected", state.specificDays.includes(day));
 
-      // Sync frequency
       if (state.specificDays.length > 0) {
         state.frequency = state.specificDays.length;
-        if (formElements?.frequencyInput) {
-          formElements.frequencyInput.value = String(state.frequency);
+        if (frequencyInput) {
+          frequencyInput.value = String(state.frequency);
         }
       }
       updateSummary();
     });
   });
 
-  formElements?.frequencyInput?.addEventListener("input", (event) => {
+  frequencyInput?.addEventListener("input", (event) => {
     const input = event.currentTarget as HTMLInputElement;
     state.frequency = clampFrequency(Number(input.value));
     input.value = String(state.frequency);
     updateSummary();
   });
 
-  formElements?.durationInput?.addEventListener("input", (event) => {
+  durationInput?.addEventListener("input", (event) => {
     const input = event.currentTarget as HTMLInputElement;
     state.duration = clampDuration(Number(input.value));
     input.value = String(state.duration);
     updateSummary();
   });
 
-  formElements?.energySelect?.addEventListener("change", (event) => {
-    const select = event.currentTarget as HTMLSelectElement;
-    state.energyType = select.value as EnergyType;
+  energySelect?.addEventListener("change", (event) => {
+    state.energyType = (event.currentTarget as HTMLSelectElement).value as EnergyType;
   });
 
-  formElements?.saveBtn?.addEventListener("click", () => handleSave());
+  timeInput?.addEventListener("input", (event) => {
+    state.timeOfDay = (event.currentTarget as HTMLInputElement).value;
+  });
+
+  saveBtn?.addEventListener("click", () => {
+    void handleSave();
+  });
   overlayElement
     .querySelector("#planningCancelBtn")
     ?.addEventListener("click", () => close());
 
-  // Focus the title input
-  formElements?.titleInput?.focus();
+  setupEmojiInteractions();
+
+  titleInput?.focus();
+}
+
+function setupEmojiInteractions() {
+  if (!overlayElement) return;
+
+  emojiButtonElement = overlayElement.querySelector("#planningEmojiButton");
+  emojiPickerElement = overlayElement.querySelector("#planningEmojiPicker");
+  const emojiInput = overlayElement.querySelector<HTMLInputElement>("#planningEmojiInput");
+  const emojiOptions = overlayElement.querySelectorAll<HTMLButtonElement>("[data-emoji-option]");
+
+  emojiButtonElement?.addEventListener("click", () => {
+    if (emojiPickerElement?.getAttribute("data-visible") === "true") {
+      hideEmojiPicker();
+    } else {
+      showEmojiPicker();
+    }
+  });
+
+  emojiOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+      const value = option.dataset.emojiOption ?? "";
+      state.emoji = value || null;
+      updateEmojiButton();
+      hideEmojiPicker();
+    });
+  });
+
+  emojiInput?.addEventListener("input", (event) => {
+    const value = (event.currentTarget as HTMLInputElement).value.trim();
+    state.emoji = value || null;
+    updateEmojiButton();
+    if (value) {
+      hideEmojiPicker();
+    }
+  });
+}
+
+function showEmojiPicker() {
+  if (!emojiPickerElement || !emojiButtonElement) return;
+  hideEmojiPicker();
+  emojiPickerElement.setAttribute("data-visible", "true");
+  emojiPickerElement.setAttribute("aria-hidden", "false");
+  emojiButtonElement.setAttribute("aria-expanded", "true");
+
+  emojiDocClickListener = (event) => {
+    const target = event.target as Node;
+    if (
+      !emojiPickerElement?.contains(target) &&
+      target !== emojiButtonElement
+    ) {
+      hideEmojiPicker();
+    }
+  };
+  document.addEventListener("pointerdown", emojiDocClickListener);
+
+  emojiDocKeydownListener = (event) => {
+    if (event.key === "Escape") {
+      hideEmojiPicker();
+    }
+  };
+  document.addEventListener("keydown", emojiDocKeydownListener);
+}
+
+function hideEmojiPicker() {
+  if (!emojiPickerElement || !emojiButtonElement) return;
+  emojiPickerElement.setAttribute("data-visible", "false");
+  emojiPickerElement.setAttribute("aria-hidden", "true");
+  emojiButtonElement.setAttribute("aria-expanded", "false");
+  if (emojiDocClickListener) {
+    document.removeEventListener("pointerdown", emojiDocClickListener);
+    emojiDocClickListener = null;
+  }
+  if (emojiDocKeydownListener) {
+    document.removeEventListener("keydown", emojiDocKeydownListener);
+    emojiDocKeydownListener = null;
+  }
+}
+
+function updateEmojiButton() {
+  if (!emojiButtonElement) {
+    emojiButtonElement =
+      overlayElement?.querySelector<HTMLButtonElement>("#planningEmojiButton") ??
+      null;
+  }
+  if (!emojiButtonElement) return;
+  emojiButtonElement.textContent = state.emoji || "+";
+}
+
+function populateLinkSelectOptions() {
+  if (!overlayElement) return;
+  const select = overlayElement.querySelector<HTMLSelectElement>("#planningLinkSelect");
+  const message = overlayElement.querySelector<HTMLParagraphElement>(
+    "#planningLinkEmptyMessage",
+  );
+  if (!select || !message) return;
+
+  const options = getLinkOptionsForType(state.linkType);
+  if (options.length === 0) {
+    const linkTypeLabel = LINK_TARGET_LABELS[state.linkType] ?? state.linkType;
+    select.innerHTML = `<option value="" disabled>No ${linkTypeLabel} available</option>`;
+    select.disabled = true;
+    state.linkTargetId = null;
+    message.textContent = `Add a ${linkTypeLabel} to link this intention.`;
+    return;
+  }
+
+  const selectedId =
+    options.find((goal) => goal.id === state.linkTargetId)?.id ?? options[0].id;
+  state.linkTargetId = selectedId;
+  select.innerHTML = options
+    .map(
+      (goal) =>
+        `<option value="${goal.id}" ${
+          goal.id === selectedId ? "selected" : ""
+        }>${escapeHtml(formatLinkOptionLabel(goal, state.linkType))}</option>`,
+    )
+    .join("");
+  select.disabled = false;
+  select.value = selectedId;
+  message.textContent = "";
+}
+
+function updateLinkTypeControls() {
+  if (!overlayElement) return;
+  overlayElement
+    .querySelectorAll<HTMLButtonElement>("[data-link-type]")
+    .forEach((btn) => {
+      const type = btn.dataset.linkType as LinkTargetType | undefined;
+      const isActive = type === state.linkType;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
 }
 
 function updateSaveButton() {
-  const canSave = state.title.trim().length > 0 && state.parentGoalId !== null;
+  const canSave = state.title.trim().length > 0 && Boolean(state.linkTargetId);
   if (formElements?.saveBtn) {
     formElements.saveBtn.disabled = !canSave;
   }
@@ -379,27 +765,48 @@ function updateSaveButton() {
 
 function updateSummary() {
   const weeklyMinutes = state.frequency * state.duration;
-  const weeklyMinutesEl = overlayElement?.querySelector(
-    "#planningWeeklyMinutes",
-  );
-  if (weeklyMinutesEl) {
-    weeklyMinutesEl.textContent = `This adds ~${formatMinutes(weeklyMinutes)} per week to your schedule.`;
-  }
+  const weeklyEl = overlayElement?.querySelector("#planningTimeCheckWeekly");
+  const monthlyEl = overlayElement?.querySelector("#planningTimeCheckMonthly");
+  if (!weeklyEl || !monthlyEl) return;
+  weeklyEl.textContent = `About ${formatTimeDescriptor(weeklyMinutes, "week")}`;
+  const monthlyMinutes = weeklyMinutes * 4;
+  monthlyEl.textContent = `Roughly ${formatTimeDescriptor(monthlyMinutes, "month")}`;
 }
 
-function handleSave() {
+async function handleSave() {
   const title = state.title.trim();
-  if (!title || !state.parentGoalId) return;
+  if (!title || !state.linkTargetId) return;
 
-  const parentGoal = Goals.getById(state.parentGoalId);
-  if (!parentGoal) return;
+  const targetGoal = Goals.getById(state.linkTargetId);
+  if (!targetGoal) return;
 
-  // Create the new intention linked to the parent goal with commitment
+  const focusParent = await resolveFocusParentForLinkTarget(targetGoal);
+  if (!focusParent) return;
+
+  hideEmojiPicker();
+
+  await waitForGoalSync(focusParent.id);
+  const scheduledDate = getNextScheduledDate(state.specificDays);
+  const startDate = formatYmd(scheduledDate);
+  const dueDate =
+    (targetGoal.dueDate && new Date(targetGoal.dueDate).toISOString()) ??
+    (focusParent.dueDate && new Date(focusParent.dueDate).toISOString()) ??
+    null;
+
   Goals.create({
     title,
     level: "intention",
-    category: parentGoal.category ?? undefined,
-    parentId: state.parentGoalId,
+    category: focusParent.category ?? undefined,
+    parentId: focusParent.id,
+    parentLevel: focusParent.level,
+    icon: state.emoji ?? undefined,
+    startTime: state.timeOfDay || undefined,
+    dueDate,
+    startDate,
+    linkTarget: {
+      type: state.linkType,
+      id: targetGoal.id,
+    },
     commitment: {
       frequency: state.frequency,
       duration: state.duration,
@@ -419,8 +826,8 @@ function handleSave() {
   close();
 }
 
-async function openOverlay(parentGoalId: string | null) {
-  resetState(parentGoalId);
+async function openOverlay(initialFocusId: string | null) {
+  resetState(initialFocusId);
   renderContent();
   requestAnimationFrame(() => {
     overlayElement?.classList.add("visible");
@@ -428,6 +835,7 @@ async function openOverlay(parentGoalId: string | null) {
 }
 
 function close() {
+  hideEmojiPicker();
   overlayElement?.classList.remove("visible");
 }
 

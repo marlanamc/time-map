@@ -9,6 +9,15 @@ export type ViewType = "year" | "month" | "week" | "day" | "home" | "garden";
 /** Goal hierarchy levels from highest to lowest */
 export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
 
+/** Types that an intention can reference via the link picker */
+export type LinkTargetType = "vision" | "milestone" | "focus";
+
+/** Hardware data describing what the intention is linked to */
+export interface LinkTarget {
+  type: LinkTargetType;
+  id: string;
+}
+
 /** Computed goal state based on recent activity (not stored, calculated at runtime) */
 export type GoalState = "active" | "resting" | "dormant";
 
@@ -213,6 +222,8 @@ export interface Goal {
   startTime?: string | null;
   endTime?: string | null;
   scheduledAt?: string | null;
+  /** Start date for recurring intentions (YYYY-MM-DD format) */
+  startDate?: string | null;
   tags: string[];
   meta?: GoalMeta;
   activityId?: string;
@@ -231,6 +242,8 @@ export interface Goal {
    * always resolves back to a Focus goal.
    */
   commitment?: CommitmentPlan;
+  /** Optional metadata describing the higher-level goal this intention supports */
+  linkTarget?: LinkTarget | null;
 }
 
 /**
@@ -254,6 +267,7 @@ export interface GoalData {
   parentId?: string | null;
   parentLevel?: GoalLevel | null;
   commitment?: CommitmentPlan;
+  linkTarget?: LinkTarget | null;
   /**
    * For range-based levels (milestone/focus/intention), an explicit local-date start (YYYY-MM-DD).
    * This is used only at creation time; persisted shape remains month/year + dueDate.

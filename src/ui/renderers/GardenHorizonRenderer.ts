@@ -16,6 +16,7 @@ import { Events } from "../../core/Events";
 import { eventBus } from "../../core/EventBus";
 import type { Goal, GoalLevel, UIElements, CalendarEvent } from "../../types";
 import { getVisionAccent } from "../../utils/goalLinkage";
+import { isIntentionActiveOnDate } from "../../utils/intentionVisibility";
 import { RealityPreviewOverlay } from "../components/RealityPreviewOverlay";
 import {
   computeGoalState,
@@ -28,6 +29,7 @@ import { GoalDetailRenderer } from "./GoalDetailRenderer";
 // Module state
 let isDrawerOpen = false;
 let selectedVisionId: string | null = null;
+let showTimePassed = false; // Toggle between "time left" and "time passed"
 
 function isGardenFenceVisible(): boolean {
   if (typeof window === "undefined") return true;
@@ -192,6 +194,33 @@ function getHoursLeftToday(date: Date = new Date()): number {
 }
 
 /**
+ * Calculate time passed functions (inverse of time left)
+ */
+function getDaysPassedInYear(date: Date = new Date()): number {
+  const now = new Date(date);
+  const startOfYear = new Date(now.getFullYear(), 0, 1, 0, 0, 0);
+  const diff = now.getTime() - startOfYear.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function getMonthsPassedInYear(date: Date = new Date()): number {
+  return date.getMonth();
+}
+
+function getWeeksPassedInMonth(date: Date = new Date()): number {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const startOfMonth = new Date(year, month, 1);
+  const diff = date.getTime() - startOfMonth.getTime();
+  const daysPassed = diff / (1000 * 60 * 60 * 24);
+  return Math.floor(daysPassed / 7);
+}
+
+function getHoursPassedToday(date: Date = new Date()): number {
+  return date.getHours();
+}
+
+/**
  * Get the week number of the year
  */
 function getWeekNumber(date: Date): number {
@@ -280,7 +309,10 @@ export const GardenHorizonRenderer = {
       (g) => g.level === "focus" && !g.archivedAt,
     );
     const intentions = Goals.getForRange(todayStart, todayEnd).filter(
-      (g) => g.level === "intention" && !g.archivedAt,
+      (g) =>
+        g.level === "intention" &&
+        !g.archivedAt &&
+        isIntentionActiveOnDate(g, viewDate),
     );
 
     // Get events for the week
@@ -360,27 +392,75 @@ export const GardenHorizonRenderer = {
     // You Are Here section (reuses existing sidebar content conceptually)
     const youAreHere = document.createElement("div");
     youAreHere.className = "spine-you-are-here";
+    youAreHere.setAttribute("role", "button");
+    youAreHere.setAttribute("tabindex", "0");
+    youAreHere.setAttribute("aria-label", "Toggle between time left and time passed");
+    youAreHere.style.cursor = "pointer";
     
-    // Format stats with proper pluralization and bold numbers/units
-    const daysLeft = getDaysLeftInYear(viewDate);
-    const monthsLeft = getMonthsLeftInYear(viewDate);
-    const weeksLeft = getWeeksLeftInMonth(viewDate);
-    const hoursLeft = getHoursLeftToday(viewDate);
-    
-    const formatStat = (value: number, unit: string, suffix: string) => {
-      const unitText = value === 1 ? unit : `${unit}s`;
-      return `<span class="spine-stat-value">${value} ${unitText}</span> ${suffix}`;
+    const updateStats = () => {
+      if (showTimePassed) {
+        // Show time passed
+        const daysPassed = getDaysPassedInYear(viewDate);
+        const monthsPassed = getMonthsPassedInYear(viewDate);
+        const weeksPassed = getWeeksPassedInMonth(viewDate);
+        const hoursPassed = getHoursPassedToday(viewDate);
+        
+        const formatStat = (value: number, unit: string, suffix: string) => {
+          const unitText = value === 1 ? unit : `${unit}s`;
+          return `<span class="spine-stat-value">${value} ${unitText}</span> ${suffix}`;
+        };
+        
+        youAreHere.innerHTML = `
+          <div class="spine-date">${formatDate(viewDate)}</div>
+          <div class="spine-stats">
+            <span class="spine-stat-line">${formatStat(daysPassed, "day", `have passed in ${viewDate.getFullYear()}`)}</span>
+            <span class="spine-stat-line">${formatStat(monthsPassed, "month", `have passed in ${viewDate.getFullYear()}`)}</span>
+            <span class="spine-stat-line">${formatStat(weeksPassed, "week", `have passed in ${getMonthName(viewDate)}`)}</span>
+            <span class="spine-stat-line">${formatStat(hoursPassed, "hour", "have passed today")}</span>
+          </div>
+        `;
+      } else {
+        // Show time left
+        const daysLeft = getDaysLeftInYear(viewDate);
+        const monthsLeft = getMonthsLeftInYear(viewDate);
+        const weeksLeft = getWeeksLeftInMonth(viewDate);
+        const hoursLeft = getHoursLeftToday(viewDate);
+        
+        const formatStat = (value: number, unit: string, suffix: string) => {
+          const unitText = value === 1 ? unit : `${unit}s`;
+          return `<span class="spine-stat-value">${value} ${unitText}</span> ${suffix}`;
+        };
+        
+        youAreHere.innerHTML = `
+          <div class="spine-date">${formatDate(viewDate)}</div>
+          <div class="spine-stats">
+            <span class="spine-stat-line">${formatStat(daysLeft, "day", `left in ${viewDate.getFullYear()}`)}</span>
+            <span class="spine-stat-line">${formatStat(monthsLeft, "month", `left in ${viewDate.getFullYear()}`)}</span>
+            <span class="spine-stat-line">${formatStat(weeksLeft, "week", `left in ${getMonthName(viewDate)}`)}</span>
+            <span class="spine-stat-line">${formatStat(hoursLeft, "hour", "left today")}</span>
+          </div>
+        `;
+      }
     };
     
-    youAreHere.innerHTML = `
-      <div class="spine-date">${formatDate(viewDate)}</div>
-      <div class="spine-stats">
-        <span class="spine-stat-line">${formatStat(daysLeft, "day", `left in ${viewDate.getFullYear()}`)}</span>
-        <span class="spine-stat-line">${formatStat(monthsLeft, "month", `left in ${viewDate.getFullYear()}`)}</span>
-        <span class="spine-stat-line">${formatStat(weeksLeft, "week", `left in ${getMonthName(viewDate)}`)}</span>
-        <span class="spine-stat-line">${formatStat(hoursLeft, "hour", "left today")}</span>
-      </div>
-    `;
+    // Initial render
+    updateStats();
+    
+    // Toggle on click
+    youAreHere.addEventListener("click", () => {
+      showTimePassed = !showTimePassed;
+      updateStats();
+    });
+    
+    // Toggle on Enter key
+    youAreHere.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        showTimePassed = !showTimePassed;
+        updateStats();
+      }
+    });
+    
     spine.appendChild(youAreHere);
 
     // Divider

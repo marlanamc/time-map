@@ -59,6 +59,7 @@ export class GoalsService {
         startTime: g.start_time ?? undefined,
         endTime: g.end_time ?? undefined,
         scheduledAt: g.scheduled_at ?? undefined,
+        startDate: g.start_date ?? undefined,
         timeLog: g.time_log || [], // JSONB auto-parsed
         subtasks: g.subtasks || [],
         notes: g.notes || [],
@@ -69,6 +70,7 @@ export class GoalsService {
         icon: g.icon ?? undefined,
         archivedAt: g.archived_at ?? null,
         commitment: g.commitment || undefined,
+        linkTarget: g.link_target ?? undefined,
       }));
 
       cacheService.set(cacheKey, goals, cacheService.TTL.GOALS);
@@ -210,6 +212,7 @@ export class GoalsService {
         start_time: goal.startTime || null,
         end_time: goal.endTime || null,
         scheduled_at: goal.scheduledAt || null,
+        start_date: goal.startDate || null,
         tags: goal.tags || [],
         meta: goal.meta ?? {},
         activity_id: goal.activityId || null,
@@ -218,6 +221,7 @@ export class GoalsService {
         icon: goal.icon || null,
         archived_at: goal.archivedAt || null,
         commitment: goal.commitment || null,
+        link_target: goal.linkTarget || null,
       };
 
       console.log("[GoalsService] Attempting to save goal:", {
@@ -398,12 +402,15 @@ export class GoalsService {
         start_time: goal.startTime,
         end_time: goal.endTime,
         scheduled_at: goal.scheduledAt ?? null,
+        start_date: goal.startDate ?? null,
         tags: goal.tags,
         activity_id: goal.activityId ?? null,
         parent_id: goal.parentId ?? null,
         parent_level: goal.parentLevel ?? null,
         icon: goal.icon ?? null,
         archived_at: goal.archivedAt ?? null,
+        commitment: goal.commitment || null,
+        link_target: goal.linkTarget || null,
       }));
 
       const { error } = await supabase.from("goals").upsert(goalsData, {
@@ -467,6 +474,7 @@ export class GoalsService {
         "due_date",
         "start_time",
         "end_time",
+        "start_date",
         "completed_at",
         "last_worked_on",
         "created_at",
@@ -481,6 +489,9 @@ export class GoalsService {
         "activity_id",
         "icon",
         "archived_at",
+        "commitment",
+        "link_target",
+        "scheduled_at",
       ];
 
       // Try selecting all columns - if a column doesn't exist, we'll get an error
@@ -564,6 +575,10 @@ export class GoalsService {
         completedAt: g.completed_at,
         lastWorkedOn: g.last_worked_on,
         dueDate: g.due_date,
+        startTime: g.start_time ?? undefined,
+        endTime: g.end_time ?? undefined,
+        scheduledAt: g.scheduled_at ?? undefined,
+        startDate: g.start_date ?? undefined,
         timeLog: g.time_log || [],
         subtasks: g.subtasks || [],
         notes: g.notes || [],
@@ -574,6 +589,7 @@ export class GoalsService {
         icon: g.icon ?? undefined,
         archivedAt: g.archived_at ?? null,
         commitment: g.commitment || undefined,
+        linkTarget: g.link_target ?? undefined,
       }));
 
       console.log(

@@ -289,6 +289,13 @@ export const GoalSchema = z
     parentLevel: GoalLevelSchema.nullable().optional(),
     icon: SafeStringSchema(10).optional(),
     archivedAt: IsoDateStringSchema.nullable().optional(),
+    linkTarget: z
+      .object({
+        type: z.enum(["vision", "milestone", "focus"]),
+        id: IdSchema,
+      })
+      .optional()
+      .nullable(),
   })
   .strict();
 
@@ -315,6 +322,13 @@ export const GoalDataSchema = z
     meta: GoalMetaSchema.optional(),
     icon: SafeStringSchema(10).optional(),
     commitment: CommitmentPlanSchema.optional(),
+    linkTarget: z
+      .object({
+        type: z.enum(["vision", "milestone", "focus"]),
+        id: IdSchema,
+      })
+      .optional()
+      .nullable(),
   })
   .strict();
 

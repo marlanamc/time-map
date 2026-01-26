@@ -28,6 +28,8 @@ Run migrations in numerical order via Supabase Dashboard (SQL Editor → New que
 10. `010_add_goal_activity_id.sql` - Activity ID for emoji tracking
 11. `011_add_goal_icon.sql` - Icon/emoji for visions
 12. `012_scaling_improvements.sql` - **Scaling & data integrity improvements**
+13. `013_add_scheduled_at.sql` - Scheduled timestamp for day view drag-and-drop
+14. `014_add_intention_linking.sql` - Start date and link target for recurring intentions
 
 **After running migrations**, reload the PostgREST schema cache:
 
@@ -43,6 +45,8 @@ SELECT pg_notify('pgrst', 'reload schema');
 - `Could not find the 'level' column` → Run `006_patch_goals_schema.sql`
 - `Could not find the 'icon' column` → Run `011_add_goal_icon.sql`
 - `Could not find the 'archived_at' column` → Run `012_scaling_improvements.sql`
+- `Could not find the 'start_date' column` → Run `014_add_intention_linking.sql`
+- `Could not find the 'link_target' column` → Run `014_add_intention_linking.sql`
 
 | Data Type            | Syncs to Cloud? | Notes                                                     |
 | -------------------- | --------------- | --------------------------------------------------------- |

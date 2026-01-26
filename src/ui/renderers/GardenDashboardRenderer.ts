@@ -4,6 +4,7 @@ import { eventBus } from "../../core/EventBus";
 import type { UIElements } from "../../types";
 import { NDSupport } from "../../features/ndSupport";
 import { getVisionAccent } from "../../utils/goalLinkage";
+import { isIntentionActiveOnDate } from "../../utils/intentionVisibility";
 import { GoalEstablishment } from "../../features/garden/GoalEstablishment";
 
 /**
@@ -139,9 +140,6 @@ export const GardenDashboardRenderer = {
           case "week-ahead":
             // Adjust prompt based on day of week
             const day = today.getDay();
-            const dayName = today.toLocaleString("default", {
-              weekday: "long",
-            });
 
             if (day === 6) {
               // Saturday
@@ -209,7 +207,8 @@ export const GardenDashboardRenderer = {
         (g) =>
           g.level === "intention" &&
           g.status !== "done" &&
-          g.status !== "archived",
+          g.status !== "archived" &&
+          isIntentionActiveOnDate(g, today),
       );
       const nextGoal =
         intentions.find((g) => g.status === "in-progress") || intentions[0];
@@ -254,7 +253,8 @@ export const GardenDashboardRenderer = {
           (g) =>
             g.level === "intention" &&
             g.status !== "done" &&
-            g.status !== "archived",
+            g.status !== "archived" &&
+            isIntentionActiveOnDate(g, today),
         )
         .slice(0, 3);
 

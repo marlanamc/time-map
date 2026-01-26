@@ -70,7 +70,7 @@ function getLocalWeekStart(date: Date): Date {
   return d;
 }
 
-function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
+export function getGoalDateRange(goal: Goal): { start: Date; end: Date } {
   // Default fallbacks: treat as month-scoped.
   const fallbackStart = startOfDay(new Date(goal.year, goal.month ?? 0, 1));
   const fallbackEnd = endOfDay(new Date(goal.year, (goal.month ?? 0) + 1, 0));
@@ -366,6 +366,7 @@ export const Goals = {
       activityId: sanitizedData.activityId ?? undefined,
       meta: Object.keys(meta).length > 0 ? meta : undefined,
       commitment: sanitizedData.commitment ?? undefined,
+      linkTarget: sanitizedData.linkTarget ?? undefined,
     };
 
     if (!State.data) {
