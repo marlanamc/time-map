@@ -315,9 +315,10 @@
   pointer-events: none;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding-left: 70px; /* Start at the front of intention cards (matches --gutter) */
-  padding-right: 1rem;
+  gap: 0;
+  /* Match the usable width of events: 70px left gutter, 10px right edge gap */
+  padding-left: 70px;
+  padding-right: 10px;
   background: transparent;
   backdrop-filter: none;
   box-shadow: none;
@@ -327,21 +328,26 @@
   margin: 0 !important;
 }
 
+/* Line container that stretches to fill available space */
 .current-time-top-indicator .current-time-line {
   position: relative;
   flex: 1;
   min-width: 0;
-  height: 2px;
-  /* Line starts at the left edge (no negative margin) */
-  margin-right: 0.75rem; /* Space before the time label */
+  height: 3px;
+  border-radius: 999px;
+  overflow: visible;
 }
 
-.current-time-top-indicator .current-time-line::after {
+/* The actual line visual - extends to the end of the container */
+.current-time-top-indicator .current-time-line::before {
   content: "";
   position: absolute;
-  inset: 0;
-  /* Line extends full width of the flex container */
-  height: 100%;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 3px;
+  border-radius: 999px;
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--accent) 90%, transparent) 0%,
@@ -353,32 +359,39 @@
   animation: timePulse 2s ease-in-out infinite;
 }
 
+/* Dot positioned at the end of the line, centered on the line end */
 .current-time-top-indicator .current-time-dot {
-  position: relative;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
   width: 12px;
   height: 12px;
-  margin-right: -6px; /* Overlap slightly with line start */
+  border-radius: 999px;
   background: radial-gradient(
     circle,
     var(--accent) 0%,
     color-mix(in srgb, var(--accent) 80%, transparent) 50%,
     color-mix(in srgb, var(--accent) 0%, transparent) 100%
   );
-  border-radius: 50%;
   box-shadow:
     0 0 12px color-mix(in srgb, var(--accent) 80%, transparent),
     0 0 24px color-mix(in srgb, var(--accent) 40%, transparent);
   animation: dotPulseInline 2s ease-in-out infinite;
-  flex-shrink: 0;
   z-index: 1;
 }
 
+/* Time label immediately to the right of the dot */
 .current-time-top-indicator .current-time-label {
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+  margin-left: 0.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 @keyframes timePulse {
@@ -395,11 +408,11 @@
 @keyframes dotPulseInline {
   0%,
   100% {
-    transform: scale(1);
+    transform: translate(50%, -50%) scale(1);
   }
 
   50% {
-    transform: scale(1.2);
+    transform: translate(50%, -50%) scale(1.2);
   }
 }
 
@@ -540,7 +553,8 @@
 }
 
 /* Shift content up when past hours are collapsed to match grid positioning */
-.planner-timeline-container:not([data-past-hours-expanded="true"]) .planner-timeline-content {
+.planner-timeline-container:not([data-past-hours-expanded="true"])
+  .planner-timeline-content {
   transform: translateY(calc(var(--current-hour-pos, 0) * -1%));
 }
 
@@ -574,18 +588,7 @@
   display: block;
 }
 
-.planner-day-view .current-time-line {
-  border-top: 2px solid var(--accent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
-}
-
-.planner-day-view .current-time-dot {
-  background: var(--accent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
-  width: 10px;
-  height: 10px;
-  margin-top: -4px;
-}
+/* Legacy styles removed - current-time indicator now uses .current-time-top-indicator styles */
 
 .day-goal-card.planner-timed-task {
   position: absolute;
