@@ -185,6 +185,9 @@
   color: var(--text-tertiary);
   transition: all var(--duration-fast);
   font-size: var(--text-sm);
+  position: relative;
+  z-index: 20; /* Ensure button is clickable above any overlays */
+  pointer-events: auto;
 }
 
 .sidebar-section-action-btn:hover {

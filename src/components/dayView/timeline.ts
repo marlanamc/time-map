@@ -22,6 +22,160 @@ function debugDropLog(
   console.debug("[DayTimelineDrag]", message, context ?? {});
 }
 
+/**
+ * Get the offset in minutes for collapsed past hours.
+ * Returns 0 if past hours are expanded or offset is not set.
+ * The CSS variable is only set when it's today and past hours are collapsed.
+ */
+function getPastHoursOffsetMinutes(
+  container: HTMLElement,
+  calculator: TimeSlotCalculator,
+): number {
+  const timelineContainer = container.querySelector(
+    ".planner-timeline-container.day-timeline",
+  ) as HTMLElement | null;
+  if (!timelineContainer) return 0;
+
+  // Only apply offset when past hours are collapsed
+  const pastHoursExpanded = timelineContainer.dataset.pastHoursExpanded === "true";
+  if (pastHoursExpanded) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:41',message:'getPastHoursOffsetMinutes: Hours expanded, returning 0',data:{pastHoursExpanded},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    return 0;
+  }
+
+  // Read the CSS variable (only set when it's today and collapsed)
+  const styles = getComputedStyle(timelineContainer);
+  const raw = styles.getPropertyValue("--current-hour-pos").trim();
+  if (!raw) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:46',message:'getPastHoursOffsetMinutes: No CSS variable found',data:{raw},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    return 0;
+  }
+
+  const offsetPercent = parseFloat(raw);
+  if (isNaN(offsetPercent) || offsetPercent <= 0) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:49',message:'getPastHoursOffsetMinutes: Invalid offset percent',data:{offsetPercent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    return 0;
+  }
+
+  // Convert percent to minutes using the calculator's plot range
+  const plotRangeMin = calculator.getPlotRangeMin();
+  const offsetMinutes = (offsetPercent / 100) * plotRangeMin;
+  
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:54',message:'getPastHoursOffsetMinutes: Calculated offset',data:{offsetPercent,plotRangeMin,offsetMinutes},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
+  
+  return offsetMinutes;
+}
+
+/**
+ * Convert a Y position inside the day timeline into minutes.
+ *
+ * When past hours are collapsed, the visible area is shifted via CSS transform.
+ * The pointer's Y position is relative to the visible viewport, so Y=0 corresponds
+ * to visibleStart (not plotStart). We must map Y onto the visible range.
+ *
+ * When not collapsed, Y maps onto the full plot range as normal.
+ */
+function yToMinutesWithCollapsedSupport(
+  y: number,
+  rectHeight: number,
+  calculator: TimeSlotCalculator,
+  container: HTMLElement,
+): number {
+  const plotStart = calculator.getPlotStartMin();
+  const plotEnd = calculator.getPlotEndMin();
+  const plotRange = plotEnd - plotStart;
+
+  if (rectHeight <= 0 || plotRange <= 0) {
+    return plotStart;
+  }
+
+  const offsetMinutes = getPastHoursOffsetMinutes(container, calculator);
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:78',message:'yToMinutesWithCollapsedSupport: Input values',data:{y,rectHeight,plotStart,plotEnd,plotRange,offsetMinutes},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
+
+  if (offsetMinutes <= 0) {
+    // Normal case: map Y linearly onto the full plot range
+    const pct = Math.max(0, Math.min(1, y / rectHeight));
+    const minutes = plotStart + pct * plotRange;
+    const result = calculator.clamp(minutes, plotStart, plotEnd);
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:84',message:'yToMinutesWithCollapsedSupport: Normal result',data:{result,pct,minutes},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+
+    return result;
+  }
+
+  // Collapsed case: the visible viewport starts at visibleStart
+  // Y=0 at top of viewport corresponds to visibleStart, not plotStart.
+  // Content is translated (not scaled), so keep the original plotRange scale.
+  const pct = Math.max(0, Math.min(1, y / rectHeight));
+  const minutes = plotStart + offsetMinutes + pct * plotRange;
+  const result = calculator.clamp(minutes, plotStart, plotEnd);
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:95',message:'yToMinutesWithCollapsedSupport: Collapsed result',data:{result,pct,minutes,offsetMinutes,plotRange},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
+
+  return result;
+}
+
+/**
+ * Convert minutes to percentage position (0-100) for CSS positioning.
+ *
+ * @param forTransformedContent - If true, returns percentage for elements INSIDE
+ *   the transformed .planner-timeline-content (uses full plot range).
+ *   If false, returns percentage for elements OUTSIDE the transform
+ *   and anchors to the visible start when collapsed (content is translated but
+ *   keeps the original scale).
+ *
+ * Drop preview/indicator: forTransformedContent = false (NOT transformed)
+ * Timed task cards: forTransformedContent = true (IS transformed)
+ */
+function minutesToPercentWithCollapsedSupport(
+  mins: number,
+  calculator: TimeSlotCalculator,
+  container: HTMLElement,
+  forTransformedContent: boolean = false,
+): number {
+  const offsetMinutes = getPastHoursOffsetMinutes(container, calculator);
+  const plotStart = calculator.getPlotStartMin();
+  const plotEnd = calculator.getPlotEndMin();
+  const plotRange = plotEnd - plotStart;
+
+  // For transformed content OR when not collapsed, use full plot range
+  if (forTransformedContent || offsetMinutes <= 0) {
+    const result = plotRange > 0 ? ((mins - plotStart) / plotRange) * 100 : 0;
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:150',message:'minutesToPercentWithCollapsedSupport: Full range result',data:{plotStart,plotRange,mins,result,forTransformedContent},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+
+    return result;
+  }
+
+  // Collapsed case for non-transformed elements: anchor to the visible start
+  // but keep the original plot range scale (content is translated, not rescaled)
+  const visibleStart = plotStart + offsetMinutes;
+  const result = plotRange > 0 ? ((mins - visibleStart) / plotRange) * 100 : 0;
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:160',message:'minutesToPercentWithCollapsedSupport: Anchored collapsed result',data:{plotStart,visibleStart,plotRange,offsetMinutes,mins,result},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+  // #endregion
+
+  return result;
+}
+
 export interface TimelineDeps {
   container: HTMLElement;
   calculator: TimeSlotCalculator;
@@ -57,6 +211,52 @@ interface DropPreviewMetrics {
   durPct: number;
   formattedTime: string;
   isInside: boolean;
+}
+
+interface TimelineViewportMetrics {
+  offsetTop: number;
+  height: number;
+  containerHeight: number;
+}
+
+/**
+ * The timeline content/grid starts below the pinned indicator (~88px).
+ * Use this to normalize Y/percent math against the actual usable area
+ * instead of the full container height.
+ */
+function getTimelineViewportMetrics(dayBed: HTMLElement): TimelineViewportMetrics {
+  const containerRect = dayBed.getBoundingClientRect();
+  const content =
+    (dayBed.querySelector(".planner-timeline-content") as HTMLElement | null) ??
+    (dayBed.querySelector(".day-bed-grid") as HTMLElement | null);
+
+  const computedTopRaw = content
+    ? getComputedStyle(content).top?.trim() ?? "0"
+    : "0";
+  const parsedTop = Number.parseFloat(computedTopRaw);
+  const offsetTop = Number.isFinite(parsedTop) && parsedTop > 0 ? parsedTop : 0;
+
+  const contentHeight =
+    content?.getBoundingClientRect().height ??
+    Math.max(1, containerRect.height - offsetTop);
+  const height =
+    contentHeight > 0 ? contentHeight : Math.max(1, containerRect.height);
+
+  return {
+    offsetTop,
+    height,
+    containerHeight: containerRect.height,
+  };
+}
+
+function viewportPercentToContainerPercent(
+  pctWithinViewport: number,
+  viewport: TimelineViewportMetrics,
+): number {
+  const px = viewport.offsetTop + (pctWithinViewport / 100) * viewport.height;
+  const containerHeight =
+    viewport.containerHeight > 0 ? viewport.containerHeight : 1;
+  return (px / containerHeight) * 100;
 }
 
 export function createTimelineRuntimeState(): TimelineRuntimeState {
@@ -113,7 +313,15 @@ function updatePlannerDropPreview(
   const label = preview.querySelector(
     ".planner-drop-preview-label",
   ) as HTMLElement | null;
-  if (label) label.textContent = metrics.formattedTime;
+  if (label) {
+    label.textContent = metrics.formattedTime;
+    // Ensure label is visible
+    label.style.display = metrics.formattedTime ? 'block' : 'none';
+  }
+  
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:285',message:'updatePlannerDropPreview: Setting preview',data:{startPct:metrics.startPct,durPct:metrics.durPct,formattedTime:metrics.formattedTime,hasLabel:!!label},timestamp:Date.now(),sessionId:'debug-session',runId:'run6',hypothesisId:'E'})}).catch(()=>{});
+  // #endregion
 }
 
 function getTimelineDropMetrics(
@@ -131,25 +339,77 @@ function getTimelineDropMetrics(
   const rect = dayBed.getBoundingClientRect();
   if (rect.height <= 0) return null;
 
+  const viewport = getTimelineViewportMetrics(dayBed);
   const scrollTop = dayBed.scrollTop;
-  const rawY = clientY - rect.top + scrollTop;
-  const y = Math.max(0, Math.min(rawY, rect.height));
-  const rawMinutes = deps.calculator.yToMinutes(y, rect.height);
-  const startMin = deps.calculator.clamp(
-    snapMinutesToInterval(rawMinutes, snapIntervalMinutes),
-    deps.calculator.getPlotStartMin(),
-    deps.calculator.getPlotEndMin() - 15,
+  const rawY = clientY - rect.top + scrollTop - viewport.offsetTop;
+  const y = Math.max(0, Math.min(rawY, viewport.height));
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:281',message:'getTimelineDropMetrics: Y position calculation',data:{clientY,rectTop:rect.top,scrollTop,rawY,y,rectHeight:rect.height,viewportOffsetTop:viewport.offsetTop,viewportHeight:viewport.height},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
+
+  const baseMinutes = yToMinutesWithCollapsedSupport(
+    y,
+    viewport.height,
+    deps.calculator,
+    deps.container,
   );
 
+  const offsetMinutes = getPastHoursOffsetMinutes(deps.container, deps.calculator);
+  const plotStart = deps.calculator.getPlotStartMin();
+  const plotEnd = deps.calculator.getPlotEndMin();
+  const visibleStart = offsetMinutes > 0 ? plotStart + offsetMinutes : plotStart;
+  const visibleRange = offsetMinutes > 0 
+    ? Math.max(1, plotEnd - visibleStart)
+    : deps.calculator.getPlotRangeMin();
   const durationRange = deps.calculator.getPlotRangeMin() || 1;
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:252',message:'getTimelineDropMetrics: Collapsed state and range calculations',data:{offsetMinutes,plotStart,plotEnd,visibleStart,visibleRange,durationRange,baseMinutes},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+  // #endregion
+
+  const snappedMinutes = snapMinutesToInterval(baseMinutes, snapIntervalMinutes);
+  const clampMin = visibleStart;
+  const clampMax = deps.calculator.getPlotEndMin() - 15;
+  
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:308',message:'getTimelineDropMetrics: Before clamping',data:{baseMinutes,snappedMinutes,clampMin,clampMax,visibleStart,plotEnd:deps.calculator.getPlotEndMin(),ninePM:1260},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'D'})}).catch(()=>{});
+  // #endregion
+
+  const startMin = deps.calculator.clamp(
+    snappedMinutes,
+    clampMin,
+    clampMax,
+  );
+  
   const endMin = Math.min(
     startMin + durationMin,
     deps.calculator.getPlotEndMin(),
   );
-  const startPct = deps.calculator.minutesToPercent(startMin);
-  const durPct = ((endMin - startMin) / durationRange) * 100;
+  // Drop preview is NOT inside transformed content, anchor to visible start using original scale
+  const startPctWithinViewport = minutesToPercentWithCollapsedSupport(
+    startMin,
+    deps.calculator,
+    deps.container,
+    false, // forTransformedContent = false (drop preview is not transformed)
+  );
+  const startPct = viewportPercentToContainerPercent(
+    startPctWithinViewport,
+    viewport,
+  );
+
+  const durPx =
+    ((endMin - startMin) / durationRange) * viewport.height;
+  const durPct =
+    viewport.containerHeight > 0
+      ? (durPx / viewport.containerHeight) * 100
+      : 0;
 
   const formattedTime = deps.calculator.format12h(startMin);
+  
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'timeline.ts:365',message:'getTimelineDropMetrics: After clamping',data:{startMin,endMin,formattedTime,startPct,durPct,offsetMinutes,visibleStart,clamped:startMin !== snappedMinutes,isNinePM:startMin >= 1260},timestamp:Date.now(),sessionId:'debug-session',runId:'run6',hypothesisId:'E'})}).catch(()=>{});
+  // #endregion
   const insideX = clientX >= rect.left && clientX <= rect.right;
   const insideY = clientY >= rect.top && clientY <= rect.bottom;
   const isInside = insideX && insideY;
@@ -345,15 +605,41 @@ export function handleNativeDragOver(
 
   e.preventDefault();
   const rect = dayBed.getBoundingClientRect();
-  const y = (e.clientY ?? rect.top) - rect.top;
-  const rawStartMin = deps.calculator.yToMinutes(y, rect.height);
+  const viewport = getTimelineViewportMetrics(dayBed);
+  const y = Math.max(
+    0,
+    Math.min(
+      (e.clientY ?? rect.top) - rect.top - viewport.offsetTop,
+      viewport.height,
+    ),
+  );
+
+  const baseMinutes = yToMinutesWithCollapsedSupport(
+    y,
+    viewport.height,
+    deps.calculator,
+    deps.container,
+  );
+
+  const offsetMinutes = getPastHoursOffsetMinutes(deps.container, deps.calculator);
+  const visibleStart = offsetMinutes > 0 
+    ? deps.calculator.getPlotStartMin() + offsetMinutes
+    : deps.calculator.getPlotStartMin();
+  
   const startMin = deps.calculator.clamp(
-    snapMinutesToInterval(rawStartMin, 15),
-    deps.calculator.getPlotStartMin(),
+    snapMinutesToInterval(baseMinutes, 15),
+    visibleStart,
     deps.calculator.getPlotEndMin() - 15,
   );
 
-  const pct = deps.calculator.minutesToPercent(startMin);
+  const pct = viewportPercentToContainerPercent(
+    minutesToPercentWithCollapsedSupport(
+      startMin,
+      deps.calculator,
+      deps.container,
+    ),
+    viewport,
+  );
   const indicator = ensurePlannerDropIndicator(dayBed);
   indicator.style.top = `${pct}%`;
   const label = indicator.querySelector(
@@ -419,12 +705,30 @@ export function handleNativeDrop(e: DragEvent, deps: TimelineDeps): void {
   if (!payload?.title) return;
 
   const rect = dayBed.getBoundingClientRect();
-  const y = (e.clientY ?? rect.top) - rect.top;
-  const rawStartMin = deps.calculator.yToMinutes(y, rect.height);
+  const viewport = getTimelineViewportMetrics(dayBed);
+  const y = Math.max(
+    0,
+    Math.min(
+      (e.clientY ?? rect.top) - rect.top - viewport.offsetTop,
+      viewport.height,
+    ),
+  );
+
+  const baseMinutes = yToMinutesWithCollapsedSupport(
+    y,
+    viewport.height,
+    deps.calculator,
+    deps.container,
+  );
+
+  const offsetMinutes = getPastHoursOffsetMinutes(deps.container, deps.calculator);
+  const visibleStart = offsetMinutes > 0 
+    ? deps.calculator.getPlotStartMin() + offsetMinutes
+    : deps.calculator.getPlotStartMin();
 
   const startMin = deps.calculator.clamp(
-    snapMinutesToInterval(rawStartMin, 15),
-    deps.calculator.getPlotStartMin(),
+    snapMinutesToInterval(baseMinutes, 15),
+    visibleStart,
     deps.calculator.getPlotEndMin() - 15,
   );
 
@@ -686,10 +990,16 @@ export function handlePointerDown(
     ".day-timeline",
   ) as HTMLElement | null;
   if (!dayBed) return;
+  const viewport = getTimelineViewportMetrics(dayBed);
 
   e.preventDefault();
   e.stopPropagation();
 
+  const offsetMinutes = getPastHoursOffsetMinutes(deps.container, deps.calculator);
+  const visibleStart = offsetMinutes > 0 
+    ? deps.calculator.getPlotStartMin() + offsetMinutes
+    : deps.calculator.getPlotStartMin();
+  
   const startMinRaw =
     deps.calculator.parseTimeToMinutes(goal.startTime) ??
     deps.options.timeWindowStart ??
@@ -698,7 +1008,7 @@ export function handlePointerDown(
     deps.calculator.parseTimeToMinutes(goal.endTime) ?? startMinRaw + 60;
   const startMin = deps.calculator.clamp(
     startMinRaw,
-    deps.calculator.getPlotStartMin(),
+    visibleStart,
     deps.calculator.getPlotEndMin() - 15,
   );
   const endMin = deps.calculator.clamp(
@@ -724,11 +1034,17 @@ export function handlePointerDown(
   card.classList.add("is-resizing");
   handle.classList.add("is-resizing");
 
-  const rect = dayBed.getBoundingClientRect();
   const updatePreview = (minsStart: number, minsEnd: number) => {
-    const topPct = deps.calculator.minutesToPercent(minsStart);
-    const durPct =
-      ((minsEnd - minsStart) / deps.calculator.getPlotRangeMin()) * 100;
+    const plotRange = deps.calculator.getPlotRangeMin();
+
+    // Card is INSIDE the transformed content, so use full plot range
+    const topPct = minutesToPercentWithCollapsedSupport(
+      minsStart,
+      deps.calculator,
+      deps.container,
+      true, // forTransformedContent = true
+    );
+    const durPct = ((minsEnd - minsStart) / plotRange) * 100;
 
     // Apply the same tighter positioning adjustments
     const adjustedTop = Math.max(0, topPct - 0.1);
@@ -742,23 +1058,33 @@ export function handlePointerDown(
     if (!runtime.activeResize) return;
     if (ev.pointerId !== runtime.activeResize.pointerId) return;
 
-    const y = ev.clientY - rect.top;
+    const dayBedRect = runtime.activeResize.dayBed.getBoundingClientRect();
+    const y = Math.max(
+      0,
+      Math.min(
+        ev.clientY - dayBedRect.top - viewport.offsetTop,
+        viewport.height,
+      ),
+    );
+
+    const baseMinutes = yToMinutesWithCollapsedSupport(
+      y,
+      viewport.height,
+      deps.calculator,
+      deps.container,
+    );
+
+    const snapped = deps.calculator.snapToInterval(baseMinutes);
+    const offsetMinutes = getPastHoursOffsetMinutes(deps.container, deps.calculator);
     const plotStart = deps.calculator.getPlotStartMin();
     const plotEnd = deps.calculator.getPlotEndMin();
-    const plotRange = deps.calculator.getPlotRangeMin();
-    const pct = rect.height > 0 ? y / rect.height : 0;
-    const rawFull = plotStart + pct * plotRange;
-    const raw =
-      runtime.activeResize.handle === "bottom"
-        ? rawFull
-        : deps.calculator.yToMinutes(y, rect.height);
-    const snapped = deps.calculator.snapToInterval(raw);
+    const visibleStart = offsetMinutes > 0 ? plotStart + offsetMinutes : plotStart;
     const minDur = 15;
 
     if (runtime.activeResize.handle === "top") {
       const nextStart = deps.calculator.clamp(
         snapped,
-        plotStart,
+        visibleStart,
         runtime.activeResize.endMin - minDur,
       );
       runtime.activeResize.startMin = nextStart;
