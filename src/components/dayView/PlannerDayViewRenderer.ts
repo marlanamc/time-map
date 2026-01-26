@@ -22,6 +22,7 @@ export class PlannerDayViewRenderer {
   private timelineGrid: TimelineGrid;
   private todayEvents: EventInstance[] = [];
   private activeDate: Date | null = null;
+  private pastHoursExpanded: boolean = false;
 
   /**
    * Generate SVG icon markup
@@ -306,8 +307,10 @@ export class PlannerDayViewRenderer {
           `
               : ""
           }
-          <div class="planner-timeline-container day-timeline">
-            ${this.timelineGrid.render()}
+          <div class="planner-timeline-container day-timeline" data-past-hours-expanded="${this.pastHoursExpanded}">
+            ${this.renderPastHoursToggle()}
+            ${this.renderTopCurrentTime()}
+            ${this.timelineGrid.render(this.activeDate, this.pastHoursExpanded)}
             <div class="planner-timeline-content">
               ${positionedItems
                 .map((item) =>
@@ -325,6 +328,355 @@ export class PlannerDayViewRenderer {
 
     this.container.innerHTML = html;
     this.container.className = "day-view-container planner-style";
+    
+    // Set up past hours toggle
+    this.setupPastHoursToggle();
+    
+    // Update current time indicator position after render
+    const timelineContainer = this.container.querySelector('.planner-timeline-container') as HTMLElement | null;
+    if (timelineContainer) {
+      this.updateCurrentTimeIndicatorPosition(timelineContainer);
+    }
+  }
+  
+  /**
+   * Set up the past hours toggle button
+   */
+  private setupPastHoursToggle(): void {
+    const toggleBtn = this.container.querySelector(
+      '[data-action="toggle-past-hours"]'
+    ) as HTMLElement | null;
+    
+    if (!toggleBtn) return;
+    
+    toggleBtn.addEventListener('click', () => {
+      this.pastHoursExpanded = !this.pastHoursExpanded;
+      const timelineContainer = this.container.querySelector(
+        ".planner-timeline-container"
+      ) as HTMLElement | null;
+      const gridEl = this.container.querySelector(
+        ".day-bed-grid"
+      ) as HTMLElement | null;
+      
+      if (timelineContainer) {
+        timelineContainer.dataset.pastHoursExpanded = String(this.pastHoursExpanded);
+        toggleBtn.setAttribute('aria-expanded', String(this.pastHoursExpanded));
+        
+        // Update CSS variable for grid positioning when collapsing/expanding
+        // Show one hour before current time
+        // Use minutesToPercent to match the indicator calculation
+        if (!this.pastHoursExpanded && this.activeDate && this.isToday(this.activeDate)) {
+          const now = new Date();
+          const currentHour = now.getHours();
+          const hourBeforeCurrent = currentHour - 1;
+          const hourBeforeMinutes = hourBeforeCurrent * 60;
+          const hourBeforePercent = this.calculator.minutesToPercent(hourBeforeMinutes);
+          
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:setupPastHoursToggle',message:'Grid transform calculation - using minutesToPercent',data:{now:now.toISOString(),currentHour,hourBeforeCurrent,hourBeforeMinutes,hourBeforePercent,cssVarValue:hourBeforePercent.toFixed(4),pastHoursExpanded:this.pastHoursExpanded},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'F'})}).catch(()=>{});
+          // #endregion
+          
+          timelineContainer.style.setProperty(
+            '--current-hour-pos',
+            hourBeforePercent.toFixed(4)
+          );
+        } else {
+          timelineContainer.style.removeProperty('--current-hour-pos');
+        }
+        
+        // Update current time indicator position
+        this.updateCurrentTimeIndicatorPosition(timelineContainer);
+        
+        const toggleText = toggleBtn.querySelector('.past-hours-toggle-text');
+        const toggleIcon = toggleBtn.querySelector('.past-hours-toggle-icon');
+        
+        if (toggleText) {
+          toggleText.textContent = this.pastHoursExpanded 
+            ? "Hide earlier hours" 
+            : "Show earlier hours";
+        }
+        if (toggleIcon) {
+          toggleIcon.textContent = this.pastHoursExpanded ? "⌄" : "›";
+        }
+        
+        // Update the grid element classes
+        if (gridEl && this.activeDate) {
+          this.timelineGrid.updateElement(gridEl, this.activeDate, this.pastHoursExpanded);
+        }
+        
+        // Update timeline content items visibility
+        const contentItems = timelineContainer.querySelectorAll(
+          '.planner-timeline-content [data-is-past="true"]'
+        );
+        contentItems.forEach((item) => {
+          const itemEl = item as HTMLElement;
+          if (this.pastHoursExpanded) {
+            itemEl.style.display = '';
+            itemEl.style.opacity = '1';
+          } else {
+            itemEl.style.display = 'none';
+            itemEl.style.opacity = '0';
+          }
+        });
+      }
+    });
+  }
+  
+  /**
+   * @deprecated Scroll-to-time feature removed - current time indicator is now pinned at top
+   */
+  private scrollToCurrentHour_DEPRECATED(): void {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:338',message:'scrollToCurrentHour called',data:{hasActiveDate:!!this.activeDate},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    requestAnimationFrame(() => {
+      const timelineContainer = this.container.querySelector(
+        ".planner-timeline-container"
+      ) as HTMLElement | null;
+      
+      if (!timelineContainer || !this.activeDate) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:349',message:'scrollToCurrentHour early return: missing elements',data:{hasTimelineContainer:!!timelineContainer,hasActiveDate:!!this.activeDate},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
+        return;
+      }
+      
+      // Find the actual scrollable container (canvas-container or main-content)
+      let scrollContainer: HTMLElement | null = this.container.closest(".canvas-container");
+      if (!scrollContainer) {
+        scrollContainer = this.container.closest(".main-content");
+      }
+      if (!scrollContainer) {
+        // Fallback to planner-main if parent containers not found
+        scrollContainer = this.container.querySelector(".planner-main");
+      }
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:360',message:'scroll container lookup',data:{hasScrollContainer:!!scrollContainer,scrollContainerClass:scrollContainer?.className,scrollContainerScrollTop:scrollContainer?.scrollTop,scrollContainerScrollHeight:scrollContainer?.scrollHeight,scrollContainerClientHeight:scrollContainer?.clientHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      
+      if (!scrollContainer) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:365',message:'no scroll container found',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
+        return;
+      }
+      
+      const currentHour = this.activeDate.getHours();
+      
+      // Find the current hour element in the timeline grid
+      const gridEl = timelineContainer.querySelector(".day-bed-grid") as HTMLElement | null;
+      if (!gridEl) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:445',message:'no grid element found',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+        // #endregion
+        return;
+      }
+      
+      // Find the hour element for the current hour
+      const currentHourEl = gridEl.querySelector(
+        `.bed-hour[data-hour="${currentHour}"]`
+      ) as HTMLElement | null;
+      
+      if (!currentHourEl) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:453',message:'current hour element not found',data:{currentHour},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+        // #endregion
+        return;
+      }
+      
+      // Get positions relative to the scroll container
+      const scrollContainerRect = scrollContainer.getBoundingClientRect();
+      const timelineRect = timelineContainer.getBoundingClientRect();
+      const currentHourRect = currentHourEl.getBoundingClientRect();
+      
+      // Find the toggle button and current time indicator to account for their heights
+      const toggleBtn = timelineContainer.querySelector(
+        '.past-hours-toggle'
+      ) as HTMLElement | null;
+      const currentTimeIndicator = timelineContainer.querySelector(
+        '.current-time-top-indicator'
+      ) as HTMLElement | null;
+      
+      const toggleBtnHeight = toggleBtn ? toggleBtn.getBoundingClientRect().height : 0;
+      const currentTimeHeight = currentTimeIndicator ? currentTimeIndicator.getBoundingClientRect().height : 0;
+      const totalTopSpace = toggleBtnHeight + currentTimeHeight + 8; // 8px spacing
+      
+      // Calculate where we want the current hour to be (directly under the current time indicator)
+      // The current hour's top position relative to the scroll container viewport
+      const currentHourTopRelativeToViewport = currentHourRect.top - scrollContainerRect.top;
+      
+      // We want the hour positioned at: toggle button + current time indicator + spacing from the top of the timeline
+      // The timeline's top relative to the scroll container viewport
+      const timelineTopRelativeToViewport = timelineRect.top - scrollContainerRect.top;
+      const targetPosition = timelineTopRelativeToViewport + totalTopSpace;
+      
+      // Calculate how much we need to scroll to position the hour at the target
+      const scrollNeeded = currentHourTopRelativeToViewport - targetPosition;
+      
+      // Calculate the new scroll position
+      const scrollPosition = scrollContainer.scrollTop + scrollNeeded;
+      
+      // Clamp to valid scroll range
+      const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+      const clampedScrollPosition = Math.max(0, Math.min(scrollPosition, maxScroll));
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:465',message:'scroll calculation using hour element',data:{currentHour,toggleBtnHeight,currentTimeHeight,totalTopSpace,timelineTopRelativeToViewport,targetPosition,currentHourTopRelativeToViewport,scrollNeeded,scrollPosition,maxScroll,clampedScrollPosition,scrollContainerScrollTop:scrollContainer.scrollTop,scrollContainerClientHeight:scrollContainer.clientHeight,scrollContainerScrollHeight:scrollContainer.scrollHeight,currentHourRectTop:currentHourRect.top,scrollContainerRectTop:scrollContainerRect.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
+      
+      // Scroll the actual scrollable container to position current hour at top
+      scrollContainer.scrollTo({
+        top: clampedScrollPosition,
+        behavior: "smooth",
+      });
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:475',message:'scrollTo called',data:{scrollTop:Math.max(0,scrollPosition),behavior:'smooth',scrollContainerClass:scrollContainer.className},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
+      
+      // Check scroll position after a delay
+      setTimeout(() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PlannerDayViewRenderer.ts:480',message:'scroll position after delay',data:{actualScrollTop:scrollContainer.scrollTop,expectedScrollTop:clampedScrollPosition,currentHourRectTop:currentHourRect.top,scrollContainerRectTop:scrollContainerRect.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+        // #endregion
+      }, 500);
+    });
+  }
+  
+  /**
+   * Render the toggle button for past hours
+   */
+  private renderPastHoursToggle(): string {
+    if (!this.activeDate || !this.isToday(this.activeDate)) {
+      return "";
+    }
+
+    // Use real current time, not activeDate's time-of-day
+    const now = new Date();
+    const currentHour = now.getHours();
+    if (currentHour <= 8) {
+      // No past hours to collapse if current hour is 8 AM or earlier
+      return "";
+    }
+
+    const toggleText = this.pastHoursExpanded
+      ? "Hide earlier hours"
+      : "Show earlier hours";
+    const toggleIcon = this.pastHoursExpanded ? "⌄" : "›";
+
+    return `
+      <button
+        type="button"
+        class="past-hours-toggle"
+        data-action="toggle-past-hours"
+        aria-label="${toggleText}"
+        aria-expanded="${this.pastHoursExpanded}">
+        <span class="past-hours-toggle-icon">${toggleIcon}</span>
+        <span class="past-hours-toggle-text">${toggleText}</span>
+      </button>
+    `;
+  }
+
+  /**
+   * Render the current time indicator at a fixed location; its actual position
+   * is computed after measuring the timeline grid.
+   */
+  private renderTopCurrentTime(): string {
+    if (!this.activeDate || !this.isToday(this.activeDate)) {
+      return "";
+    }
+
+    const now = new Date();
+    const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+    const timeLabel = this.calculator.format12h(currentTimeMinutes);
+
+    return `
+      <div class="current-time-top-indicator" data-pinned="true">
+        <div class="current-time-line"></div>
+        <div class="current-time-dot"></div>
+        <span class="current-time-label">${timeLabel}</span>
+      </div>
+    `;
+  }
+  
+  /**
+   * Check if a date is today
+   */
+  private isToday(date: Date): boolean {
+    const today = new Date();
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
+  }
+
+  /**
+   * Update the current time indicator so it aligns with the measured hour grid position.
+   */
+  private updateCurrentTimeIndicatorPosition(timelineContainer: HTMLElement): void {
+    if (!this.activeDate || !this.isToday(this.activeDate)) {
+      return;
+    }
+
+    const indicator = timelineContainer.querySelector(
+      ".current-time-top-indicator"
+    ) as HTMLElement | null;
+    const gridEl = timelineContainer.querySelector(".day-bed-grid") as HTMLElement | null;
+    if (!indicator || !gridEl) {
+      return;
+    }
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const totalMinutes = currentHour * 60 + currentMinute;
+    const timeLabel = this.calculator.format12h(totalMinutes);
+
+    const currentHourEl = gridEl.querySelector(
+      `.bed-hour[data-hour="${currentHour}"]`
+    ) as HTMLElement | null;
+    if (!currentHourEl) {
+      return;
+    }
+
+    const timelineRect = timelineContainer.getBoundingClientRect();
+    const currentHourRect = currentHourEl.getBoundingClientRect();
+    const nextHourEl =
+      currentHour < 23
+        ? (gridEl.querySelector(
+            `.bed-hour[data-hour="${currentHour + 1}"]`
+          ) as HTMLElement | null)
+        : null;
+
+    let hourHeight = 0;
+    if (nextHourEl) {
+      hourHeight = nextHourEl.getBoundingClientRect().top - currentHourRect.top;
+    } else {
+      const gridRect = gridEl.getBoundingClientRect();
+      const totalHours = Math.max(
+        gridEl.querySelectorAll(".bed-hour").length,
+        1
+      );
+      hourHeight = gridRect.height / totalHours;
+    }
+
+    if (hourHeight <= 0) {
+      hourHeight = 1;
+    }
+
+    const minuteOffset = (currentMinute / 60) * hourHeight;
+    const topPx = currentHourRect.top - timelineRect.top + minuteOffset;
+
+    indicator.style.top = `${topPx}px`;
+
+    const labelEl = indicator.querySelector(
+      ".current-time-label"
+    ) as HTMLElement | null;
+    if (labelEl) {
+      labelEl.textContent = timeLabel;
+    }
   }
 
   /**
@@ -411,8 +763,8 @@ export class PlannerDayViewRenderer {
    * @returns Object containing expand state information
    * @private
    */
-  private captureExpandState(): Record<string, boolean> {
-    const state: Record<string, boolean> = {};
+  private captureExpandState(): Map<string, boolean> {
+    const state = new Map<string, boolean>();
 
     // Capture collapsed sections
     const collapsedSections = this.container.querySelectorAll(
@@ -420,7 +772,7 @@ export class PlannerDayViewRenderer {
     );
     collapsedSections.forEach((section) => {
       const sectionId = section.getAttribute("data-section-id") || "default";
-      state[sectionId] = true;
+      state.set(sectionId, true);
     });
 
     return state;
@@ -431,8 +783,8 @@ export class PlannerDayViewRenderer {
    * @param state - Expand state information from captureExpandState
    * @private
    */
-  private restoreExpandState(state: Record<string, boolean>): void {
-    Object.entries(state).forEach(([sectionId, isCollapsed]) => {
+  private restoreExpandState(state: Map<string, boolean>): void {
+    state.forEach((isCollapsed, sectionId) => {
       if (isCollapsed) {
         const section =
           this.container.querySelector(`[data-section-id="${sectionId}"]`) ||
@@ -536,11 +888,20 @@ export class PlannerDayViewRenderer {
         `
         : "";
 
+    // Determine if this item is in a past hour (for collapsing)
+    // Show one hour before current time, so items before (currentHour - 1) are past
+    const itemHour = Math.floor(item.startMin / 60);
+    const isPast = this.activeDate && this.isToday(this.activeDate) 
+      ? itemHour < this.activeDate.getHours() - 1
+      : false;
+    
     return `
         <div class="day-goal-card planner-timed-task day-goal-variant-planter ${colorClass}" 
              tabindex="0" 
              style="top: ${adjustedTop}%; height: ${adjustedHeight}%; --lane: ${item.lane}; --lanes: ${item.totalLanes};" 
-             data-goal-id="${goal.id}">
+             data-goal-id="${goal.id}"
+             data-hour="${itemHour}"
+             data-is-past="${isPast}">
         ${resizeHandles}
         <div class="day-goal-checkbox ${
           goal.status === "done" ? "checked" : ""
@@ -620,12 +981,21 @@ export class PlannerDayViewRenderer {
       ? `<span class="timeline-countdown" aria-hidden="true">${countdownLabel}</span>`
       : "";
 
+    // Determine if this item is in a past hour (for collapsing)
+    // Show one hour before current time, so items before (currentHour - 1) are past
+    const itemHour = Math.floor(item.startMin / 60);
+    const isPast = this.activeDate && this.isToday(this.activeDate) 
+      ? itemHour < this.activeDate.getHours() - 1
+      : false;
+
     return `
       <div
         class="planner-event-card"
         style="top: ${top}%; height: ${adjustedHeight}%; --lane: ${item.lane}; --lanes: ${item.totalLanes};"
         data-action="edit-event"
         data-event-id="${event.originalId}"
+        data-hour="${itemHour}"
+        data-is-past="${isPast}"
       >
         <span class="planner-event-time">${timeLabel}</span>
         <span class="planner-event-title">${event.title}</span>
