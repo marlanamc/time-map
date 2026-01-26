@@ -2,11 +2,10 @@
 // App Settings Panel Module
 // ===================================
 import { State } from "../../core/State";
-import { CONFIG, VIEWS } from "../../config";
+import { CONFIG } from "../../config";
 import { NDSupport } from "../ndSupport";
 import type {
   AppData,
-  ViewType,
   Goal,
   WeeklyReview,
   BrainDumpEntry,
@@ -391,9 +390,6 @@ export const AppSettings = {
     });
 
     modal.querySelector("#saveAppSettings")?.addEventListener("click", () => {
-      const defaultView = (
-        modal.querySelector("#settingsDefaultView") as HTMLSelectElement | null
-      )?.value;
       const startFocusMode = !!(
         modal.querySelector("#settingsFocusMode") as HTMLInputElement
       )?.checked;
@@ -448,16 +444,6 @@ export const AppSettings = {
       const themeMode =
         (modal.querySelector("#settingsThemeMode") as HTMLSelectElement | null)
           ?.value || "auto";
-
-      if (
-        State.data &&
-        defaultView &&
-        (Object.values(VIEWS) as ViewType[]).includes(defaultView as ViewType)
-      ) {
-        const view = defaultView as ViewType;
-        State.data.preferences.defaultView = view;
-        State.currentView = view;
-      }
 
       if (State.data) {
         State.data.preferences.focusMode = startFocusMode;
