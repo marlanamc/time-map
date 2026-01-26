@@ -166,21 +166,16 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
   border-radius: var(--radius-lg);
   border: 1px solid var(--divider);
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   background: var(--surface-0);
   box-shadow: var(--shadow-xs);
 }
 
 .spine-vision-item:hover,
 .spine-vision-item:focus-visible {
-  background: var(--surface-2);
-  border-color: var(--accent-muted, var(--divider));
-  transform: translateX(2px);
-  box-shadow: var(--shadow-sm);
+  background: var(--glass-pill-bg);
+  border-color: var(--glass-pill-border);
+  box-shadow: var(--glass-pill-shadow);
 }
 
 .spine-vision-item.is-selected {
@@ -317,7 +312,7 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
 .reality-preview-overlay.visible {
   opacity: 1;
   transform: scale(1);
-  pointer-events: all;
+  pointer-events: none;
 }
 
 .reality-preview-card {
@@ -1564,6 +1559,203 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
 
 [data-theme="light"] .goal-detail-commitment-grid div {
   background: color-mix(in srgb, var(--surface-1) 88%, rgba(255, 255, 255, 0.05));
+}
+
+/* ===================================
+   Dark Mode: Midnight Moss with Amber Glow
+   Warm, grounding sanctuary for ND users
+   =================================== */
+
+:root.dark-mode .calendar-grid.garden-horizon {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(80, 90, 70, 0.08), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(235, 190, 120, 0.06), transparent 55%),
+    var(--surface-0);
+}
+
+:root.dark-mode .goal-spine {
+  background: color-mix(in srgb, var(--surface-1) 92%, rgba(50, 55, 45, 0.08));
+  border-color: rgba(235, 190, 120, 0.18);
+  box-shadow:
+    0 4px 16px rgba(10, 15, 10, 0.65),
+    0 2px 6px rgba(235, 190, 120, 0.08);
+}
+
+:root.dark-mode .goal-spine:hover {
+  border-color: rgba(235, 190, 120, 0.26);
+  box-shadow:
+    0 8px 24px rgba(10, 15, 10, 0.70),
+    0 4px 12px rgba(235, 190, 120, 0.12);
+}
+
+:root.dark-mode .spine-you-are-here {
+  background: color-mix(in srgb, var(--surface-2) 88%, rgba(60, 65, 55, 0.12));
+  border-color: rgba(235, 190, 120, 0.20);
+  box-shadow:
+    0 2px 8px rgba(10, 15, 10, 0.60),
+    inset 0 1px 0 rgba(245, 210, 145, 0.06);
+}
+
+:root.dark-mode .spine-vision-item {
+  background: color-mix(in srgb, var(--surface-1) 90%, rgba(45, 50, 40, 0.10));
+  border-color: rgba(200, 195, 170, 0.14);
+  box-shadow: 0 2px 8px rgba(10, 15, 10, 0.55);
+}
+
+:root.dark-mode .spine-vision-item:hover {
+  background: color-mix(in srgb, var(--surface-2) 88%, rgba(50, 55, 45, 0.12));
+  border-color: rgba(235, 190, 120, 0.22);
+  box-shadow:
+    0 4px 12px rgba(10, 15, 10, 0.62),
+    0 0 16px rgba(235, 190, 120, 0.08);
+}
+
+:root.dark-mode .time-canvas {
+  background: color-mix(in srgb, var(--surface-0) 70%, rgba(30, 35, 28, 0.30));
+  border-color: rgba(235, 190, 120, 0.16);
+  box-shadow:
+    0 8px 24px rgba(10, 15, 10, 0.65),
+    inset 0 1px 0 rgba(245, 210, 145, 0.04);
+}
+
+:root.dark-mode .time-band {
+  background: color-mix(in srgb, var(--surface-1) 85%, rgba(40, 45, 38, 0.15));
+  border-color: rgba(235, 190, 120, 0.18);
+  box-shadow: 0 4px 12px rgba(10, 15, 10, 0.58);
+}
+
+:root.dark-mode .time-band:hover {
+  border-color: rgba(235, 190, 120, 0.24);
+  box-shadow:
+    0 6px 18px rgba(10, 15, 10, 0.65),
+    0 0 20px rgba(235, 190, 120, 0.10);
+}
+
+:root.dark-mode .time-band-header {
+  border-bottom-color: rgba(235, 190, 120, 0.14);
+}
+
+:root.dark-mode .time-band-marker {
+  background: color-mix(in srgb, var(--surface-1) 88%, rgba(45, 50, 42, 0.12));
+  border-color: rgba(235, 190, 120, 0.16);
+  box-shadow:
+    0 3px 10px rgba(10, 15, 10, 0.55),
+    inset 0 1px 0 rgba(245, 210, 145, 0.05);
+}
+
+:root.dark-mode .time-band-marker:hover {
+  background: color-mix(in srgb, var(--surface-2) 85%, rgba(50, 55, 45, 0.15));
+  border-color: rgba(235, 190, 120, 0.26);
+  box-shadow:
+    0 5px 16px rgba(10, 15, 10, 0.62),
+    0 0 18px rgba(235, 190, 120, 0.12);
+}
+
+:root.dark-mode .time-band-marker.is-selected {
+  background: color-mix(in srgb, var(--accent) 20%, rgba(60, 65, 55, 0.80));
+  border-color: rgba(235, 190, 120, 0.35);
+  box-shadow:
+    0 8px 24px rgba(10, 15, 10, 0.68),
+    0 0 24px rgba(235, 190, 120, 0.18);
+}
+
+:root.dark-mode .time-band-now {
+  background:
+    linear-gradient(180deg,
+      rgba(26, 28, 24, 0.96) 0%,
+      rgba(34, 36, 32, 0.88) 30%,
+      rgba(42, 45, 39, 0.75) 65%,
+      rgba(235, 190, 120, 0.08) 100%
+    );
+  border-color: rgba(235, 190, 120, 0.28);
+  box-shadow:
+    0 12px 36px rgba(10, 15, 10, 0.75),
+    0 0 32px rgba(235, 190, 120, 0.15);
+}
+
+:root.dark-mode .now-intention {
+  background: color-mix(in srgb, var(--surface-1) 88%, rgba(50, 55, 45, 0.12));
+  border-color: rgba(235, 190, 120, 0.18);
+  box-shadow:
+    0 4px 12px rgba(10, 15, 10, 0.60),
+    inset 0 1px 0 rgba(245, 210, 145, 0.06);
+}
+
+:root.dark-mode .now-intention:hover {
+  border-color: rgba(235, 190, 120, 0.26);
+  box-shadow:
+    0 6px 16px rgba(10, 15, 10, 0.68),
+    0 0 16px rgba(235, 190, 120, 0.10);
+}
+
+:root.dark-mode .utility-rail {
+  background: color-mix(in srgb, var(--surface-1) 90%, rgba(40, 45, 38, 0.10));
+  border-color: rgba(235, 190, 120, 0.22);
+  box-shadow:
+    0 16px 48px rgba(10, 15, 10, 0.75),
+    0 0 28px rgba(235, 190, 120, 0.12);
+}
+
+:root.dark-mode .utility-rail::before {
+  background: radial-gradient(
+    circle at 50% -10%,
+    rgba(235, 190, 120, 0.18) 0%,
+    transparent 60%
+  );
+}
+
+:root.dark-mode .utility-rail-btn {
+  background: color-mix(in srgb, var(--surface-0) 75%, rgba(50, 55, 45, 0.25));
+  box-shadow:
+    inset 0 1px 0 rgba(245, 210, 145, 0.10),
+    0 4px 14px rgba(10, 15, 10, 0.58);
+}
+
+:root.dark-mode .utility-rail-btn:hover {
+  background: color-mix(in srgb, var(--surface-2) 80%, rgba(60, 65, 55, 0.20));
+  box-shadow:
+    inset 0 1px 0 rgba(245, 210, 145, 0.14),
+    0 6px 18px rgba(10, 15, 10, 0.65),
+    0 0 16px rgba(235, 190, 120, 0.08);
+}
+
+:root.dark-mode .utility-rail-btn.is-active,
+:root.dark-mode .utility-rail-btn[aria-current="page"],
+:root.dark-mode .utility-rail-btn[aria-current="true"] {
+  background: color-mix(in srgb, var(--accent) 18%, rgba(60, 65, 55, 0.82));
+  border-color: rgba(235, 190, 120, 0.28);
+  box-shadow:
+    0 10px 28px rgba(10, 15, 10, 0.70),
+    0 0 24px rgba(235, 190, 120, 0.16);
+}
+
+:root.dark-mode .time-band-event {
+  background: color-mix(in srgb, var(--surface-1) 85%, rgba(45, 50, 42, 0.15));
+  border-color: rgba(235, 190, 120, 0.16);
+  box-shadow:
+    0 4px 12px rgba(10, 15, 10, 0.60),
+    inset 0 1px 0 rgba(245, 210, 145, 0.05);
+}
+
+:root.dark-mode .time-band-event:hover {
+  box-shadow:
+    0 6px 18px rgba(10, 15, 10, 0.68),
+    0 0 16px rgba(235, 190, 120, 0.10);
+}
+
+/* Panel overlays and modals */
+:root.dark-mode .reality-preview-card,
+:root.dark-mode .planning-page-panel {
+  background: color-mix(in srgb, var(--surface-1) 92%, rgba(45, 50, 42, 0.08));
+  border-color: rgba(235, 190, 120, 0.20);
+  box-shadow:
+    0 24px 60px rgba(10, 15, 10, 0.80),
+    0 0 32px rgba(235, 190, 120, 0.12);
+}
+
+:root.dark-mode .goal-detail-panel {
+  background: color-mix(in srgb, var(--surface-1) 94%, rgba(40, 45, 38, 0.06));
+  border-color: rgba(235, 190, 120, 0.18);
 }
 
 @media (prefers-reduced-motion: reduce) {
