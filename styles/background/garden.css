@@ -82,19 +82,20 @@
 
 :root.time-evening:not(.dark-mode) .garden-sky {
     --garden-sky-gradient: linear-gradient(to bottom,
-            #d8a088 0%,
-            #e0c4a8 35%,
-            #e5d8c8 65%,
-            var(--surface-0) 100%);
+            #e8f1ff 0%,
+            #dde7ff 30%,
+            #e7dcff 60%,
+            #f5e3ff 85%,
+            #fde7f3 100%);
     background: var(--garden-sky-gradient);
 }
 
 :root.dark-mode.time-evening .garden-sky {
     --garden-sky-gradient: linear-gradient(to bottom,
-            #FF8C42 0%,
-            #FFB347 30%,
-            #F4A989 70%,
-            #D9C8B8 100%);
+            #050815 0%,
+            #090f22 35%,
+            #111a35 70%,
+            #1a1730 100%);
     background: var(--garden-sky-gradient);
 }
 
