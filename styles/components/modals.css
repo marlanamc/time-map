@@ -1,61 +1,148 @@
 /* ===================================
-   Modals
+   Modals — Garden Horizon system
    =================================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(12, 18, 28, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: opacity 0.25s ease, visibility 0.25s ease;
   padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
     env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  pointer-events: none;
 }
 
 .modal-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: all;
 }
 
 :root:not(.dark-mode) .modal-overlay {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.dark-mode .modal-overlay {
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(248, 242, 235, 0.70);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .modal {
-  background: var(--bg-elevated);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
+  width: min(var(--container-modal), 92vw);
   max-width: var(--container-modal);
-  width: 90%;
-  max-height: 85vh;
-  overflow-y: auto;
-  transform: scale(0.95) translateY(var(--space-2));
-  transition: transform var(--duration-normal) var(--ease-out);
-  box-shadow: var(--shadow-xl);
+  max-height: min(
+    85vh,
+    calc(
+      100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) -
+        var(--space-6)
+    )
+  );
+  background: color-mix(in srgb, var(--surface-1) 95%, rgba(255, 255, 255, 0.92));
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow: hidden;
+  box-shadow:
+    0 30px 60px rgba(15, 23, 42, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transform: scale(0.97) translateY(var(--space-2));
+  transition: transform 0.35s ease, opacity 0.35s ease;
   margin-top: env(safe-area-inset-top, 0px);
   margin-bottom: env(safe-area-inset-bottom, 0px);
+  color: var(--text-primary);
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.modal-title {
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.modal-level-descriptor {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.modal-close {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--surface-0);
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3) 0 var(--space-4);
+  min-height: 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--glass-border);
+  flex-wrap: wrap;
+}
+
+.modal-actions .btn {
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
 }
 
 /* Edit sheet variant for goal modal */
 .modal-overlay.edit-sheet {
   align-items: center;
   justify-content: center;
-  background: rgba(5, 5, 10, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(245, 227, 203, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   padding: env(safe-area-inset-top, 0px) 0
     calc(env(safe-area-inset-bottom, 0px) + var(--space-2)) 0;
 }
@@ -67,11 +154,17 @@
 .modal.edit-sheet-panel {
   width: min(var(--container-sheet), 100%);
   max-height: 95vh;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-2xl);
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(8, 10, 18, 0.95);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(188, 143, 102, 0.22);
+  background: color-mix(
+    in srgb,
+    #fcf4e8 92%,
+    #fdf7f0 8%
+  );
+  box-shadow:
+    0 24px 60px rgba(148, 105, 70, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -99,12 +192,11 @@
   align-items: center;
   justify-content: space-between;
   background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(248, 250, 252, 0.9) 50%,
-    rgba(241, 245, 249, 0.85) 100%
+    180deg,
+    rgba(252, 243, 233, 0.96) 0%,
+    rgba(247, 234, 220, 0.96) 100%
   );
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(193, 152, 116, 0.28);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -199,10 +291,16 @@
 .goal-hero {
   width: 100%;
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-2xl);
+  background: linear-gradient(
+    180deg,
+    #fff8ef 0%,
+    #fbeede 100%
+  );
   padding: var(--space-3);
   box-sizing: border-box;
+  border: 1px solid rgba(200, 150, 110, 0.25);
+  box-shadow: inset 0 1px 6px rgba(255, 255, 255, 0.7);
 }
 
 .goal-hero input {
@@ -212,23 +310,73 @@
   font-weight: 500;
   min-height: var(--space-12);
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  border: 1px solid rgba(190, 140, 100, 0.35);
+  background: rgba(255, 253, 248, 0.9);
+  color: #3f2a20;
 }
 
 .goal-hero label {
   font-size: var(--text-xs);
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(110, 77, 54, 0.7);
 }
 
 .goal-hero-reassurance {
   margin: 0;
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(110, 77, 54, 0.75);
 }
+
+.dark-mode .goal-hero {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-2) 80%, rgba(255, 255, 255, 0.05)) 0%,
+    color-mix(in srgb, var(--surface-2) 90%, rgba(255, 255, 255, 0.03)) 100%
+  );
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 6px rgba(255, 255, 255, 0.04);
+}
+
+.dark-mode .goal-hero input {
+  background: color-mix(in srgb, var(--surface-1) 60%, rgba(255, 255, 255, 0.04));
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+}
+
+.dark-mode .goal-hero label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dark-mode .goal-hero-reassurance {
+  color: var(--text-tertiary);
+}
+
+.dark-mode .goal-hero .due-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.goal-hero .due-pill {
+  background: #fbe0d8;
+  border: 1px solid #f3b3a2;
+  color: #8a3a2c;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: 600;
+}
+
+.goal-progress-ring {
+  --ring-track: rgba(210, 175, 145, 0.25);
+  --ring-fill: #e49b7b;
+  --ring-center: #fffaf3;
+  color: #5b3624;
+}
+
 
 .goal-edit-sheet .goal-hero-date {
   font-size: var(--text-xs);
@@ -339,7 +487,7 @@
   }
 
   .modal.edit-sheet-panel {
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     width: 100%;
     margin-bottom: var(--space-2); /* Add small bottom margin to lift it up */
     max-height: calc(
@@ -374,7 +522,7 @@
   }
 
   .modal.edit-sheet-panel {
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-2xl);
   }
 
   .edit-sheet-body {
@@ -382,29 +530,53 @@
   }
 }
 
-:root:not(.dark-mode) .modal {
-  background: color-mix(in srgb, var(--bg-elevated) 85%, #ffffff 15%);
-  border-color: var(--divider);
-  box-shadow:
-    0 22px 56px rgba(31, 45, 42, 0.18),
-    0 10px 30px rgba(0, 0, 0, 0.08);
-}
-
-.dark-mode .modal {
-  background: rgba(10, 22, 18, 0.95);
-  border-color: var(--accent-muted);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
 /* Dark mode styles for edit sheet topbar */
 .dark-mode .edit-sheet-topbar {
   background: linear-gradient(
     135deg,
-    rgba(15, 23, 42, 0.95) 0%,
-    rgba(30, 41, 59, 0.9) 50%,
-    rgba(51, 65, 85, 0.85) 100%
+    rgba(15, 23, 42, 0.97) 0%,
+    rgba(30, 41, 59, 0.93) 50%,
+    rgba(51, 65, 85, 0.89) 100%
   );
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 110, 199, 0.12);
+}
+
+/* ===================================
+   Nebula Oni Dark Mode - Sakura Pink Accents
+   =================================== */
+:root.dark-mode .modal-overlay {
+  background: rgba(12, 18, 28, 0.75);
+}
+
+:root.dark-mode .modal {
+  background: color-mix(
+    in srgb,
+    var(--surface-1) 92%,
+    rgba(255, 110, 199, 0.06)
+  );
+  border-color: rgba(255, 110, 199, 0.22);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.80),
+    0 0 32px rgba(255, 110, 199, 0.14);
+}
+
+:root.dark-mode .modal-overlay.edit-sheet {
+  background: rgba(12, 18, 28, 0.80);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+:root.dark-mode .modal.edit-sheet-panel {
+  background: color-mix(
+    in srgb,
+    rgba(8, 10, 18, 0.96) 90%,
+    rgba(255, 110, 199, 0.08)
+  );
+  border-color: rgba(255, 110, 199, 0.24);
+  box-shadow:
+    0 40px 90px rgba(0, 0, 0, 0.85),
+    0 0 36px rgba(255, 110, 199, 0.16),
+    inset 0 1px 0 rgba(255, 150, 220, 0.10);
 }
 
 .dark-mode .edit-sheet-topbar-title .modal-title {
@@ -424,67 +596,13 @@
 }
 
 .modal-lg {
+  width: min(var(--container-lg), 92vw);
   max-width: var(--container-lg);
 }
 
 .modal-xl {
+  width: min(var(--container-xl), 92vw);
   max-width: var(--container-xl);
-}
-
-.modal-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  gap: var(--space-1) var(--space-3);
-  margin-bottom: var(--space-5);
-  align-items: start;
-}
-
-.modal-title {
-  font-size: var(--text-xl);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin: 0;
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.modal-level-descriptor {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  margin: 0;
-  grid-column: 1;
-  grid-row: 2;
-}
-
-.modal-close {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-surface);
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-tertiary);
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
-  min-width: 44px;
-  min-height: 44px;
-  grid-column: 2;
-  grid-row: 1;
-  align-self: start;
-}
-
-.modal-close:hover {
-  background: var(--danger-muted);
-  color: var(--danger);
-}
-
-.modal-body {
-  max-height: 55vh;
-  overflow-y: auto;
 }
 
 /* Form Elements */
@@ -597,22 +715,6 @@
   gap: var(--space-4);
 }
 
-/* Modal Actions - Ensure 44px minimum touch targets */
-.modal-actions {
-  display: flex;
-  gap: var(--space-3);
-  justify-content: flex-end;
-  margin-top: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--glass-border);
-}
-
-.modal-actions .btn {
-  min-height: 44px;
-  min-width: 44px;
-  padding: var(--space-3) var(--space-4);
-}
-
 /* Touch-friendly interactive elements */
 .modal-pill,
 .modal-chip,
@@ -706,16 +808,17 @@
   font-weight: 600;
   letter-spacing: -0.02em;
   flex: 1;
+  color: #3f271b;
 }
 
 .goal-detail-title.completed {
   text-decoration: line-through;
-  color: var(--text-tertiary);
+  color: #a17655;
 }
 
 .goal-description {
   font-size: var(--text-base);
-  color: var(--text-secondary);
+  color: #6f4a33;
   line-height: 1.6;
   margin-bottom: var(--space-5);
 }
@@ -727,8 +830,9 @@
   gap: var(--space-4);
   margin-bottom: var(--space-5);
   padding: var(--space-4);
-  background: var(--bg-surface);
+  background: #fbf1e4;
   border-radius: var(--radius-md);
+  border: 1px solid rgba(204, 160, 122, 0.32);
 }
 
 .goal-meta-item {
@@ -737,7 +841,7 @@
 
 .goal-meta-label {
   font-size: var(--text-xs);
-  color: var(--text-ghost);
+  color: rgba(110, 77, 54, 0.7);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: var(--space-1);
@@ -746,7 +850,24 @@
 .goal-meta-value {
   font-size: var(--text-sm);
   font-weight: 500;
-  color: var(--text-primary);
+  color: #4b3021;
+}
+
+.goal-edit-sheet .kanban-column {
+  background: #fcf5ea;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(203, 162, 126, 0.28);
+  padding: var(--space-4);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.goal-edit-sheet .kanban-empty-state {
+  background: #f3ddc7;
+  border-radius: var(--radius-lg);
+  color: rgba(96, 63, 43, 0.85);
+  padding: var(--space-3);
+  border: none;
+  font-style: italic;
 }
 
 /* Detail Sections */
@@ -1065,6 +1186,21 @@
 /* ===================================
    Mobile Bottom Sheet Pattern
    =================================== */
+@media (max-width: 768px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    max-height: 90vh;
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (max-width: 600px) {
   .modal-overlay {
     align-items: flex-end;
@@ -1075,7 +1211,7 @@
     width: 100%;
     max-width: 100%;
     margin: 0;
-    border-radius: 24px 24px 0 0;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     max-height: 85vh;
     transform: translateY(100%);
     transition: transform var(--duration-normal) var(--ease-out);

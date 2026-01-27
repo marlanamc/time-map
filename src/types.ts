@@ -4,7 +4,14 @@
  */
 
 /** Available view types in the application */
-export type ViewType = "year" | "month" | "week" | "day" | "home" | "garden";
+export type ViewType =
+  | "year"
+  | "month"
+  | "week"
+  | "day"
+  | "home"
+  | "garden"
+  | "goal-detail";
 
 /** Goal hierarchy levels from highest to lowest */
 export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
@@ -525,6 +532,7 @@ export interface AppState {
   currentView: ViewType;
   selectedMonth: number | null;
   selectedGoal: string | null;
+  goalDetailId: string | null;
   zoom: number;
   focusMode: boolean;
   activeCategory: string;

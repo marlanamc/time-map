@@ -16,7 +16,11 @@ import {
 import { Toast } from "../components/feedback/Toast";
 import { Celebration } from "../components/feedback/Celebration";
 import { TimeVisualizations } from "../garden/timeVisualizations";
-import { HomeRenderer, MobileHereRenderer, YearRenderer } from "./renderers";
+import {
+  HomeRenderer,
+  MobileHereRenderer,
+  YearRenderer,
+} from "./renderers";
 import type { DayViewController } from "../components/dayView/DayViewController";
 import { ThemeManager } from "../theme/ThemeManager";
 import { eventBus } from "../core/EventBus";
@@ -240,6 +244,9 @@ export const UI = {
           year: number,
           options?: any,
         ) => this.openGoalModal(level, month, year, options),
+        openGoalDetail: (goalId: string) => this.openGoalDetail(goalId),
+        openGoalEdit: (goalId: string) => goalDetailModal.show(goalId),
+        closeGoalDetailPage: () => this.closeGoalDetailPage(),
         escapeHtml: (text: string) => escapeHtmlUtil(text),
         dayViewController: this.dayViewController,
       },
@@ -1856,6 +1863,22 @@ export const UI = {
       preselectedYear,
       link,
     );
+  },
+
+  openGoalDetail(goalId: string): void {
+    if (!goalId) return;
+    if (State.currentView !== VIEWS.GOAL_DETAIL) {
+      this._uiState.lastViewBeforeDetail = State.currentView;
+    }
+    State.setGoalDetailGoal(goalId);
+    State.setView(VIEWS.GOAL_DETAIL);
+  },
+
+  closeGoalDetailPage(): void {
+    const fallbackView = this._uiState.lastViewBeforeDetail ?? VIEWS.GARDEN;
+    this._uiState.lastViewBeforeDetail = null;
+    State.setGoalDetailGoal(null);
+    State.setView(fallbackView);
   },
 
   closeGoalModal() {

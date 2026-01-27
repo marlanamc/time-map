@@ -40,6 +40,7 @@ export const State: AppState & {
   currentView: VIEWS.YEAR as ViewType,
   selectedMonth: null,
   selectedGoal: null,
+  goalDetailId: null,
   zoom: 100,
   focusMode: false,
   activeCategory: "all",
@@ -151,6 +152,10 @@ export const State: AppState & {
 
     eventBus.emit("view:changed", { view, transition: true });
     eventBus.emit("view:sync-buttons");
+  },
+
+  setGoalDetailGoal(goalId: string | null) {
+    this.goalDetailId = goalId;
   },
 
   // Navigate to specific date

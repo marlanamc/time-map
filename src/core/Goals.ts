@@ -317,15 +317,21 @@ export const Goals = {
       }
 
       case "intention": {
-        // Single day: align to a specific day (default: today).
+        // For recurring intentions: use the parent's dueDate (passed from PlanningPage)
+        // For one-off intentions: align to a specific day (default: today)
         const day = sanitizedData.startDate
           ? parseYmdLocal(sanitizedData.startDate)
           : null;
         const baseDate = day ?? now;
         month = baseDate.getMonth();
         year = baseDate.getFullYear();
-        const end = endOfDay(baseDate);
-        dueDate = end.toISOString();
+
+        // If dueDate was explicitly provided (recurring intention), use it
+        // Otherwise use just the startDate (one-off intention)
+        if (!dueDate) {
+          const end = endOfDay(baseDate);
+          dueDate = end.toISOString();
+        }
         break;
       }
     }
@@ -359,6 +365,7 @@ export const Goals = {
       startTime: sanitizedData.startTime || null,
       endTime: sanitizedData.endTime || null,
       scheduledAt: sanitizedData.scheduledAt ?? null,
+      startDate: sanitizedData.startDate ?? undefined,
       tags,
       parentId: sanitizedData.parentId ?? null,
       parentLevel: parentGoal?.level ?? sanitizedData.parentLevel ?? null,
@@ -839,6 +846,15 @@ export async function ensurePlanningFocusForGoal(goal: Goal): Promise<Goal> {
   }
 
   if (goal.level === "vision" || goal.level === "milestone") {
+    // Check if a focus already exists for this goal
+    const existingFocus = Goals.getAll().find(
+      (g) => g.level === "focus" && g.parentId === goal.id
+    );
+    if (existingFocus) {
+      return existingFocus;
+    }
+
+    // Create a new focus only if one doesn't exist
     const focusTitle =
       goal.level === "vision"
         ? `Weekly plan for: ${goal.title}`

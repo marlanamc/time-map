@@ -1682,6 +1682,129 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
   }
 }
 
+@media (max-width: 768px) {
+  .calendar-grid.garden-horizon {
+    padding: var(--space-4) var(--space-3)
+      calc(var(--space-6) + var(--space-3) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .garden-horizon-layout {
+    gap: var(--space-4);
+  }
+
+  .goal-spine {
+    width: min(260px, 85vw);
+    padding: var(--space-4);
+  }
+
+  .time-canvas {
+    max-height: none;
+    overflow-y: visible;
+    padding: var(--space-5) var(--space-4) calc(var(--space-6) + var(--space-2));
+    box-shadow:
+      0 24px 60px rgba(15, 23, 42, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .time-band {
+    padding: var(--space-4);
+    width: 100%;
+  }
+
+  .time-band-markers {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .time-band-markers::-webkit-scrollbar {
+    display: none;
+  }
+
+  .time-band-marker {
+    flex: 0 0 auto;
+    min-width: 210px;
+    scroll-snap-align: start;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .time-band-more {
+    align-self: flex-start;
+    font-size: var(--text-xs);
+  }
+
+  .time-band-empty {
+    padding-right: var(--space-2);
+  }
+
+  .time-band-now {
+    margin-top: var(--space-3);
+    padding: var(--space-5);
+    border-radius: var(--radius-2xl);
+    box-shadow:
+      0 18px 36px rgba(15, 23, 42, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  .time-band-now .time-band-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .time-band-now .now-greeting-block {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .now-greeting-title,
+  .now-greeting-subtitle {
+    text-align: left;
+  }
+
+  .now-intentions {
+    gap: var(--space-2);
+    width: 100%;
+  }
+
+  .now-intention {
+    min-height: 48px;
+    padding: var(--space-3);
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .now-intention .intention-title {
+    flex: 1 1 auto;
+  }
+
+  .utility-rail {
+    position: fixed;
+    width: min(360px, 92vw);
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--space-3);
+    z-index: 10;
+  }
+
+  .utility-rail-btn {
+    min-height: 52px;
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .garden-horizon-chip {
+    min-height: 44px;
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+}
+
 /* Warm-light overrides */
 [data-theme="light"] .calendar-grid.garden-horizon {
   background:

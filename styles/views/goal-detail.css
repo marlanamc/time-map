@@ -1,0 +1,221 @@
+.calendar-grid.goal-detail-view {
+  min-height: 100%;
+  width: 100%;
+  background: var(--surface-0);
+  padding: clamp(24px, 3vw, 48px) clamp(20px, 5vw, 60px) clamp(32px, 5vw, 64px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.goal-detail-page {
+  width: min(840px, 100%);
+  display: flex;
+  justify-content: center;
+}
+
+.goal-detail-page .living-garden-detail {
+  width: 100%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.goal-detail-page .living-garden-detail-top {
+  background: transparent;
+  border-bottom: 1px solid color-mix(in srgb, var(--divider) 70%, rgba(255, 255, 255, 0.6));
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  gap: var(--space-2);
+}
+
+.goal-detail-page .living-garden-detail-topbar-btn {
+  color: var(--text-secondary);
+}
+
+.goal-detail-page .living-garden-detail-topbar-heading {
+  letter-spacing: 0.2em;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.goal-detail-page .living-garden-detail-header {
+  margin-top: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-2xl);
+  border: 1px solid color-mix(in srgb, var(--divider) 70%, rgba(255, 255, 255, 0.5));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-1) 90%, rgba(255, 255, 255, 0.85)) 0%,
+    color-mix(in srgb, var(--surface-1) 70%, var(--surface-2) 40%) 100%
+  );
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.goal-detail-page .living-garden-detail-header::after {
+  content: "";
+  position: absolute;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: calc(-1 * var(--space-2));
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--divider) 40%, rgba(255, 255, 255, 0.5)) 50%,
+    transparent
+  );
+}
+
+.goal-detail-page .living-garden-detail-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.goal-detail-page .living-garden-detail-description {
+  color: var(--text-secondary);
+}
+
+.goal-detail-page .living-garden-detail-due {
+  margin-top: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--text-secondary) 30%, rgba(255, 255, 255, 0.6));
+  background: color-mix(in srgb, var(--surface-1) 85%, rgba(255, 255, 255, 0.7));
+  color: var(--text-secondary);
+}
+
+.goal-detail-page .living-garden-progress-ring-fill {
+  stroke: color-mix(in srgb, var(--garden-focus-accent, var(--accent)) 65%, var(--text-tertiary) 35%);
+  opacity: calc(0.4 + var(--progress, 0) / 220);
+}
+
+.goal-detail-page .living-garden-progress-ring-value {
+  color: var(--text-primary);
+}
+
+.goal-detail-page .living-garden-progress-ring-text {
+  color: var(--text-tertiary);
+}
+
+.goal-detail-page .living-garden-detail-stats {
+  margin-top: var(--space-4);
+  background: color-mix(in srgb, var(--surface-0) 85%, rgba(255, 255, 255, 0.6));
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in srgb, var(--divider) 60%, rgba(255, 255, 255, 0.45));
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  padding: var(--space-4);
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.goal-detail-page .living-garden-detail-stats::after {
+  content: "";
+  position: absolute;
+  inset-inline: var(--space-4);
+  bottom: calc(-1 * var(--space-2));
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--divider) 35%, rgba(255, 255, 255, 0.45)) 50%,
+    transparent
+  );
+}
+
+.goal-detail-page .living-garden-detail-stat-value {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.goal-detail-page .living-garden-detail-stat-label {
+  color: var(--text-tertiary);
+}
+
+.goal-detail-page .living-garden-kanban {
+  margin-top: var(--space-4);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+
+.goal-detail-page .living-garden-kanban-column {
+  background: color-mix(in srgb, var(--surface-1) 94%, rgba(255, 255, 255, 0.25));
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in srgb, var(--divider) 50%, rgba(255, 255, 255, 0.6));
+  padding: var(--space-4);
+  min-height: 200px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--surface-1) 70%, rgba(255, 255, 255, 0));
+}
+
+.goal-detail-page .living-garden-kanban-header {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--divider) 35%, rgba(255, 255, 255, 0.45));
+}
+
+.goal-detail-page .living-garden-kanban-header h4 {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.goal-detail-page .living-garden-kanban-count {
+  border: 1px solid color-mix(in srgb, var(--divider) 35%, rgba(255, 255, 255, 0.5));
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.goal-detail-page .living-garden-chip {
+  background: color-mix(in srgb, var(--surface-1) 96%, rgba(255, 255, 255, 0.85));
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in srgb, var(--divider) 60%, rgba(255, 255, 255, 0.5));
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.goal-detail-page .living-garden-kanban-empty {
+  background: color-mix(in srgb, var(--surface-1) 92%, rgba(255, 255, 255, 0.45));
+  border-radius: var(--radius-md);
+  border: none;
+  text-align: center;
+  font-style: italic;
+  color: var(--text-tertiary);
+  padding: var(--space-3);
+}
+
+.goal-detail-page .living-garden-breadcrumb {
+  margin-bottom: 0;
+}
+
+.goal-detail-page .living-garden-breadcrumb-item {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.goal-detail-page .living-garden-breadcrumb-item:hover {
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .calendar-grid.goal-detail-view {
+    padding: var(--space-4);
+  }
+
+  .goal-detail-page .living-garden-detail-header,
+  .goal-detail-page .living-garden-detail-stats,
+  .goal-detail-page .living-garden-kanban-column {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+}

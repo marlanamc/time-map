@@ -5,11 +5,12 @@ import { State } from "../../core/State";
 import { Goals } from "../../core/Goals";
 import { CONFIG, VIEWS } from "../../config";
 import { expandEventsForRange } from "../../utils/recurrence";
+import { getIntentionInstancesForDate } from "../../core/Scheduling";
 import {
   buildAccentAttributes,
   getInheritedAccent,
 } from "../../utils/goalLinkage";
-import type { UIElements } from "../../types";
+import type { Goal, UIElements } from "../../types";
 import { viewportManager } from "../viewport/ViewportManager";
 
 export const WeekRenderer = {
@@ -127,8 +128,11 @@ export const WeekRenderer = {
       date.setDate(date.getDate() + i);
       const isToday = date.toDateString() === today.toDateString();
       const ymd = formatYmd(date);
-      const dayGoals = Goals.getForDate(date)
-        .filter((g) => g.level === "intention")
+      const intentionInstances = getIntentionInstancesForDate(date);
+      const dayGoals = intentionInstances
+        .map((instance) => Goals.getById(instance.goalId))
+        .filter((goal): goal is Goal => Boolean(goal))
+        .filter((goal) => goal.level === "intention")
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title));
       const dayEvents = eventsByDay.get(ymd) ?? [];
@@ -137,7 +141,7 @@ export const WeekRenderer = {
           <div class="week-day-column ${isToday ? "today" : ""}">
             <div class="week-day-header">
               <button type="button" class="week-day-jump" data-date="${ymd}" aria-label="Open ${date.toDateString()}">
-                <span class="week-day-name">${dayNames[i]}</span>
+                <span class="week-day-name">${dayNames.at(i) ?? ""}</span>
                 <span class="week-day-date">${date.getDate()}</span>
               </button>
               ${

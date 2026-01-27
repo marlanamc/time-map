@@ -28,6 +28,9 @@ type RenderCoordinatorCallbacks = {
     year: number,
     options?: any,
   ) => void;
+  openGoalDetail: (goalId: string) => void;
+  openGoalEdit: (goalId: string) => void;
+  closeGoalDetailPage: () => void;
   escapeHtml: (text: string) => string;
   dayViewController: any;
 };
@@ -272,6 +275,32 @@ export class RenderCoordinator {
       case VIEWS.DAY:
         this.callbacks.renderDayView();
         break;
+      case VIEWS.GOAL_DETAIL: {
+        const detailGoalId = State.goalDetailId;
+        if (!detailGoalId) {
+          this.callbacks.closeGoalDetailPage();
+          break;
+        }
+        GoalDetailRenderer.renderPage(
+          this.elements,
+          detailGoalId,
+          this.callbacks.escapeHtml.bind(this),
+          {
+            onOpenGoal: (goalId) => this.callbacks.openGoalDetail(goalId),
+            onOpenGoalEdit: (goalId) => this.callbacks.openGoalEdit(goalId),
+            onAddChildGoal: (opts) => {
+              const month = State.viewingMonth ?? new Date().getMonth();
+              const year = State.viewingYear ?? new Date().getFullYear();
+              this.callbacks.openGoalModal(opts.childLevel, month, year, {
+                parentId: opts.parentId,
+                parentLevel: opts.parentLevel,
+              });
+            },
+            onClose: () => this.callbacks.closeGoalDetailPage(),
+          },
+        );
+        break;
+      }
       case VIEWS.HOME:
         // Home view uses the sidebar layout; nothing to render on the main grid.
         break;
@@ -279,7 +308,7 @@ export class RenderCoordinator {
         GardenHorizonRenderer.render(
           this.elements,
           this.callbacks.escapeHtml.bind(this),
-          (goalId) => GoalDetailRenderer.show(goalId),
+          (goalId) => this.callbacks.openGoalDetail(goalId),
           (level) =>
             this.callbacks.openGoalModal(
               level,

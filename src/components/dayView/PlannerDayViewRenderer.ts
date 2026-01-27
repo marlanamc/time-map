@@ -10,6 +10,7 @@ import { expandEventsForRange } from "../../utils/recurrence";
 import { formatCountdown, formatTo12Hour } from "../../utils/time";
 import { getGoalEmoji } from "../../utils/goalVisuals";
 import type { TimelineItem, PositionedTimelineItem } from "./types";
+import { getIntentionInstancesForDate } from "../../core/Scheduling";
 
 /**
  * Renderer for the Planner-style day view
@@ -92,9 +93,11 @@ export class PlannerDayViewRenderer {
     contextGoals?: { vision: Goal[]; milestone: Goal[]; focus: Goal[] },
   ): void {
     this.activeDate = date;
-    const dayGoals = allGoals
-      .filter((g) => this.isGoalForDate(g, date))
-      .filter((g) => g.level === "intention");
+    const intentionInstances = getIntentionInstancesForDate(date);
+    const activeGoalIds = new Set(intentionInstances.map((instance) => instance.goalId));
+    const dayGoals = allGoals.filter(
+      (g) => g.level === "intention" && activeGoalIds.has(g.id),
+    );
 
     // Split goals
     const sortDoneLast = (a: Goal, b: Goal) =>
@@ -1276,45 +1279,6 @@ export class PlannerDayViewRenderer {
     const diffMinutes = Math.round((target.getTime() - now.getTime()) / 60000);
     const clamped = Math.max(0, diffMinutes);
     return formatCountdown(clamped);
-  }
-
-  /**
-   * Check if a goal belongs to a specific date
-   * @param goal - The goal to check
-   * @param date - The target date
-   * @returns True if the goal's due date matches the target date
-   * @private
-   */
-  private isGoalForDate(goal: Goal, date: Date): boolean {
-    // Handle recurring intentions with commitment.specificDays
-    if (goal.level === "intention" && goal.commitment?.specificDays && goal.startDate) {
-      const startDate = new Date(goal.startDate);
-      startDate.setHours(0, 0, 0, 0);
-
-      // Check if date is on or after start date
-      const checkDate = new Date(date);
-      checkDate.setHours(0, 0, 0, 0);
-      if (checkDate < startDate) return false;
-
-      // Check if date is before due date (if one exists)
-      if (goal.dueDate) {
-        const dueDate = new Date(goal.dueDate);
-        dueDate.setHours(23, 59, 59, 999);
-        if (checkDate > dueDate) return false;
-      }
-
-      // Check if the date's weekday matches one of the scheduled days
-      // getDay() returns 0=Sunday through 6=Saturday
-      const weekday = date.getDay();
-      return goal.commitment.specificDays.includes(weekday);
-    }
-
-    // Fallback for non-recurring goals (original behavior)
-    if (goal.dueDate) {
-      const dueDate = new Date(goal.dueDate);
-      return dueDate.toDateString() === date.toDateString();
-    }
-    return false;
   }
 
   /**

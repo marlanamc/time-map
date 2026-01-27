@@ -17,6 +17,7 @@ import { eventBus } from "../../core/EventBus";
 import type { Goal, GoalLevel, UIElements, CalendarEvent } from "../../types";
 import { getVisionAccent } from "../../utils/goalLinkage";
 import { isIntentionActiveOnDate } from "../../utils/intentionVisibility";
+import { InboxPage } from "../pages/InboxPage";
 import { RealityPreviewOverlay } from "../components/RealityPreviewOverlay";
 import {
   computeGoalState,
@@ -24,7 +25,6 @@ import {
   getStateIndicator,
   getStateClass,
 } from "../../core/GoalStateComputation";
-import { GoalDetailRenderer } from "./GoalDetailRenderer";
 
 // Module state
 let isDrawerOpen = false;
@@ -270,8 +270,6 @@ export const GardenHorizonRenderer = {
     const container = elements.calendarGrid;
     if (!container) return;
 
-    GoalDetailRenderer.attach(container);
-    GoalDetailRenderer.hide();
     RealityPreviewOverlay.hide();
 
     const viewDate = State.viewingDate ?? new Date();
@@ -364,6 +362,18 @@ export const GardenHorizonRenderer = {
 
     // Mobile drawer toggle
     this.setupMobileDrawer(container, viewDate);
+
+    container
+      .querySelectorAll<HTMLElement>('[data-action="open-goal-detail"]')
+      .forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const goalId = el.dataset.goalId;
+          if (!goalId) return;
+          onGoalClick(goalId);
+        });
+      });
 
     // Scroll to NOW section by default
     requestAnimationFrame(() => {
@@ -669,10 +679,12 @@ export const GardenHorizonRenderer = {
 
       for (const goal of goals.slice(0, 5)) {
         const marker = document.createElement("div");
-        marker.className = "time-band-marker";
+        marker.className =
+          "time-band-marker time-band-marker-chip garden-horizon-chip";
         marker.setAttribute("tabindex", "0");
         marker.setAttribute("role", "button");
-        marker.setAttribute("aria-label", goal.title);
+        marker.setAttribute("aria-label", escapeHtmlFn(goal.title));
+        marker.setAttribute("data-action", "open-goal-detail");
         marker.setAttribute("data-goal-id", goal.id);
 
         const accent = getVisionAccent(goal);
@@ -811,9 +823,12 @@ export const GardenHorizonRenderer = {
 
       for (const intention of intentions.slice(0, 3)) {
         const intentionEl = document.createElement("div");
-        intentionEl.className = `now-intention ${intention.status === "done" ? "done" : ""}`;
+        intentionEl.className = `now-intention ${intention.status === "done" ? "done" : ""} garden-horizon-chip`;
         intentionEl.setAttribute("tabindex", "0");
         intentionEl.setAttribute("role", "button");
+        intentionEl.setAttribute("aria-label", escapeHtmlFn(intention.title));
+        intentionEl.setAttribute("data-action", "open-goal-detail");
+        intentionEl.setAttribute("data-goal-id", intention.id);
 
         const accent = getVisionAccent(intention);
         if (accent?.color) {
@@ -826,6 +841,12 @@ export const GardenHorizonRenderer = {
         `;
 
         intentionEl.addEventListener("click", () => onGoalClick(intention.id));
+        intentionEl.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onGoalClick(intention.id);
+          }
+        });
         intentionsSection.appendChild(intentionEl);
       }
 
@@ -855,6 +876,7 @@ export const GardenHorizonRenderer = {
       { id: "plan", label: "Plan", icon: "📋" },
       { id: "review", label: "Review", icon: "📝" },
       { id: "map", label: "Map", icon: "🗺️" },
+      { id: "inbox", label: "Inbox", icon: "📥" },
     ];
 
     for (const btn of buttons) {
@@ -862,6 +884,7 @@ export const GardenHorizonRenderer = {
       button.type = "button";
       button.className = "utility-rail-btn";
       button.setAttribute("data-action", btn.id);
+      button.setAttribute("data-garden-action", btn.id);
       button.innerHTML = `
         <span class="utility-rail-icon" aria-hidden="true">${btn.icon}</span>
         <span class="utility-rail-label">${btn.label}</span>
@@ -881,7 +904,7 @@ export const GardenHorizonRenderer = {
    * Handle utility rail actions
    */
   handleUtilityAction(action: string): void {
-    switch (action) {
+      switch (action) {
       case "plan":
         // Open planning page
         eventBus.emit("garden:plan-requested", { goalId: selectedVisionId });
@@ -893,6 +916,9 @@ export const GardenHorizonRenderer = {
       case "map":
         // Open map view
         eventBus.emit("garden:map-requested");
+        break;
+      case "inbox":
+        InboxPage.open(State.viewingDate);
         break;
     }
   },
@@ -980,7 +1006,6 @@ export const GardenHorizonRenderer = {
    */
   cleanup(): void {
     // Hide overlays
-    GoalDetailRenderer.hide();
     RealityPreviewOverlay.hide();
 
     // Remove garden-specific class from container

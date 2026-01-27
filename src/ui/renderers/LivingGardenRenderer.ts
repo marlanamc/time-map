@@ -13,6 +13,7 @@ import type {
   GardenLevelEmojis,
 } from "../../types";
 import { getVisionAccent } from "../../utils/goalLinkage";
+import { GoalDetailRenderer } from "./GoalDetailRenderer";
 
 type AddGoalLinkedOpts = {
   level: Extract<GoalLevel, "milestone" | "focus">;
@@ -54,62 +55,6 @@ function getVisionIdForGoal(goal: Goal): string | null {
 }
 
 /** Build breadcrumb trail by walking up the parentId chain */
-function buildBreadcrumb(goal: Goal): Goal[] {
-  const trail: Goal[] = [];
-  let current: Goal | null = goal;
-  const seen = new Set<string>();
-
-  while (current && !seen.has(current.id)) {
-    trail.unshift(current);
-    seen.add(current.id);
-    current = current.parentId
-      ? (Goals.getById(current.parentId) ?? null)
-      : null;
-  }
-  return trail;
-}
-
-/** Format minutes to "Xh Ym" or "Xm" display string */
-function formatTimeLogged(minutes: number): string {
-  if (minutes === 0) return "0m";
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  if (hours === 0) return `${mins}m`;
-  if (mins === 0) return `${hours}h`;
-  return `${hours}h ${mins}m`;
-}
-
-/** Group goals by status for kanban display */
-function groupByStatus(goals: Goal[]): {
-  todo: Goal[];
-  inProgress: Goal[];
-  done: Goal[];
-} {
-  return {
-    todo: goals.filter(
-      (g) => g.status === "not-started" || g.status === "blocked",
-    ),
-    inProgress: goals.filter((g) => g.status === "in-progress"),
-    done: goals.filter((g) => g.status === "done"),
-  };
-}
-
-/** Get level emoji for display */
-function getLevelEmoji(level: GoalLevel): string {
-  switch (level) {
-    case "vision":
-      return "✨";
-    case "milestone":
-      return "🎯";
-    case "focus":
-      return "🔎";
-    case "intention":
-      return "🌱";
-    default:
-      return "📌";
-  }
-}
-
 export const LivingGardenRenderer = {
   render(
     elements: UIElements,
@@ -409,292 +354,66 @@ export const LivingGardenRenderer = {
       `
         : "";
 
-    const activeGoal = activeGoalId
-      ? (Goals.getById(activeGoalId) ?? null)
-      : null;
-    if (activeGoalId && !activeGoal) {
+    const currentActiveGoal = activeGoalId ? Goals.getById(activeGoalId) : null;
+    if (activeGoalId && !currentActiveGoal) {
       activeGoalId = null;
     }
-    const allGoals = Goals.getAll();
-    const isDescendant = (candidateId: string, ancestorId: string): boolean => {
-      let cur = Goals.getById(candidateId) ?? null;
-      const guard = new Set<string>();
-      while (cur && !guard.has(cur.id)) {
-        if (cur.parentId === ancestorId) return true;
-        guard.add(cur.id);
-        cur = cur.parentId ? (Goals.getById(cur.parentId) ?? null) : null;
+
+    if (activeGoalId && currentActiveGoal) {
+      const year = State.viewingYear;
+      const detailMarkup = GoalDetailRenderer.buildMarkup(currentActiveGoal, escapeHtmlFn, {
+        showAddChildAction: Boolean(onAddGoalLinked || onAddGoal),
+      });
+      container.className = `garden-view-container living-garden${isMobile ? " living-garden--mobile" : ""}`;
+      container.innerHTML = `
+        <div class="garden-view">
+          <div class="week-view-header">
+            <h2 class="week-view-title">${year} Garden</h2>
+          </div>
+          <div class="living-garden-container living-garden-container--bare">
+            ${detailMarkup}
+          </div>
+        </div>
+      `;
+
+      const detailRoot = container.querySelector(".living-garden-detail") as HTMLElement | null;
+      if (detailRoot) {
+        GoalDetailRenderer.hydrate(detailRoot, {
+          onOpenGoal: (goalId) => {
+            activeGoalId = goalId;
+            eventBus.emit("view:changed", { transition: false });
+          },
+          onOpenGoalEdit: (goalId) => {
+            onGoalClick(goalId);
+          },
+          onAddChildGoal: (opts) => {
+            if (opts.childLevel === "intention") {
+              onAddGoal?.("intention");
+              return;
+            }
+            if (!onAddGoalLinked) {
+              onAddGoal?.(opts.childLevel);
+              return;
+            }
+            onAddGoalLinked({
+              level: opts.childLevel,
+              parentId: opts.parentId,
+              parentLevel: opts.parentLevel,
+              preselectedMonth: viewDate.getMonth(),
+              preselectedYear: viewDate.getFullYear(),
+            });
+          },
+          onClose: () => {
+            activeGoalId = null;
+            eventBus.emit("view:changed", { transition: false });
+          },
+        });
       }
-      return false;
-    };
 
-    const renderGoalDetail = (goal: Goal) => {
-      const descendants = allGoals.filter((g) => isDescendant(g.id, goal.id));
-      const descendantIntentions = descendants.filter(
-        (g) => g.level === "intention",
-      );
-      const doneIntentions = descendantIntentions.filter(
-        (g) => g.status === "done",
-      ).length;
-      const completionRate =
-        descendantIntentions.length > 0
-          ? Math.round((doneIntentions / descendantIntentions.length) * 100)
-          : 0;
+      return;
+    }
 
-      // Use goal.progress for intentions, computed rate for others
-      const progress =
-        goal.level === "intention" ? goal.progress : completionRate;
-
-      const statusLabel =
-        completionRate >= 75
-          ? "Blooming"
-          : completionRate >= 35
-            ? "Growing"
-            : "Sprouting";
-      const statusIcon =
-        completionRate >= 75 ? "🌸" : completionRate >= 35 ? "🌿" : "🌱";
-
-      // Build breadcrumb trail
-      const breadcrumb = buildBreadcrumb(goal);
-
-      // Calculate time logged
-      const totalMinutes = (goal.timeLog || []).reduce(
-        (sum, e) => sum + e.minutes,
-        0,
-      );
-      const timeDisplay = formatTimeLogged(totalMinutes);
-
-      // Subtask stats
-      const subtasksDone = (goal.subtasks || []).filter((s) => s.done).length;
-      const subtasksTotal = (goal.subtasks || []).length;
-
-      // Get direct children for kanban
-      const directChildren = allGoals.filter((g) => g.parentId === goal.id);
-      const kanban = groupByStatus(directChildren);
-      const hasAnyChildren = directChildren.length > 0;
-
-      // Determine what child level this goal can have
-      const childLevel: GoalLevel | null =
-        goal.level === "vision"
-          ? "milestone"
-          : goal.level === "milestone"
-            ? "focus"
-            : goal.level === "focus"
-              ? "intention"
-              : null;
-
-      const _childLevelLabel =
-        childLevel === "milestone"
-          ? "milestones"
-          : childLevel === "focus"
-            ? "focuses"
-            : childLevel === "intention"
-              ? "intentions"
-              : "";
-
-      // Get vision accent for theming
-      const visionId = getVisionIdForGoal(goal);
-      const vision = visionId ? Goals.getById(visionId) : null;
-      const accent = vision ? getVisionAccent(vision) : null;
-      const accentStyle = accent ? `--garden-accent: ${accent.color};` : "";
-
-      // Render breadcrumb
-      const renderBreadcrumb = () => {
-        if (breadcrumb.length <= 1) return "";
-        return `
-          <nav class="living-garden-breadcrumb" aria-label="Goal hierarchy">
-            ${breadcrumb
-              .map((g, i) => {
-                const isLast = i === breadcrumb.length - 1;
-                const emoji = g.icon || getLevelEmoji(g.level);
-                if (isLast) {
-                  return `<span class="living-garden-breadcrumb-current">${escapeHtmlFn(emoji)} ${escapeHtmlFn(g.title)}</span>`;
-                }
-                return `
-                  <button class="living-garden-breadcrumb-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(g.id)}">
-                    <span>${escapeHtmlFn(emoji)}</span>
-                    <span>${escapeHtmlFn(g.title)}</span>
-                  </button>
-                  <span class="living-garden-breadcrumb-separator">›</span>
-                `;
-              })
-              .join("")}
-          </nav>
-        `;
-      };
-
-      // Render kanban column with contextual empty states
-      const renderKanbanColumn = (
-        title: string,
-        items: Goal[],
-        dotClass: string,
-        emptyHint: string,
-      ) => `
-        <div class="living-garden-kanban-column">
-          <div class="living-garden-kanban-header">
-            <span class="living-garden-kanban-dot ${dotClass}"></span>
-            <h4>${title}</h4>
-            <span class="living-garden-kanban-count">${items.length}</span>
-          </div>
-          <div class="living-garden-kanban-items">
-            ${
-              items.length
-                ? items
-                    .map(
-                      (item) => `
-                      <div class="living-garden-chip ${item.status === "done" ? "is-complete" : ""}" data-action="open-goal" data-goal-id="${escapeHtmlFn(item.id)}">
-                        ${item.icon ? `<span class="living-garden-emoji">${escapeHtmlFn(item.icon)}</span>` : `<span class="living-garden-emoji">${getLevelEmoji(item.level)}</span>`}
-                        <div class="living-garden-chip-text">
-                          <span class="living-garden-chip-title">${escapeHtmlFn(item.title)}</span>
-                          <span class="living-garden-chip-meta">${item.level}</span>
-                        </div>
-                      </div>
-                    `,
-                    )
-                    .join("")
-                : `<div class="living-garden-kanban-empty">${emptyHint}</div>`
-            }
-          </div>
-        </div>
-      `;
-
-      // Render empty state when no children exist
-      const renderEmptyKanban = () => `
-        <div class="living-garden-empty-state">
-          <div class="living-garden-empty-state-icon">${childLevel === "milestone" ? "🎯" : childLevel === "focus" ? "🔎" : "🌱"}</div>
-          <h3 class="living-garden-empty-state-title">Ready to break this down?</h3>
-          <p class="living-garden-empty-state-text">
-            ${
-              goal.level === "vision"
-                ? "Add milestones to turn this vision into achievable monthly goals."
-                : goal.level === "milestone"
-                  ? "Add focuses to create weekly action items for this milestone."
-                  : "Add intentions to plan your daily actions."
-            }
-          </p>
-          ${
-            childLevel && onAddGoalLinked
-              ? `
-            <button class="living-garden-btn-primary living-garden-empty-state-cta"
-                    data-action="add-child"
-                    data-parent-id="${escapeHtmlFn(goal.id)}"
-                    data-parent-level="${goal.level}"
-                    data-child-level="${childLevel}">
-              Add ${childLevel === "milestone" ? "a milestone" : childLevel === "focus" ? "a focus" : "an intention"}
-            </button>
-          `
-              : ""
-          }
-        </div>
-      `;
-
-      // Render subtasks for intentions (leaf nodes)
-      const renderSubtasks = () => {
-        if (!goal.subtasks || goal.subtasks.length === 0) {
-          return `<p class="living-garden-detail-empty">No subtasks yet.</p>`;
-        }
-        return `
-          <div class="living-garden-subtasks">
-            ${goal.subtasks
-              .map(
-                (s) => `
-                <div class="living-garden-subtask ${s.done ? "is-complete" : ""}">
-                  <span class="living-garden-subtask-check">${s.done ? "✓" : "○"}</span>
-                  <span class="living-garden-subtask-title">${escapeHtmlFn(s.title)}</span>
-                </div>
-              `,
-              )
-              .join("")}
-          </div>
-        `;
-      };
-
-      return `
-        <section class="living-garden-detail" style="${accentStyle}">
-          <div class="living-garden-detail-top">
-            <button class="living-garden-detail-topbar-btn" data-action="goal-back">← Back to garden</button>
-            <div class="living-garden-detail-topbar-title">
-              <h1 class="living-garden-detail-topbar-heading">${goal.level.toUpperCase()}</h1>
-            </div>
-            <button class="living-garden-detail-topbar-btn living-garden-detail-topbar-action" data-action="open-goal-edit" data-goal-id="${escapeHtmlFn(goal.id)}">Edit goal</button>
-          </div>
-
-          <div class="living-garden-detail-body">
-            ${renderBreadcrumb()}
-
-            <div class="living-garden-detail-header">
-              <div class="living-garden-detail-info">
-                <h2 class="living-garden-detail-title">${goal.icon ? `${escapeHtmlFn(goal.icon)} ` : ""}${escapeHtmlFn(goal.title)}</h2>
-                <p class="living-garden-detail-description">${escapeHtmlFn(goal.description || "No description yet.")}</p>
-                ${goal.dueDate ? `<span class="living-garden-detail-due">Due: ${new Date(goal.dueDate).toLocaleDateString()}</span>` : ""}
-              </div>
-              <div class="living-garden-detail-progress">
-                <svg class="living-garden-progress-ring" viewBox="0 0 100 100">
-                  <circle class="living-garden-progress-ring-bg" cx="50" cy="50" r="42" />
-                  <circle class="living-garden-progress-ring-fill" cx="50" cy="50" r="42" style="--progress: ${progress}" />
-                </svg>
-                <div class="living-garden-progress-ring-label">
-                  <span class="living-garden-progress-ring-value">${progress}%</span>
-                  <span class="living-garden-progress-ring-text">complete</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="living-garden-detail-stats">
-              <div class="living-garden-detail-stat">
-                <span class="living-garden-detail-stat-icon">⏱️</span>
-                <div class="living-garden-detail-stat-text">
-                  <span class="living-garden-detail-stat-value">${timeDisplay}</span>
-                  <span class="living-garden-detail-stat-label">Time logged</span>
-                </div>
-              </div>
-              <div class="living-garden-detail-stat">
-                <span class="living-garden-detail-stat-icon">${statusIcon}</span>
-                <div class="living-garden-detail-stat-text">
-                  <span class="living-garden-detail-stat-value">${statusLabel}</span>
-                  <span class="living-garden-detail-stat-label">${completionRate}% intentions done</span>
-                </div>
-              </div>
-              ${
-                subtasksTotal > 0
-                  ? `
-                <div class="living-garden-detail-stat">
-                  <span class="living-garden-detail-stat-icon">📋</span>
-                  <div class="living-garden-detail-stat-text">
-                    <span class="living-garden-detail-stat-value">${subtasksDone}/${subtasksTotal}</span>
-                    <span class="living-garden-detail-stat-label">Subtasks done</span>
-                  </div>
-                </div>
-              `
-                  : ""
-              }
-            </div>
-
-            ${
-              goal.level === "intention"
-                ? `
-                <div class="living-garden-detail-section">
-                  <h3 class="living-garden-detail-section-title">Subtasks</h3>
-                  ${renderSubtasks()}
-                </div>
-              `
-                : hasAnyChildren
-                  ? `
-                <div class="living-garden-kanban">
-                  ${renderKanbanColumn("To Do", kanban.todo, "living-garden-kanban-dot--todo", "Waiting to start")}
-                  ${renderKanbanColumn("In Progress", kanban.inProgress, "living-garden-kanban-dot--active", "Nothing active")}
-                  ${renderKanbanColumn("Done", kanban.done, "living-garden-kanban-dot--done", "Celebrate soon!")}
-                </div>
-              `
-                  : renderEmptyKanban()
-            }
-          </div>
-        </section>
-      `;
-    };
-
-    const mainContent = activeGoal ? renderGoalDetail(activeGoal) : lanesMarkup;
     const viewingYear = State.viewingYear;
-
     container.className = `garden-view-container living-garden${isMobile ? " living-garden--mobile" : ""}`;
     container.innerHTML = `
       <div class="garden-view">
@@ -702,7 +421,7 @@ export const LivingGardenRenderer = {
           <h2 class="week-view-title">${viewingYear} Garden</h2>
         </div>
         <div class="living-garden-container living-garden-container--bare">
-          ${mainContent}
+          ${lanesMarkup}
           ${!isMobile ? reflectionSection : ""}
         </div>
       </div>
