@@ -136,6 +136,7 @@
          and `--accent-stroke` for outlines/borders/focus.
        - The rainbow theme overrides `--accent-fill*` to a unified multi-stop gradient. */
   --accent: var(--teal); /* Primary accent (default theme) */
+  --accent-rgb: 74, 144, 153;
   --accent-hover: #5aaab2;
   --accent-muted: rgba(74, 144, 153, 0.16);
   --accent-subtle: rgba(74, 144, 153, 0.08);
@@ -338,10 +339,7 @@
   --transition-transform: transform var(--duration-fast) var(--ease-out);
   --transition-all: all var(--duration-normal) var(--ease-out);
 
-  /* Garden Engine - Dynamic Time & Season Variables */
-  --time-brightness: 1;
-  --time-saturation: 1;
-  --time-hue-shift: 0deg;
+  /* Garden Engine - Dynamic Time Variables */
   --shadow-opacity: 0.3;
   --shadow-length: 4px;
   --shadow-angle: 45deg;
@@ -351,12 +349,6 @@
   /* Mobile layout metrics (overridden by JS when available) */
   --mobile-tab-bar-height: 0px;
   --mobile-home-stats-height: 0px;
-
-  /* Seasonal colors (defaults to current) */
-  --seasonal-accent: var(--sage);
-  --seasonal-bg: var(--bg-base);
-  --seasonal-flower: var(--petal);
-  --seasonal-secondary: var(--teal);
 
   /* Breakpoints */
   --bp-sm: 600px;

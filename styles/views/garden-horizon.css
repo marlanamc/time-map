@@ -23,6 +23,7 @@
   --state-resting-color: var(--accent-highlight, #f59e0b);
   --state-dormant-color: var(--text-tertiary);
   isolation: isolate;
+  /* Border is set in dark mode rule to use --gh-border-container */
 }
 
 /* Hide date navigation on garden horizon view (desktop and mobile) */
@@ -38,6 +39,7 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
   grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
   gap: calc(var(--space-6) + var(--space-1));
   align-items: flex-start;
+  /* Border is set in dark mode rule to use --gh-border-container */
 }
 
 .goal-spine {
@@ -1634,6 +1636,14 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
     border-radius: var(--radius-2xl);
     border: 1px solid var(--divider);
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+    width: 100%;
+    margin-bottom: var(--space-3);
+  }
+
+  .mobile-title {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--text-primary);
   }
 
   .mobile-you-are-here {
@@ -1643,7 +1653,68 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
     padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-xl);
     background: var(--surface-2);
-    gap: var(--space-2);
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    width: 100%;
+    margin-bottom: var(--space-3);
+  }
+
+  .mobile-you-are-here-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mobile-you-are-here-label {
+    font-size: var(--text-xs);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .mobile-you-are-here-summary {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .mobile-you-are-here-date {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    font-weight: 600;
+  }
+
+  .mobile-header-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    text-align: center;
+  }
+
+  .mobile-header-subtitle {
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .spine-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(12, 18, 28, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    z-index: 18;
+    pointer-events: none;
+  }
+
+  .spine-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .mobile-menu-btn,
@@ -1656,16 +1727,19 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
 
   .time-canvas {
     border-radius: var(--radius-xl);
-    padding-top: var(--space-4);
-    margin-top: var(--space-2);
+    margin-top: var(--space-3);
+    padding: var(--space-4) var(--space-4)
+      calc(var(--space-6) + 92px + env(safe-area-inset-bottom, 0px));
+    max-height: none;
+    overflow-y: visible;
   }
 
   .utility-rail {
     position: fixed;
-    bottom: var(--space-4);
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%);
-    width: min(420px, 92vw);
+    width: min(360px, 92vw);
   }
 
   .goal-detail-panel {
@@ -1700,7 +1774,8 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
   .time-canvas {
     max-height: none;
     overflow-y: visible;
-    padding: var(--space-5) var(--space-4) calc(var(--space-6) + var(--space-2));
+    padding: var(--space-5) var(--space-4)
+      calc(var(--space-6) + 96px + env(safe-area-inset-bottom, 0px));
     box-shadow:
       0 24px 60px rgba(15, 23, 42, 0.18),
       inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -1811,6 +1886,11 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
     radial-gradient(ellipse 80% 50% at 20% 0%, rgba(214, 185, 149, 0.14), transparent 55%),
     radial-gradient(ellipse 60% 40% at 80% 100%, rgba(244, 200, 144, 0.10), transparent 55%),
     var(--surface-0);
+  border: 1px solid var(--divider);
+}
+
+[data-theme="light"] .garden-horizon-layout {
+  border: 1px solid var(--divider);
 }
 
 [data-theme="light"] .goal-spine {
@@ -1888,207 +1968,253 @@ body:has(.calendar-grid.garden-horizon) #headerMobileNav .date-nav {
 
 /* ===================================
    Dark Mode: Nebula Oni - Glacial Blue + Sakura Pink
-   Vibrant, cosmic sanctuary for ND users
+   Calm, cosmic IDE-inspired sanctuary
    =================================== */
 
-:root.dark-mode .calendar-grid.garden-horizon {
+:root.dark-mode {
+  --gh-bg-deep: #020712;
+  --gh-bg-panel: #0b1a34;
+  --gh-bg-container: #010712;
+  --gh-border-container: rgba(8, 16, 31, 0.7);
+  --gh-accent-pink: #f9b8d5;
+  --gh-accent-blue: #72d9ff;
+  --gh-border-soft: rgba(170, 191, 219, 0.34);
+  --gh-border-strong: rgba(252, 192, 214, 0.55);
+  --gh-glow-soft: rgba(245, 184, 215, 0.25);
+  --text-secondary: color-mix(in srgb, #f7f4ff 80%, #9ba4c1 20%);
+  --text-tertiary: color-mix(in srgb, #d2ddff 70%, #8b97b8 30%);
+}
+
+:is(:root, html, body).dark-mode .calendar-grid.garden-horizon {
   background:
-    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 110, 199, 0.08), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(88, 166, 255, 0.06), transparent 55%),
-    var(--surface-0);
+    radial-gradient(
+      ellipse 110% 40% at 15% -15%,
+      color-mix(in srgb, var(--gh-accent-pink) 15%, transparent 85%) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 110% 40% at 85% 115%,
+      color-mix(in srgb, var(--gh-accent-blue) 18%, transparent 82%) 0%,
+      transparent 70%
+    ),
+    var(--gh-bg-deep);
+  border: 1px solid var(--gh-border-container) !important;
+}
+
+:is(:root, html, body).dark-mode .garden-horizon-layout {
+  background: var(--gh-bg-container);
+  border: 1px solid var(--gh-border-container) !important;
+  border-color: var(--gh-border-container) !important;
 }
 
 :root.dark-mode .goal-spine {
-  background: color-mix(in srgb, var(--surface-1) 92%, rgba(255, 110, 199, 0.05));
-  border-color: rgba(255, 110, 199, 0.20);
+  background: var(--gh-bg-panel);
+  border: 1px solid var(--gh-border-soft);
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.65),
-    0 2px 6px rgba(255, 110, 199, 0.10);
+    0 20px 35px rgba(0, 0, 0, 0.66),
+    inset 0 1px 0 color-mix(in srgb, var(--gh-accent-blue) 20%, transparent 80%);
 }
 
 :root.dark-mode .goal-spine:hover {
-  border-color: rgba(255, 110, 199, 0.30);
+  border-color: color-mix(in srgb, var(--gh-accent-pink) 65%, var(--gh-border-soft) 35%);
   box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.70),
-    0 4px 12px rgba(255, 110, 199, 0.14);
+    0 24px 42px rgba(0, 0, 0, 0.72),
+    0 0 24px var(--gh-glow-soft);
 }
 
 :root.dark-mode .spine-you-are-here {
-  background: color-mix(in srgb, var(--surface-2) 88%, rgba(255, 110, 199, 0.08));
-  border-color: rgba(255, 110, 199, 0.22);
+  background: color-mix(in srgb, var(--gh-bg-panel) 70%, var(--gh-bg-deep) 30%);
+  border: 1px solid var(--gh-border-soft);
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.60),
-    inset 0 1px 0 rgba(255, 150, 220, 0.08);
+    0 4px 12px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 var(--gh-glow-soft);
 }
 
 :root.dark-mode .spine-you-are-here:hover {
-  background: color-mix(in srgb, var(--surface-1) 90%, rgba(255, 110, 199, 0.12));
-  border-color: rgba(255, 110, 199, 0.32);
+  border-color: var(--gh-accent-pink);
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.65),
-    0 0 16px rgba(255, 110, 199, 0.12);
+    0 6px 14px rgba(0, 0, 0, 0.7),
+    0 0 16px color-mix(in srgb, var(--gh-accent-pink) 65%, transparent 35%);
 }
 
 :root.dark-mode .spine-vision-item {
-  background: color-mix(in srgb, var(--surface-1) 90%, rgba(255, 110, 199, 0.06));
-  border-color: rgba(255, 110, 199, 0.16);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+  background: color-mix(in srgb, var(--gh-bg-panel) 80%, var(--gh-bg-deep) 20%);
+  border: 1px solid var(--gh-border-soft);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
 }
 
 :root.dark-mode .spine-vision-item:hover {
-  background: color-mix(in srgb, var(--surface-2) 88%, rgba(255, 110, 199, 0.10));
-  border-color: rgba(255, 110, 199, 0.26);
+  background: color-mix(in srgb, var(--gh-bg-panel) 75%, var(--gh-accent-blue) 10%, var(--gh-bg-deep) 15%);
+  border-color: color-mix(in srgb, var(--gh-accent-pink) 45%, var(--gh-border-soft) 55%);
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.62),
-    0 0 16px rgba(255, 110, 199, 0.10);
+    0 14px 32px rgba(0, 0, 0, 0.65),
+    0 0 20px var(--gh-glow-soft);
 }
 
 :root.dark-mode .time-canvas {
-  background: color-mix(in srgb, var(--surface-0) 70%, rgba(13, 17, 23, 0.30));
-  border-color: rgba(255, 110, 199, 0.18);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--gh-bg-panel) 90%, var(--gh-bg-deep) 10%) 0%,
+    color-mix(in srgb, var(--gh-bg-panel) 80%, color-mix(in srgb, var(--gh-accent-blue) 40%, transparent 60%) 20%) 100%
+  );
+  border: 1px solid var(--gh-border-soft);
   box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.65),
-    inset 0 1px 0 rgba(255, 150, 220, 0.05);
+    0 18px 42px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 var(--gh-glow-soft);
 }
 
 :root.dark-mode .time-band {
-  background: color-mix(in srgb, var(--surface-1) 85%, rgba(255, 110, 199, 0.08));
-  border-color: rgba(255, 110, 199, 0.20);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.58);
+  background: color-mix(in srgb, var(--gh-bg-panel) 85%, var(--gh-bg-deep) 15%);
+  border: 1px solid var(--gh-border-soft);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
 }
 
 :root.dark-mode .time-band:hover {
-  border-color: rgba(255, 110, 199, 0.28);
+  border-color: var(--gh-accent-blue);
   box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.65),
-    0 0 20px rgba(255, 110, 199, 0.12);
+    0 10px 24px rgba(0, 0, 0, 0.65),
+    0 0 18px color-mix(in srgb, var(--gh-accent-blue) 35%, transparent 65%);
 }
 
 :root.dark-mode .time-band-header {
-  border-bottom-color: rgba(255, 110, 199, 0.16);
+  border-bottom-color: var(--gh-border-soft);
 }
 
 :root.dark-mode .time-band-marker {
-  background: color-mix(in srgb, var(--surface-1) 88%, rgba(255, 110, 199, 0.08));
-  border-color: rgba(255, 110, 199, 0.18);
+  background: color-mix(in srgb, var(--gh-bg-panel) 92%, var(--gh-bg-deep) 8%);
+  border: 1px solid var(--gh-border-soft);
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 150, 220, 0.06);
+    0 4px 12px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 color-mix(in srgb, var(--gh-accent-blue) 20%, transparent 80%);
 }
 
 :root.dark-mode .time-band-marker:hover {
-  background: color-mix(in srgb, var(--surface-2) 85%, rgba(255, 110, 199, 0.12));
-  border-color: rgba(255, 110, 199, 0.30);
+  border-color: var(--gh-accent-pink);
+  background: color-mix(in srgb, var(--gh-bg-panel) 88%, var(--gh-accent-blue) 12%);
   box-shadow:
-    0 5px 16px rgba(0, 0, 0, 0.62),
-    0 0 18px rgba(255, 110, 199, 0.14);
+    0 6px 16px rgba(0, 0, 0, 0.62),
+    0 0 18px var(--gh-glow-soft);
 }
 
 :root.dark-mode .time-band-marker.is-selected {
-  background: color-mix(in srgb, var(--accent) 22%, rgba(48, 54, 61, 0.85));
-  border-color: rgba(255, 110, 199, 0.40);
+  background: color-mix(in srgb, var(--gh-accent-blue) 35%, var(--gh-bg-panel) 65%);
+  border-color: var(--gh-accent-pink);
   box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.68),
-    0 0 24px rgba(255, 110, 199, 0.22);
+    0 10px 24px rgba(0, 0, 0, 0.65),
+    0 0 20px var(--gh-glow-soft);
 }
 
 :root.dark-mode .time-band-now {
   background:
     linear-gradient(180deg,
-      rgba(13, 17, 23, 0.96) 0%,
-      rgba(22, 27, 34, 0.88) 30%,
-      rgba(33, 38, 45, 0.75) 65%,
-      rgba(255, 110, 199, 0.10) 100%
+      color-mix(in srgb, var(--gh-bg-deep) 80%, var(--gh-bg-panel) 20%) 0%,
+      color-mix(in srgb, var(--gh-bg-panel) 90%, var(--gh-bg-deep) 10%) 70%,
+      color-mix(in srgb, var(--gh-accent-pink) 30%, var(--gh-bg-panel) 70%) 100%
     );
-  border-color: rgba(255, 110, 199, 0.32);
+  border-color: var(--gh-border-strong);
   box-shadow:
-    0 12px 36px rgba(0, 0, 0, 0.75),
-    0 0 32px rgba(255, 110, 199, 0.18);
+    0 12px 30px rgba(0, 0, 0, 0.75),
+    0 0 18px color-mix(in srgb, var(--gh-accent-blue) 45%, transparent 55%);
 }
 
 :root.dark-mode .now-intention {
-  background: color-mix(in srgb, var(--surface-1) 88%, rgba(255, 110, 199, 0.08));
-  border-color: rgba(255, 110, 199, 0.20);
+  background: color-mix(in srgb, var(--gh-bg-panel) 90%, var(--gh-bg-deep) 10%);
+  border: 1px solid var(--gh-border-soft);
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.60),
-    inset 0 1px 0 rgba(255, 150, 220, 0.07);
+    0 6px 14px rgba(0, 0, 0, 0.58),
+    inset 0 1px 0 color-mix(in srgb, var(--gh-accent-blue) 20%, transparent 80%);
 }
 
 :root.dark-mode .now-intention:hover {
-  border-color: rgba(255, 110, 199, 0.30);
+  border-color: var(--gh-accent-blue);
   box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.68),
-    0 0 16px rgba(255, 110, 199, 0.12);
+    0 8px 18px rgba(0, 0, 0, 0.65),
+    0 0 16px var(--gh-glow-soft);
 }
 
 :root.dark-mode .utility-rail {
-  background: color-mix(in srgb, var(--surface-1) 90%, rgba(255, 110, 199, 0.06));
-  border-color: rgba(255, 110, 199, 0.24);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--gh-bg-panel) 92%, var(--gh-bg-deep) 8%) 0%,
+    color-mix(in srgb, var(--gh-bg-panel) 85%, color-mix(in srgb, var(--gh-accent-pink) 45%, transparent 55%) 100%)
+  );
+  border: 1px solid var(--gh-border-soft);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.75),
-    0 0 28px rgba(255, 110, 199, 0.14);
+    0 20px 42px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 1px color-mix(in srgb, var(--gh-accent-blue) 15%, transparent 85%);
 }
 
 :root.dark-mode .utility-rail::before {
-  background: radial-gradient(
-    circle at 50% -10%,
-    rgba(255, 110, 199, 0.20) 0%,
-    transparent 60%
-  );
+  background:
+    radial-gradient(circle at 50% -10%,
+      color-mix(in srgb, var(--gh-accent-pink) 30%, transparent 80%) 0%,
+      transparent 70%
+    );
 }
 
 :root.dark-mode .utility-rail-btn {
-  background: color-mix(in srgb, var(--surface-0) 75%, rgba(255, 110, 199, 0.10));
+  background: color-mix(in srgb, var(--gh-bg-panel) 88%, var(--gh-bg-deep) 12%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow:
-    inset 0 1px 0 rgba(255, 150, 220, 0.12),
-    0 4px 14px rgba(0, 0, 0, 0.58);
+    inset 0 1px 0 color-mix(in srgb, var(--gh-accent-blue) 25%, transparent 75%),
+    0 4px 12px rgba(0, 0, 0, 0.55);
 }
 
 :root.dark-mode .utility-rail-btn:hover {
-  background: color-mix(in srgb, var(--surface-2) 80%, rgba(255, 110, 199, 0.14));
+  background: color-mix(in srgb, var(--gh-bg-panel) 76%, var(--gh-accent-blue) 14%, var(--gh-bg-deep) 10%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 150, 220, 0.16),
-    0 6px 18px rgba(0, 0, 0, 0.65),
-    0 0 16px rgba(255, 110, 199, 0.10);
+    inset 0 1px 0 color-mix(in srgb, var(--gh-accent-blue) 40%, transparent 60%),
+    0 6px 16px rgba(0, 0, 0, 0.62);
 }
 
 :root.dark-mode .utility-rail-btn.is-active,
 :root.dark-mode .utility-rail-btn[aria-current="page"],
 :root.dark-mode .utility-rail-btn[aria-current="true"] {
-  background: color-mix(in srgb, var(--accent) 20%, rgba(48, 54, 61, 0.85));
-  border-color: rgba(255, 110, 199, 0.32);
+  background: color-mix(in srgb, var(--gh-accent-blue) 35%, var(--gh-bg-panel) 65%);
+  border-color: var(--gh-accent-pink);
   box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.70),
-    0 0 24px rgba(255, 110, 199, 0.18);
+    0 8px 20px rgba(0, 0, 0, 0.65),
+    0 0 24px color-mix(in srgb, var(--gh-accent-blue) 60%, transparent 40%);
 }
 
 :root.dark-mode .time-band-event {
-  background: color-mix(in srgb, var(--surface-1) 85%, rgba(255, 110, 199, 0.08));
-  border-color: rgba(255, 110, 199, 0.18);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--gh-bg-panel) 78%, var(--gh-bg-deep) 22%) 0%,
+    color-mix(in srgb, var(--gh-accent-blue) 20%, var(--gh-bg-panel) 80%) 120%
+  );
+  border: 1px solid var(--gh-border-soft);
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.60),
-    inset 0 1px 0 rgba(255, 150, 220, 0.06);
+    0 6px 18px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 color-mix(in srgb, var(--gh-accent-blue) 25%, transparent 75%);
 }
 
 :root.dark-mode .time-band-event:hover {
   box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.68),
-    0 0 16px rgba(255, 110, 199, 0.12);
+    0 10px 24px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 color-mix(in srgb, var(--gh-accent-blue) 45%, transparent 55%);
 }
 
-/* Panel overlays and modals */
 :root.dark-mode .reality-preview-card,
 :root.dark-mode .planning-page-panel {
-  background: color-mix(in srgb, var(--surface-1) 92%, rgba(255, 110, 199, 0.06));
-  border-color: rgba(255, 110, 199, 0.22);
+  background: var(--gh-bg-panel);
+  border: 1px solid var(--gh-border-strong);
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.80),
-    0 0 32px rgba(255, 110, 199, 0.14);
+    0 25px 50px rgba(0, 0, 0, 0.75),
+    0 0 26px color-mix(in srgb, var(--gh-accent-blue) 45%, transparent 55%);
 }
 
 :root.dark-mode .goal-detail-panel {
-  background: color-mix(in srgb, var(--surface-1) 94%, rgba(255, 110, 199, 0.04));
-  border-color: rgba(255, 110, 199, 0.20);
+  background: color-mix(in srgb, var(--gh-bg-panel) 88%, var(--gh-bg-deep) 12%);
+  border: 1px solid var(--gh-border-soft);
+}
+
+/* Accent dots and indicators */
+:root.dark-mode .marker-dot {
+  background: var(--gh-accent-pink);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--gh-accent-pink) 30%, transparent 70%);
+}
+
+:root.dark-mode .event-dot {
+  background: var(--gh-accent-blue);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--gh-accent-blue) 35%, transparent 65%);
 }
 
 @media (prefers-reduced-motion: reduce) {

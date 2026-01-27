@@ -1,7 +1,7 @@
 .calendar-grid.goal-detail-view {
   min-height: 100%;
   width: 100%;
-  background: var(--surface-0);
+  background: transparent;
   padding: clamp(24px, 3vw, 48px) clamp(20px, 5vw, 60px) clamp(32px, 5vw, 64px);
   display: flex;
   justify-content: center;

@@ -327,8 +327,8 @@
   gap: var(--space-2);
   font-size: var(--text-xs);
   padding: 4px 8px;
-  background: var(--seasonal-flower); /* "Rose" or similar */
-  color: #fff; /* Assuming dark petail color, or adjust text */
+  background: var(--petal); /* "Rose" or similar */
+  color: #fff; /* Assuming dark petal color, or adjust text */
   border-radius: 12px 0 12px 0; /* Leaf shape */
   margin-bottom: 2px;
   cursor: pointer;

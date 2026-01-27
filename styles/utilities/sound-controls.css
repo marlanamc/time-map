@@ -81,7 +81,7 @@
     /* WCAG 2.2 AA compliant touch target */
     height: 44px;
     border-radius: 50%;
-    background: var(--seasonal-accent);
+    background: var(--accent);
     cursor: pointer;
     transition: transform var(--duration-fast) var(--ease-out);
     /* Add visual indicator that size increased */
@@ -98,7 +98,7 @@
     /* WCAG 2.2 AA compliant touch target */
     height: 44px;
     border-radius: 50%;
-    background: var(--seasonal-accent);
+    background: var(--accent);
     border: none;
     cursor: pointer;
     transition: transform var(--duration-fast) var(--ease-out);
@@ -169,4 +169,3 @@
         transform: none !important;
     }
 }
-

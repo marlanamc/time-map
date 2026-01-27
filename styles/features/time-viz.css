@@ -46,7 +46,7 @@
 
 .hour-block.hour-current {
   transform: scale(1.3);
-  filter: drop-shadow(0 0 8px var(--seasonal-flower));
+  filter: drop-shadow(0 0 8px var(--petal));
   animation: bloom-pulse 2s ease-in-out infinite;
 }
 
@@ -210,7 +210,7 @@
     /* Use simpler transform only */
     transform: scale(1.2);
     /* Replace with border glow (cheaper) */
-    outline: 2px solid var(--seasonal-flower);
+    outline: 2px solid var(--petal);
     outline-offset: 2px;
     animation: none;
   }
@@ -392,7 +392,7 @@
 }
 
 .time-marker-upcoming {
-  border-left: 3px solid var(--seasonal-accent);
+  border-left: 3px solid var(--accent);
 }
 
 .time-marker-past {

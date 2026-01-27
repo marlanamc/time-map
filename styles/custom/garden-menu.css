@@ -28,7 +28,7 @@
             rgba(248, 252, 250, 0.92) 100%);
     border-radius: 24px 0 0 24px;
     border: none;
-    border-left: 4px solid var(--seasonal-accent);
+    border-left: 4px solid var(--accent);
     box-shadow:
         -8px 0 40px rgba(0, 0, 0, 0.12),
         -2px 0 8px rgba(90, 155, 141, 0.08),
@@ -46,7 +46,7 @@
     right: 0;
     height: 200px;
     background: radial-gradient(ellipse at top,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08) 0%,
+            rgba(var(--accent-rgb, 90, 155, 141), 0.08) 0%,
             transparent 70%);
     pointer-events: none;
 }
@@ -92,7 +92,7 @@
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08);
+    background: rgba(var(--accent-rgb, 90, 155, 141), 0.08);
     border: none;
     font-size: 24px;
     color: var(--text-secondary);
@@ -100,34 +100,34 @@
 }
 
 .support-panel-close:hover {
-    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+    background: rgba(var(--accent-rgb, 90, 155, 141), 0.15);
     transform: rotate(90deg) scale(1.1);
-    color: var(--seasonal-accent);
+    color: var(--accent);
 }
 
 /* Profile Section - Garden Tag */
 .support-panel-profile-section {
     padding: var(--space-4) var(--space-5);
     background: linear-gradient(135deg,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.06) 0%,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.02) 100%);
+            rgba(var(--accent-rgb, 90, 155, 141), 0.06) 0%,
+            rgba(var(--accent-rgb, 90, 155, 141), 0.02) 100%);
     border-radius: 16px;
     margin: 0 0 var(--space-4);
-    border: 1px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+    border: 1px solid rgba(var(--accent-rgb, 90, 155, 141), 0.15);
 }
 
 .user-avatar {
     width: 48px;
     height: 48px;
     border-radius: 16px;
-    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-active) 100%);
     color: white;
     font-weight: 600;
     font-size: var(--text-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.3);
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb, 90, 155, 141), 0.3);
     position: relative;
 }
 
@@ -136,7 +136,7 @@
     position: absolute;
     inset: -3px;
     border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, var(--seasonal-accent), var(--seasonal-secondary));
+    background: linear-gradient(135deg, var(--accent), var(--accent-active));
     z-index: -1;
     opacity: 0.2;
     filter: blur(8px);
@@ -165,7 +165,7 @@
     height: 100%;
     background: linear-gradient(90deg,
             transparent,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.1),
+            rgba(var(--accent-rgb, 90, 155, 141), 0.1),
             transparent);
     transition: left 0.5s ease;
 }
@@ -176,24 +176,24 @@
 
 .support-panel-item:hover {
     background: var(--surface-2);
-    border-color: var(--seasonal-accent);
+    border-color: var(--accent);
     transform: translateY(-1px);
     box-shadow:
-        0 8px 24px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15),
-        0 0 0 4px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.05);
+        0 8px 24px rgba(var(--accent-rgb, 90, 155, 141), 0.15),
+        0 0 0 4px rgba(var(--accent-rgb, 90, 155, 141), 0.05);
 }
 
 .support-panel-icon {
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-active) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.25);
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb, 90, 155, 141), 0.25);
 }
 
 .support-panel-icon svg {
@@ -219,7 +219,7 @@
     height: 1px;
     background: linear-gradient(90deg,
             transparent 0%,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2) 50%,
+            rgba(var(--accent-rgb, 90, 155, 141), 0.2) 50%,
             transparent 100%);
     margin: var(--space-3) 0;
     position: relative;
@@ -233,7 +233,7 @@
     transform: translate(-50%, -50%);
     background: var(--bg-surface);
     padding: 0 var(--space-2);
-    color: var(--seasonal-accent);
+    color: var(--accent);
     font-size: 12px;
     opacity: 0.6;
 }
@@ -264,8 +264,8 @@
 }
 
 .toggle-switch[aria-checked="true"] {
-    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
-    box-shadow: 0 0 0 4px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-active) 100%);
+    box-shadow: 0 0 0 4px rgba(var(--accent-rgb, 90, 155, 141), 0.15);
 }
 
 .toggle-switch[aria-checked="true"]::before {
@@ -374,9 +374,9 @@
 }
 
 .modal-close:hover {
-    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+    background: rgba(var(--accent-rgb, 90, 155, 141), 0.15);
     transform: rotate(90deg) scale(1.1);
-    color: var(--seasonal-accent);
+    color: var(--accent);
 }
 
 /* Light mode time themes - semi-transparent accent tint for modals */
@@ -385,13 +385,13 @@
 :root.time-afternoon:not(.dark-mode) .modal,
 :root.time-evening:not(.dark-mode) .modal {
     background: linear-gradient(160deg,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.12) 0%,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08) 50%,
+            rgba(var(--accent-rgb, 90, 155, 141), 0.12) 0%,
+            rgba(var(--accent-rgb, 90, 155, 141), 0.08) 50%,
             rgba(242, 247, 246, 0.92) 100%);
-    border: 1px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.18);
+    border: 1px solid rgba(var(--accent-rgb, 90, 155, 141), 0.18);
     box-shadow:
         0 18px 54px rgba(26, 43, 47, 0.14),
-        0 0 0 1px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.10),
+        0 0 0 1px rgba(var(--accent-rgb, 90, 155, 141), 0.10),
         inset 0 1px 0 rgba(250, 252, 251, 0.55);
 }
 
@@ -400,7 +400,7 @@
 :root.time-afternoon:not(.dark-mode) .modal-overlay,
 :root.time-evening:not(.dark-mode) .modal-overlay {
     background: linear-gradient(135deg,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.22) 0%,
+            rgba(var(--accent-rgb, 90, 155, 141), 0.22) 0%,
             rgba(31, 45, 42, 0.40) 100%);
 }
 
@@ -409,7 +409,7 @@
 :root.time-afternoon:not(.dark-mode) .modal-header,
 :root.time-evening:not(.dark-mode) .modal-header {
     background: linear-gradient(to bottom,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15) 0%,
+            rgba(var(--accent-rgb, 90, 155, 141), 0.15) 0%,
             transparent 100%);
 }
 
@@ -458,15 +458,15 @@
 
 /* Custom Buttons - Handcrafted Feel */
 .btn-primary {
-    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-active) 100%);
     border: none;
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-5);
     font-weight: 600;
     color: white;
     box-shadow:
-        0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.3),
-        0 0 0 0 rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.4);
+        0 4px 12px rgba(var(--accent-rgb, 90, 155, 141), 0.3),
+        0 0 0 0 rgba(var(--accent-rgb, 90, 155, 141), 0.4);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
@@ -493,8 +493,8 @@
 .btn-primary:hover {
     transform: translateY(-2px) scale(1.02);
     box-shadow:
-        0 8px 20px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.4),
-        0 0 0 6px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.1);
+        0 8px 20px rgba(var(--accent-rgb, 90, 155, 141), 0.4),
+        0 0 0 6px rgba(var(--accent-rgb, 90, 155, 141), 0.1);
 }
 
 .btn-primary:active {
@@ -503,7 +503,7 @@
 
 .btn-ghost {
     background: transparent;
-    border: 2px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+    border: 2px solid rgba(var(--accent-rgb, 90, 155, 141), 0.2);
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-5);
     color: var(--text-primary);
@@ -512,9 +512,9 @@
 }
 
 .btn-ghost:hover {
-    background: rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.08);
-    border-color: var(--seasonal-accent);
-    color: var(--seasonal-accent);
+    background: rgba(var(--accent-rgb, 90, 155, 141), 0.08);
+    border-color: var(--accent);
+    color: var(--accent);
     transform: translateY(-1px);
 }
 
@@ -522,9 +522,9 @@
 .affirmation-panel {
     background: linear-gradient(135deg,
             rgba(255, 255, 255, 0.9) 0%,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.05) 100%);
+            rgba(var(--accent-rgb, 90, 155, 141), 0.05) 100%);
     border-radius: 20px;
-    border: 2px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+    border: 2px solid rgba(var(--accent-rgb, 90, 155, 141), 0.2);
     padding: var(--space-5);
     box-shadow:
         0 8px 24px rgba(0, 0, 0, 0.08),
@@ -553,43 +553,43 @@
 .affirmation-panel:hover {
     transform: translateY(-4px) rotate(-1deg);
     box-shadow:
-        0 12px 32px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2),
-        0 0 0 4px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.1);
-    border-color: var(--seasonal-accent);
+        0 12px 32px rgba(var(--accent-rgb, 90, 155, 141), 0.2),
+        0 0 0 4px rgba(var(--accent-rgb, 90, 155, 141), 0.1);
+    border-color: var(--accent);
 }
 
 /* Achievements - Garden Medals */
 .achievements-panel {
     background: linear-gradient(160deg,
             rgba(255, 255, 255, 0.6) 0%,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.03) 100%);
+            rgba(var(--accent-rgb, 90, 155, 141), 0.03) 100%);
     border-radius: 16px;
     padding: var(--space-4);
-    border: 1px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+    border: 1px solid rgba(var(--accent-rgb, 90, 155, 141), 0.15);
 }
 
 .achievement-badge {
     width: 48px;
     height: 48px;
     border-radius: var(--radius-md);
-    background: linear-gradient(135deg, var(--seasonal-accent) 0%, var(--seasonal-secondary) 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-active) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
     box-shadow:
-        0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.3),
+        0 4px 12px rgba(var(--accent-rgb, 90, 155, 141), 0.3),
         0 0 0 3px rgba(255, 255, 255, 0.5),
-        0 0 0 5px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+        0 0 0 5px rgba(var(--accent-rgb, 90, 155, 141), 0.2);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .achievement-badge:hover {
     transform: rotate(12deg) scale(1.15);
     box-shadow:
-        0 8px 20px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.4),
+        0 8px 20px rgba(var(--accent-rgb, 90, 155, 141), 0.4),
         0 0 0 3px rgba(255, 255, 255, 0.8),
-        0 0 0 6px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.3);
+        0 0 0 6px rgba(var(--accent-rgb, 90, 155, 141), 0.3);
 }
 
 /* Mobile Bottom Bar - Garden Path */
@@ -597,7 +597,7 @@
     background: linear-gradient(to top,
             rgba(255, 255, 255, 0.95) 0%,
             rgba(248, 252, 250, 0.92) 100%);
-    border-top: 3px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.2);
+    border-top: 3px solid rgba(var(--accent-rgb, 90, 155, 141), 0.2);
     box-shadow:
         0 -4px 24px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -616,7 +616,7 @@
     transform: translateX(-50%);
     width: 32px;
     height: 3px;
-    background: var(--seasonal-accent);
+    background: var(--accent);
     border-radius: 0 0 3px 3px;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -627,7 +627,7 @@
 }
 
 .mobile-bottom-bar button.active {
-    color: var(--seasonal-accent);
+    color: var(--accent);
     transform: translateY(-4px);
 }
 
@@ -638,7 +638,7 @@ input[type="password"],
 input[type="number"],
 textarea,
 select {
-    border: 1px solid rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.16);
+    border: 1px solid rgba(var(--accent-rgb, 90, 155, 141), 0.16);
     border-radius: 12px;
     padding: var(--space-3);
     background: var(--surface-1);
@@ -651,11 +651,11 @@ input[type="password"]:focus,
 input[type="number"]:focus,
 textarea:focus,
 select:focus {
-    border-color: var(--seasonal-accent);
+    border-color: var(--accent);
     background: var(--surface-2);
     box-shadow:
-        0 0 0 4px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.1),
-        0 4px 12px rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.15);
+        0 0 0 4px rgba(var(--accent-rgb, 90, 155, 141), 0.1),
+        0 4px 12px rgba(var(--accent-rgb, 90, 155, 141), 0.15);
     outline: none;
 }
 
@@ -759,8 +759,8 @@ select:focus {
         repeating-linear-gradient(45deg,
             transparent,
             transparent 10px,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.008) 10px,
-            rgba(var(--seasonal-accent-rgb, 90, 155, 141), 0.008) 20px);
+            rgba(var(--accent-rgb, 90, 155, 141), 0.008) 10px,
+            rgba(var(--accent-rgb, 90, 155, 141), 0.008) 20px);
     pointer-events: none;
     opacity: 0.5;
 }
@@ -788,7 +788,7 @@ select:focus {
 
 /* Focus visible states - accessibility with style */
 *:focus-visible {
-    outline: 3px solid var(--seasonal-accent);
+    outline: 3px solid var(--accent);
     outline-offset: 3px;
     border-radius: 8px;
 }

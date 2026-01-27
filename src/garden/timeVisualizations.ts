@@ -287,7 +287,7 @@ export class TimeVisualizations {
 
     // Add subtle highlight for upcoming
     if (type === "upcoming") {
-      element.style.borderLeft = "3px solid var(--seasonal-accent)";
+      element.style.borderLeft = "3px solid var(--accent)";
     }
 
     // Dim past items

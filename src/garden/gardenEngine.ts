@@ -346,19 +346,12 @@ export class GardenEngine {
    * Apply current state to DOM
    */
   private applyStateToDOM(): void {
-    const { time, season, weather, lighting, shadowAngle } = this.state;
+    const { time, weather, lighting, shadowAngle, season } = this.state;
 
     // Update body classes - only change if different to prevent flash
     const root = document.documentElement;
-    const currentSeasonClass = Array.from(root.classList).find(c => c.startsWith('season-'));
     const currentTimeClass = Array.from(root.classList).find(c => c.startsWith('time-'));
-    const targetSeasonClass = `season-${season.season}`;
     const targetTimeClass = `time-${time.timeOfDay}`;
-
-    if (currentSeasonClass !== targetSeasonClass) {
-      root.classList.remove('season-spring', 'season-summer', 'season-fall', 'season-winter');
-      root.classList.add(targetSeasonClass);
-    }
 
     if (currentTimeClass !== targetTimeClass) {
       root.classList.remove('time-dawn', 'time-morning', 'time-afternoon', 'time-evening', 'time-night');
@@ -367,6 +360,7 @@ export class GardenEngine {
 
     // Add quality level as data attribute for CSS targeting (mobile optimization)
     root.dataset.gardenQuality = this.state.effects.qualityLevel;
+    root.dataset.gardenSeason = season.season;
 
     // Update CSS custom properties
     // root is already defined above from document.documentElement
@@ -380,20 +374,12 @@ export class GardenEngine {
       ? lighting.saturation
       : Math.min(1.05, Math.max(0.9, lighting.saturation));
 
-    root.style.setProperty('--time-brightness', brightness.toString());
-    root.style.setProperty('--time-saturation', saturation.toString());
-    root.style.setProperty('--time-hue-shift', `${lighting.hueShift}deg`);
-
     // Shadows
     root.style.setProperty('--shadow-opacity', lighting.shadowOpacity.toString());
     root.style.setProperty('--shadow-length', `${lighting.shadowLength}px`);
     root.style.setProperty('--shadow-angle', `${shadowAngle}deg`);
-
-    // Seasonal colors
-    root.style.setProperty('--seasonal-accent', season.colors.accent);
-    root.style.setProperty('--seasonal-bg', season.colors.bg);
-    root.style.setProperty('--seasonal-flower', season.colors.flower);
-    root.style.setProperty('--seasonal-secondary', season.colors.secondary);
+    root.style.setProperty('--garden-brightness', brightness.toString());
+    root.style.setProperty('--garden-saturation', saturation.toString());
 
     // Weather effects
     const weatherClasses = getWeatherEffects(weather.current);

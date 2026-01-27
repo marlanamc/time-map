@@ -179,7 +179,7 @@ export function addBloomAnimationsToCSS(): void {
 
     @keyframes center-glow {
       0% { filter: brightness(1); }
-      50% { filter: brightness(1.8) drop-shadow(0 0 8px var(--seasonal-flower)); }
+      50% { filter: brightness(1.8) drop-shadow(0 0 8px var(--petal)); }
       100% { filter: brightness(1); }
     }
 
@@ -193,7 +193,7 @@ export function addBloomAnimationsToCSS(): void {
     }
 
     .bloomable:focus {
-      outline: 2px solid var(--seasonal-accent);
+      outline: 2px solid var(--accent);
       outline-offset: 4px;
     }
   `;
