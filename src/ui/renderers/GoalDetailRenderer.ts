@@ -12,6 +12,7 @@ export type GoalDetailCallbacks = {
   onOpenGoal?: (goalId: string) => void;
   onOpenGoalEdit?: (goalId: string) => void;
   onAddChildGoal?: (opts: AddChildGoalOpts) => void;
+  onOpenVision?: (visionId: string) => void;
   onClose?: () => void;
 };
 
@@ -131,8 +132,9 @@ function buildGoalDetailMarkup(
             if (isLast) {
               return `<span class="living-garden-breadcrumb-current">${escapeHtmlFn(emoji)} ${escapeHtmlFn(g.title)}</span>`;
             }
+            const action = g.level === "vision" ? "open-vision" : "open-goal";
             return `
-              <button class="living-garden-breadcrumb-item" data-action="open-goal" data-goal-id="${escapeHtmlFn(g.id)}">
+              <button class="living-garden-breadcrumb-item" data-action="${action}" data-goal-id="${escapeHtmlFn(g.id)}">
                 <span>${escapeHtmlFn(emoji)}</span>
                 <span>${escapeHtmlFn(g.title)}</span>
               </button>
@@ -141,6 +143,47 @@ function buildGoalDetailMarkup(
           })
           .join("")}
       </nav>
+    `;
+  };
+
+  const renderVisionLine = () => {
+    if (goal.level !== "milestone") return "";
+    const visionId = getVisionIdForGoal(goal);
+    if (!visionId) return "";
+    const vision = Goals.getById(visionId);
+    if (!vision) return "";
+    return `
+      <p class="living-garden-detail-vision-line">
+        This milestone belongs to:
+        <button
+          type="button"
+          class="living-garden-detail-vision-link"
+          data-action="open-vision"
+          data-goal-id="${escapeHtmlFn(vision.id)}"
+        >
+          ${escapeHtmlFn(vision.title)}
+        </button>
+      </p>
+    `;
+  };
+
+  const renderLinkedParentLine = () => {
+    if (goal.level !== "intention" || !goal.parentId) return "";
+    const parent = Goals.getById(goal.parentId);
+    if (!parent) return "";
+    const action = parent.level === "vision" ? "open-vision" : "open-goal";
+    return `
+      <p class="living-garden-detail-vision-line">
+        Linked to:
+        <button
+          type="button"
+          class="living-garden-detail-vision-link"
+          data-action="${action}"
+          data-goal-id="${escapeHtmlFn(parent.id)}"
+        >
+          ${escapeHtmlFn(parent.title)}
+        </button>
+      </p>
     `;
   };
 
@@ -182,15 +225,6 @@ function buildGoalDetailMarkup(
     <div class="living-garden-empty-state">
       <div class="living-garden-empty-state-icon">${childLevel === "milestone" ? "🎯" : childLevel === "focus" ? "🔎" : "🌱"}</div>
       <h3 class="living-garden-empty-state-title">Ready to break this down?</h3>
-      <p class="living-garden-empty-state-text">
-        ${
-          goal.level === "vision"
-            ? "Add milestones to turn this vision into achievable monthly goals."
-            : goal.level === "milestone"
-              ? "Add focuses to create weekly action items for this milestone."
-              : "Add intentions to plan your daily actions."
-        }
-      </p>
       ${
         childLevel && options.showAddChildAction
           ? `
@@ -237,15 +271,17 @@ function buildGoalDetailMarkup(
         <button class="living-garden-detail-topbar-btn living-garden-detail-topbar-action" data-action="open-goal-edit" data-goal-id="${escapeHtmlFn(goal.id)}">Edit goal</button>
       </div>
 
-      <div class="living-garden-detail-body">
-        ${renderBreadcrumb()}
+        <div class="living-garden-detail-body">
+          ${renderBreadcrumb()}
 
-        <div class="living-garden-detail-header">
-          <div class="living-garden-detail-info">
-            <h2 class="living-garden-detail-title">${goal.icon ? `${escapeHtmlFn(goal.icon)} ` : ""}${escapeHtmlFn(goal.title)}</h2>
-            <p class="living-garden-detail-description">${escapeHtmlFn(goal.description || "No description yet.")}</p>
-            ${goal.dueDate ? `<span class="living-garden-detail-due">Due: ${new Date(goal.dueDate).toLocaleDateString()}</span>` : ""}
-          </div>
+          <div class="living-garden-detail-header">
+            <div class="living-garden-detail-info">
+              <h2 class="living-garden-detail-title">${goal.icon ? `${escapeHtmlFn(goal.icon)} ` : ""}${escapeHtmlFn(goal.title)}</h2>
+              ${renderVisionLine()}
+              ${renderLinkedParentLine()}
+              <p class="living-garden-detail-description">${escapeHtmlFn(goal.description || "No description yet.")}</p>
+              ${goal.dueDate ? `<span class="living-garden-detail-due">Due: ${new Date(goal.dueDate).toLocaleDateString()}</span>` : ""}
+            </div>
           <div class="living-garden-detail-progress">
             <svg class="living-garden-progress-ring" viewBox="0 0 100 100">
               <circle class="living-garden-progress-ring-bg" cx="50" cy="50" r="42" />
@@ -269,8 +305,8 @@ function buildGoalDetailMarkup(
           <div class="living-garden-detail-stat">
             <span class="living-garden-detail-stat-icon">${statusIcon}</span>
             <div class="living-garden-detail-stat-text">
-              <span class="living-garden-detail-stat-value">${statusLabel}</span>
-              <span class="living-garden-detail-stat-label">${completionRate}% intentions done</span>
+              <span class="living-garden-detail-stat-value">${statusLabel} ${completionRate}%</span>
+              <span class="living-garden-detail-stat-label">Intentions done</span>
             </div>
           </div>
           ${
@@ -325,6 +361,19 @@ function attachGoalDetailInteractions(
       }
     });
   });
+
+  root
+    .querySelectorAll<HTMLElement>("[data-action='open-vision']")
+    .forEach((el) => {
+      el.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const goalId = el.dataset.goalId;
+        if (goalId) {
+          callbacks.onOpenVision?.(goalId);
+        }
+      });
+    });
 
   root.querySelectorAll<HTMLElement>("[data-action='add-child']").forEach((btn) => {
     btn.addEventListener("click", (event) => {

@@ -245,7 +245,7 @@ function buildBands(goal: Goal): string {
 function buildSoftBlocks(goal: Goal): string {
   const commitment = goal.commitment;
   if (!commitment) {
-    return '<div class="reality-preview-soft-block-empty">No commitment yet. Plan first to see how it fits.</div>';
+    return '<div class="reality-preview-soft-block-empty">No commitment yet.</div>';
   }
 
   const blockLabel = `${commitment.frequency} × ${commitment.duration} min`;
@@ -297,7 +297,7 @@ function renderOverlay(goal: Goal): void {
       <div class="reality-preview-card-header">
         <div>
           <p class="reality-preview-title">Reality Preview</p>
-          <p class="reality-preview-subtitle">This would live here.</p>
+          <p class="reality-preview-subtitle">Weekly time snapshot.</p>
         </div>
         <button
           type="button"
@@ -330,8 +330,7 @@ function renderOverlay(goal: Goal): void {
         </div>
       </div>
       <p class="reality-preview-note">
-        Soft blocks show how this goal could sit inside your calendar without
-        asking you to act right now.
+        Soft blocks show how this goal fits inside your calendar.
       </p>
     </div>
   `;
