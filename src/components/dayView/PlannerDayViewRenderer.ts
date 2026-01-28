@@ -277,7 +277,7 @@ export class PlannerDayViewRenderer {
           <div class="planner-sidebar-section">
             <div class="sidebar-section-header">
               <div class="sidebar-section-left">
-                <span class="sidebar-section-title">Quick intentions</span>
+                <span class="sidebar-section-title">Common intentions</span>
                 <button
                   type="button"
                   class="sidebar-section-action-btn"

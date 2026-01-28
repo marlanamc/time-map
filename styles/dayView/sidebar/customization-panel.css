@@ -1,5 +1,5 @@
 /**
- * Quick Intentions Modal - Custom Styles
+ * Common Intentions Modal - Custom Styles
  * @remarks Extends base modal styles from modals.css
  */
 
@@ -15,6 +15,18 @@
 .intentions-modal {
   max-width: var(--container-modal);
   margin-top: 0;
+  transform: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.intentions-modal-overlay.active .intentions-modal {
+  transform: none;
+}
+
+.intentions-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .intentions-modal .modal-header {

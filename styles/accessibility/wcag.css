@@ -563,6 +563,24 @@
     box-shadow: var(--shadow-md);
 }
 
+.settings-dev-tools {
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--glass-border);
+    background: var(--bg-surface);
+    opacity: 0.92;
+}
+
+.settings-dev-tools .setting-row {
+    margin-bottom: 0;
+}
+
+.dev-tools-btn {
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    opacity: 0.9;
+}
+
 .settings-section:last-of-type {
     margin-bottom: 0;
     border-bottom: none;

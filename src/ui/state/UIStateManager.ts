@@ -17,6 +17,8 @@ export class UIStateManager {
   goalModalLevel: GoalLevel = "milestone";
   lastNonHomeView: ViewType = VIEWS.YEAR;
   lastViewBeforeDetail: ViewType | null = null;
+  lastVisionBeforeDetailId: string | null = null;
+  lastViewBeforeVision: ViewType | null = null;
 
   saveView(view: ViewType) {
     if (view === VIEWS.HOME) return;

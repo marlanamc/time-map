@@ -11,7 +11,8 @@ export type ViewType =
   | "day"
   | "home"
   | "garden"
-  | "goal-detail";
+  | "goal-detail"
+  | "vision-detail";
 
 /** Goal hierarchy levels from highest to lowest */
 export type GoalLevel = "vision" | "milestone" | "focus" | "intention";
@@ -533,6 +534,7 @@ export interface AppState {
   selectedMonth: number | null;
   selectedGoal: string | null;
   goalDetailId: string | null;
+  visionDetailId: string | null;
   zoom: number;
   focusMode: boolean;
   activeCategory: string;

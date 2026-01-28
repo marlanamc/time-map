@@ -4,6 +4,7 @@
 import { State } from "../../core/State";
 import { CONFIG, VIEWS } from "../../config";
 import { NDSupport } from "../ndSupport";
+import { clearServiceWorkersAndReload } from "../../ui/DevTools";
 import type {
   AppData,
   ViewType,
@@ -37,6 +38,8 @@ export const AppSettings = {
   showPanel() {
     if (!State.data) return;
     const isMobile = document.body.classList.contains("is-mobile");
+    const isDev =
+      import.meta.env.DEV || window.location.hostname === "localhost";
     const modal = document.createElement("div");
     modal.className = "modal-overlay active app-settings-modal";
 
@@ -194,6 +197,26 @@ export const AppSettings = {
             `
             }
 
+            ${
+              isDev
+                ? `
+            <div class="settings-section settings-dev-tools">
+              <h3>Developer tools</h3>
+              <div class="setting-row">
+                <label>Service worker helper</label>
+                <button
+                  class="btn btn-ghost dev-tools-btn"
+                  type="button"
+                  data-action="clear-sw-and-reload"
+                >
+                  🧹 Clear cache and reload
+                </button>
+              </div>
+            </div>
+          `
+                : ""
+            }
+
             <div class="settings-section">
               <h3>Data</h3>
               <div class="setting-row">
@@ -321,6 +344,14 @@ export const AppSettings = {
         }
       }
     });
+
+    modal
+      .querySelector("[data-action='clear-sw-and-reload']")
+      ?.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        clearServiceWorkersAndReload();
+      });
 
     modal
       .querySelector("#settingsShortcutsBtn")

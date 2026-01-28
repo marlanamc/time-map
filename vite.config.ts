@@ -23,6 +23,7 @@ export default defineConfig({
       output: {
         // Use ESM format for import.meta.env to work correctly
         format: "es",
+        // Hashed filenames guarantee each build produces new URLs for JS/CSS.
         // Ensure consistent file names for caching
         entryFileNames: "assets/[name]-[hash].js",
         chunkFileNames: "assets/[name]-[hash].js",
@@ -48,7 +49,7 @@ export default defineConfig({
   server: {
     port: 4173,
     open: true, // Auto-open browser
-    // Disable service worker in dev
+    // Dev server relies on HMR; prevent browsers from caching assets aggressively.
     headers: {
       "Cache-Control": "no-store",
       "Service-Worker-Allowed": "/",

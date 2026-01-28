@@ -9,18 +9,7 @@
 
 import { Goals } from "../../core/Goals";
 import { State } from "../../core/State";
-import type { Category, GoalLevel, GoalMeta } from "../../types";
-import { CONFIG } from "../../config";
-import {
-  renderAccordionSection,
-  setupAccordionSectionToggles,
-} from "../../components/modals/shared/AccordionSection";
-import { renderLinkagePicker } from "../../components/modals/shared/LinkagePicker";
-import {
-  renderEnergyMetaPanel,
-  setupEnergyMetaPanel,
-} from "../../components/modals/shared/EnergyMetaPanel";
-import { setupActivityPicker } from "../../components/modals/shared/ActivityPicker";
+import type { GoalLevel } from "../../types";
 
 export interface QuickAddCallbacks {
   onRender: () => void;
@@ -34,24 +23,22 @@ export type QuickAddOptions = {
   /** Optional linkage for the created intention. */
   parentId?: string | null;
   parentLevel?: GoalLevel | null;
-  /** UI copy overrides (kept lightweight). */
+  /** Optional helper text shown beneath the heading. */
   label?: string;
+  /** Placeholder text for the title field. */
   placeholder?: string;
+  /** Prefill the title input for share targets and similar flows. */
   prefillTitle?: string;
-  showTinyField?: boolean;
-  tinyLabel?: string;
-  tinyPlaceholder?: string;
 };
 
 class QuickAddManager {
   private callbacks: QuickAddCallbacks | null = null;
-  private quickAddMetaDraft: GoalMeta = {};
-  private quickAddActivityId: string | null = null;
-  private quickAddLinkSelection: {
-    parentId: string;
-    parentLevel: GoalLevel;
-  } | null = null;
-  private quickAddCategory: Category | null = null;
+  private quickAddLinkSelection:
+    | {
+        parentId: string;
+        parentLevel: GoalLevel;
+      }
+    | null = null;
 
   /**
    * Set callbacks for QuickAdd interactions
@@ -72,104 +59,48 @@ class QuickAddManager {
     const overlay = document.createElement("div");
     overlay.className = "quick-add-overlay";
 
-    const label = opts?.label ?? "Quick intention";
     overlay.innerHTML = `
-      <div class="quick-add-container">
+      <div class="quick-add-container" role="dialog" aria-modal="true" aria-labelledby="quickAddHeading">
         <div class="quick-add-header">
-          <span class="quick-add-emoji">🌱</span>
-          <span class="quick-add-label">${label}</span>
+          <div class="quick-add-header-text">
+            <span class="quick-add-emoji">🌱</span>
+            <div>
+              <span id="quickAddHeading" class="quick-add-label">Quick Add</span>
+              <p id="quickAddSubtitle" class="quick-add-subtitle"></p>
+            </div>
+          </div>
+          <button type="button" class="quick-add-close" id="quickAddClose" aria-label="Close Quick Add">×</button>
         </div>
-        <input type="text" id="quickAddInput" autocomplete="off" autocapitalize="sentences" spellcheck="true" autofocus>
-        <div id="quickAddAccordionContainer" class="quick-add-accordion"></div>
-        <div id="quickAddVisionContainer" class="quick-add-vision-section">
-          <label class="quick-add-vision-label">Connect to Vision (optional)</label>
-          <select id="quickAddVisionSelect" class="modal-select">
-            <option value="">No vision</option>
-          </select>
-        </div>
+        <form class="quick-add-form" novalidate>
+          <div class="quick-add-field">
+            <label for="quickAddTitleInput" class="quick-add-field-label">Title</label>
+            <input type="text" id="quickAddTitleInput" autocomplete="off" autocapitalize="sentences" spellcheck="true">
+          </div>
+          <div class="quick-add-field quick-add-time-grid">
+            <div class="quick-add-time-field">
+              <label for="quickAddStartTime" class="quick-add-field-label">Start (optional)</label>
+              <input type="time" id="quickAddStartTime" class="quick-add-time-input">
+            </div>
+            <div class="quick-add-time-field">
+              <label for="quickAddEndTime" class="quick-add-field-label">End (optional)</label>
+              <input type="time" id="quickAddEndTime" class="quick-add-time-input">
+            </div>
+          </div>
+          <div class="quick-add-vision-section">
+            <label for="quickAddVisionSelect" class="quick-add-field-label quick-add-vision-label">Connect to Vision (optional)</label>
+            <select id="quickAddVisionSelect" class="modal-select">
+              <option value="">No vision</option>
+            </select>
+          </div>
+          <div class="quick-add-actions">
+            <button type="button" class="btn btn-secondary" id="quickAddCancel">Cancel</button>
+            <button type="button" class="btn btn-primary" id="quickAddSave">Add intention</button>
+          </div>
+        </form>
       </div>
     `;
 
     document.body.appendChild(overlay);
-    const input = overlay.querySelector("#quickAddInput") as HTMLInputElement;
-    if (opts?.prefillTitle) input.value = opts.prefillTitle;
-    input.focus();
-
-    const accordionContainer = overlay.querySelector(
-      "#quickAddAccordionContainer"
-    ) as HTMLElement | null;
-    if (accordionContainer) {
-      accordionContainer.innerHTML = renderAccordionSection({
-        id: "quickAddMoreSection",
-        title: "More (optional)",
-        subtitle: "Details and context",
-        bodyHtml: `
-          <div id="quickAddLinkContainer"></div>
-          <div id="quickAddEnergyContainer"></div>
-          <div id="quickAddDetailsContainer"></div>
-        `,
-      });
-      setupAccordionSectionToggles(accordionContainer);
-      // refreshMoreSection(); // Move this call after function declaration
-    }
-
-    // Setup vision selector
-    const visionSelect = overlay.querySelector("#quickAddVisionSelect") as HTMLSelectElement;
-    if (visionSelect) {
-      const visions = getVisions();
-      visions.forEach(vision => {
-        const option = document.createElement("option");
-        option.value = vision.id;
-        option.textContent = vision.title;
-        visionSelect.appendChild(option);
-      });
-
-      visionSelect.addEventListener("change", () => {
-        const selectedVisionId = visionSelect.value;
-        if (selectedVisionId) {
-          // Find active focus for this vision
-          const activeFocus = Goals.findActiveFocusForVision(selectedVisionId);
-          if (activeFocus) {
-            this.quickAddLinkSelection = {
-              parentId: activeFocus.id,
-              parentLevel: "focus"
-            };
-          } else {
-            // If no active focus, try to find active milestone
-            const activeMilestone = Goals.getAll().find(g =>
-              g.level === "milestone" &&
-              g.parentId === selectedVisionId &&
-              g.status !== "done" &&
-              g.status !== "archived"
-            );
-            if (activeMilestone) {
-              this.quickAddLinkSelection = {
-                parentId: activeMilestone.id,
-                parentLevel: "milestone"
-              };
-            } else {
-              // Fallback to vision itself
-              this.quickAddLinkSelection = {
-                parentId: selectedVisionId,
-                parentLevel: "vision"
-              };
-            }
-          }
-          refreshMoreSection();
-        } else {
-          this.quickAddLinkSelection = null;
-          refreshMoreSection();
-        }
-      });
-    }
-
-    this.quickAddMetaDraft = {};
-    this.quickAddActivityId = null;
-    this.quickAddCategory = null;
-    this.quickAddLinkSelection =
-      opts?.parentId && opts.parentLevel
-        ? { parentId: opts.parentId, parentLevel: opts.parentLevel }
-        : null;
 
     const getVisions = () => {
       const year = State.viewingYear ?? new Date().getFullYear();
@@ -180,180 +111,134 @@ class QuickAddManager {
         .map((g) => ({ id: g.id, title: g.title }));
     };
 
-    const getMilestones = () =>
-      Goals.getAll()
-        .filter((g) => g.level === "milestone" && g.status !== "done")
-        .slice()
-        .sort((a, b) => a.title.localeCompare(b.title))
-        .map((g) => ({ id: g.id, title: g.title }));
-
-    const getFocuses = () => {
-      const viewingDate = State.viewingDate ?? new Date();
-      const wk = State.getWeekNumber(viewingDate);
-      const wy = State.getWeekYear(viewingDate);
-      const ws = State.getWeekStart(wy, wk);
-      const we = new Date(ws);
-      we.setDate(we.getDate() + 6);
-      return Goals.getForRange(ws, we)
-        .filter((g) => g.level === "focus" && g.status !== "done")
-        .slice()
-        .sort((a, b) => a.title.localeCompare(b.title))
-        .map((g) => ({ id: g.id, title: g.title }));
-    };
-
-    const renderCategorySelect = () => {
-      const options = Object.entries(CONFIG.CATEGORIES)
-        .map(([key, meta]) => `<option value="${key}">${meta.label}</option>`)
-        .join("");
-      return `
-        <div class="form-group">
-          <label for="quickAddCategory">Category (optional)</label>
-          <select id="quickAddCategory" class="modal-select">
-            <option value=""${
-              this.quickAddCategory ? "" : " selected"
-            }>No category</option>
-            ${options}
-          </select>
-        </div>
-        <div class="form-group" id="quickAddActivitySlot"></div>
-      `;
-    };
-
-    const attachLinkHandlers = (container: HTMLElement) => {
-      container
-        .querySelectorAll<HTMLElement>("[data-action='select-link']")
-        .forEach((btn) => {
-          btn.onclick = (e) => {
-            e.preventDefault();
-            const parentId = (btn as HTMLElement).dataset.parentId;
-            const parentLevel = (btn as HTMLElement).dataset.parentLevel as
-              | GoalLevel
-              | undefined;
-            if (!parentId || !parentLevel) return;
-            this.quickAddLinkSelection = { parentId, parentLevel };
-            refreshMoreSection();
-          };
-        });
-      container
-        .querySelectorAll<HTMLElement>("[data-action='clear-link']")
-        .forEach((btn) => {
-          btn.onclick = (e) => {
-            e.preventDefault();
-            this.quickAddLinkSelection = null;
-            refreshMoreSection();
-          };
-        });
-      const linkSelect =
-        container.querySelector<HTMLSelectElement>("#goalLinkSelect");
-      if (linkSelect) {
-        linkSelect.onchange = () => {
-          const raw = linkSelect.value?.trim();
-          if (!raw) {
-            this.quickAddLinkSelection = null;
-            refreshMoreSection();
-            return;
-          }
-          const [parentLevel, parentId] = raw.split(":");
-          if (!parentId) return;
-          if (
-            parentLevel === "vision" ||
-            parentLevel === "milestone" ||
-            parentLevel === "focus"
-          ) {
-            this.quickAddLinkSelection = {
-              parentLevel: parentLevel as GoalLevel,
-              parentId,
-            };
-          }
-          refreshMoreSection();
+    const resolveLinkForVision = (visionId: string) => {
+      const activeFocus = Goals.findActiveFocusForVision(visionId);
+      if (activeFocus) {
+        return {
+          parentId: activeFocus.id,
+          parentLevel: "focus" as GoalLevel,
         };
       }
+      const activeMilestone = Goals.getAll().find(
+        (g) =>
+          g.level === "milestone" &&
+          g.parentId === visionId &&
+          g.status !== "done" &&
+          g.status !== "archived",
+      );
+      if (activeMilestone) {
+        return {
+          parentId: activeMilestone.id,
+          parentLevel: "milestone" as GoalLevel,
+        };
+      }
+      return {
+        parentId: visionId,
+        parentLevel: "vision" as GoalLevel,
+      };
     };
 
-    const refreshMoreSection = () => {
-      const linkContainer = overlay.querySelector(
-        "#quickAddLinkContainer"
-      ) as HTMLElement | null;
-      if (linkContainer) {
-        linkContainer.innerHTML = renderLinkagePicker({
-          level: "intention",
-          visions: getVisions(),
-          milestones: getMilestones(),
-          focuses: getFocuses(),
-          selected: this.quickAddLinkSelection,
-        });
-        attachLinkHandlers(linkContainer);
-      }
+    this.quickAddLinkSelection =
+      opts?.parentId && opts.parentLevel
+        ? { parentId: opts.parentId, parentLevel: opts.parentLevel }
+        : null;
 
-      const energyContainer = overlay.querySelector(
-        "#quickAddEnergyContainer"
-      ) as HTMLElement | null;
-      if (energyContainer) {
-        energyContainer.innerHTML = renderEnergyMetaPanel({
-          level: "intention",
-          meta: this.quickAddMetaDraft,
-        });
-        setupEnergyMetaPanel(energyContainer, {
-          level: "intention",
-          meta: this.quickAddMetaDraft,
-          getMeta: () => this.quickAddMetaDraft,
-          onChange: (nextMeta) => {
-            this.quickAddMetaDraft = nextMeta;
-          },
-          onRequestRerender: refreshMoreSection,
-        });
-      }
+    const titleInput = overlay.querySelector(
+      "#quickAddTitleInput",
+    ) as HTMLInputElement | null;
+    const startTimeInput = overlay.querySelector(
+      "#quickAddStartTime",
+    ) as HTMLInputElement | null;
+    const endTimeInput = overlay.querySelector(
+      "#quickAddEndTime",
+    ) as HTMLInputElement | null;
+    const visionSelect = overlay.querySelector(
+      "#quickAddVisionSelect",
+    ) as HTMLSelectElement | null;
+    const subtitle = overlay.querySelector("#quickAddSubtitle");
+    const closeButton = overlay.querySelector(
+      "#quickAddClose",
+    ) as HTMLButtonElement | null;
+    const cancelButton = overlay.querySelector(
+      "#quickAddCancel",
+    ) as HTMLButtonElement | null;
+    const saveButton = overlay.querySelector(
+      "#quickAddSave",
+    ) as HTMLButtonElement | null;
 
-      const detailsContainer = overlay.querySelector(
-        "#quickAddDetailsContainer"
-      ) as HTMLElement | null;
-      if (detailsContainer) {
-        detailsContainer.innerHTML = renderCategorySelect();
-        const categorySelect =
-          detailsContainer.querySelector<HTMLSelectElement>(
-            "#quickAddCategory"
-          );
-        if (categorySelect) {
-          categorySelect.value = this.quickAddCategory ?? "";
-          categorySelect.onchange = () => {
-            const raw = categorySelect.value;
-            this.quickAddCategory =
-              raw && raw in CONFIG.CATEGORIES ? (raw as Category) : null;
-          };
-        }
-        const activitySlot = detailsContainer.querySelector(
-          "#quickAddActivitySlot"
-        );
-        setupActivityPicker(activitySlot as HTMLElement | null, {
-          value: this.quickAddActivityId,
-          onChange: (nextValue) => {
-            this.quickAddActivityId = nextValue;
-          },
-        });
-      }
-    };
+    const closeOverlay = () => overlay.remove();
 
-    // Call refreshMoreSection after it's declared to fix hoisting issue
-    if (accordionContainer) {
-      refreshMoreSection();
+    if (subtitle) {
+      subtitle.textContent =
+        opts?.label ?? "Create a one off intention for today.";
     }
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && input.value.trim()) {
-        this.save(input.value.trim(), {
-          startDate: opts?.startDate,
-          parentId: opts?.parentId,
-          parentLevel: opts?.parentLevel,
-        });
-        overlay.remove();
+    if (titleInput) {
+      titleInput.placeholder =
+        opts?.placeholder ?? "Describe what you'd like to do today";
+      if (opts?.prefillTitle) titleInput.value = opts.prefillTitle;
+      titleInput.focus();
+    }
+
+    if (visionSelect) {
+      getVisions().forEach((vision) => {
+        const option = document.createElement("option");
+        option.value = vision.id;
+        option.textContent = vision.title;
+        visionSelect.appendChild(option);
+      });
+
+      visionSelect.addEventListener("change", () => {
+        const selectedVisionId = visionSelect.value;
+        if (selectedVisionId) {
+          this.quickAddLinkSelection = resolveLinkForVision(
+            selectedVisionId,
+          );
+        } else {
+          this.quickAddLinkSelection = null;
+        }
+      });
+    }
+
+    const handleSubmit = () => {
+      if (!titleInput) return;
+      const title = titleInput.value.trim();
+      if (!title) {
+        titleInput.focus();
+        return;
       }
-      if (e.key === "Escape") {
-        overlay.remove();
+      const startTimeValue = startTimeInput?.value.trim() ?? "";
+      const endTimeValue = endTimeInput?.value.trim() ?? "";
+      this.save(title, {
+        startDate: opts?.startDate,
+        parentId: opts?.parentId ?? null,
+        parentLevel: opts?.parentLevel ?? null,
+        startTime: startTimeValue || null,
+        endTime: endTimeValue || null,
+      });
+      closeOverlay();
+    };
+
+    saveButton?.addEventListener("click", handleSubmit);
+    titleInput?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleSubmit();
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeOverlay();
       }
     });
 
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) overlay.remove();
+    cancelButton?.addEventListener("click", (event) => {
+      event.preventDefault();
+      closeOverlay();
+    });
+    closeButton?.addEventListener("click", closeOverlay);
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) closeOverlay();
     });
   }
 
@@ -366,7 +251,9 @@ class QuickAddManager {
       startDate?: string;
       parentId?: string | null;
       parentLevel?: GoalLevel | null;
-    }
+      startTime?: string | null;
+      endTime?: string | null;
+    },
   ): void {
     if (!this.callbacks) return;
 
@@ -375,10 +262,6 @@ class QuickAddManager {
       (opts?.parentId
         ? { parentId: opts.parentId, parentLevel: opts.parentLevel ?? null }
         : null);
-    const meta: GoalMeta | undefined =
-      Object.keys(this.quickAddMetaDraft).length > 0
-        ? { ...this.quickAddMetaDraft }
-        : undefined;
 
     Goals.create({
       title,
@@ -387,14 +270,17 @@ class QuickAddManager {
       startDate: opts?.startDate,
       parentId: selectedLink?.parentId ?? null,
       parentLevel: selectedLink?.parentLevel ?? null,
-      meta,
-      category: this.quickAddCategory ?? undefined,
-      activityId: this.quickAddActivityId ?? undefined,
+      startTime: opts?.startTime ?? null,
+      endTime: opts?.endTime ?? null,
     });
 
     this.callbacks.onRender();
     this.callbacks.onToast("🌱", "Saved.");
-    this.callbacks.onCelebrate("✨", "Intention set.", "One small step is enough.");
+    this.callbacks.onCelebrate(
+      "✨",
+      "Intention set.",
+      "One small step is enough.",
+    );
   }
 }
 

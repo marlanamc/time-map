@@ -6,5 +6,6 @@ export const VIEWS = {
   DAY: "day" as const,
   HOME: "home" as const,
   GOAL_DETAIL: "goal-detail" as const,
+  VISION_DETAIL: "vision-detail" as const,
   GARDEN: "garden" as const,
 } as const;

@@ -12,3 +12,4 @@ export { GardenDashboardRenderer } from "./GardenDashboardRenderer";
 export { GardenHorizonRenderer } from "./GardenHorizonRenderer";
 export { GardenSanctuaryRenderer } from "./GardenSanctuaryRenderer";
 export { GoalDetailRenderer } from "./GoalDetailRenderer";
+export { VisionDetailRenderer } from "./VisionDetailRenderer";

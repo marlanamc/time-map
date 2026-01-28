@@ -147,7 +147,7 @@ export class SidebarRenderer {
 
     const intentionsContent = renderIntentionsGrid();
     const intentionsActions = renderIntentionsEditButton();
-    const intentionsHtml = renderSidebarSection('intentions', 'Quick intentions', intentionsContent, {
+    const intentionsHtml = renderSidebarSection('intentions', 'Common intentions', intentionsContent, {
       isCollapsed: getSectionState('intentions'),
       actions: intentionsActions,
     });

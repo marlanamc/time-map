@@ -207,6 +207,25 @@
   color: var(--text-primary);
 }
 
+.goal-detail-page .living-garden-detail-vision-line {
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.goal-detail-page .living-garden-detail-vision-link {
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.goal-detail-page .living-garden-detail-vision-link:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .calendar-grid.goal-detail-view {
     padding: var(--space-4);

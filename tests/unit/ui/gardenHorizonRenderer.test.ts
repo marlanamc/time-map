@@ -216,6 +216,7 @@ describe("GardenHorizonRenderer", () => {
     mockEvents.push(sampleEvent);
 
     const goalClickSpy = jest.fn();
+    const visionClickSpy = jest.fn();
     const addGoalSpy = jest.fn();
     const elements = {
       calendarGrid: document.getElementById("calendarGrid"),
@@ -226,6 +227,7 @@ describe("GardenHorizonRenderer", () => {
         elements,
         (text: string) => text,
         goalClickSpy,
+        visionClickSpy,
         addGoalSpy,
       ),
     ).not.toThrow();
@@ -255,6 +257,7 @@ describe("GardenHorizonRenderer", () => {
     );
     const visionItem = document.querySelector(".spine-vision-item") as HTMLElement;
     visionItem.click();
+    expect(visionClickSpy).toHaveBeenCalledWith("vision-1");
     const planButton = document.querySelector(
       '.utility-rail-btn[data-action="plan"]',
     ) as HTMLElement;

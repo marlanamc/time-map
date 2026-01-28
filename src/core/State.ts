@@ -41,6 +41,7 @@ export const State: AppState & {
   selectedMonth: null,
   selectedGoal: null,
   goalDetailId: null,
+  visionDetailId: null,
   zoom: 100,
   focusMode: false,
   activeCategory: "all",
@@ -156,6 +157,10 @@ export const State: AppState & {
 
   setGoalDetailGoal(goalId: string | null) {
     this.goalDetailId = goalId;
+  },
+
+  setVisionDetailId(visionId: string | null): void {
+    this.visionDetailId = visionId;
   },
 
   // Navigate to specific date

@@ -337,6 +337,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           return "month";
         case VIEWS.YEAR:
           return "year";
+        case VIEWS.VISION_DETAIL:
+          return State.visionDetailId ? `vision/${State.visionDetailId}` : undefined;
         default:
           return undefined;
       }
@@ -346,17 +348,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     const viewParam = params.get("view");
     const action = params.get("action");
     const pathSlug = location.pathname.slice(1); // remove leading slash
+    const pathSegments = pathSlug.split("/").filter(Boolean);
 
     let didHandleAction = false;
+    let visionIdFromPath: string | null = null;
 
     // 1. Determine Initial View from URL
     // Path takes precedence over query params
-    let targetView = getViewFromSlug(pathSlug);
+    let targetView: ViewSlug | undefined;
+    if (pathSegments[0] === "vision" && pathSegments[1]) {
+      targetView = VIEWS.VISION_DETAIL;
+      visionIdFromPath = pathSegments[1];
+    } else {
+      const firstSegment = pathSegments[0] ?? "";
+      targetView = getViewFromSlug(firstSegment);
+    }
 
     // Fallback to query param (legacy/PWA)
-    if (!targetView && viewParam) {
+    if (!targetView && viewParam && viewParam !== VIEWS.VISION_DETAIL) {
       targetView = getViewFromSlug(viewParam);
     }
+
+    if (targetView === VIEWS.VISION_DETAIL && !visionIdFromPath) {
+      targetView = undefined;
+    }
+
+    State.setVisionDetailId(
+      targetView === VIEWS.VISION_DETAIL ? visionIdFromPath : null,
+    );
 
     if (targetView) {
       State.setView(targetView);
@@ -413,14 +432,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 4. Handle Browser Navigation (Back/Forward)
     window.addEventListener("popstate", () => {
       const rawSlug = location.pathname.slice(1);
-      const view = getViewFromSlug(rawSlug);
-      if (view) {
-        // Use internal setView but we know the URL is already correct so the listener won't pushState
-        State.setView(view);
-      } else if (rawSlug === "") {
-        // If user hits Back to root, we rely on whatever current state is?
-        // Or re-assert default.
-        // For now, this is safer than potentially broken emptyness.
+      const segments = rawSlug.split("/").filter(Boolean);
+      if (segments[0] === "vision" && segments[1]) {
+        State.setVisionDetailId(segments[1]);
+        State.setView(VIEWS.VISION_DETAIL);
+      } else {
+        State.setVisionDetailId(null);
+        const view = getViewFromSlug(segments[0] ?? "");
+        if (view) {
+          State.setView(view);
+        } else if (rawSlug === "") {
+          // If user hits Back to root, we rely on whatever current state is?
+          // Or re-assert default.
+          // For now, this is safer than potentially broken emptyness.
+        }
       }
     });
   }
@@ -484,178 +509,201 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      const toastEl = document.getElementById("toast");
-      const toastIconEl = document.getElementById("toastIcon");
-      const toastMessageEl = document.getElementById("toastMessage");
-      let toastHideTimer: number | null = null;
+    type WindowWithSwHelper = Window & {
+      unregisterGardenFenceServiceWorkers?: () => Promise<void>;
+    };
+    const windowWithSwHelper = window as WindowWithSwHelper;
 
-      const hideToast = () => {
-        if (!toastEl) return;
-        toastEl.classList.remove("active");
-        toastEl.removeAttribute("data-toast-type");
-        if (toastHideTimer) window.clearTimeout(toastHideTimer);
-        toastHideTimer = null;
-      };
+    // Expose a small helper for the console so stale versions can be nuked quickly.
+    const unregisterGardenFenceServiceWorkers = async () => {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(
+        registrations.map((registration) => registration.unregister()),
+      );
+      console.info(
+        `[SW] Unregistered ${registrations.length} service worker(s); reload to resume production behavior.`,
+      );
+    };
+    windowWithSwHelper.unregisterGardenFenceServiceWorkers =
+      unregisterGardenFenceServiceWorkers;
 
-      const showToast = (
-        icon: string,
-        message: string,
-        opts?: { timeoutMs?: number; type?: string },
-      ) => {
-        if (!toastEl || !toastIconEl || !toastMessageEl) return;
-        if (toastHideTimer) window.clearTimeout(toastHideTimer);
-        toastHideTimer = null;
+    if (import.meta.env.PROD) {
+      window.addEventListener("load", () => {
+        const toastEl = document.getElementById("toast");
+        const toastIconEl = document.getElementById("toastIcon");
+        const toastMessageEl = document.getElementById("toastMessage");
+        let toastHideTimer: number | null = null;
 
-        toastIconEl.textContent = icon || "";
-        toastMessageEl.textContent = message;
-        if (opts?.type) toastEl.setAttribute("data-toast-type", opts.type);
-        toastEl.classList.add("active");
+        const hideToast = () => {
+          if (!toastEl) return;
+          toastEl.classList.remove("active");
+          toastEl.removeAttribute("data-toast-type");
+          if (toastHideTimer) window.clearTimeout(toastHideTimer);
+          toastHideTimer = null;
+        };
 
-        if (typeof opts?.timeoutMs === "number" && opts.timeoutMs > 0) {
-          toastHideTimer = window.setTimeout(hideToast, opts.timeoutMs);
-        }
-      };
+        const showToast = (
+          icon: string,
+          message: string,
+          opts?: { timeoutMs?: number; type?: string },
+        ) => {
+          if (!toastEl || !toastIconEl || !toastMessageEl) return;
+          if (toastHideTimer) window.clearTimeout(toastHideTimer);
+          toastHideTimer = null;
 
-      const storeSwVersion = (version: string) => {
-        try {
-          localStorage.setItem("gardenFence.swVersion", version);
-        } catch {
-          // ignore storage errors
-        }
-      };
+          toastIconEl.textContent = icon || "";
+          toastMessageEl.textContent = message;
+          if (opts?.type) toastEl.setAttribute("data-toast-type", opts.type);
+          toastEl.classList.add("active");
 
-      const showUpdatePrompt = (registration: ServiceWorkerRegistration) => {
-        if (!toastEl || !toastIconEl || !toastMessageEl) return;
-        if (!navigator.serviceWorker.controller) return; // First install.
-        if (!registration.waiting) return;
+          if (typeof opts?.timeoutMs === "number" && opts.timeoutMs > 0) {
+            toastHideTimer = window.setTimeout(hideToast, opts.timeoutMs);
+          }
+        };
 
-        const actionsClass = "toast-actions";
-        let actions = toastEl.querySelector(
-          `.${actionsClass}`,
-        ) as HTMLDivElement | null;
-        if (!actions) {
-          actions = document.createElement("div");
-          actions.className = actionsClass;
-          toastEl.appendChild(actions);
-        }
+        const storeSwVersion = (version: string) => {
+          try {
+            localStorage.setItem("gardenFence.swVersion", version);
+          } catch {
+            // ignore storage errors
+          }
+        };
 
-        actions.innerHTML = `
-          <button type="button" class="toast-action" data-sw-action="reload">Reload</button>
-          <button type="button" class="toast-action secondary" data-sw-action="later">Later</button>
-        `;
+        const showUpdatePrompt = (registration: ServiceWorkerRegistration) => {
+          if (!toastEl || !toastIconEl || !toastMessageEl) return;
+          if (!navigator.serviceWorker.controller) return; // First install.
+          if (!registration.waiting) return;
 
-        actions.addEventListener(
-          "click",
-          (e) => {
-            const target = e.target as Element | null;
-            const btn = target?.closest(
-              "[data-sw-action]",
-            ) as HTMLElement | null;
-            const action = btn?.dataset.swAction;
-            if (!action) return;
-            e.preventDefault();
-            e.stopPropagation();
+          const actionsClass = "toast-actions";
+          let actions = toastEl.querySelector(
+            `.${actionsClass}`,
+          ) as HTMLDivElement | null;
+          if (!actions) {
+            actions = document.createElement("div");
+            actions.className = actionsClass;
+            toastEl.appendChild(actions);
+          }
 
-            if (action === "reload") {
-              registration.waiting?.postMessage({ type: "SKIP_WAITING" });
-              hideToast();
-            } else {
-              hideToast();
-            }
-          },
-          { once: true },
-        );
+          actions.innerHTML = `
+            <button type="button" class="toast-action" data-sw-action="reload">Reload</button>
+            <button type="button" class="toast-action secondary" data-sw-action="later">Later</button>
+          `;
 
-        showToast("⬆️", "New version available.", { type: "sw-update" });
-      };
+          actions.addEventListener(
+            "click",
+            (e) => {
+              const target = e.target as Element | null;
+              const btn = target?.closest(
+                "[data-sw-action]",
+              ) as HTMLElement | null;
+              const action = btn?.dataset.swAction;
+              if (!action) return;
+              e.preventDefault();
+              e.stopPropagation();
 
-      navigator.serviceWorker.addEventListener("message", (event) => {
-        const type = event?.data?.type;
-        if (type === "SW_VERSION" && typeof event.data.version === "string") {
-          storeSwVersion(event.data.version);
-        }
-        if (type === "CACHES_CLEARED") {
-          showToast("🧹", "Cache cleared.", {
-            timeoutMs: 2500,
-            type: "sw-cache",
-          });
-        }
-        if (type === "CACHES_CLEAR_FAILED") {
-          showToast("⚠️", "Couldn’t clear cache.", {
-            timeoutMs: 3500,
-            type: "sw-cache",
-          });
-        }
-        if (type === "PROCESS_SYNC_QUEUE") {
-          import("./services/SyncQueue")
-            .then((mod) => mod.syncQueue.forceSync())
-            .catch(() => {});
-        }
-        if (type === "SHARE_TARGET" && event.data.payload) {
-          handleSharedIntent(event.data.payload);
-        }
-      });
+              if (action === "reload") {
+                registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+                hideToast();
+              } else {
+                hideToast();
+              }
+            },
+            { once: true },
+          );
 
-      navigator.serviceWorker
-        .register("./sw.js")
-        .then((registration) => {
-          let refreshing = false;
+          showToast("⬆️", "New version available.", { type: "sw-update" });
+        };
 
-          const requestUpdate = () => registration.update().catch(() => {});
-          const ensurePeriodicSync = () => {
-            const periodicSync = (registration as any).periodicSync;
-            if (!periodicSync?.register) return;
-            periodicSync
-              .getTags?.()
-              .then((tags: string[]) => {
-                if (!tags.includes("garden-fence-sync")) {
-                  return periodicSync.register("garden-fence-sync", {
-                    minInterval: 3 * 60 * 60 * 1000,
-                  });
-                }
-              })
-              .catch(() => {});
-          };
-
-          // When a new SW takes control, reload once so the latest assets are used.
-          navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (refreshing) return;
-            refreshing = true;
-            window.location.reload();
-          });
-
-          // If an update is found, prompt the user to reload.
-          registration.addEventListener("updatefound", () => {
-            const installing = registration.installing;
-            if (!installing) return;
-            installing.addEventListener("statechange", () => {
-              if (installing.state !== "installed") return;
-              showUpdatePrompt(registration);
+        navigator.serviceWorker.addEventListener("message", (event) => {
+          const type = event?.data?.type;
+          if (type === "SW_VERSION" && typeof event.data.version === "string") {
+            storeSwVersion(event.data.version);
+          }
+          if (type === "CACHES_CLEARED") {
+            showToast("🧹", "Cache cleared.", {
+              timeoutMs: 2500,
+              type: "sw-cache",
             });
-          });
-
-          // Handle refresh if an update is already waiting (e.g., opened in a new tab).
-          showUpdatePrompt(registration);
-
-          // Ask the active SW for its current version.
-          registration.active?.postMessage({ type: "GET_VERSION" });
-
-          // Proactively check for updates on launch and when returning to the app.
-          requestUpdate();
-          ensurePeriodicSync();
-          setInterval(requestUpdate, 60 * 60 * 1000); // hourly
-          document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") {
-              requestUpdate();
-              ensurePeriodicSync();
-            }
-          });
-        })
-        .catch((err) => {
-          console.warn("Service worker registration failed:", err);
+          }
+          if (type === "CACHES_CLEAR_FAILED") {
+            showToast("⚠️", "Couldn’t clear cache.", {
+              timeoutMs: 3500,
+              type: "sw-cache",
+            });
+          }
+          if (type === "PROCESS_SYNC_QUEUE") {
+            import("./services/SyncQueue")
+              .then((mod) => mod.syncQueue.forceSync())
+              .catch(() => {});
+          }
+          if (type === "SHARE_TARGET" && event.data.payload) {
+            handleSharedIntent(event.data.payload);
+          }
         });
-    });
+
+        // Production SW registration uses the install + activation helpers in sw.js
+        // (skipWaiting + clientsClaim) and prompts the user before reloading so we
+        // never keep serving very stale assets.
+        navigator.serviceWorker
+          .register("./sw.js")
+          .then((registration) => {
+            let refreshing = false;
+
+            const requestUpdate = () => registration.update().catch(() => {});
+            const ensurePeriodicSync = () => {
+              const periodicSync = (registration as any).periodicSync;
+              if (!periodicSync?.register) return;
+              periodicSync
+                .getTags?.()
+                .then((tags: string[]) => {
+                  if (!tags.includes("garden-fence-sync")) {
+                    return periodicSync.register("garden-fence-sync", {
+                      minInterval: 3 * 60 * 60 * 1000,
+                    });
+                  }
+                })
+                .catch(() => {});
+            };
+
+            // When a new SW takes control, reload once so the latest assets are used.
+            navigator.serviceWorker.addEventListener("controllerchange", () => {
+              if (refreshing) return;
+              refreshing = true;
+              window.location.reload();
+            });
+
+            // If an update is found, prompt the user to reload.
+            registration.addEventListener("updatefound", () => {
+              const installing = registration.installing;
+              if (!installing) return;
+              installing.addEventListener("statechange", () => {
+                if (installing.state !== "installed") return;
+                showUpdatePrompt(registration);
+              });
+            });
+
+            // Handle refresh if an update is already waiting (e.g., opened in a new tab).
+            showUpdatePrompt(registration);
+
+            // Ask the active SW for its current version.
+            registration.active?.postMessage({ type: "GET_VERSION" });
+
+            // Proactively check for updates on launch and when returning to the app.
+            requestUpdate();
+            ensurePeriodicSync();
+            setInterval(requestUpdate, 60 * 60 * 1000); // hourly
+            document.addEventListener("visibilitychange", () => {
+              if (document.visibilityState === "visible") {
+                requestUpdate();
+                ensurePeriodicSync();
+              }
+            });
+          })
+          .catch((err) => {
+            console.warn("Service worker registration failed:", err);
+          });
+      });
+    }
   }
 
   // Header "More" Menu Toggle

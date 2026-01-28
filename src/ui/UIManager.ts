@@ -245,8 +245,10 @@ export const UI = {
           options?: any,
         ) => this.openGoalModal(level, month, year, options),
         openGoalDetail: (goalId: string) => this.openGoalDetail(goalId),
+        openVisionDetail: (visionId: string) => this.openVisionDetail(visionId),
         openGoalEdit: (goalId: string) => goalDetailModal.show(goalId),
         closeGoalDetailPage: () => this.closeGoalDetailPage(),
+        closeVisionPage: () => this.closeVisionPage(),
         escapeHtml: (text: string) => escapeHtmlUtil(text),
         dayViewController: this.dayViewController,
       },
@@ -1865,10 +1867,22 @@ export const UI = {
     );
   },
 
+  openVisionDetail(visionId: string): void {
+    if (!visionId) return;
+    if (State.currentView !== VIEWS.VISION_DETAIL) {
+      this._uiState.lastViewBeforeVision = State.currentView;
+    }
+    State.setGoalDetailGoal(null);
+    State.setVisionDetailId(visionId);
+    State.setView(VIEWS.VISION_DETAIL);
+  },
+
   openGoalDetail(goalId: string): void {
     if (!goalId) return;
     if (State.currentView !== VIEWS.GOAL_DETAIL) {
       this._uiState.lastViewBeforeDetail = State.currentView;
+      this._uiState.lastVisionBeforeDetailId =
+        State.currentView === VIEWS.VISION_DETAIL ? State.visionDetailId : null;
     }
     State.setGoalDetailGoal(goalId);
     State.setView(VIEWS.GOAL_DETAIL);
@@ -1876,8 +1890,22 @@ export const UI = {
 
   closeGoalDetailPage(): void {
     const fallbackView = this._uiState.lastViewBeforeDetail ?? VIEWS.GARDEN;
+    const fallbackVisionId =
+      fallbackView === VIEWS.VISION_DETAIL
+        ? this._uiState.lastVisionBeforeDetailId
+        : null;
     this._uiState.lastViewBeforeDetail = null;
+    this._uiState.lastVisionBeforeDetailId = null;
     State.setGoalDetailGoal(null);
+    State.setVisionDetailId(fallbackVisionId);
+    State.setView(fallbackView);
+  },
+
+  closeVisionPage(): void {
+    const fallbackView = this._uiState.lastViewBeforeVision ?? VIEWS.GARDEN;
+    this._uiState.lastViewBeforeVision = null;
+    State.setGoalDetailGoal(null);
+    State.setVisionDetailId(null);
     State.setView(fallbackView);
   },
 

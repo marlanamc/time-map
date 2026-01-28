@@ -7,6 +7,7 @@ import {
   WeekRenderer,
   GardenHorizonRenderer,
   GoalDetailRenderer,
+  VisionDetailRenderer,
 } from "../renderers";
 
 type RenderCoordinatorCallbacks = {
@@ -29,8 +30,10 @@ type RenderCoordinatorCallbacks = {
     options?: any,
   ) => void;
   openGoalDetail: (goalId: string) => void;
+  openVisionDetail: (visionId: string) => void;
   openGoalEdit: (goalId: string) => void;
   closeGoalDetailPage: () => void;
+  closeVisionPage: () => void;
   escapeHtml: (text: string) => string;
   dayViewController: any;
 };
@@ -79,18 +82,22 @@ export class RenderCoordinator {
         ? State.viewingDate.toISOString().slice(0, 10)
         : "";
 
-      switch (State.currentView) {
-        case VIEWS.YEAR:
-          return `year:${year}`;
-        case VIEWS.MONTH:
-          return `month:${year}-${month}`;
-        case VIEWS.WEEK:
-          return `week:${year}-${week}`;
-        case VIEWS.DAY:
-          return `day:${day}`;
-        default:
-          return `${State.currentView}:${day}`;
-      }
+    switch (State.currentView) {
+      case VIEWS.YEAR:
+        return `year:${year}`;
+      case VIEWS.MONTH:
+        return `month:${year}-${month}`;
+      case VIEWS.WEEK:
+        return `week:${year}-${week}`;
+      case VIEWS.DAY:
+        return `day:${day}`;
+      case VIEWS.GOAL_DETAIL:
+        return `goal:${State.goalDetailId ?? ""}`;
+      case VIEWS.VISION_DETAIL:
+        return `vision:${State.visionDetailId ?? ""}`;
+      default:
+        return `${State.currentView}:${day}`;
+    }
     })();
 
     const shouldResetScroll = navKey !== this.lastNavKey;
@@ -288,6 +295,7 @@ export class RenderCoordinator {
           {
             onOpenGoal: (goalId) => this.callbacks.openGoalDetail(goalId),
             onOpenGoalEdit: (goalId) => this.callbacks.openGoalEdit(goalId),
+            onOpenVision: (visionId) => this.callbacks.openVisionDetail(visionId),
             onAddChildGoal: (opts) => {
               const month = State.viewingMonth ?? new Date().getMonth();
               const year = State.viewingYear ?? new Date().getFullYear();
@@ -301,6 +309,31 @@ export class RenderCoordinator {
         );
         break;
       }
+      case VIEWS.VISION_DETAIL: {
+        const visionId = State.visionDetailId;
+        if (!visionId) {
+          this.callbacks.closeVisionPage();
+          break;
+        }
+        VisionDetailRenderer.renderPage(
+          this.elements,
+          visionId,
+          this.callbacks.escapeHtml.bind(this),
+          {
+            onMilestoneClick: (goalId) => this.callbacks.openGoalDetail(goalId),
+            onAddMilestone: (id) => {
+              const month = State.viewingMonth ?? new Date().getMonth();
+              const year = State.viewingYear ?? new Date().getFullYear();
+              this.callbacks.openGoalModal("milestone", month, year, {
+                parentId: id,
+                parentLevel: "vision",
+              });
+            },
+            onClose: () => this.callbacks.closeVisionPage(),
+          },
+        );
+        break;
+      }
       case VIEWS.HOME:
         // Home view uses the sidebar layout; nothing to render on the main grid.
         break;
@@ -309,6 +342,7 @@ export class RenderCoordinator {
           this.elements,
           this.callbacks.escapeHtml.bind(this),
           (goalId) => this.callbacks.openGoalDetail(goalId),
+          (visionId) => this.callbacks.openVisionDetail(visionId),
           (level) =>
             this.callbacks.openGoalModal(
               level,

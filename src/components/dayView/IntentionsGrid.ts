@@ -1,6 +1,6 @@
 /**
- * IntentionsGrid - Customizable quick intentions display
- * @remarks Renders quick intention templates with edit mode
+ * IntentionsGrid - Customizable common intentions display
+ * @remarks Renders common intention templates with edit mode
  */
 
 import type { CustomIntention } from "../../types";
@@ -70,9 +70,9 @@ export function renderIntentionsGrid(intentions?: CustomIntention[]): string {
   if (items.length === 0) {
     return `
       <div class="intentions-grid-empty">
-        <p>No quick intentions yet</p>
+        <p>No common intentions yet</p>
         <button type="button" class="btn-add-intention" data-action="customize">
-          + Add your first quick intention
+          + Add your first common intention
         </button>
       </div>
     `;
@@ -97,8 +97,8 @@ export function renderIntentionsEditButton(): string {
       type="button"
       class="section-edit-btn"
       data-action="customize"
-      aria-label="Customize quick intentions"
-      title="Customize quick intentions"
+      aria-label="Customize common intentions"
+      title="Customize common intentions"
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M11.333 2L14 4.667l-9.334 9.333H2v-2.667L11.333 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

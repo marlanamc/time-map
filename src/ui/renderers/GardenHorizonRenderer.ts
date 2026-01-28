@@ -54,11 +54,11 @@ function applyVisionSelectionStyles(goalId: string | null): void {
 
 function selectVision(
   goalId: string,
-  onGoalClick: (goalId: string) => void,
+  onVisionClick: (visionId: string) => void,
 ): void {
   selectedVisionId = goalId;
   applyVisionSelectionStyles(goalId);
-  onGoalClick(goalId);
+  onVisionClick(goalId);
 }
 
 /**
@@ -263,6 +263,7 @@ export const GardenHorizonRenderer = {
     elements: UIElements,
     escapeHtmlFn: (text: string) => string,
     onGoalClick: (goalId: string) => void,
+    onVisionClick: (visionId: string) => void,
     onAddGoal?: (level: GoalLevel) => void,
   ): void {
     if (!State.data) return;
@@ -335,7 +336,7 @@ export const GardenHorizonRenderer = {
       sortedVisions,
       viewDate,
       escapeHtmlFn,
-      onGoalClick,
+      onVisionClick,
       onAddGoal,
     );
     layout.appendChild(spine);
@@ -487,7 +488,7 @@ export const GardenHorizonRenderer = {
     visions: Goal[],
     viewDate: Date,
     escapeHtmlFn: (text: string) => string,
-    onGoalClick: (goalId: string) => void,
+    onVisionClick: (visionId: string) => void,
     onAddGoal?: (level: GoalLevel) => void,
   ): HTMLElement {
     const spine = document.createElement("aside");
@@ -625,14 +626,14 @@ export const GardenHorizonRenderer = {
 
         // Click handler
         item.addEventListener("click", () => {
-          selectVision(vision.id, onGoalClick);
+          selectVision(vision.id, onVisionClick);
         });
 
         // Keyboard handler
         item.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            selectVision(vision.id, onGoalClick);
+            selectVision(vision.id, onVisionClick);
           }
         });
 

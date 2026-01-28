@@ -183,6 +183,16 @@ This project uses **Vite** for an incredibly fast development experience:
 3. **No manual refresh needed** - Vite handles everything automatically
 4. **Build for production:** `npm run build`
 
+## Caching & stale builds (Vite 7.3.0)
+
+Vite already outputs JS/CSS with `[hash]` in the file name so each deploy produces entirely new URLs, and the service worker in `sw.js` is intentionally registered only in production (the app now guards registration with `import.meta.env.PROD`). When the SW detects a new version it posts a `SKIP_WAITING` request to the waiting worker and prompts the user to reload so the latest HTML/JS arrives quickly instead of patching partial updates. Production hosting should still serve `index.html` with `Cache-Control: no-cache` (or a very small `max-age`) so the HTML is always fresh, while hashed assets can safely use `Cache-Control: max-age=31536000, immutable`.
+
+### Debugging stale builds
+
+- `npm run clean && npm run build` — removes `node_modules/.vite` and `dist/` first, then rebuilds with a fresh cache.
+- `npm run dev -- --force` — tells Vite to ignore its dependency cache if you ever see stale chunks locally.
+- `window.unregisterGardenFenceServiceWorkers()` — a console helper that removes every registered service worker for this origin so you can start from a clean slate if the production SW was too aggressive.
+
 ### Key Development Features
 
 - ⚡ **Instant HMR** - See changes in milliseconds, not seconds
