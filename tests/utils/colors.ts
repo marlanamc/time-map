@@ -1,15 +1,25 @@
 export type Rgba = { r: number; g: number; b: number; a: number };
 
 export function parseRgba(value: string): Rgba {
-  const match = value
-    .replace(/\s+/g, '')
-    .match(/^rgba?\((\d+),(\d+),(\d+)(?:,([\d.]+))?\)$/i);
-  if (!match) throw new Error(`Unsupported color format: ${value}`);
+  const normalized = value.replace(/\s+/g, "");
+  const isRgba = normalized.toLowerCase().startsWith("rgba(");
+  const isRgb = normalized.toLowerCase().startsWith("rgb(");
+  if (!isRgb && !isRgba) {
+    throw new Error(`Unsupported color format: ${value}`);
+  }
+  const inner = normalized.slice(
+    normalized.indexOf("(") + 1,
+    normalized.lastIndexOf(")"),
+  );
+  const parts = inner.split(",");
+  if (parts.length < 3 || parts.length > 4) {
+    throw new Error(`Unsupported color format: ${value}`);
+  }
+  const [rText, gText, bText, aText] = parts;
   return {
-    r: Number(match[1]),
-    g: Number(match[2]),
-    b: Number(match[3]),
-    a: match[4] ? Number(match[4]) : 1,
+    r: Number(rText),
+    g: Number(gText),
+    b: Number(bText),
+    a: aText ? Number(aText) : 1,
   };
 }
-

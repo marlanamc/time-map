@@ -781,6 +781,13 @@
 }
 
 .timed-task-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.timed-task-title-text {
   font-weight: 700;
   font-size: 0.95rem;
   text-transform: none;
@@ -788,6 +795,32 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: inline-block;
+  flex: 1;
+  min-width: 0;
+}
+
+.timed-task-time-until {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.timed-task-time-until::before {
+  content: "TIME UNTIL";
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.day-goal-card.planner-timed-task:hover .timed-task-time-until::before {
+  opacity: 0.85;
 }
 
 .timed-task-actions {

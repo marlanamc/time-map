@@ -152,6 +152,17 @@ export function handleClick(e: Event, deps: EventDeps): void {
     return;
   }
 
+  const detailBtn = target.closest(".btn-intention-details") as HTMLElement | null;
+  if (detailBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const goalId = detailBtn.dataset.goalId;
+    if (goalId) {
+      deps.callbacks.onOpenGoalDetail?.(goalId);
+    }
+    return;
+  }
+
   const card = target.closest(".day-goal-card") as HTMLElement;
   if (
     card &&

@@ -1373,6 +1373,7 @@ export const UI = {
           onGoalClick: (goalId: string) => {
             goalDetailModal.show(goalId);
           },
+          onOpenGoalDetail: (goalId: string) => this.openGoalDetail(goalId),
           onZenFocus: (goalId: string) => {
             void this.ensureZenFocus().then((zf) => zf?.open(goalId));
           },

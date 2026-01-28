@@ -18,6 +18,7 @@ export interface DayViewOptions {
 export interface DayViewCallbacks {
   onGoalUpdate: (goalId: string, updates: Partial<Goal>) => void;
   onGoalClick: (goalId: string) => void;
+  onOpenGoalDetail?: (goalId: string) => void;
   onZenFocus: (goalId: string) => void;
   onPlantSomething?: () => void;
   onShowToast?: (emoji: string, message: string) => void;

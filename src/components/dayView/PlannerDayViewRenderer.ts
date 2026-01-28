@@ -12,6 +12,12 @@ import { getGoalEmoji } from "../../utils/goalVisuals";
 import type { TimelineItem, PositionedTimelineItem } from "./types";
 import { getIntentionInstancesForDate } from "../../core/Scheduling";
 
+type CountdownState = "future" | "now" | "past";
+type CountdownInfo = {
+  label: string;
+  state: CountdownState;
+};
+
 /**
  * Renderer for the Planner-style day view
  * @remarks Displays goals in a planner layout with a sidebar showing task cloud,
@@ -31,7 +37,9 @@ export class PlannerDayViewRenderer {
    * @returns SVG markup as a string
    * @private
    */
-  private icon(name: "plus" | "eye" | "minus" | "calendar"): string {
+  private icon(
+    name: "plus" | "eye" | "minus" | "calendar" | "edit",
+  ): string {
     if (name === "plus") {
       return `
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -43,14 +51,28 @@ export class PlannerDayViewRenderer {
       return `
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-      `;
+      </svg>
+    `;
     }
     if (name === "calendar") {
       return `
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
           <path d="M16 2v4M8 2v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      `;
+    }
+    if (name === "edit") {
+      return `
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            d="M4.5 17.5V21h3.5L19 7.5l-3.5-3.5L4.5 17.5zM20.5 6.5l-1-1a1 1 0 0 0-1.42 0l-1.67 1.67 2.5 2.5L20.5 7.9a1 1 0 0 0 0-1.4z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       `;
     }
@@ -1120,9 +1142,14 @@ export class PlannerDayViewRenderer {
     const colorClass = goal.category ? `cat-${goal.category}` : "cat-default";
     const startTimeForMeta =
       goal.startTime ?? this.formatTimeFromScheduled(goal, date);
-    const countdownLabel = this.getCountdownLabelForTime(startTimeForMeta);
-    const countdownHtml = countdownLabel
-      ? `<span class="timeline-countdown" aria-hidden="true">${countdownLabel}</span>`
+    const countdownInfo = this.getCountdownInfoForTime(
+      startTimeForMeta,
+      goal.endTime,
+    );
+    const countdownBadge = countdownInfo
+      ? `<span class="timed-task-time-until" data-time-until-state="${
+          countdownInfo.state
+        }">${countdownInfo.label}</span>`
       : "";
     const resizeHandles =
       goal.status !== "done"
@@ -1152,19 +1179,23 @@ export class PlannerDayViewRenderer {
         }"></div>
         <div class="timed-task-content">
           <span class="timed-task-emoji">${emoji}</span>
-          <span class="timed-task-title">${goal.title}</span>
+          <span class="timed-task-title">
+            <span class="timed-task-title-text">${goal.title}</span>
+          </span>
         </div>
         <div class="timed-task-actions">
-          <button class="btn-zen-focus btn-icon" type="button" data-goal-id="${
+          ${countdownBadge}
+          <button class="btn-icon btn-intention-edit" type="button" data-goal-id="${
             goal.id
-          }" aria-label="Focus" title="Focus">${this.icon("eye")}</button>
-          <button class="btn-icon btn-planner-remove" type="button" data-goal-id="${
+          }" aria-label="Edit intention" title="Edit intention">${this.icon(
+            "edit",
+          )}</button>
+          <button class="btn-icon btn-intention-details" type="button" data-goal-id="${
             goal.id
-          }" aria-label="Remove from timeline" title="Remove from timeline">${this.icon(
-            "minus",
+          }" aria-label="Open intention details" title="Open intention details">${this.icon(
+            "eye",
           )}</button>
         </div>
-      ${countdownHtml}
     </div>
     `;
   }
@@ -1220,9 +1251,12 @@ export class PlannerDayViewRenderer {
     const startLabel = this.calculator.format12h(startMin);
     const endLabel = this.calculator.format12h(endMin);
     const timeLabel = `${startLabel} - ${endLabel}`;
-    const countdownLabel = this.getCountdownLabelFromIso(event.startAt);
-    const countdownHtml = countdownLabel
-      ? `<span class="timeline-countdown" aria-hidden="true">${countdownLabel}</span>`
+    const countdownInfo = this.getCountdownInfoFromIso(
+      event.startAt,
+      event.endAt ?? null,
+    );
+    const countdownHtml = countdownInfo
+      ? `<span class="timeline-countdown" data-time-until-state="${countdownInfo.state}" aria-hidden="true">${countdownInfo.label}</span>`
       : "";
 
     const itemHour = Math.floor(item.startMin / 60);
@@ -1248,16 +1282,30 @@ export class PlannerDayViewRenderer {
     `;
   }
 
-  private getCountdownLabelForTime(time?: string | null): string | null {
-    const target = this.buildDateFromTime(time);
-    return this.getCountdownLabel(target);
+  private getCountdownInfoForTime(
+    start?: string | null,
+    end?: string | null,
+  ): CountdownInfo | null {
+    const target = this.buildDateFromTime(start);
+    const endDate = end ? this.buildDateFromTime(end) : null;
+    return this.getCountdownInfo(target, endDate);
   }
 
-  private getCountdownLabelFromIso(iso: string): string | null {
-    if (!iso) return null;
-    const parsed = new Date(iso);
-    if (Number.isNaN(parsed.getTime())) return null;
-    return this.getCountdownLabel(parsed);
+  private getCountdownInfoFromIso(
+    startIso: string,
+    endIso?: string | null,
+  ): CountdownInfo | null {
+    if (!startIso) return null;
+    const parsedStart = new Date(startIso);
+    if (Number.isNaN(parsedStart.getTime())) return null;
+    let parsedEnd: Date | null = null;
+    if (endIso) {
+      const maybeEnd = new Date(endIso);
+      if (!Number.isNaN(maybeEnd.getTime())) {
+        parsedEnd = maybeEnd;
+      }
+    }
+    return this.getCountdownInfo(parsedStart, parsedEnd);
   }
 
   private buildDateFromTime(time?: string | null): Date | null {
@@ -1273,12 +1321,23 @@ export class PlannerDayViewRenderer {
     return result;
   }
 
-  private getCountdownLabel(target: Date | null): string | null {
+  private getCountdownInfo(
+    target: Date | null,
+    end?: Date | null,
+  ): CountdownInfo | null {
     if (!target) return null;
     const now = new Date();
-    const diffMinutes = Math.round((target.getTime() - now.getTime()) / 60000);
-    const clamped = Math.max(0, diffMinutes);
-    return formatCountdown(clamped);
+    if (end && now >= end) {
+      return { label: "Past", state: "past" };
+    }
+    const diffMinutes = (target.getTime() - now.getTime()) / 60000;
+    if (diffMinutes <= 0) {
+      return { label: "Now", state: "now" };
+    }
+    return {
+      label: formatCountdown(diffMinutes),
+      state: "future",
+    };
   }
 
   /**
