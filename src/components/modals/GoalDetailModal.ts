@@ -23,6 +23,7 @@ import { renderEnergyMetaPanel, setupEnergyMetaPanel } from "./shared/EnergyMeta
 import { renderActivityPicker, setupActivityPicker } from "./shared/ActivityPicker";
 import { setupModalA11y, type ModalA11yCleanup } from "./shared/modalA11y";
 import type { AccentTheme, Category, Goal, GoalMeta, GoalStatus } from "../../types";
+import { getLinkedGoalChips, renderGoalChips } from "../../ui/utils/goalChips";
 
 export interface GoalDetailModalCallbacks {
   escapeHtml: (text: string) => string;
@@ -175,25 +176,14 @@ function populateEnergySection(
   }
 }
 
-function populateLinkSection(
-  modal: HTMLElement,
-  goal: Goal,
-  escapeHtml: (value: string) => string,
-  getLevelLabel: (level: string) => string,
-): void {
+function populateLinkSection(modal: HTMLElement, goal: Goal): void {
   const container = modal.querySelector("#goalDetailLinkBody");
   if (!container) return;
-  let linkHtml = '<p class="field-help">None (life task)</p>';
-  if (goal.parentId) {
-    const parent = Goals.getById(goal.parentId);
-    if (parent) {
-      linkHtml = `<p class="field-help">${getLevelLabel(
-        parent.level,
-      )}: ${escapeHtml(parent.title)}</p>`;
-    } else {
-      linkHtml = `<p class="field-help">Linked to unknown goal</p>`;
-    }
-  }
+  const chipsHtml = renderGoalChips(getLinkedGoalChips(goal));
+  const fallback = goal.parentId
+    ? '<p class="field-help">Connection unknown</p>'
+    : '<p class="field-help">None (life task)</p>';
+  const linkHtml = chipsHtml || fallback;
   container.innerHTML = `
     <div class="form-group">
       <label>Connection</label>
@@ -456,10 +446,9 @@ class GoalDetailModalManager {
       "#goalDetailAccordionContainer",
     ) as HTMLElement | null;
     setupAccordionSectionToggles(accordionContainer);
-    const getLevelLabel = this.getLevelLabel.bind(this);
     populateContextSection(modal, goal);
     populateEnergySection(modal, goal.level, detailState);
-    populateLinkSection(modal, goal, callbacks.escapeHtml, getLevelLabel);
+    populateLinkSection(modal, goal);
     populateDetailsSection(modal, goal.progress);
     populateAdvancedSection(modal, goal, callbacks);
     this.bindEvents(modal, goalId, detailState);

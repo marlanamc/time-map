@@ -1,5 +1,6 @@
 import { Goals } from "../../core/Goals";
 import { getVisionAccent } from "../../utils/goalLinkage";
+import { getLinkedGoalChips, renderGoalChips } from "../utils/goalChips";
 import type { Goal, GoalLevel, UIElements } from "../../types";
 
 type AddChildGoalOpts = {
@@ -167,24 +168,9 @@ function buildGoalDetailMarkup(
     `;
   };
 
-  const renderLinkedParentLine = () => {
-    if (goal.level !== "intention" || !goal.parentId) return "";
-    const parent = Goals.getById(goal.parentId);
-    if (!parent) return "";
-    const action = parent.level === "vision" ? "open-vision" : "open-goal";
-    return `
-      <p class="living-garden-detail-vision-line">
-        Linked to:
-        <button
-          type="button"
-          class="living-garden-detail-vision-link"
-          data-action="${action}"
-          data-goal-id="${escapeHtmlFn(parent.id)}"
-        >
-          ${escapeHtmlFn(parent.title)}
-        </button>
-      </p>
-    `;
+  const renderLinkedGoalChips = () => {
+    if (goal.level !== "intention") return "";
+    return renderGoalChips(getLinkedGoalChips(goal));
   };
 
   const renderKanbanColumn = (
@@ -278,7 +264,7 @@ function buildGoalDetailMarkup(
             <div class="living-garden-detail-info">
               <h2 class="living-garden-detail-title">${goal.icon ? `${escapeHtmlFn(goal.icon)} ` : ""}${escapeHtmlFn(goal.title)}</h2>
               ${renderVisionLine()}
-              ${renderLinkedParentLine()}
+              ${renderLinkedGoalChips()}
               <p class="living-garden-detail-description">${escapeHtmlFn(goal.description || "No description yet.")}</p>
               ${goal.dueDate ? `<span class="living-garden-detail-due">Due: ${new Date(goal.dueDate).toLocaleDateString()}</span>` : ""}
             </div>

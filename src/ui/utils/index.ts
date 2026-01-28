@@ -10,3 +10,8 @@ export {
   formatDate,
   formatMinutes,
 } from "./DOMUtils";
+
+export {
+  getLinkedGoalChips,
+  renderGoalChips,
+} from "./goalChips";
