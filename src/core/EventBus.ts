@@ -49,6 +49,19 @@ export interface EventRegistry {
   "garden:review-requested": void;
   "garden:map-requested": void;
 
+  // Capacity check events
+  "capacityCheck:complete": {
+    capacityLevel: "high" | "medium" | "low" | "rest";
+    energyType: "focus" | "creative" | "rest" | "admin";
+    availableMinutes: number;
+    summary: string;
+  };
+  "capacityCheck:openPlanning": {
+    capacityLevel: "high" | "medium" | "low" | "rest";
+    energyType: "focus" | "creative" | "rest" | "admin";
+    availableMinutes: number;
+  };
+
   // Auth events
   "auth:login": { userId: string };
   "auth:logout": void;

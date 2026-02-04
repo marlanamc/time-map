@@ -6,6 +6,7 @@ import { NDSupport } from "../../features/ndSupport";
 import { getVisionAccent } from "../../utils/goalLinkage";
 import { isIntentionActiveOnDate } from "../../utils/intentionVisibility";
 import { GoalEstablishment } from "../../features/garden/GoalEstablishment";
+import { openCapacityCheck } from "../../features/capacityCheck";
 
 /**
  * GardenDashboardRenderer (V3: Grounding & Focus)
@@ -31,7 +32,11 @@ export const GardenDashboardRenderer = {
 
     // Preserve base class and add garden-specific classes
     container.classList.add("garden-view-wrapper");
-    container.classList.remove("year-view-container", "month-view-container", "week-view-container");
+    container.classList.remove(
+      "year-view-container",
+      "month-view-container",
+      "week-view-container",
+    );
     if (!container.classList.contains("calendar-grid")) {
       container.classList.add("calendar-grid");
     }
@@ -283,6 +288,7 @@ export const GardenDashboardRenderer = {
     // --- Tools ---
     const renderTools = () => `
         <div class="floating-tools">
+            <button class="tool-fab" data-action="capacity-check" title="Capacity Check">💭</button>
             <button class="tool-fab" data-action="breathe" title="Breathe">🌬️</button>
             <button class="tool-fab" data-action="dopamine" title="Dopamine">🍬</button>
             <button class="tool-fab" data-action="brain-dump" title="Brain Dump">🧠</button>
@@ -442,6 +448,19 @@ export const GardenDashboardRenderer = {
     container
       .querySelector('[data-action="dopamine"]')
       ?.addEventListener("click", () => NDSupport.showDopamineMenu());
+
+    // Capacity Check
+    container
+      .querySelector('[data-action="capacity-check"]')
+      ?.addEventListener("click", () => {
+        openCapacityCheck((result) => {
+          // Optionally show a toast with the result
+          eventBus.emit("ui:toast", {
+            icon: "💭",
+            message: `Today: ${result.capacityLevel} capacity, ${result.energyType} energy`,
+          });
+        });
+      });
 
     // Brain Dump
     container

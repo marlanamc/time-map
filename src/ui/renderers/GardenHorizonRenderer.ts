@@ -7,7 +7,7 @@
  * Layout:
  * - Goal Spine (left): You Are Here panel + Visions list
  * - Time Canvas (center): Vertical scroll from Year → Month → Week → NOW
- * - Floating Utility Rail (bottom): Plan | Review | Map
+ * - Floating Utility Rail (bottom): Plan | Review | Map | Check
  */
 
 import { State } from "../../core/State";
@@ -25,6 +25,10 @@ import {
   getStateIndicator,
   getStateClass,
 } from "../../core/GoalStateComputation";
+import {
+  openCapacityCheck,
+  getLastCapacityResult,
+} from "../../features/capacityCheck";
 
 // Module state
 let isDrawerOpen = false;
@@ -325,7 +329,12 @@ export const GardenHorizonRenderer = {
     // Preserve base class and add garden-specific class
     container.classList.add("garden-horizon");
     // Remove other view-specific classes
-    container.classList.remove("year-view", "month-view", "week-view", "day-view");
+    container.classList.remove(
+      "year-view",
+      "month-view",
+      "week-view",
+      "day-view",
+    );
 
     // Create the main layout
     const layout = document.createElement("div");
@@ -364,35 +373,44 @@ export const GardenHorizonRenderer = {
     // #region agent log
     // Debug: Check border styles after render
     requestAnimationFrame(() => {
-      const calendarGrid = document.getElementById('calendarGrid');
-      const layout = calendarGrid?.querySelector('.garden-horizon-layout');
+      const calendarGrid = document.getElementById("calendarGrid");
+      const layout = calendarGrid?.querySelector(".garden-horizon-layout");
       const root = document.documentElement;
-      
-      if (calendarGrid && calendarGrid.classList.contains('garden-horizon')) {
+
+      if (calendarGrid && calendarGrid.classList.contains("garden-horizon")) {
         const computed = window.getComputedStyle(calendarGrid);
         const borderColor = computed.borderColor;
         const borderWidth = computed.borderWidth;
         const borderStyle = computed.borderStyle;
         const boxShadow = computed.boxShadow;
         const outline = computed.outline;
-        const cssVar = getComputedStyle(root).getPropertyValue('--gh-border-container').trim();
-        const hasDarkMode = root.classList.contains('dark-mode') || document.body.classList.contains('dark-mode');
+        const cssVar = getComputedStyle(root)
+          .getPropertyValue("--gh-border-container")
+          .trim();
+        const hasDarkMode =
+          root.classList.contains("dark-mode") ||
+          document.body.classList.contains("dark-mode");
         const rootClasses = root.className;
         const bodyClasses = document.body.className;
-        
+
         // Check all matching CSS rules
-        const allRules: Array<{selector: string, border: string, borderColor: string, specificity: string}> = [];
-        Array.from(document.styleSheets).forEach(sheet => {
+        const allRules: Array<{
+          selector: string;
+          border: string;
+          borderColor: string;
+          specificity: string;
+        }> = [];
+        Array.from(document.styleSheets).forEach((sheet) => {
           try {
-            Array.from(sheet.cssRules || []).forEach(rule => {
+            Array.from(sheet.cssRules || []).forEach((rule) => {
               if (rule instanceof CSSStyleRule) {
                 try {
                   if (calendarGrid.matches(rule.selectorText)) {
                     allRules.push({
                       selector: rule.selectorText,
-                      border: rule.style.border || '',
-                      borderColor: rule.style.borderColor || '',
-                      specificity: ''
+                      border: rule.style.border || "",
+                      borderColor: rule.style.borderColor || "",
+                      specificity: "",
                     });
                   }
                 } catch {
@@ -404,55 +422,217 @@ export const GardenHorizonRenderer = {
             // Ignoring stylesheet access issues (cross-origin, etc.)
           }
         });
-        
-        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GardenHorizonRenderer.ts:362',message:'Border debug - calendar-grid computed styles',data:{borderColor,borderWidth,borderStyle,boxShadow,outline,cssVarValue:cssVar,hasDarkMode,rootClasses,bodyClasses,matchingRuleCount:allRules.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        
+
+        fetch(
+          "http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              location: "GardenHorizonRenderer.ts:362",
+              message: "Border debug - calendar-grid computed styles",
+              data: {
+                borderColor,
+                borderWidth,
+                borderStyle,
+                boxShadow,
+                outline,
+                cssVarValue: cssVar,
+                hasDarkMode,
+                rootClasses,
+                bodyClasses,
+                matchingRuleCount: allRules.length,
+              },
+              timestamp: Date.now(),
+              sessionId: "debug-session",
+              runId: "run1",
+              hypothesisId: "A",
+            }),
+          },
+        ).catch(() => {});
+
         // Log matching rules separately
         allRules.forEach((rule, idx) => {
-          fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GardenHorizonRenderer.ts:362',message:`Matching CSS rule ${idx}`,data:rule,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+          fetch(
+            "http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                location: "GardenHorizonRenderer.ts:362",
+                message: `Matching CSS rule ${idx}`,
+                data: rule,
+                timestamp: Date.now(),
+                sessionId: "debug-session",
+                runId: "run1",
+                hypothesisId: "B",
+              }),
+            },
+          ).catch(() => {});
         });
       }
-      
+
       // Check layout element
       if (layout) {
         const layoutComputed = window.getComputedStyle(layout);
         const layoutBorderColor = layoutComputed.borderColor;
         const layoutBorderWidth = layoutComputed.borderWidth;
         const layoutBoxShadow = layoutComputed.boxShadow;
-        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GardenHorizonRenderer.ts:362',message:'Border debug - garden-horizon-layout styles',data:{borderColor:layoutBorderColor,borderWidth:layoutBorderWidth,boxShadow:layoutBoxShadow},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        fetch(
+          "http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              location: "GardenHorizonRenderer.ts:362",
+              message: "Border debug - garden-horizon-layout styles",
+              data: {
+                borderColor: layoutBorderColor,
+                borderWidth: layoutBorderWidth,
+                boxShadow: layoutBoxShadow,
+              },
+              timestamp: Date.now(),
+              sessionId: "debug-session",
+              runId: "run1",
+              hypothesisId: "C",
+            }),
+          },
+        ).catch(() => {});
       }
-      
+
       // Check if box-shadow is creating the visual border effect
       if (calendarGrid) {
         const computed = window.getComputedStyle(calendarGrid);
-        const hasBoxShadow = computed.boxShadow && computed.boxShadow !== 'none';
-        const hasOutline = computed.outline && computed.outline !== 'none';
-        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GardenHorizonRenderer.ts:362',message:'Visual border check - box-shadow/outline',data:{hasBoxShadow,hasOutline,boxShadow:computed.boxShadow,outline:computed.outline},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-        
+        const hasBoxShadow =
+          computed.boxShadow && computed.boxShadow !== "none";
+        const hasOutline = computed.outline && computed.outline !== "none";
+        fetch(
+          "http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              location: "GardenHorizonRenderer.ts:362",
+              message: "Visual border check - box-shadow/outline",
+              data: {
+                hasBoxShadow,
+                hasOutline,
+                boxShadow: computed.boxShadow,
+                outline: computed.outline,
+              },
+              timestamp: Date.now(),
+              sessionId: "debug-session",
+              runId: "run1",
+              hypothesisId: "D",
+            }),
+          },
+        ).catch(() => {});
+
         // Check parent elements for borders
         const parent = calendarGrid.parentElement;
-        const canvas = parent?.closest('#canvas');
+        const canvas = parent?.closest("#canvas");
         const canvasContainer = canvas?.parentElement;
         if (parent) {
           const parentComputed = window.getComputedStyle(parent);
-          const canvasComputed = canvas ? window.getComputedStyle(canvas) : null;
-          const containerComputed = canvasContainer ? window.getComputedStyle(canvasContainer) : null;
-          fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GardenHorizonRenderer.ts:362',message:'Parent element border check',data:{parentBorder:parentComputed.border,parentBorderColor:parentComputed.borderColor,canvasBorder:canvasComputed?.border,canvasBorderColor:canvasComputed?.borderColor,containerBorder:containerComputed?.border,containerBorderColor:containerComputed?.borderColor,dividerVar:getComputedStyle(root).getPropertyValue('--divider').trim()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+          const canvasComputed = canvas
+            ? window.getComputedStyle(canvas)
+            : null;
+          const containerComputed = canvasContainer
+            ? window.getComputedStyle(canvasContainer)
+            : null;
+          fetch(
+            "http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                location: "GardenHorizonRenderer.ts:362",
+                message: "Parent element border check",
+                data: {
+                  parentBorder: parentComputed.border,
+                  parentBorderColor: parentComputed.borderColor,
+                  canvasBorder: canvasComputed?.border,
+                  canvasBorderColor: canvasComputed?.borderColor,
+                  containerBorder: containerComputed?.border,
+                  containerBorderColor: containerComputed?.borderColor,
+                  dividerVar: getComputedStyle(root)
+                    .getPropertyValue("--divider")
+                    .trim(),
+                },
+                timestamp: Date.now(),
+                sessionId: "debug-session",
+                runId: "run1",
+                hypothesisId: "E",
+              }),
+            },
+          ).catch(() => {});
         }
-        
+
         // Check for pseudo-elements that might create visual borders
-        const before = window.getComputedStyle(calendarGrid, '::before');
-        const after = window.getComputedStyle(calendarGrid, '::after');
-        const hasBefore = before.content && before.content !== 'none' && before.content !== 'normal';
-        const hasAfter = after.content && after.content !== 'none' && after.content !== 'normal';
-        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GardenHorizonRenderer.ts:362',message:'Pseudo-element check',data:{hasBefore,hasAfter,beforeContent:before.content,beforeBorder:before.border,beforeBorderColor:before.borderColor,beforeBoxShadow:before.boxShadow,afterContent:after.content,afterBorder:after.border,afterBorderColor:after.borderColor,afterBoxShadow:after.boxShadow},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-        
+        const before = window.getComputedStyle(calendarGrid, "::before");
+        const after = window.getComputedStyle(calendarGrid, "::after");
+        const hasBefore =
+          before.content &&
+          before.content !== "none" &&
+          before.content !== "normal";
+        const hasAfter =
+          after.content &&
+          after.content !== "none" &&
+          after.content !== "normal";
+        fetch(
+          "http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              location: "GardenHorizonRenderer.ts:362",
+              message: "Pseudo-element check",
+              data: {
+                hasBefore,
+                hasAfter,
+                beforeContent: before.content,
+                beforeBorder: before.border,
+                beforeBorderColor: before.borderColor,
+                beforeBoxShadow: before.boxShadow,
+                afterContent: after.content,
+                afterBorder: after.border,
+                afterBorderColor: after.borderColor,
+                afterBoxShadow: after.boxShadow,
+              },
+              timestamp: Date.now(),
+              sessionId: "debug-session",
+              runId: "run1",
+              hypothesisId: "F",
+            }),
+          },
+        ).catch(() => {});
+
         // Check actual rendered border color by inspecting the element's visual appearance
         // This is a workaround - we can't directly get the "visual" color, but we can check if there are any filters/blend modes
         const filter = computed.filter;
         const mixBlendMode = computed.mixBlendMode;
         const backdropFilter = computed.backdropFilter;
-        fetch('http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GardenHorizonRenderer.ts:362',message:'Visual effects check',data:{filter,mixBlendMode,backdropFilter,backgroundColor:computed.backgroundColor},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+        fetch(
+          "http://127.0.0.1:7242/ingest/4467fe45-6449-42ed-a52d-b93a0f522e1a",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              location: "GardenHorizonRenderer.ts:362",
+              message: "Visual effects check",
+              data: {
+                filter,
+                mixBlendMode,
+                backdropFilter,
+                backgroundColor: computed.backgroundColor,
+              },
+              timestamp: Date.now(),
+              sessionId: "debug-session",
+              runId: "run1",
+              hypothesisId: "G",
+            }),
+          },
+        ).catch(() => {});
       }
     });
     // #endregion
@@ -501,9 +681,12 @@ export const GardenHorizonRenderer = {
     youAreHere.className = "spine-you-are-here";
     youAreHere.setAttribute("role", "button");
     youAreHere.setAttribute("tabindex", "0");
-    youAreHere.setAttribute("aria-label", "Toggle between time left and time passed");
+    youAreHere.setAttribute(
+      "aria-label",
+      "Toggle between time left and time passed",
+    );
     youAreHere.style.cursor = "pointer";
-    
+
     const updateStats = () => {
       if (showTimePassed) {
         // Show time passed
@@ -511,12 +694,12 @@ export const GardenHorizonRenderer = {
         const monthsPassed = getMonthsPassedInYear(viewDate);
         const weeksPassed = getWeeksPassedInMonth(viewDate);
         const hoursPassed = getHoursPassedToday(viewDate);
-        
+
         const formatStat = (value: number, unit: string, suffix: string) => {
           const unitText = value === 1 ? unit : `${unit}s`;
           return `<span class="spine-stat-value">${value} ${unitText}</span> ${suffix}`;
         };
-        
+
         youAreHere.innerHTML = `
           <div class="spine-date">${formatDate(viewDate)}</div>
           <div class="spine-stats">
@@ -532,12 +715,12 @@ export const GardenHorizonRenderer = {
         const monthsLeft = getMonthsLeftInYear(viewDate);
         const weeksLeft = getWeeksLeftInMonth(viewDate);
         const hoursLeft = getHoursLeftToday(viewDate);
-        
+
         const formatStat = (value: number, unit: string, suffix: string) => {
           const unitText = value === 1 ? unit : `${unit}s`;
           return `<span class="spine-stat-value">${value} ${unitText}</span> ${suffix}`;
         };
-        
+
         youAreHere.innerHTML = `
           <div class="spine-date">${formatDate(viewDate)}</div>
           <div class="spine-stats">
@@ -549,16 +732,16 @@ export const GardenHorizonRenderer = {
         `;
       }
     };
-    
+
     // Initial render
     updateStats();
-    
+
     // Toggle on click
     youAreHere.addEventListener("click", () => {
       showTimePassed = !showTimePassed;
       updateStats();
     });
-    
+
     // Toggle on Enter key
     youAreHere.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -567,7 +750,7 @@ export const GardenHorizonRenderer = {
         updateStats();
       }
     });
-    
+
     spine.appendChild(youAreHere);
 
     // Divider
@@ -900,6 +1083,47 @@ export const GardenHorizonRenderer = {
 
     band.appendChild(header);
 
+    // Capacity status badge (if check was done today)
+    const capacityResult = getLastCapacityResult();
+    if (capacityResult) {
+      const capacityBadge = document.createElement("div");
+      capacityBadge.className = `capacity-status-badge capacity-${capacityResult.capacityLevel}`;
+      capacityBadge.setAttribute("role", "status");
+      capacityBadge.setAttribute(
+        "aria-label",
+        `Current capacity: ${capacityResult.capacityLevel}`,
+      );
+
+      const levelEmojis: Record<string, string> = {
+        high: "🌟",
+        medium: "🌤️",
+        low: "🌙",
+        rest: "💤",
+      };
+      const energyEmojis: Record<string, string> = {
+        focus: "🎯",
+        creative: "✨",
+        rest: "🌿",
+        admin: "📋",
+      };
+
+      capacityBadge.innerHTML = `
+        <span class="capacity-badge-level">${levelEmojis[capacityResult.capacityLevel] || "💭"} ${capacityResult.capacityLevel} capacity</span>
+        <span class="capacity-badge-energy">${energyEmojis[capacityResult.energyType] || "⚡"} ${capacityResult.energyType} energy</span>
+        <span class="capacity-badge-time">~${capacityResult.availableMinutes}min</span>
+      `;
+
+      // Click to redo check
+      capacityBadge.style.cursor = "pointer";
+      capacityBadge.addEventListener("click", () => {
+        openCapacityCheck(() => {
+          eventBus.emit("view:changed", { transition: false });
+        });
+      });
+
+      band.appendChild(capacityBadge);
+    }
+
     const showFullDate = !isGardenFenceVisible();
     if (showFullDate) {
       const dateEl = document.createElement("div");
@@ -970,6 +1194,7 @@ export const GardenHorizonRenderer = {
     rail.setAttribute("aria-label", "Quick actions");
 
     const buttons = [
+      { id: "check", label: "Check", icon: "💭" },
       { id: "plan", label: "Plan", icon: "📋" },
       { id: "review", label: "Review", icon: "📝" },
       { id: "map", label: "Map", icon: "🗺️" },
@@ -1001,7 +1226,16 @@ export const GardenHorizonRenderer = {
    * Handle utility rail actions
    */
   handleUtilityAction(action: string): void {
-      switch (action) {
+    switch (action) {
+      case "check":
+        // Open capacity check
+        openCapacityCheck((result) => {
+          eventBus.emit("ui:toast", {
+            icon: "💭",
+            message: `Today: ${result.capacityLevel} capacity, ${result.energyType} energy`,
+          });
+        });
+        break;
       case "plan":
         // Open planning page
         eventBus.emit("garden:plan-requested", { goalId: selectedVisionId });
@@ -1034,9 +1268,11 @@ export const GardenHorizonRenderer = {
     }
 
     // Remove any stale mobile nodes before inserting fresh ones
-    container.querySelectorAll(".garden-horizon-mobile-header, .mobile-you-are-here, .spine-overlay").forEach((el) =>
-      el.remove(),
-    );
+    container
+      .querySelectorAll(
+        ".garden-horizon-mobile-header, .mobile-you-are-here, .spine-overlay",
+      )
+      .forEach((el) => el.remove());
 
     const mobileHeader = document.createElement("header");
     mobileHeader.className = "garden-horizon-mobile-header";

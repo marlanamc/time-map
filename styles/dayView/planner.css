@@ -1212,6 +1212,10 @@
     gap: 0.875rem;
   }
 
+  .timed-task-actions {
+    display: none; /* hide edit/eye buttons */
+  }
+
   /* Sidebar items - improve visibility */
   .sidebar-item-title {
     font-size: 0.95rem;
@@ -1261,5 +1265,23 @@
     background: var(--bg-surface);
     border: 1px solid var(--planner-border);
     box-shadow: var(--shadow-sm);
+  }
+
+  .planner-main {
+    padding: 0;
+  }
+
+  .planner-timeline-container {
+    padding: 0;
+  }
+
+  .planner-timeline-container .current-time-top-indicator {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .day-goal-card.planner-timed-task {
+    --gutter: 0px;
+    --edge-gap: 0px;
   }
 }
